@@ -19,10 +19,10 @@ claude plugin marketplace add /path/to/shipyard
 claude plugin install shipyard@shipyard
 ```
 
-### From npm
+### From GitHub
 
 ```bash
-npm install -g @lgbarn/shipyard
+npm install -g github:lgbarn/shipyard
 claude plugin marketplace add "$(npm root -g)/@lgbarn/shipyard"
 claude plugin install shipyard@shipyard
 ```
@@ -290,7 +290,7 @@ When you run `/shipyard:init`, Shipyard creates a `.shipyard/config.json` in you
 | Skill authoring guide | ✅ | ❌ | ✅ |
 | Plugin marketplace | ❌ | ❌ | ✅ (7 plugins) |
 | **Distribution** | | | |
-| npm install | ✅ (`@lgbarn/shipyard`) | ✅ (`npx get-shit-done-cc`) | ✅ (marketplace) |
+| npm install | ✅ (`github:lgbarn/shipyard`) | ✅ (`npx get-shit-done-cc`) | ✅ (marketplace) |
 | Multi-runtime | ❌ (Claude Code) | ✅ (Claude + OpenCode + Gemini) | ❌ (Claude Code) |
 | **Scale** | | | |
 | Commands | 11 | 20+ | 3 |
