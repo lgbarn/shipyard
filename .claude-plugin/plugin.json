@@ -1,28 +1,8 @@
 {
   "name": "shipyard",
-  "description": "Ship software systematically: project lifecycle, TDD, parallel agents, code review, security auditing, and infrastructure validation — from idea to production",
-  "version": "1.2.0",
+  "description": "Ship software systematically: project lifecycle, TDD, parallel agents, code review, security auditing, and infrastructure validation",
   "author": {
     "name": "lgbarn",
-    "url": "https://github.com/lgbarn"
-  },
-  "license": "MIT",
-  "repository": "https://github.com/lgbarn/shipyard",
-  "homepage": "https://github.com/lgbarn/shipyard",
-  "bugs": "https://github.com/lgbarn/shipyard/issues",
-  "keywords": [
-    "workflow",
-    "tdd",
-    "planning",
-    "code-review",
-    "subagents",
-    "project-management",
-    "parallel-agents",
-    "lifecycle",
-    "security",
-    "infrastructure-as-code",
-    "terraform",
-    "docker",
-    "ansible"
-  ]
+    "email": "lgbarn@users.noreply.github.com"
+  }
 }
