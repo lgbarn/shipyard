@@ -15,14 +15,16 @@ Shipyard is a Claude Code plugin that combines structured project lifecycle mana
 
 ```bash
 git clone git@github.com:lgbarn/shipyard.git
-claude plugin add /path/to/shipyard
+claude plugin marketplace add /path/to/shipyard
+claude plugin install shipyard@shipyard
 ```
 
 ### From npm
 
 ```bash
 npm install -g @lgbarn/shipyard
-claude plugin add "$(npm root -g)/@lgbarn/shipyard"
+claude plugin marketplace add "$(npm root -g)/@lgbarn/shipyard"
+claude plugin install shipyard@shipyard
 ```
 
 ### Verify

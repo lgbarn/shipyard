@@ -33,6 +33,7 @@
     "hooks/",
     "scripts/",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "marketplace.json"
   ]
 }

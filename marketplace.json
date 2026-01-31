@@ -1,0 +1,10 @@
+{
+  "name": "shipyard",
+  "plugins": [
+    {
+      "name": "shipyard",
+      "version": "1.2.0",
+      "description": "Ship software systematically: project lifecycle, TDD, parallel agents, code review, security auditing, and infrastructure validation"
+    }
+  ]
+}
