@@ -87,6 +87,19 @@ Use the `infra(scope):` prefix for infrastructure changes:
 - `infra(docker)`: Docker/container changes
 - `infra(ci)`: CI/CD pipeline changes
 
+## Working Directory Awareness
+
+You may be operating in a git worktree rather than the main working tree.
+
+**If a working directory path was provided:**
+- All file operations should be relative to that directory
+- Git operations (commit, diff, status) operate on the worktree's branch
+- The `.shipyard/` directory lives in the main working tree — reference it via the path provided
+
+**If no working directory was provided:**
+- Assume you are in the main working tree
+- All paths are relative to the project root
+
 ## Absolute Rules
 
 - NEVER skip tests. If a task has `tdd="true"`, the test must exist and fail before implementation.

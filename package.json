@@ -1,0 +1,38 @@
+{
+  "name": "@lgbarn/shipyard",
+  "version": "1.2.0",
+  "description": "Ship software systematically: project lifecycle, TDD, parallel agents, code review, security auditing, and infrastructure validation — from idea to production",
+  "keywords": [
+    "claude-code-plugin",
+    "workflow",
+    "tdd",
+    "planning",
+    "code-review",
+    "subagents",
+    "project-management",
+    "parallel-agents",
+    "lifecycle",
+    "security",
+    "infrastructure-as-code"
+  ],
+  "author": "lgbarn",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lgbarn/shipyard.git"
+  },
+  "homepage": "https://github.com/lgbarn/shipyard",
+  "bugs": {
+    "url": "https://github.com/lgbarn/shipyard/issues"
+  },
+  "files": [
+    ".claude-plugin/",
+    "agents/",
+    "commands/",
+    "skills/",
+    "hooks/",
+    "scripts/",
+    "README.md",
+    "LICENSE"
+  ]
+}

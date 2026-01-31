@@ -5,6 +5,11 @@ description: Use when implementing any feature or bugfix, before writing impleme
 
 # Test-Driven Development (TDD)
 
+## Activation Triggers
+- Any feature or bugfix implementation before writing production code
+- Plan tasks with `tdd="true"` marker
+- Files matching: `*.test.*`, `*.spec.*`, `__tests__/`, `*_test.go`
+
 ## Overview
 
 Write the test first. Watch it fail. Write minimal code to pass.

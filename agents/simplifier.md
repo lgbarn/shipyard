@@ -125,6 +125,16 @@ Produce `SIMPLIFICATION-{phase}.md` in the phase directory:
 - **Prioritize impact.** High priority = clear, mechanical improvements (duplicates, dead code). Low priority = subjective improvements (naming, style).
 - **Don't over-report.** If the code is clean, say so. A short "no significant findings" report is valuable — it confirms quality.
 
+## Issue Tracking
+
+When you produce findings that the user chooses to defer:
+- If `.shipyard/ISSUES.md` exists, append deferred findings as new issues to the Open Issues table
+- Auto-increment the ID from the highest existing ID
+- Set source to "simplifier"
+- Set severity: High priority → high, Medium → medium, Low → low
+- Set date to current timestamp
+- This ensures deferred simplification work is tracked across sessions
+
 ## What NOT to Flag
 
 - Public API surfaces that may have external callers

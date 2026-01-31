@@ -5,6 +5,10 @@ description: Use when working with Terraform (.tf, .tfvars), Ansible (playbooks,
 
 # Infrastructure Validation
 
+## Activation Triggers
+- Files matching: `*.tf`, `*.tfvars`, `Dockerfile`, `docker-compose.yml`, `playbook*.yml`, `roles/`, `inventory/`
+- Config: `.shipyard/config.json` has `iac_validation` set to `"auto"` or `true`
+
 ## Overview
 
 IaC mistakes don't cause test failures — they cause outages, breaches, and cost overruns. Validate before every change.

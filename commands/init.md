@@ -87,6 +87,16 @@ Also ask about quality gates:
 6. **IaC validation:** "Should Shipyard run infrastructure validation when Terraform/Ansible/Docker files are changed? (auto = detect IaC files automatically)"
 7. **Documentation generation:** "Should Shipyard generate documentation after each phase build? (Recommended for all projects — helps maintain up-to-date docs)"
 
+Also ask about model and context preferences:
+8. **Model routing:** "Which model routing strategy should Shipyard use for its agents?"
+   - **Default routing** (recommended): Haiku for validation/checks, Sonnet for building/planning, Opus for architecture/debugging — balances cost and quality
+   - **All Sonnet:** Use Sonnet for everything — balanced cost and quality
+   - **All Opus:** Use Opus for everything — highest quality, highest cost
+9. **Context loading:** "How much context should Shipyard load at session start?"
+   - **Auto** (recommended): Loads based on current state — minimal when idle, more when building
+   - **Minimal:** Always load minimal context — fastest startup, lowest token usage
+   - **Full:** Always load everything — most context available, higher token usage
+
 Store preferences in `.shipyard/config.json`:
 ```json
 {
@@ -97,12 +107,22 @@ Store preferences in `.shipyard/config.json`:
   "simplification_review": true,
   "iac_validation": "auto|true|false",
   "documentation_generation": true,
+  "model_routing": {
+    "validation": "haiku",
+    "building": "sonnet",
+    "planning": "sonnet",
+    "architecture": "opus",
+    "debugging": "opus",
+    "review": "sonnet",
+    "security_audit": "sonnet"
+  },
+  "context_tier": "auto",
   "created_at": "<timestamp>",
-  "version": "1.1"
+  "version": "1.2"
 }
 ```
 
-**Defaults:** `security_audit: true`, `simplification_review: true`, `iac_validation: "auto"`, `documentation_generation: true`. The `"auto"` setting for IaC detects IaC files and only runs validation when they're present.
+**Defaults:** `security_audit: true`, `simplification_review: true`, `iac_validation: "auto"`, `documentation_generation: true`. The `"auto"` setting for IaC detects IaC files and only runs validation when they're present. Model routing defaults to the "Default routing" preset. Context tier defaults to `"auto"`.
 
 ## Step 6: Roadmap Generation
 

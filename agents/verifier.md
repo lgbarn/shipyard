@@ -2,7 +2,7 @@
 name: verifier
 description: |
   Use this agent when verifying that implementation meets success criteria, validating phase completion, checking plan coverage before execution, or performing pre-ship validation. Examples: <example>Context: A phase has been fully built and reviewed, and needs final verification before moving on. user: "Verify that the database phase is complete" assistant: "I'll dispatch the verifier agent to check each success criterion from the roadmap against the actual implementation and produce a verification report." <commentary>The verifier agent runs after build completion during /shipyard:build to confirm all phase success criteria are met.</commentary></example> <example>Context: Plans have been created and need validation before execution begins. user: "Verify the plans cover all requirements" assistant: "I'll dispatch the verifier agent to check that the plans collectively cover all phase requirements and that verification commands are runnable." <commentary>During /shipyard:plan, the verifier checks plan quality and coverage before the builder starts execution.</commentary></example> <example>Context: The project is ready for final shipping validation. user: "Ship it" assistant: "Before shipping, I'll dispatch the verifier agent to perform final validation across all phases and produce a comprehensive verification report." <commentary>During /shipyard:ship, the verifier performs comprehensive validation across all phases to confirm the project is ready.</commentary></example>
-model: sonnet
+model: haiku
 color: yellow
 ---
 

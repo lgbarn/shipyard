@@ -223,3 +223,6 @@ shipyard: archive milestone {name}
 >
 > If there are more milestones planned:
 > "To start the next milestone, run `/shipyard:init` to define new goals."
+>
+> If `.shipyard/ISSUES.md` has open issues:
+> "Note: {count} issue(s) remain open and have been preserved in `.shipyard/ISSUES.md` for the next milestone. Run `/shipyard:issues` to review."

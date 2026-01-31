@@ -5,6 +5,12 @@ description: Use when starting feature work that needs a branch, creating worktr
 
 # Git Workflow
 
+## Activation Triggers
+- Starting feature work that needs branch isolation
+- Creating, switching, or removing worktrees
+- Completing a development branch (merge, PR, preserve, discard)
+- `/shipyard:worktree` command invoked
+
 ## Overview
 
 Comprehensive git workflow covering the full development lifecycle: branch creation, worktree isolation, atomic commits, and branch completion.

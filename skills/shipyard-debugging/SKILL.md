@@ -5,6 +5,11 @@ description: Use when encountering any bug, test failure, or unexpected behavior
 
 # Systematic Debugging
 
+## Activation Triggers
+- Any bug, error, test failure, or unexpected behavior encountered
+- Error/exception/traceback/failure appearing in output
+- Before proposing any fix — must investigate root cause first
+
 ## Overview
 
 Random fixes waste time and create new bugs. Quick patches mask underlying issues.

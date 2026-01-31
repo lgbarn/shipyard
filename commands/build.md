@@ -15,6 +15,18 @@ You are executing the Shipyard build workflow. Follow these steps precisely.
 - If `--light` is provided, skip post-phase auditor and simplifier (Steps 4a and 4b). Use this during early iteration — the full pipeline runs at ship time regardless.
 - If no phase number, read `.shipyard/STATE.md` for the current phase.
 - Read `.shipyard/config.json` for gate preferences (`security_audit`, `simplification_review`, `iac_validation`, `documentation_generation`).
+- Detect current working directory and worktree status:
+  - Run `git worktree list` to identify if operating in a worktree
+  - Record `$(pwd)` as the working directory
+  - Record `$(git branch --show-current)` as the current branch
+- Read `model_routing` from config for agent model selection. When dispatching agents, use the configured model:
+  - Builder agents: `model_routing.building` (default: sonnet)
+  - Reviewer agents: `model_routing.review` (default: sonnet)
+  - Verifier agent: `model_routing.validation` (default: haiku)
+  - Auditor agent: `model_routing.security_audit` (default: sonnet)
+  - Simplifier agent: `model_routing.review` (default: sonnet)
+  - Documenter agent: `model_routing.review` (default: sonnet)
+  If `model_routing` is not present in config, use agent defaults.
 
 ## Step 1: Validate State
 
@@ -32,6 +44,14 @@ Update `.shipyard/STATE.md`:
 - **Current Position:** Building phase {N}
 - **Status:** building
 
+## Step 2a: Create Checkpoint
+
+Create a pre-build checkpoint for rollback safety:
+
+```bash
+${CLAUDE_PLUGIN_ROOT}/scripts/checkpoint.sh "pre-build-phase-${N}"
+```
+
 ## Step 3: Execute by Wave
 
 Group plans by wave number. Execute waves sequentially, plans within a wave in parallel.
@@ -46,6 +66,9 @@ For each incomplete plan in this wave, dispatch a **builder agent** (subagent_ty
 - `.shipyard/PROJECT.md` for requirements context
 - Codebase conventions from `.shipyard/codebase/CONVENTIONS.md` (if exists)
 - Results from previous waves (SUMMARY.md files)
+- Working directory: the current working directory path
+- Current branch: the active git branch
+- Worktree status: whether this is a worktree or main working tree
 
 **Builder agent instructions:**
 - Execute each task in the plan sequentially
@@ -84,7 +107,7 @@ Wait for all builders in the wave to complete. Read their SUMMARY.md files.
 
 #### 3c. Review Gate
 
-For each completed plan, dispatch a **reviewer agent** (subagent_type: "shipyard:reviewer") performing a **two-stage review**:
+For each completed plan, dispatch a **reviewer agent** (subagent_type: "shipyard:reviewer") with the same working directory context (path, branch, worktree status), performing a **two-stage review**:
 
 **Stage 1 -- Correctness Review:**
 - Read the plan and its SUMMARY.md
@@ -135,6 +158,7 @@ Dispatch a **verifier agent** (subagent_type: "shipyard:verifier") with:
 - All SUMMARY.md and REVIEW.md files for this phase
 - The phase description from ROADMAP.md
 - PROJECT.md requirements relevant to this phase
+- Working directory, current branch, and worktree status
 
 The verifier checks:
 - All phase goals are met
@@ -159,6 +183,7 @@ After verification passes, dispatch an **auditor agent** (subagent_type: "shipya
 - `.shipyard/PROJECT.md` for context
 - `.shipyard/codebase/CONVENTIONS.md` (if exists)
 - List of dependencies added/changed during the phase
+- Working directory, current branch, and worktree status
 
 The auditor performs comprehensive security analysis:
 - Code security (OWASP Top 10)
@@ -183,6 +208,7 @@ After the audit (or directly after verification if audit was skipped), dispatch 
 - Git diff of all files changed during this phase (from phase start)
 - All SUMMARY.md files from this phase's plans
 - `.shipyard/PROJECT.md` for context
+- Working directory, current branch, and worktree status
 
 The simplifier reviews cumulative changes for:
 - Cross-task duplication
@@ -207,6 +233,7 @@ After simplification review (or directly after verification if simplification wa
 - All SUMMARY.md files from this phase's plans
 - `.shipyard/PROJECT.md` for context
 - Existing documentation in `docs/` directory (if exists)
+- Working directory, current branch, and worktree status
 
 The documenter analyzes cumulative changes for:
 - Public API documentation needs
@@ -237,6 +264,14 @@ Create a git commit with build artifacts:
 shipyard: complete phase {N} build
 ```
 
+## Step 6a: Create Checkpoint
+
+Create a post-build checkpoint:
+
+```bash
+${CLAUDE_PLUGIN_ROOT}/scripts/checkpoint.sh "post-build-phase-${N}"
+```
+
 ## Step 7: Route Forward
 
 Based on the verification result:
@@ -252,3 +287,6 @@ Based on the verification result:
 
 - **Critical issues unresolved:**
   > "Phase {N} has unresolved critical issues. Review the findings in `.shipyard/phases/{N}/results/` and decide how to proceed."
+
+Also check `.shipyard/ISSUES.md` for open issues. If open issues exist, append:
+> "Note: {count} open issue(s) tracked. Run `/shipyard:issues` to review."

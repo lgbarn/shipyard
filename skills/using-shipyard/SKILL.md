@@ -79,6 +79,59 @@ Shipyard also provides these commands:
 | `/shipyard:resume` | Resume an interrupted build |
 | `/shipyard:quick` | Quick single-task execution without full planning |
 | `/shipyard:ship` | Finalize work - merge, PR, or preserve |
+| `/shipyard:issues` | View and manage deferred issues across sessions |
+| `/shipyard:rollback` | Revert to a previous checkpoint |
+| `/shipyard:recover` | Diagnose and recover from interrupted state |
+| `/shipyard:worktree` | Manage git worktrees for isolated feature development |
+
+## Skill Activation Triggers
+
+These triggers are **deterministic**. When a trigger condition matches, you MUST invoke the corresponding skill. Do not use judgment — if the trigger fires, invoke.
+
+### File Pattern Triggers
+| Pattern | Skill |
+|---------|-------|
+| `*.tf`, `*.tfvars`, `terraform*` | `shipyard:infrastructure-validation` |
+| `Dockerfile`, `docker-compose.yml`, `*.dockerfile` | `shipyard:infrastructure-validation` |
+| `playbook*.yml`, `roles/`, `inventory/`, `ansible*` | `shipyard:infrastructure-validation` |
+| `*.test.*`, `*.spec.*`, `__tests__/`, `*_test.go` | `shipyard:shipyard-tdd` |
+
+### Task Marker Triggers
+| Marker | Skill |
+|--------|-------|
+| `tdd="true"` in plan task | `shipyard:shipyard-tdd` |
+| Plan file loaded for execution | `shipyard:shipyard-executing-plans` |
+| Design discussion, feature exploration | `shipyard:shipyard-brainstorming` |
+| Creating an implementation plan | `shipyard:shipyard-writing-plans` |
+
+### State Condition Triggers
+| Condition | Skill |
+|-----------|-------|
+| About to claim "done", "complete", "fixed" | `shipyard:shipyard-verification` |
+| About to commit, create PR, or merge | `shipyard:shipyard-verification` |
+| Bug, error, test failure, unexpected behavior | `shipyard:shipyard-debugging` |
+| 2+ independent tasks with no shared state | `shipyard:parallel-dispatch` |
+| Creating or editing a skill file | `shipyard:shipyard-writing-skills` |
+| Branch management, delivery, worktrees | `shipyard:git-workflow` |
+| Starting feature work on a new phase | `shipyard:git-workflow` |
+
+### Content Pattern Triggers
+| Pattern in output or conversation | Skill |
+|----------------------------------|-------|
+| Error, exception, traceback, failure | `shipyard:shipyard-debugging` |
+| Security, vulnerability, CVE, OWASP | `shipyard:security-audit` |
+| Duplicate, complex, bloat, refactor | `shipyard:code-simplification` |
+| Document, README, API docs, changelog | `shipyard:documentation` |
+
+### Trigger Evaluation Protocol
+
+Before EVERY response, evaluate triggers in this order:
+1. **File patterns** — check files being discussed, modified, or created
+2. **Task markers** — check any loaded plans or task definitions
+3. **State conditions** — check current workflow state and intent
+4. **Content patterns** — check recent output and user messages
+
+If ANY trigger matches → invoke the skill BEFORE responding. Multiple triggers can fire simultaneously — invoke all matching skills.
 
 ## Red Flags
 

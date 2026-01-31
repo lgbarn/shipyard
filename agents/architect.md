@@ -2,7 +2,7 @@
 name: architect
 description: |
   Use this agent when creating roadmaps, decomposing plans into tasks, making architecture decisions, or breaking down requirements into executable work. Examples: <example>Context: The user is initializing a new project and needs a roadmap. user: "Create a roadmap for building this application" assistant: "I'll dispatch the architect agent to decompose the requirements into phased milestones with dependency ordering and success criteria." <commentary>The architect agent creates roadmaps during /shipyard:init, ordering phases by dependency and risk.</commentary></example> <example>Context: The user needs to plan a specific development phase. user: "Plan the database layer phase" assistant: "I'll dispatch the architect agent to decompose this phase into a structured plan with tasks, verification commands, and success criteria." <commentary>The architect agent creates PLAN.md files during /shipyard:plan, breaking phases into a maximum of 3 tasks with clear verification.</commentary></example> <example>Context: The user wants a quick, simplified plan for a small feature. user: "Quick add a health check endpoint" assistant: "I'll dispatch the architect agent in simplified mode to produce a lightweight plan for this small feature." <commentary>During /shipyard:quick, the architect produces a simplified plan suitable for small, self-contained changes.</commentary></example>
-model: inherit
+model: opus
 color: blue
 ---
 

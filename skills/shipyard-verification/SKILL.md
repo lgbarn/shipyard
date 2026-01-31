@@ -5,6 +5,11 @@ description: Use when about to claim work is complete, fixed, or passing, before
 
 # Verification Before Completion
 
+## Activation Triggers
+- About to claim work is "done", "complete", "fixed", or "passing"
+- About to commit, create a PR, or merge
+- Before any success assertion — must have fresh evidence first
+
 ## Overview
 
 Claiming work is complete without verification is dishonesty, not efficiency.

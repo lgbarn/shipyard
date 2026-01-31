@@ -4,12 +4,38 @@ Ship software systematically — from idea to production with discipline, parall
 
 Shipyard is a Claude Code plugin that combines structured project lifecycle management with rigorous development practices. It replaces ad-hoc workflows with a systematic pipeline: brainstorm requirements, plan in phases, execute with fresh subagents, review with two-stage gates, audit for security, audit for simplification, and ship with confidence.
 
-## Quick Start
+## Prerequisites
+
+- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI installed and authenticated
+- `jq` (used by session hooks for state injection)
+
+## Installation
+
+### From source
 
 ```bash
-# Install from marketplace
-/plugin install shipyard
+git clone git@github.com:lgbarn/shipyard.git
+claude plugin add /path/to/shipyard
+```
 
+### From npm
+
+```bash
+npm install -g @lgbarn/shipyard
+claude plugin add "$(npm root -g)/@lgbarn/shipyard"
+```
+
+### Verify
+
+```bash
+claude /shipyard:status
+```
+
+## Quick Start
+
+Once installed, navigate to any project directory and run:
+
+```bash
 # Initialize a new project
 /shipyard:init
 
@@ -31,12 +57,16 @@ Shipyard is a Claude Code plugin that combines structured project lifecycle mana
 | Command | Purpose |
 |---------|---------|
 | `/shipyard:init` | Initialize project — gather requirements, analyze codebase, create roadmap |
-| `/shipyard:plan` | Decompose a phase into executable plans with atomic tasks |
-| `/shipyard:build` | Execute plans with parallel builder agents and review gates |
+| `/shipyard:plan [phase] [--skip-research]` | Decompose a phase into executable plans with atomic tasks |
+| `/shipyard:build [phase] [--plan N] [--light]` | Execute plans with parallel builder agents and review gates |
 | `/shipyard:status` | Show progress dashboard and route to next action |
 | `/shipyard:resume` | Restore context from a previous session |
-| `/shipyard:quick` | Execute a small task with full guarantees |
-| `/shipyard:ship` | Verify and deliver — merge, PR, or preserve |
+| `/shipyard:quick [task]` | Execute a small task with full guarantees |
+| `/shipyard:ship [--phase \| --milestone \| --branch]` | Verify and deliver — merge, PR, or preserve |
+| `/shipyard:issues [--add \| --resolve \| --list]` | View and manage deferred issues across sessions |
+| `/shipyard:rollback [checkpoint] [--list]` | Revert to a previous checkpoint |
+| `/shipyard:recover` | Diagnose and recover from interrupted state |
+| `/shipyard:worktree [create\|list\|switch\|remove] [name]` | Manage git worktrees for isolated feature development |
 
 ## Skills (Auto-Activating)
 
@@ -44,20 +74,20 @@ Shipyard includes 14 skills that activate automatically based on context:
 
 | Skill | When It Activates |
 |-------|-------------------|
-| `test-driven-development` | Writing any new code, features, or fixes |
-| `systematic-debugging` | Any error, test failure, or unexpected behavior |
-| `verification-before-completion` | Before claiming any task is complete |
-| `brainstorming` | Creative work: features, components, design |
+| `shipyard-tdd` | Writing any new code, features, or fixes |
+| `shipyard-debugging` | Any error, test failure, or unexpected behavior |
+| `shipyard-verification` | Before claiming any task is complete |
+| `shipyard-brainstorming` | Creative work: features, components, design |
 | `security-audit` | Working with code, configs, dependencies, or IaC |
 | `code-simplification` | After implementation, before shipping, reviewing AI code |
 | `documentation` | After implementation, before shipping, when docs are incomplete |
 | `infrastructure-validation` | Working with Terraform, Ansible, Docker, or IaC files |
 | `parallel-dispatch` | 2+ independent tasks that can run concurrently |
-| `writing-plans` | Creating implementation plans |
-| `executing-plans` | Implementing from a written plan |
+| `shipyard-writing-plans` | Creating implementation plans |
+| `shipyard-executing-plans` | Implementing from a written plan |
 | `git-workflow` | Branch management, commits, delivery |
 | `using-shipyard` | Every session (skill discovery protocol) |
-| `writing-skills` | Creating new skills |
+| `shipyard-writing-skills` | Creating new skills |
 
 ## Agents
 
@@ -67,7 +97,7 @@ Shipyard dispatches specialized agents for different phases of work:
 |-------|------|---------------|
 | **mapper** | Brownfield codebase analysis (4 parallel instances) | `/shipyard:init` |
 | **researcher** | Domain/technology research | `/shipyard:plan` |
-| **architect** | Roadmap + plan decomposition | `/shipyard:init`, `/shipyard:plan` |
+| **architect** | Roadmap + plan decomposition | `/shipyard:init`, `/shipyard:plan`, `/shipyard:quick` |
 | **builder** | Task execution with TDD, IaC validation, atomic commits | `/shipyard:build`, `/shipyard:quick` |
 | **reviewer** | Two-stage code review (spec + quality) | `/shipyard:build` |
 | **auditor** | Comprehensive security & compliance analysis | `/shipyard:build`, `/shipyard:ship` |
@@ -127,6 +157,89 @@ Shipyard uses a dual state system:
 │       ├── SIMPLIFICATION-{N}.md # Code simplification report
 │       └── DOCUMENTATION-{N}.md  # Documentation generation report
 └── quick/              # Ad-hoc tasks
+```
+
+## Plugin Structure
+
+```
+shipyard/
+├── .claude-plugin/
+│   └── plugin.json        # Plugin metadata (name, version, keywords)
+├── agents/                # Specialized subagent definitions
+│   ├── architect.md       # Roadmap and plan decomposition
+│   ├── auditor.md         # Security and compliance analysis
+│   ├── builder.md         # Task execution with TDD
+│   ├── documenter.md      # Documentation generation
+│   ├── mapper.md          # Brownfield codebase analysis
+│   ├── researcher.md      # Domain/technology research
+│   ├── reviewer.md        # Two-stage code review
+│   ├── simplifier.md      # Complexity and duplication analysis
+│   └── verifier.md        # Post-execution verification
+├── commands/              # Slash command definitions
+│   ├── init.md            # /shipyard:init
+│   ├── plan.md            # /shipyard:plan
+│   ├── build.md           # /shipyard:build
+│   ├── status.md          # /shipyard:status
+│   ├── resume.md          # /shipyard:resume
+│   ├── quick.md           # /shipyard:quick
+│   ├── ship.md            # /shipyard:ship
+│   ├── issues.md          # /shipyard:issues
+│   ├── rollback.md        # /shipyard:rollback
+│   ├── recover.md         # /shipyard:recover
+│   └── worktree.md        # /shipyard:worktree
+├── hooks/
+│   └── hooks.json         # SessionStart hook for state injection
+├── scripts/
+│   ├── state-read.sh      # Adaptive context loading on session start
+│   ├── state-write.sh     # Updates .shipyard/STATE.md
+│   └── checkpoint.sh      # Git tag checkpoint management
+└── skills/                # Auto-activating skill definitions
+    ├── code-simplification/
+    ├── documentation/
+    ├── git-workflow/
+    ├── infrastructure-validation/
+    ├── parallel-dispatch/
+    ├── security-audit/
+    ├── shipyard-brainstorming/
+    ├── shipyard-debugging/
+    ├── shipyard-executing-plans/
+    ├── shipyard-tdd/
+    ├── shipyard-verification/
+    ├── shipyard-writing-plans/
+    ├── shipyard-writing-skills/
+    └── using-shipyard/
+```
+
+## Configuration
+
+When you run `/shipyard:init`, Shipyard creates a `.shipyard/config.json` in your project with these options:
+
+| Option | Values | Default | Description |
+|--------|--------|---------|-------------|
+| `interaction_mode` | `interactive`, `autonomous` | — | Approve each phase or execute full roadmap |
+| `git_strategy` | `per_task`, `per_phase`, `manual` | — | When to create git commits |
+| `review_depth` | `detailed`, `lightweight` | — | Review gate depth between build steps |
+| `security_audit` | `true`, `false` | `true` | Run security audit after each phase |
+| `simplification_review` | `true`, `false` | `true` | Check for duplication and complexity |
+| `iac_validation` | `auto`, `true`, `false` | `auto` | Validate Terraform/Ansible/Docker changes |
+| `documentation_generation` | `true`, `false` | `true` | Generate docs after each phase |
+| `model_routing` | object | see below | Model selection per task type |
+| `context_tier` | `auto`, `minimal`, `full` | `auto` | Context loading at session start |
+
+### Model Routing Defaults
+
+```json
+{
+  "model_routing": {
+    "validation": "haiku",
+    "building": "sonnet",
+    "planning": "sonnet",
+    "architecture": "opus",
+    "debugging": "opus",
+    "review": "sonnet",
+    "security_audit": "sonnet"
+  }
+}
 ```
 
 ## Acknowledgments

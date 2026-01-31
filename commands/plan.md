@@ -22,6 +22,15 @@ You are executing the Shipyard planning workflow. Follow these steps precisely.
 3. Read `.shipyard/STATE.md` for current context.
 4. If this phase already has plans and is not a `--gaps` run, ask the user if they want to re-plan (existing plans will be archived).
 
+## Step 1a: Load Model Routing
+
+Read `model_routing` from `.shipyard/config.json` for agent model selection:
+- Researcher agent: `model_routing.planning` (default: sonnet)
+- Architect agent: `model_routing.architecture` (default: opus)
+- Verifier agent: `model_routing.validation` (default: haiku)
+
+If `model_routing` is not present in config, use agent defaults.
+
 ## Step 2: Mark Phase In Progress
 
 Update the native task for this phase to `in_progress` using TaskUpdate.
@@ -54,6 +63,8 @@ Dispatch an **architect agent** (subagent_type: "shipyard:architect") with:
 - PROJECT.md
 - Codebase analysis
 - Previous phase summaries (if any exist in `.shipyard/phases/{N-1}/`)
+
+If `.shipyard/ISSUES.md` exists, also pass it to the architect agent. Open issues relevant to this phase should be considered during planning — they may warrant inclusion as tasks or inform design decisions.
 
 The architect agent must produce plan files in `.shipyard/phases/{N}/plans/`:
 
@@ -127,6 +138,14 @@ Create a git commit with the planning artifacts:
 shipyard: plan phase {N}
 ```
 
+## Step 8a: Create Checkpoint
+
+Create a post-plan checkpoint:
+
+```bash
+${CLAUDE_PLUGIN_ROOT}/scripts/checkpoint.sh "post-plan-phase-${N}"
+```
+
 ## Step 9: Present Summary & Route Forward
 
 Display a summary showing:
@@ -136,6 +155,9 @@ Display a summary showing:
 
 Suggest:
 > "Phase {N} is planned with {X} plans across {Y} waves. Run `/shipyard:build {N}` to begin execution."
+
+If not already in a worktree and the phase involves code changes, also suggest:
+> "Tip: Run `/shipyard:worktree create phase-{N}-{name}` to work in an isolated worktree before building."
 
 ---
 

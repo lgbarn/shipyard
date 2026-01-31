@@ -38,12 +38,22 @@ Look in `.shipyard/quick/` for existing quick task files. Generate the next sequ
 - First task: `001`
 - Format: zero-padded 3-digit number
 
+## Step 3a: Detect Working Directory
+
+Detect current working directory and worktree status:
+- Run `git worktree list` to identify if operating in a worktree
+- Record `$(pwd)` as the working directory
+- Record `$(git branch --show-current)` as the current branch
+
 ## Step 4: Quick Plan
 
 Dispatch an **architect agent** (subagent_type: "shipyard:architect") in quick mode with:
 - The task description
 - PROJECT.md context (if it exists)
 - Codebase conventions (if `.shipyard/codebase/CONVENTIONS.md` exists)
+- Working directory: the current working directory path
+- Current branch: the active git branch
+- Worktree status: whether this is a worktree or main working tree
 
 The architect produces a simplified plan in `.shipyard/quick/QUICK-{NNN}.md`:
 ```markdown
@@ -69,6 +79,7 @@ The architect produces a simplified plan in `.shipyard/quick/QUICK-{NNN}.md`:
 Dispatch a **builder agent** (subagent_type: "shipyard:builder") with:
 - The quick plan
 - Project context
+- Working directory, current branch, and worktree status
 
 The builder should:
 - Execute each step in the plan
