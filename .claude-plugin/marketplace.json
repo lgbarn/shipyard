@@ -1,10 +1,18 @@
 {
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "shipyard",
+  "description": "Ship software systematically: project lifecycle, TDD, parallel agents, code review, security auditing, and infrastructure validation",
+  "owner": {
+    "name": "lgbarn",
+    "email": "lgbarn@users.noreply.github.com"
+  },
   "plugins": [
     {
       "name": "shipyard",
       "version": "1.2.0",
-      "description": "Ship software systematically: project lifecycle, TDD, parallel agents, code review, security auditing, and infrastructure validation"
+      "description": "Ship software systematically: project lifecycle, TDD, parallel agents, code review, security auditing, and infrastructure validation",
+      "source": "..",
+      "category": "development"
     }
   ]
 }
