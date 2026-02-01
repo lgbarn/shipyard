@@ -142,6 +142,68 @@ Based on the argument and project state:
 **Branch scope:**
 - Use whatever is on the current branch regardless of phase state
 
+## Step 3a: Capture Lessons Learned
+
+Invoke the `shipyard:lessons-learned` skill for format and quality guidance.
+
+### Extract Candidate Lessons
+
+Read all SUMMARY.md files in the shipping scope:
+- For phase scope: `.shipyard/phases/{N}/results/SUMMARY-*.md`
+- For milestone scope: all phases' SUMMARY files
+
+Extract content from "Issues Encountered" and "Decisions Made" sections as candidate lessons.
+
+### Present to User
+
+Use AskUserQuestion to present:
+
+> **Phase {N} is complete. Let's capture lessons learned.**
+>
+> These will be saved to `.shipyard/LESSONS.md` and optionally to your project's `CLAUDE.md`.
+>
+> Based on the build summaries, here are some candidate lessons:
+> {Pre-populated from SUMMARY.md extracts, or "No candidates found" if empty}
+>
+> **What went well?**
+> **What surprised you or what did you learn?**
+> **What should future work avoid?**
+> **Any process improvements?**
+>
+> Edit, add to, or approve the above. Type "skip" to skip lesson capture.
+
+### Persist Lessons
+
+If user does not type "skip":
+
+1. Format lessons as a markdown section following the LESSONS.md format from the skill:
+   ```
+   ## [YYYY-MM-DD] Phase N: {Phase Name}
+
+   ### What Went Well
+   - {user input}
+
+   ### Surprises / Discoveries
+   - {user input}
+
+   ### Pitfalls to Avoid
+   - {user input}
+
+   ### Process Improvements
+   - {user input}
+
+   ---
+   ```
+2. Append to `.shipyard/LESSONS.md` (create file with `# Shipyard Lessons Learned` header if it does not exist).
+3. If `CLAUDE.md` exists in the project root:
+   - Ask user: "Update CLAUDE.md with these lessons? (y/n)"
+   - If yes: check for existing `## Lessons Learned` section
+     - If section exists: append new lessons under it (with date separator)
+     - If not: append `## Lessons Learned` section at end of file
+4. Commit: `shipyard(phase-{N}): capture lessons learned`
+
+If user types "skip", continue to Step 4 with no lesson capture.
+
 ## Step 4: Present Delivery Options
 
 Use AskUserQuestion to present four options:
