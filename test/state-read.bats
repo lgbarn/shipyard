@@ -41,3 +41,52 @@ load test_helper
     assert_output --partial "Current Phase"
     assert_output --partial "building"
 }
+
+# --- Context tier tests ---
+
+@test "state-read: auto-detect building status resolves to execution tier" {
+    setup_shipyard_with_state
+    # STATE.md already has Status: building
+    # Create phase directory with a plan file for execution tier to find
+    mkdir -p .shipyard/phases/1/plans
+    echo "# Test Plan" > .shipyard/phases/1/plans/PLAN-1.1.md
+
+    run bash "$STATE_READ"
+    assert_success
+    # Execution tier loads phase plans
+    assert_output --partial "Test Plan"
+}
+
+@test "state-read: planning tier includes PROJECT.md and ROADMAP.md" {
+    setup_shipyard_dir
+    # Create state with planning status
+    cat > .shipyard/STATE.md <<'EOF'
+# Shipyard State
+
+**Last Updated:** 2026-01-01T00:00:00Z
+**Current Phase:** 1
+**Status:** planning
+EOF
+
+    echo "# My Project" > .shipyard/PROJECT.md
+    echo "# My Roadmap" > .shipyard/ROADMAP.md
+
+    run bash "$STATE_READ"
+    assert_success
+    assert_output --partial "My Project"
+    assert_output --partial "My Roadmap"
+}
+
+@test "state-read: missing config.json defaults to auto tier" {
+    setup_shipyard_with_state
+    # No config.json -- should default to auto, then resolve based on status
+    # Status is "building" -> auto resolves to execution
+    # Create phases dir so find doesn't fail under set -e
+    mkdir -p .shipyard/phases
+    run bash "$STATE_READ"
+    assert_success
+
+    # Should still produce valid JSON (no crash from missing config)
+    echo "$output" | jq . >/dev/null 2>&1
+    assert_equal "$?" "0"
+}
