@@ -166,7 +166,8 @@ Shipyard uses a dual state system:
 ```
 shipyard/
 ├── .claude-plugin/
-│   └── plugin.json        # Plugin metadata (name, version, keywords)
+│   ├── marketplace.json   # Marketplace metadata (version, category)
+│   └── plugin.json        # Plugin definition (name, description)
 ├── agents/                # Specialized subagent definitions
 │   ├── architect.md       # Roadmap and plan decomposition
 │   ├── auditor.md         # Security and compliance analysis
@@ -189,28 +190,42 @@ shipyard/
 │   ├── rollback.md        # /shipyard:rollback
 │   ├── recover.md         # /shipyard:recover
 │   └── worktree.md        # /shipyard:worktree
+├── docs/
+│   └── PROTOCOLS.md       # Model routing and config.json reference
 ├── hooks/
 │   └── hooks.json         # SessionStart hook for state injection
 ├── scripts/
 │   ├── state-read.sh      # Adaptive context loading on session start
 │   ├── state-write.sh     # Updates .shipyard/STATE.md
 │   └── checkpoint.sh      # Git tag checkpoint management
-└── skills/                # Auto-activating skill definitions
-    ├── code-simplification/
-    ├── documentation/
-    ├── git-workflow/
-    ├── infrastructure-validation/
-    ├── parallel-dispatch/
-    ├── security-audit/
-    ├── shipyard-brainstorming/
-    ├── shipyard-debugging/
-    ├── shipyard-executing-plans/
-    ├── shipyard-tdd/
-    ├── shipyard-verification/
-    ├── shipyard-writing-plans/
-    ├── shipyard-writing-skills/
-    ├── lessons-learned/
-    └── using-shipyard/
+├── skills/                # Auto-activating skill definitions
+│   ├── code-simplification/
+│   ├── documentation/
+│   ├── git-workflow/
+│   ├── infrastructure-validation/
+│   ├── lessons-learned/
+│   ├── parallel-dispatch/
+│   ├── security-audit/
+│   ├── shipyard-brainstorming/
+│   ├── shipyard-debugging/
+│   ├── shipyard-executing-plans/
+│   ├── shipyard-tdd/
+│   ├── shipyard-verification/
+│   ├── shipyard-writing-plans/
+│   ├── shipyard-writing-skills/
+│   └── using-shipyard/
+├── test/                  # bats-core test suite (dev only)
+│   ├── run.sh             # Test runner
+│   ├── test_helper.bash   # Shared fixtures
+│   ├── state-read.bats
+│   ├── state-write.bats
+│   ├── checkpoint.bats
+│   ├── integration.bats
+│   └── e2e-smoke.bats
+├── CHANGELOG.md
+├── CONTRIBUTING.md
+├── LICENSE
+└── package.json
 ```
 
 ## Configuration
