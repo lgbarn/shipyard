@@ -23,6 +23,10 @@
 | 25 | low | reviewer | Issue #16 link in CONTRIBUTING.md may go stale; add inline file/line context as fallback | CONTRIBUTING.md:61 | 2026-02-01 |
 | 26 | low | reviewer | No mention of docs/ directory conventions in CONTRIBUTING.md | CONTRIBUTING.md | 2026-02-01 |
 | 27 | low | reviewer | lessons-learned/ breaks alphabetical order in Plugin Structure tree; placed after shipyard-writing-skills/ instead of after infrastructure-validation/ | README.md:212 | 2026-02-01 |
+| 29 | low | reviewer | E2e checkpoint prune test uses `sleep 1` to avoid timing race; adds 1s to CI wall time | test/e2e-smoke.bats:55 | 2026-02-01 |
+| 30 | low | reviewer | CHANGELOG.md lacks `[Unreleased]` placeholder section for post-release changes (spec-correct but convention mismatch) | CHANGELOG.md | 2026-02-01 |
+| 31 | low | reviewer | E2e setup() duplicates git init + config logic from test_helper `setup_git_repo`; consolidation opportunity | test/e2e-smoke.bats:6-12 | 2026-02-01 |
+| 32 | low | reviewer | SUMMARY-1.2.md states tag points to `f979ddc` but actual tag target is `ecb090c` | .shipyard/phases/7/results/SUMMARY-1.2.md:29 | 2026-02-01 |
 
 ## Closed Issues
 
