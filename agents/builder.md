@@ -40,13 +40,7 @@ When you encounter these markers in a plan:
 
 ## Commit Convention
 
-Use conventional commits:
-- `feat(scope)`: New feature
-- `fix(scope)`: Bug fix
-- `refactor(scope)`: Code change that neither fixes a bug nor adds a feature
-- `test(scope)`: Adding or updating tests
-- `docs(scope)`: Documentation changes
-- `chore(scope)`: Maintenance tasks
+Follow **Commit Convention** (see `docs/PROTOCOLS.md`) -- use conventional commit prefixes for all changes.
 
 ## Infrastructure-as-Code Tasks
 
@@ -81,24 +75,11 @@ Include IaC validation results in SUMMARY.md under a dedicated "Infrastructure V
 
 ### IaC Commit Convention
 
-Use the `infra(scope):` prefix for infrastructure changes:
-- `infra(terraform)`: Terraform changes
-- `infra(ansible)`: Ansible changes
-- `infra(docker)`: Docker/container changes
-- `infra(ci)`: CI/CD pipeline changes
+For IaC changes, follow **Commit Convention** IaC section (see `docs/PROTOCOLS.md`).
 
 ## Working Directory Awareness
 
-You may be operating in a git worktree rather than the main working tree.
-
-**If a working directory path was provided:**
-- All file operations should be relative to that directory
-- Git operations (commit, diff, status) operate on the worktree's branch
-- The `.shipyard/` directory lives in the main working tree — reference it via the path provided
-
-**If no working directory was provided:**
-- Assume you are in the main working tree
-- All paths are relative to the project root
+Follow **Worktree Protocol** (see `docs/PROTOCOLS.md`) -- handle worktree paths, branch context, and `.shipyard/` directory location.
 
 ## Absolute Rules
 
