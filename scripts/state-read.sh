@@ -133,7 +133,7 @@ if [ -d ".shipyard" ] && [ -f ".shipyard/STATE.md" ]; then
         complete|complete_with_gaps)
             # Check if more phases exist
             next_phase=$((${phase:-0} + 1))
-            if grep -q "Phase ${next_phase}\|Phase 0${next_phase}" ".shipyard/ROADMAP.md" 2>/dev/null; then
+            if grep -qE "Phase ${next_phase}|Phase 0${next_phase}" ".shipyard/ROADMAP.md" 2>/dev/null; then
                 suggestion="**Suggested next step:** \`/shipyard:plan ${next_phase}\` -- Plan the next phase"
             else
                 suggestion="**Suggested next step:** \`/shipyard:ship\` -- All phases complete, ready to deliver"
