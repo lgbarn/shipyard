@@ -23,3 +23,40 @@ load test_helper
     # Verify it is valid JSON
     echo "$output" | jq -e '.hookSpecificOutput.additionalContext' >/dev/null
 }
+
+@test "integration: checkpoint create then prune retains recent tags" {
+    setup_git_repo
+
+    # Create a checkpoint
+    bash "$CHECKPOINT" "integration-test"
+
+    # Verify it exists
+    run git tag -l "shipyard-checkpoint-integration-test-*"
+    assert_success
+    [ -n "$output" ]
+
+    # Prune with 30-day window -- our just-created tag should survive
+    run bash "$CHECKPOINT" --prune 30
+    assert_success
+
+    # Verify the tag still exists after prune
+    run git tag -l "shipyard-checkpoint-integration-test-*"
+    assert_success
+    [ -n "$output" ]
+}
+
+@test "integration: multiple writes accumulate history entries" {
+    setup_shipyard_dir
+    mkdir -p .shipyard/phases
+
+    bash "$STATE_WRITE" --phase 1 --position "Step one" --status planning
+    bash "$STATE_WRITE" --phase 1 --position "Step two" --status building
+    bash "$STATE_WRITE" --phase 1 --position "Step three" --status complete
+
+    # All three history entries should be present
+    run cat .shipyard/STATE.md
+    assert_output --partial "Step one"
+    assert_output --partial "Step two"
+    assert_output --partial "Step three"
+    assert_output --partial "## History"
+}
