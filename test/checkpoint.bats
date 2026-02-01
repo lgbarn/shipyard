@@ -63,3 +63,28 @@ load test_helper
     assert_success
     [ -n "$output" ]
 }
+
+# --- Exit codes and dirty worktree ---
+
+@test "checkpoint: warns when worktree is dirty" {
+    setup_git_repo
+    # Modify a tracked file without committing
+    echo "dirty" >> README.md
+    run bash "$CHECKPOINT" "dirty-test"
+    assert_success
+    assert_output --partial "uncommitted changes"
+}
+
+@test "checkpoint: no warning when worktree is clean" {
+    setup_git_repo
+    run bash "$CHECKPOINT" "clean-test"
+    assert_success
+    refute_output --partial "uncommitted"
+}
+
+@test "checkpoint: label that sanitizes to empty string exits 1" {
+    setup_git_repo
+    run bash "$CHECKPOINT" '<>;&'
+    assert_failure
+    assert_output --partial "alphanumeric"
+}
