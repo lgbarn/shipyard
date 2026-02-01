@@ -12,6 +12,14 @@
 | 12 | low | reviewer | Raw writes bypass Schema 2.0 enforcement by design but this is undocumented | scripts/state-write.sh:180-184 | 2026-02-01 |
 | 13 | low | reviewer | Recovery test assertion for "recovered" is imprecise; could match position or history | test/state-write.bats:112 | 2026-02-01 |
 | 14 | low | reviewer | No test for atomic_write failure paths (mktemp failure exit 3, empty content exit 2) | test/state-write.bats | 2026-02-01 |
+| 15 | low | reviewer | Heredoc `read || true` pattern lacks explanatory comment; may confuse future maintainers | scripts/state-read.sh:25 | 2026-02-01 |
+| 16 | low | reviewer | Hardcoded skill list in state-read.sh has no automated sync check against skills/ directory | scripts/state-read.sh:29-43 | 2026-02-01 |
+| 17 | low | reviewer | Discovery Workflow numbered list skips from 1 to 3 (missing step 2) | skills/shipyard-writing-skills/SKILL.md:418-422 | 2026-02-01 |
+| 18 | low | reviewer | Red Flags section uses ## instead of ### creating incorrect heading hierarchy in EXAMPLES.md | skills/shipyard-writing-skills/EXAMPLES.md:165 | 2026-02-01 |
+| 19 | low | reviewer | TOKEN BUDGET comments in SKILL.md files are advisory only; no CI gate or lint script enforces them | skills/*/SKILL.md | 2026-02-01 |
+| 20 | low | reviewer | init.md repeats config default values also present in PROTOCOLS.md Model Routing section; dual-maintenance risk | commands/init.md:100-104 | 2026-02-01 |
+| 21 | low | reviewer | Model Routing Protocol contains full config.json skeleton (44 lines) only relevant to init; consider splitting or annotating | docs/PROTOCOLS.md:37-62 | 2026-02-01 |
+| 22 | low | reviewer | Minor protocol reference format inconsistency: lowercase "follow" and missing trailing description in builder.md IaC line | agents/builder.md:78 | 2026-02-01 |
 
 ## Closed Issues
 
