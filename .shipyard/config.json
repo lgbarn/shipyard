@@ -1,0 +1,21 @@
+{
+  "interaction_mode": "interactive",
+  "git_strategy": "per_task",
+  "review_depth": "detailed",
+  "security_audit": true,
+  "simplification_review": true,
+  "iac_validation": "auto",
+  "documentation_generation": true,
+  "model_routing": {
+    "validation": "opus",
+    "building": "opus",
+    "planning": "opus",
+    "architecture": "opus",
+    "debugging": "opus",
+    "review": "opus",
+    "security_audit": "opus"
+  },
+  "context_tier": "auto",
+  "created_at": "2026-02-01T00:00:00Z",
+  "version": "1.2"
+}
