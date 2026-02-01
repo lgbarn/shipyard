@@ -76,7 +76,7 @@ fi
 
 # If raw content provided, write directly
 if [ -n "$RAW_CONTENT" ]; then
-    echo "$RAW_CONTENT" > "$STATE_FILE"
+    printf '%s\n' "$RAW_CONTENT" > "$STATE_FILE"
     echo "STATE.md updated (raw write) at ${TIMESTAMP}"
     exit 0
 fi
