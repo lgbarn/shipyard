@@ -64,6 +64,7 @@ POSITION=""
 STATUS=""
 BLOCKER=""
 RAW_CONTENT=""
+RECOVER=false
 TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
 while [[ $# -gt 0 ]]; do
@@ -88,6 +89,10 @@ while [[ $# -gt 0 ]]; do
             RAW_CONTENT="$2"
             shift 2
             ;;
+        --recover)
+            RECOVER=true
+            shift
+            ;;
         *)
             echo "Unknown argument: $1" >&2
             exit 1
@@ -110,6 +115,65 @@ if [ -n "$STATUS" ]; then
             exit 1
             ;;
     esac
+fi
+
+# Recovery mode: rebuild STATE.md from .shipyard/ artifacts
+if [ "$RECOVER" = true ]; then
+    echo "Recovering STATE.md from .shipyard/ artifacts..." >&2
+
+    # Find latest phase number from phases/ directories
+    latest_phase=""
+    if [ -d ".shipyard/phases" ]; then
+        latest_phase=$(find .shipyard/phases/ -maxdepth 1 -type d 2>/dev/null | \
+            sed 's|.*/||' | grep '^[0-9]' | sort -n | tail -1)
+    fi
+    latest_phase="${latest_phase:-1}"
+
+    # Determine status from phase artifacts
+    recovered_status="ready"
+    recovered_position="Recovered state"
+    phase_dir=".shipyard/phases/${latest_phase}"
+    if [ -d "$phase_dir" ]; then
+        if [ -d "${phase_dir}/results" ] && \
+           find "${phase_dir}/results/" -name "SUMMARY-*.md" 2>/dev/null | grep -q .; then
+            recovered_status="complete"
+            recovered_position="Phase ${latest_phase} completed (recovered)"
+        elif [ -d "${phase_dir}/plans" ] && \
+             find "${phase_dir}/plans/" -name "PLAN-*.md" 2>/dev/null | grep -q .; then
+            recovered_status="planned"
+            recovered_position="Phase ${latest_phase} planned (recovered)"
+        else
+            recovered_position="Phase ${latest_phase} (recovered, status unknown)"
+        fi
+    fi
+
+    # Build recovered history from git checkpoint tags (if available)
+    recovered_history=""
+    if command -v git >/dev/null 2>&1 && git rev-parse --git-dir >/dev/null 2>&1; then
+        while IFS= read -r tag; do
+            [ -z "$tag" ] && continue
+            tag_date=$(echo "$tag" | grep -oE '[0-9]{8}T[0-9]{6}Z' | head -1 || echo "")
+            tag_label=$(echo "$tag" | sed 's/^shipyard-checkpoint-//' | sed 's/-[0-9]*T[0-9]*Z$//')
+            recovered_history="${recovered_history}- [${tag_date:-unknown}] Checkpoint: ${tag_label}
+"
+        done < <(git tag -l "shipyard-checkpoint-*" 2>/dev/null | sort)
+    fi
+
+    # Generate recovered STATE.md
+    TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+    NEW_CONTENT=$(printf '%s\n' "# Shipyard State" "" \
+        "**Schema:** 2.0" \
+        "**Last Updated:** ${TIMESTAMP}" \
+        "**Current Phase:** ${latest_phase}" \
+        "**Current Position:** ${recovered_position}" \
+        "**Status:** ${recovered_status}" \
+        "" "## History" "" \
+        "- [${TIMESTAMP}] State recovered from .shipyard/ artifacts" \
+        "${recovered_history}")
+
+    atomic_write "$NEW_CONTENT" "$STATE_FILE"
+    echo "STATE.md recovered: Phase=${latest_phase} Status=${recovered_status}" >&2
+    exit 0
 fi
 
 # If raw content provided, write directly

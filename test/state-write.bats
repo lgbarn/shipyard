@@ -94,3 +94,44 @@ load test_helper
     assert_failure
     assert_equal "$status" 3
 }
+
+# --- Phase 3: recovery tests ---
+
+@test "state-write: --recover rebuilds from phase artifacts" {
+    setup_shipyard_dir
+    mkdir -p .shipyard/phases/2/plans
+    echo "# Plan" > .shipyard/phases/2/plans/PLAN-2.1.md
+
+    run bash "$STATE_WRITE" --recover
+    assert_success
+
+    run cat .shipyard/STATE.md
+    assert_output --partial "**Current Phase:** 2"
+    assert_output --partial "**Status:** planned"
+    assert_output --partial "**Schema:** 2.0"
+    assert_output --partial "recovered"
+}
+
+@test "state-write: --recover with no phases defaults to phase 1" {
+    setup_shipyard_dir
+
+    run bash "$STATE_WRITE" --recover
+    assert_success
+
+    run cat .shipyard/STATE.md
+    assert_output --partial "**Current Phase:** 1"
+    assert_output --partial "**Status:** ready"
+}
+
+@test "state-write: --recover detects completed phase from summary" {
+    setup_shipyard_dir
+    mkdir -p .shipyard/phases/3/results
+    echo "# Summary" > .shipyard/phases/3/results/SUMMARY-3.1.md
+
+    run bash "$STATE_WRITE" --recover
+    assert_success
+
+    run cat .shipyard/STATE.md
+    assert_output --partial "**Current Phase:** 3"
+    assert_output --partial "**Status:** complete"
+}
