@@ -44,7 +44,8 @@
     "hooks/",
     "scripts/",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "CHANGELOG.md"
   ],
   "devDependencies": {
     "bats": "^1.13.0",
