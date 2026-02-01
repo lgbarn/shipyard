@@ -31,3 +31,35 @@ load test_helper
     assert_success
     assert_output --partial "Warning"
 }
+
+# --- Prune ---
+
+@test "checkpoint: --prune rejects non-integer days" {
+    setup_git_repo
+    run bash "$CHECKPOINT" --prune "abc"
+    assert_failure
+    assert_output --partial "positive integer"
+}
+
+@test "checkpoint: --prune removes old tags and reports count" {
+    setup_git_repo
+
+    # Create a fake old checkpoint tag (simulate by directly creating with old-looking timestamp)
+    git tag -a "shipyard-checkpoint-old-20200101T000000Z" -m "old checkpoint"
+    # Create a recent tag
+    bash "$CHECKPOINT" "recent"
+
+    # Prune with 1 day window -- old tag should be removed, recent kept
+    run bash "$CHECKPOINT" --prune 1
+    assert_success
+    assert_output --partial "Pruned"
+
+    # Verify old tag is gone
+    run git tag -l "shipyard-checkpoint-old-*"
+    refute_output --partial "20200101"
+
+    # Verify recent tag still exists
+    run git tag -l "shipyard-checkpoint-recent-*"
+    assert_success
+    [ -n "$output" ]
+}
