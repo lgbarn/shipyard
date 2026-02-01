@@ -21,8 +21,30 @@ if ! command -v jq >/dev/null 2>&1; then
     exit 3
 fi
 
-# Read the using-shipyard skill content
-using_shipyard_content=$(cat "${PLUGIN_ROOT}/skills/using-shipyard/SKILL.md" 2>/dev/null || echo "Shipyard skill file not found.")
+# Compact skill summary (replaces full SKILL.md injection for token efficiency)
+read -r -d '' skill_summary <<'SKILLEOF' || true
+## Shipyard Skills & Commands
+
+**Skills** (invoke via Skill tool for full details):
+- `shipyard:using-shipyard` - How to find and use skills
+- `shipyard:shipyard-tdd` - TDD discipline for implementation
+- `shipyard:shipyard-debugging` - Root cause investigation before fixes
+- `shipyard:shipyard-verification` - Evidence before completion claims
+- `shipyard:shipyard-brainstorming` - Requirements gathering and design
+- `shipyard:security-audit` - OWASP, secrets, dependency security
+- `shipyard:code-simplification` - Duplication and dead code detection
+- `shipyard:infrastructure-validation` - Terraform, Ansible, Docker validation
+- `shipyard:parallel-dispatch` - Concurrent agent dispatch
+- `shipyard:shipyard-writing-plans` - Creating implementation plans
+- `shipyard:shipyard-executing-plans` - Executing plans with agents
+- `shipyard:git-workflow` - Branch, commit, worktree, and delivery
+- `shipyard:documentation` - Docs after implementation
+- `shipyard:shipyard-writing-skills` - Creating and testing new skills
+
+**Triggers:** File patterns (*.tf, Dockerfile, *.test.*), task markers (tdd="true"), state conditions (claiming done, errors), and content patterns (security, refactor) activate skills automatically. If even 1% chance a skill applies, invoke it.
+
+**Commands:** /init, /plan, /build, /status, /resume, /quick, /ship, /issues, /rollback, /recover, /worktree
+SKILLEOF
 
 # Build state context
 state_context=""
