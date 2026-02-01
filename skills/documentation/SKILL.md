@@ -3,6 +3,8 @@ name: documentation
 description: Use when generating documentation, updating README files, writing API docs, creating architecture documentation, or when documentation is incomplete or outdated
 ---
 
+<!-- TOKEN BUDGET: 160 lines / ~480 tokens -->
+
 # Documentation Generation
 
 Generate accurate, useful documentation that serves its audience. API docs for developers, guides for users, architecture docs for maintainers.

@@ -3,6 +3,8 @@ name: infrastructure-validation
 description: Use when working with Terraform (.tf, .tfvars), Ansible (playbooks, roles, inventory), Docker (Dockerfile, docker-compose.yml), CloudFormation, or any infrastructure-as-code files — provides validation workflows, tool chains, and common mistake prevention
 ---
 
+<!-- TOKEN BUDGET: 130 lines / ~390 tokens -->
+
 # Infrastructure Validation
 
 ## Activation Triggers

@@ -3,6 +3,8 @@ name: shipyard-writing-plans
 description: Use when you have a spec or requirements for a multi-step task, before touching code
 ---
 
+<!-- TOKEN BUDGET: 170 lines / ~510 tokens -->
+
 # Writing Plans
 
 ## Overview

@@ -3,6 +3,8 @@ name: security-audit
 description: Use when working with any code, infrastructure-as-code, configuration files, dependencies, or before claiming security posture is adequate — covers OWASP Top 10, secrets detection, dependency vulnerabilities, IaC security, Docker hardening, and supply chain risks
 ---
 
+<!-- TOKEN BUDGET: 90 lines / ~270 tokens -->
+
 # Security Audit
 
 ## Overview
