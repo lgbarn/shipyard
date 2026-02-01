@@ -161,6 +161,22 @@ if [ -d ".shipyard" ] && [ -f ".shipyard/STATE.md" ]; then
                 fi
             fi
         fi
+
+        # Load recent lessons (execution/full tier only, max 5)
+        if [ -f ".shipyard/LESSONS.md" ]; then
+            lesson_headers=$(grep -n "^## \[" ".shipyard/LESSONS.md" 2>/dev/null || echo "")
+            if [ -n "$lesson_headers" ]; then
+                last_five=$(echo "$lesson_headers" | tail -5)
+                lesson_snippet=""
+                while IFS=: read -r line_num _; do
+                    chunk=$(sed -n "${line_num},$((line_num + 8))p" ".shipyard/LESSONS.md" 2>/dev/null || echo "")
+                    lesson_snippet="${lesson_snippet}${chunk}\n"
+                done <<< "$last_five"
+                if [ -n "$lesson_snippet" ]; then
+                    state_context="${state_context}\n### Recent Lessons Learned\n${lesson_snippet}\n"
+                fi
+            fi
+        fi
     fi
 
     # Brownfield/full tier: also load codebase analysis
