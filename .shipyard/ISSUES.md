@@ -20,6 +20,8 @@
 | 20 | low | reviewer | init.md repeats config default values also present in PROTOCOLS.md Model Routing section; dual-maintenance risk | commands/init.md:100-104 | 2026-02-01 |
 | 21 | low | reviewer | Model Routing Protocol contains full config.json skeleton (44 lines) only relevant to init; consider splitting or annotating | docs/PROTOCOLS.md:37-62 | 2026-02-01 |
 | 22 | low | reviewer | Minor protocol reference format inconsistency: lowercase "follow" and missing trailing description in builder.md IaC line | agents/builder.md:78 | 2026-02-01 |
+| 23 | low | reviewer | No test for 5-lesson maximum cap; a test with 7 lessons asserting only last 5 appear would strengthen boundary coverage | test/state-read.bats | 2026-02-01 |
+| 24 | low | reviewer | Magic number 8 in sed extraction window lacks inline comment explaining why 8 lines | scripts/state-read.sh:172 | 2026-02-01 |
 
 ## Closed Issues
 
