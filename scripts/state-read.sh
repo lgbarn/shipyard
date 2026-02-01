@@ -75,12 +75,23 @@ if [ -d ".shipyard" ] && [ -f ".shipyard/STATE.md" ]; then
             if [ -n "$phase_dir" ]; then
                 plan_context=""
                 # Load plans (first 50 lines each, max 3)
-                for plan_file in $(ls "${phase_dir}/plans/"PLAN-*.md 2>/dev/null | head -3); do
+                plan_count=0
+                for plan_file in "${phase_dir}/plans/"PLAN-*.md; do
+                    [ -e "$plan_file" ] || continue
+                    [ "$plan_count" -ge 3 ] && break
+                    plan_count=$((plan_count + 1))
                     plan_snippet=$(head -50 "$plan_file" 2>/dev/null || echo "")
                     plan_context="${plan_context}\n#### $(basename "$plan_file")\n${plan_snippet}\n"
                 done
                 # Load recent summaries (first 30 lines each, max 3)
-                for summary_file in $(ls "${phase_dir}/results/"SUMMARY-*.md 2>/dev/null | tail -3); do
+                summary_files=()
+                for f in "${phase_dir}/results/"SUMMARY-*.md; do
+                    [ -e "$f" ] && summary_files+=("$f")
+                done
+                # Take last 3 entries (glob sorts lexicographically)
+                total=${#summary_files[@]}
+                start=$(( total > 3 ? total - 3 : 0 ))
+                for summary_file in "${summary_files[@]:$start}"; do
                     summary_snippet=$(head -30 "$summary_file" 2>/dev/null || echo "")
                     plan_context="${plan_context}\n#### $(basename "$summary_file")\n${summary_snippet}\n"
                 done
