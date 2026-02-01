@@ -19,11 +19,7 @@ Check if `.shipyard/` directory exists.
 
 ## Step 2: Read Last Position
 
-Read `.shipyard/STATE.md` to determine:
-- **Current Phase** -- which phase was active
-- **Current Position** -- what step we were on (planning, building, etc.)
-- **Status** -- the last known status
-- **History** -- recent actions taken
+Follow **State Loading Protocol** (see `docs/PROTOCOLS.md`) -- read STATE.md for current phase, position, status, and history.
 
 ## Step 3: Detect Incomplete Work
 

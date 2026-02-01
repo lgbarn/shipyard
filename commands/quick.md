@@ -40,10 +40,7 @@ Look in `.shipyard/quick/` for existing quick task files. Generate the next sequ
 
 ## Step 3a: Detect Working Directory
 
-Detect current working directory and worktree status:
-- Run `git worktree list` to identify if operating in a worktree
-- Record `$(pwd)` as the working directory
-- Record `$(git branch --show-current)` as the current branch
+Follow **Worktree Protocol** (see `docs/PROTOCOLS.md`) -- detect worktree, record working directory and branch.
 
 ## Step 4: Quick Plan
 
