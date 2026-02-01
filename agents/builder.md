@@ -75,7 +75,7 @@ Include IaC validation results in SUMMARY.md under a dedicated "Infrastructure V
 
 ### IaC Commit Convention
 
-For IaC changes, follow **Commit Convention** IaC section (see `docs/PROTOCOLS.md`).
+For IaC changes, Follow **Commit Convention** IaC section (see `docs/PROTOCOLS.md`) -- use IaC-specific prefixes for Terraform, Ansible, and Docker commits.
 
 ## Working Directory Awareness
 
