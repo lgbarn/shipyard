@@ -3,6 +3,8 @@ name: git-workflow
 description: Use when starting feature work that needs a branch, creating worktrees for isolation, making atomic commits during development, or completing a development branch via merge, PR, preserve, or discard
 ---
 
+<!-- TOKEN BUDGET: 450 lines / ~1350 tokens -->
+
 # Git Workflow
 
 ## Activation Triggers

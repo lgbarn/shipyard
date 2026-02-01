@@ -3,6 +3,8 @@ name: shipyard-tdd
 description: Use when implementing any feature or bugfix, before writing implementation code
 ---
 
+<!-- TOKEN BUDGET: 450 lines / ~1350 tokens -->
+
 # Test-Driven Development (TDD)
 
 ## Activation Triggers

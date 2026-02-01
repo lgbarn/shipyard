@@ -3,6 +3,8 @@ name: shipyard-writing-skills
 description: Use when creating new skills, editing existing skills, or verifying skills work before deployment
 ---
 
+<!-- TOKEN BUDGET: 500 lines / ~1500 tokens -->
+
 # Writing Skills
 
 ## Overview

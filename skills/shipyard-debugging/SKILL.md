@@ -3,6 +3,8 @@ name: shipyard-debugging
 description: Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes
 ---
 
+<!-- TOKEN BUDGET: 360 lines / ~1080 tokens -->
+
 # Systematic Debugging
 
 ## Activation Triggers

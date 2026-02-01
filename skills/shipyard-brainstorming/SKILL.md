@@ -3,6 +3,8 @@ name: shipyard-brainstorming
 description: "You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation. Also used during /shipyard:init for requirements gathering."
 ---
 
+<!-- TOKEN BUDGET: 70 lines / ~210 tokens -->
+
 # Brainstorming Ideas Into Designs
 
 ## Overview

@@ -3,6 +3,8 @@ name: shipyard-verification
 description: Use when about to claim work is complete, fixed, or passing, before committing or creating PRs - requires running verification commands and confirming output before making any success claims; evidence before assertions always
 ---
 
+<!-- TOKEN BUDGET: 170 lines / ~510 tokens -->
+
 # Verification Before Completion
 
 ## Activation Triggers

@@ -3,6 +3,8 @@ name: code-simplification
 description: Use after implementing features, before claiming a phase is complete, when reviewing AI-generated code, or when code feels overly complex — detects duplication, dead code, over-engineering, and AI-specific bloat patterns
 ---
 
+<!-- TOKEN BUDGET: 370 lines / ~1110 tokens -->
+
 # Code Simplification
 
 ## Overview

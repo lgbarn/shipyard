@@ -3,6 +3,8 @@ name: shipyard-executing-plans
 description: Use when you have a written implementation plan to execute, either in the current session with builder/reviewer agents or in a separate session with review checkpoints
 ---
 
+<!-- TOKEN BUDGET: 240 lines / ~720 tokens -->
+
 # Executing Plans
 
 ## Overview
