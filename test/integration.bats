@@ -89,3 +89,50 @@ load test_helper
     assert_output --partial "**Current Phase:** 2"
     assert_output --partial "**Schema:** 2.0"
 }
+
+@test "integration: schema version 2.0 survives write-read cycle" {
+    setup_shipyard_dir
+    mkdir -p .shipyard/phases
+
+    # Write with structured args
+    bash "$STATE_WRITE" --phase 1 --position "Schema test" --status planning
+
+    # Verify schema in file
+    run cat .shipyard/STATE.md
+    assert_output --partial "**Schema:** 2.0"
+
+    # Read and verify JSON output includes the schema in context
+    run bash "$STATE_READ"
+    assert_success
+    assert_output --partial "Schema"
+    assert_output --partial "2.0"
+}
+
+@test "integration: write-recover-checkpoint round-trip" {
+    setup_git_repo
+    mkdir -p .shipyard/phases/3/results
+    echo "# Summary" > .shipyard/phases/3/results/SUMMARY-3.1.md
+
+    # Create a checkpoint first
+    bash "$CHECKPOINT" "pre-recovery"
+
+    # Recover state from artifacts
+    run bash "$STATE_WRITE" --recover
+    assert_success
+
+    # Verify recovered state is correct
+    run cat .shipyard/STATE.md
+    assert_output --partial "**Current Phase:** 3"
+    assert_output --partial "**Status:** complete"
+
+    # Create post-recovery checkpoint
+    git add -A && git commit -q -m "recovered state" || true
+    run bash "$CHECKPOINT" "post-recovery"
+    assert_success
+    assert_output --partial "Checkpoint created"
+
+    # Both checkpoint tags should exist
+    run git tag -l "shipyard-checkpoint-*"
+    assert_output --partial "pre-recovery"
+    assert_output --partial "post-recovery"
+}
