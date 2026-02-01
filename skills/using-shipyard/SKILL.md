@@ -5,6 +5,8 @@ description: Use when starting any conversation - establishes how to find and us
 
 <!-- TOKEN BUDGET: 210 lines / ~630 tokens -->
 
+# Using Shipyard
+
 <EXTREMELY-IMPORTANT>
 If you think there is even a 1% chance a skill might apply to what you are doing, you ABSOLUTELY MUST invoke the skill.
 
