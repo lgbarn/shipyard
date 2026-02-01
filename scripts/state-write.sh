@@ -90,35 +90,34 @@ fi
 
 # If we have structured updates, apply them
 if [ -n "$PHASE" ] || [ -n "$POSITION" ] || [ -n "$STATUS" ]; then
-    # Build new state content
-    NEW_STATE="# Shipyard State\n\n"
-    NEW_STATE+="**Last Updated:** ${TIMESTAMP}\n\n"
+    {
+        printf '%s\n' "# Shipyard State" ""
+        printf '%s\n' "**Last Updated:** ${TIMESTAMP}" ""
 
-    if [ -n "$PHASE" ]; then
-        NEW_STATE+="**Current Phase:** ${PHASE}\n"
-    fi
-    if [ -n "$POSITION" ]; then
-        NEW_STATE+="**Current Position:** ${POSITION}\n"
-    fi
-    if [ -n "$STATUS" ]; then
-        NEW_STATE+="**Status:** ${STATUS}\n"
-    fi
-    if [ -n "$BLOCKER" ]; then
-        NEW_STATE+="\n## Blockers\n\n- ${BLOCKER}\n"
-    fi
+        if [ -n "$PHASE" ]; then
+            printf '%s\n' "**Current Phase:** ${PHASE}"
+        fi
+        if [ -n "$POSITION" ]; then
+            printf '%s\n' "**Current Position:** ${POSITION}"
+        fi
+        if [ -n "$STATUS" ]; then
+            printf '%s\n' "**Status:** ${STATUS}"
+        fi
+        if [ -n "$BLOCKER" ]; then
+            printf '%s\n' "" "## Blockers" "" "- ${BLOCKER}"
+        fi
 
-    # Preserve history section if it exists
-    if echo "$EXISTING" | grep -q "## History"; then
-        HISTORY_SECTION=$(echo "$EXISTING" | sed -n '/## History/,$p')
-        NEW_STATE+="\n${HISTORY_SECTION}\n"
-    else
-        NEW_STATE+="\n## History\n\n"
-    fi
+        # Preserve history section if it exists
+        if echo "$EXISTING" | grep -q "## History"; then
+            printf '%s\n' ""
+            echo "$EXISTING" | sed -n '/## History/,$p'
+        else
+            printf '%s\n' "" "## History" ""
+        fi
 
-    # Append current action to history
-    NEW_STATE+="- [${TIMESTAMP}] Phase ${PHASE:-?}: ${POSITION:-updated} (${STATUS:-unknown})\n"
-
-    printf '%b' "$NEW_STATE" > "$STATE_FILE"
+        # Append current action to history
+        printf '%s\n' "- [${TIMESTAMP}] Phase ${PHASE:-?}: ${POSITION:-updated} (${STATUS:-unknown})"
+    } > "$STATE_FILE"
     echo "STATE.md updated at ${TIMESTAMP}: Phase=${PHASE:-?} Position=${POSITION:-?} Status=${STATUS:-?}"
 else
     echo "Error: No updates provided. Use --phase, --position, --status, or --raw." >&2
