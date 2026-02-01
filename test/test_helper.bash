@@ -36,6 +36,25 @@ setup_shipyard_with_state() {
 STATEEOF
 }
 
+# Assert that $output is valid JSON (replaces fragile jq + $? pattern)
+assert_valid_json() {
+    run jq . <<< "$output"
+    assert_success
+}
+
+# Create .shipyard with a corrupt (truncated) STATE.md
+setup_shipyard_corrupt_state() {
+    setup_shipyard_dir
+    echo "# Shipyard State" > .shipyard/STATE.md
+    # Missing required fields: Status, Current Phase
+}
+
+# Create .shipyard with an empty STATE.md
+setup_shipyard_empty_state() {
+    setup_shipyard_dir
+    : > .shipyard/STATE.md
+}
+
 # Initialize a real git repo in BATS_TEST_TMPDIR (for checkpoint tests)
 setup_git_repo() {
     cd "$BATS_TEST_TMPDIR"

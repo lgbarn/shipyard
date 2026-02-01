@@ -9,12 +9,11 @@ load test_helper
     run bash "$STATE_READ"
     assert_success
 
-    # Must be valid JSON
-    echo "$output" | jq . >/dev/null 2>&1
-    assert_equal "$?" "0"
-
     # Must contain the no-project message
     assert_output --partial "No Shipyard Project Detected"
+
+    # Must be valid JSON
+    assert_valid_json
 }
 
 @test "state-read: always outputs valid JSON with hookSpecificOutput structure" {
@@ -31,15 +30,21 @@ load test_helper
     assert_equal "$hook_name" "SessionStart"
 }
 
-@test "state-read: minimal state (STATE.md only) is included in output" {
+@test "state-read: minimal tier includes STATE.md but excludes PROJECT.md and ROADMAP.md" {
     setup_shipyard_with_state
     # Set config to minimal tier
     echo '{"context_tier": "minimal"}' > .shipyard/config.json
+
+    # Create files that should NOT appear in minimal tier
+    echo "# Should Not Appear" > .shipyard/PROJECT.md
+    echo "# Also Hidden" > .shipyard/ROADMAP.md
 
     run bash "$STATE_READ"
     assert_success
     assert_output --partial "Current Phase"
     assert_output --partial "building"
+    refute_output --partial "Should Not Appear"
+    refute_output --partial "Also Hidden"
 }
 
 # --- Context tier tests ---
@@ -68,6 +73,7 @@ load test_helper
 **Status:** planning
 EOF
 
+    mkdir -p .shipyard/phases
     echo "# My Project" > .shipyard/PROJECT.md
     echo "# My Roadmap" > .shipyard/ROADMAP.md
 
@@ -87,6 +93,32 @@ EOF
     assert_success
 
     # Should still produce valid JSON (no crash from missing config)
-    echo "$output" | jq . >/dev/null 2>&1
-    assert_equal "$?" "0"
+    assert_valid_json
+}
+
+# --- Corruption detection tests ---
+
+@test "state-read: corrupt STATE.md (missing Status) exits code 2 with JSON error" {
+    setup_shipyard_corrupt_state
+    run bash "$STATE_READ"
+    assert_failure
+    assert_equal "$status" 2
+    # Output should be valid JSON with error field
+    echo "$output" | jq -e '.error' >/dev/null
+}
+
+@test "state-read: empty STATE.md exits code 2" {
+    setup_shipyard_empty_state
+    run bash "$STATE_READ"
+    assert_failure
+    assert_equal "$status" 2
+}
+
+@test "state-read: missing phases directory does not crash (Issue #4)" {
+    setup_shipyard_with_state
+    # Do NOT create .shipyard/phases/ -- this is the bug trigger
+    # Status is "building" which auto-resolves to execution tier, which calls find on phases/
+    run bash "$STATE_READ"
+    assert_success
+    echo "$output" | jq -e '.hookSpecificOutput' >/dev/null
 }
