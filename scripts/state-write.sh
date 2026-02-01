@@ -10,15 +10,53 @@
 #   state-write.sh --phase 2 --position "Building plan 1 of 3" --status in_progress
 #   state-write.sh --raw "$(cat updated-state.md)"
 
+# Exit Codes:
+#   0 - Success (STATE.md written or recovered)
+#   1 - User error (invalid --phase, invalid --status, missing required args)
+#   2 - State corruption (post-write validation failed, generated STATE.md is empty/malformed)
+#   3 - Missing dependency (.shipyard/ directory missing, mktemp failed)
+
 set -euo pipefail
 
 # Ensure .shipyard directory exists
 if [ ! -d ".shipyard" ]; then
     echo "Error: .shipyard/ directory does not exist. Run /shipyard:init first." >&2
-    exit 1
+    exit 3
 fi
 
 STATE_FILE=".shipyard/STATE.md"
+
+# Atomic write: write to temp file, validate, then mv (POSIX-atomic replacement)
+atomic_write() {
+    local content="$1"
+    local target="$2"
+    local tmpfile
+    tmpfile=$(mktemp "${target}.tmp.XXXXXX" 2>/dev/null) || \
+    tmpfile=$(mktemp -t "state-write.XXXXXX") || {
+        echo "Error: Failed to create temporary file" >&2
+        exit 3
+    }
+    # Cleanup on unexpected exit
+    trap 'rm -f "$tmpfile"' EXIT INT TERM
+
+    printf '%s\n' "$content" > "$tmpfile"
+
+    # Post-write validation: must be non-empty
+    if [ ! -s "$tmpfile" ]; then
+        echo "Error: Generated STATE.md is empty" >&2
+        rm -f "$tmpfile"
+        exit 2
+    fi
+
+    # Atomic move (same filesystem guarantees atomicity)
+    mv "$tmpfile" "$target" || {
+        echo "Error: Failed to move temp file to ${target}" >&2
+        rm -f "$tmpfile"
+        exit 2
+    }
+    # Clear the trap since file is moved
+    trap - EXIT INT TERM
+}
 
 # Parse arguments
 PHASE=""
@@ -76,7 +114,7 @@ fi
 
 # If raw content provided, write directly
 if [ -n "$RAW_CONTENT" ]; then
-    printf '%s\n' "$RAW_CONTENT" > "$STATE_FILE"
+    atomic_write "$RAW_CONTENT" "$STATE_FILE"
     echo "STATE.md updated (raw write) at ${TIMESTAMP}"
     exit 0
 fi
@@ -90,8 +128,9 @@ fi
 
 # If we have structured updates, apply them
 if [ -n "$PHASE" ] || [ -n "$POSITION" ] || [ -n "$STATUS" ]; then
-    {
+    NEW_CONTENT=$({
         printf '%s\n' "# Shipyard State" ""
+        printf '%s\n' "**Schema:** 2.0"
         printf '%s\n' "**Last Updated:** ${TIMESTAMP}" ""
 
         if [ -n "$PHASE" ]; then
@@ -117,7 +156,8 @@ if [ -n "$PHASE" ] || [ -n "$POSITION" ] || [ -n "$STATUS" ]; then
 
         # Append current action to history
         printf '%s\n' "- [${TIMESTAMP}] Phase ${PHASE:-?}: ${POSITION:-updated} (${STATUS:-unknown})"
-    } > "$STATE_FILE"
+    })
+    atomic_write "$NEW_CONTENT" "$STATE_FILE"
     echo "STATE.md updated at ${TIMESTAMP}: Phase=${PHASE:-?} Position=${POSITION:-?} Status=${STATUS:-?}"
 else
     echo "Error: No updates provided. Use --phase, --position, --status, or --raw." >&2

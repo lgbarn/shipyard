@@ -69,3 +69,28 @@ load test_helper
     assert_failure
     assert_output --partial "No updates provided"
 }
+
+# --- Phase 3: atomic writes, schema version, exit codes ---
+
+@test "state-write: structured write includes Schema 2.0" {
+    setup_shipyard_dir
+    run bash "$STATE_WRITE" --phase 1 --position "test" --status ready
+    assert_success
+    run cat .shipyard/STATE.md
+    assert_output --partial "**Schema:** 2.0"
+}
+
+@test "state-write: atomic write leaves no temp files" {
+    setup_shipyard_dir
+    bash "$STATE_WRITE" --phase 1 --position "test" --status ready
+    # No .tmp files should remain
+    run find .shipyard -name "*.tmp.*"
+    assert_output ""
+}
+
+@test "state-write: missing .shipyard exits code 3" {
+    cd "$BATS_TEST_TMPDIR"
+    run bash "$STATE_WRITE" --phase 1 --position "test" --status ready
+    assert_failure
+    assert_equal "$status" 3
+}
