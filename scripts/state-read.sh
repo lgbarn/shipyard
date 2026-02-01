@@ -21,14 +21,23 @@ if [ -d ".shipyard" ] && [ -f ".shipyard/STATE.md" ]; then
     state_md=$(cat ".shipyard/STATE.md" 2>/dev/null || echo "")
 
     # Extract status and phase from STATE.md
-    status=$(echo "$state_md" | grep -oP '(?<=\*\*Status:\*\* ).*' 2>/dev/null || echo "")
-    phase=$(echo "$state_md" | grep -oP '(?<=\*\*Current Phase:\*\* )\d+' 2>/dev/null || echo "")
+    status=$(echo "$state_md" | sed -n 's/^.*\*\*Status:\*\* \(.*\)$/\1/p' | head -1)
+    phase=$(echo "$state_md" | sed -n 's/^.*\*\*Current Phase:\*\* \([0-9][0-9]*\).*$/\1/p' | head -1)
+
+    # Validate phase is a pure integer
+    if [ -n "$phase" ] && ! [[ "$phase" =~ ^[0-9]+$ ]]; then
+        phase=""
+    fi
 
     # Determine context tier from config (default: auto)
     context_tier="auto"
     if [ -f ".shipyard/config.json" ]; then
         context_tier=$(jq -r '.context_tier // "auto"' ".shipyard/config.json" 2>/dev/null || echo "auto")
     fi
+    case "$context_tier" in
+        auto|minimal|planning|execution|brownfield|full) ;;
+        *) context_tier="auto" ;;
+    esac
 
     # Auto-detect tier based on status
     if [ "$context_tier" = "auto" ]; then
