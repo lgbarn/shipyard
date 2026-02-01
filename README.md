@@ -71,7 +71,7 @@ Once installed, navigate to any project directory and run:
 
 ## Skills (Auto-Activating)
 
-Shipyard includes 14 skills that activate automatically based on context:
+Shipyard includes 15 skills that activate automatically based on context:
 
 | Skill | When It Activates |
 |-------|-------------------|
@@ -89,6 +89,7 @@ Shipyard includes 14 skills that activate automatically based on context:
 | `git-workflow` | Branch management, commits, delivery |
 | `using-shipyard` | Every session (skill discovery protocol) |
 | `shipyard-writing-skills` | Creating new skills |
+| `lessons-learned` | After phase completion, before shipping, reflecting on work |
 
 ## Agents
 
@@ -208,6 +209,7 @@ shipyard/
     ├── shipyard-verification/
     ├── shipyard-writing-plans/
     ├── shipyard-writing-skills/
+    ├── lessons-learned/
     └── using-shipyard/
 ```
 
@@ -224,28 +226,14 @@ When you run `/shipyard:init`, Shipyard creates a `.shipyard/config.json` in you
 | `simplification_review` | `true`, `false` | `true` | Check for duplication and complexity |
 | `iac_validation` | `auto`, `true`, `false` | `auto` | Validate Terraform/Ansible/Docker changes |
 | `documentation_generation` | `true`, `false` | `true` | Generate docs after each phase |
-| `model_routing` | object | see below | Model selection per task type |
+| `model_routing` | object | see `docs/PROTOCOLS.md` | Model selection per task type |
 | `context_tier` | `auto`, `minimal`, `full` | `auto` | Context loading at session start |
 
-### Model Routing Defaults
-
-```json
-{
-  "model_routing": {
-    "validation": "haiku",
-    "building": "sonnet",
-    "planning": "sonnet",
-    "architecture": "opus",
-    "debugging": "opus",
-    "review": "sonnet",
-    "security_audit": "sonnet"
-  }
-}
-```
+See `docs/PROTOCOLS.md` for model routing configuration and the full config.json skeleton.
 
 ## Feature Comparison
 
-| Capability | Shipyard v1.2.0 | GSD v1.10.1 | Superpowers v3.6.2 |
+| Capability | Shipyard v2.0.0 | GSD v1.10.1 | Superpowers v3.6.2 |
 |-----------|:---:|:---:|:---:|
 | **Project Lifecycle** | | | |
 | Init / requirements gathering | ✅ | ✅ | ✅ |
@@ -281,7 +269,7 @@ When you run `/shipyard:init`, Shipyard creates a `.shipyard/config.json` in you
 | State recovery | ✅ | ✅ (fork) | ❌ |
 | Issue tracking (cross-session) | ✅ | ✅ (todos) | ❌ |
 | **Skills & Extensibility** | | | |
-| Auto-activating skills | ✅ (14 skills) | ❌ | ✅ (15+ skills) |
+| Auto-activating skills | ✅ (15 skills) | ❌ | ✅ (15+ skills) |
 | Deterministic skill triggers | ✅ (4 trigger types) | ❌ | ❌ (description-based) |
 | Systematic debugging | ✅ | ✅ | ✅ (4-phase + escalation) |
 | Verification before completion | ✅ | ✅ | ✅ |
@@ -293,7 +281,7 @@ When you run `/shipyard:init`, Shipyard creates a `.shipyard/config.json` in you
 | Multi-runtime | ❌ (Claude Code) | ✅ (Claude + OpenCode + Gemini) | ❌ (Claude Code) |
 | **Scale** | | | |
 | Commands | 11 | 20+ | 3 |
-| Skills | 14 | 0 | 15+ |
+| Skills | 15 | 0 | 15+ |
 | Named agents | 9 | implicit | implicit |
 
 ## Acknowledgments
@@ -302,6 +290,10 @@ Shipyard draws inspiration from:
 
 - [Superpowers](https://github.com/obra/superpowers) by Jesse Vincent — composable skills, TDD discipline, two-stage code review
 - [GSD (Get Shit Done)](https://gsd.site/) by TÂCHES — project lifecycle management, phase-based planning, context engineering
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for how to add commands, skills, and agents, run tests, and submit pull requests.
 
 ## License
 
