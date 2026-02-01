@@ -60,3 +60,32 @@ load test_helper
     assert_output --partial "Step three"
     assert_output --partial "## History"
 }
+
+@test "integration: corrupt STATE.md detected then recovered via --recover" {
+    setup_shipyard_dir
+    mkdir -p .shipyard/phases/2/plans
+    echo "# Plan 2.1" > .shipyard/phases/2/plans/PLAN-2.1.md
+
+    # Write a corrupt STATE.md (missing required fields)
+    echo "# Broken State File" > .shipyard/STATE.md
+
+    # Read should detect corruption (exit 2)
+    run bash "$STATE_READ"
+    assert_failure
+    assert_equal "$status" 2
+    echo "$output" | jq -e '.error' >/dev/null
+
+    # Recovery should rebuild from artifacts
+    run bash "$STATE_WRITE" --recover
+    assert_success
+
+    # Read should now succeed with recovered state
+    run bash "$STATE_READ"
+    assert_success
+    echo "$output" | jq -e '.hookSpecificOutput' >/dev/null
+
+    # Verify recovered state references the correct phase
+    run cat .shipyard/STATE.md
+    assert_output --partial "**Current Phase:** 2"
+    assert_output --partial "**Schema:** 2.0"
+}
