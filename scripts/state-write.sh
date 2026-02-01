@@ -57,6 +57,23 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+# Validate inputs
+if [ -n "$PHASE" ] && ! [[ "$PHASE" =~ ^[0-9]+$ ]]; then
+    echo "Error: --phase must be a positive integer, got '${PHASE}'" >&2
+    exit 1
+fi
+
+if [ -n "$STATUS" ]; then
+    case "$STATUS" in
+        ready|planned|planning|building|in_progress|complete|complete_with_gaps|shipped|blocked|paused)
+            ;;
+        *)
+            echo "Error: --status must be one of: ready, planned, planning, building, in_progress, complete, complete_with_gaps, shipped, blocked, paused. Got '${STATUS}'" >&2
+            exit 1
+            ;;
+    esac
+fi
+
 # If raw content provided, write directly
 if [ -n "$RAW_CONTENT" ]; then
     echo "$RAW_CONTENT" > "$STATE_FILE"
