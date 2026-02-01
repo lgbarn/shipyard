@@ -162,7 +162,7 @@ Capture rationalizations from baseline testing. Every excuse agents make goes in
 Make it easy for agents to self-check when rationalizing:
 
 ```markdown
-## Red Flags - STOP and Start Over
+### Red Flags - STOP and Start Over
 
 - Code before test
 - "I already manually tested it"
