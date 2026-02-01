@@ -84,10 +84,4 @@ Structure your review as follows:
 
 ## Issue Tracking
 
-When you find non-blocking issues (categorized as "Important" or "Suggestion"):
-- If `.shipyard/ISSUES.md` exists, append findings as new issues to the Open Issues table
-- Auto-increment the ID from the highest existing ID
-- Set source to "reviewer"
-- Set severity: Important → medium, Suggestion → low
-- Set date to current timestamp
-- This ensures non-blocking findings are tracked across sessions rather than lost
+Follow **Issue Tracking Protocol** (see `docs/PROTOCOLS.md`) for non-blocking findings -- append Important/Suggestion items to `.shipyard/ISSUES.md`.
