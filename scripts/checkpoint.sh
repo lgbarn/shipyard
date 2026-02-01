@@ -10,6 +10,11 @@
 #   checkpoint.sh "pre-build-phase-2"
 #   checkpoint.sh "post-plan-phase-1"
 #   checkpoint.sh --prune 14
+#
+# Exit Codes:
+#   0 - Success (tag created, pruned, or graceful non-git-repo warning)
+#   1 - User error (invalid arguments, empty label after sanitization)
+#   3 - Missing dependency (git command failed for reason other than "not a repo")
 
 set -euo pipefail
 
@@ -51,4 +56,10 @@ git tag -a "$TAG" -m "Shipyard checkpoint: ${LABEL}" 2>/dev/null || {
 }
 
 echo "Checkpoint created: ${TAG}"
+
+# Warn if worktree has uncommitted changes
+if ! git diff-index --quiet HEAD -- 2>/dev/null; then
+    echo "Warning: Git worktree has uncommitted changes" >&2
+    echo "  Consider committing before checkpointing for clean rollback points" >&2
+fi
 exit 0
