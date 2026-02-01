@@ -19,13 +19,7 @@ Check if `.shipyard/` directory exists.
 
 ## Step 2: Read State Files
 
-Read the following files (skip any that don't exist):
-- `.shipyard/STATE.md` -- current position and status
-- `.shipyard/ROADMAP.md` -- phases and progress
-- `.shipyard/PROJECT.md` -- project overview
-- `.shipyard/config.json` -- workflow preferences
-- Any recent `SUMMARY.md` files from `.shipyard/phases/`
-- Any `VERIFICATION.md` files from `.shipyard/phases/`
+Follow **State Loading Protocol** (see `docs/PROTOCOLS.md`) -- read STATE.md, ROADMAP.md, PROJECT.md, config.json, and recent SUMMARY/VERIFICATION files.
 
 ## Step 3: Display Native Task Progress
 

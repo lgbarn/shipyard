@@ -89,40 +89,19 @@ Also ask about quality gates:
 
 Also ask about model and context preferences:
 8. **Model routing:** "Which model routing strategy should Shipyard use for its agents?"
-   - **Default routing** (recommended): Haiku for validation/checks, Sonnet for building/planning, Opus for architecture/debugging — balances cost and quality
-   - **All Sonnet:** Use Sonnet for everything — balanced cost and quality
-   - **All Opus:** Use Opus for everything — highest quality, highest cost
+   - **Default routing** (recommended): Haiku for validation/checks, Sonnet for building/planning, Opus for architecture/debugging
+   - **All Sonnet:** Use Sonnet for everything
+   - **All Opus:** Use Opus for everything
 9. **Context loading:** "How much context should Shipyard load at session start?"
-   - **Auto** (recommended): Loads based on current state — minimal when idle, more when building
-   - **Minimal:** Always load minimal context — fastest startup, lowest token usage
-   - **Full:** Always load everything — most context available, higher token usage
+   - **Auto** (recommended): Loads based on current state
+   - **Minimal:** Always load minimal context
+   - **Full:** Always load everything
 
-Store preferences in `.shipyard/config.json`:
-```json
-{
-  "interaction_mode": "interactive|autonomous",
-  "git_strategy": "per_task|per_phase|manual",
-  "review_depth": "detailed|lightweight",
-  "security_audit": true,
-  "simplification_review": true,
-  "iac_validation": "auto|true|false",
-  "documentation_generation": true,
-  "model_routing": {
-    "validation": "haiku",
-    "building": "sonnet",
-    "planning": "sonnet",
-    "architecture": "opus",
-    "debugging": "opus",
-    "review": "sonnet",
-    "security_audit": "sonnet"
-  },
-  "context_tier": "auto",
-  "created_at": "<timestamp>",
-  "version": "1.2"
-}
-```
+Store preferences in `.shipyard/config.json`. Follow **Model Routing Protocol** (see `docs/PROTOCOLS.md`) for the full `config.json` structure, model routing keys, and defaults.
 
-**Defaults:** `security_audit: true`, `simplification_review: true`, `iac_validation: "auto"`, `documentation_generation: true`. The `"auto"` setting for IaC detects IaC files and only runs validation when they're present. Model routing defaults to the "Default routing" preset. Context tier defaults to `"auto"`.
+Non-routing fields: `interaction_mode`, `git_strategy`, `review_depth`, `security_audit`, `simplification_review`, `iac_validation`, `documentation_generation`, `context_tier`, `created_at`, `version`.
+
+**Defaults:** `security_audit: true`, `simplification_review: true`, `iac_validation: "auto"`, `documentation_generation: true`, `context_tier: "auto"`.
 
 ## Step 6: Roadmap Generation
 

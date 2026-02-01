@@ -15,18 +15,8 @@ You are executing the Shipyard build workflow. Follow these steps precisely.
 - If `--light` is provided, skip post-phase auditor and simplifier (Steps 4a and 4b). Use this during early iteration — the full pipeline runs at ship time regardless.
 - If no phase number, read `.shipyard/STATE.md` for the current phase.
 - Read `.shipyard/config.json` for gate preferences (`security_audit`, `simplification_review`, `iac_validation`, `documentation_generation`).
-- Detect current working directory and worktree status:
-  - Run `git worktree list` to identify if operating in a worktree
-  - Record `$(pwd)` as the working directory
-  - Record `$(git branch --show-current)` as the current branch
-- Read `model_routing` from config for agent model selection. When dispatching agents, use the configured model:
-  - Builder agents: `model_routing.building` (default: sonnet)
-  - Reviewer agents: `model_routing.review` (default: sonnet)
-  - Verifier agent: `model_routing.validation` (default: haiku)
-  - Auditor agent: `model_routing.security_audit` (default: sonnet)
-  - Simplifier agent: `model_routing.review` (default: sonnet)
-  - Documenter agent: `model_routing.review` (default: sonnet)
-  If `model_routing` is not present in config, use agent defaults.
+- Follow **Worktree Protocol** (see `docs/PROTOCOLS.md`) -- detect worktree, record working directory and branch.
+- Follow **Model Routing Protocol** (see `docs/PROTOCOLS.md`) -- read `model_routing` from config for agent model selection.
 
 ## Step 1: Validate State
 
@@ -46,11 +36,7 @@ Update `.shipyard/STATE.md`:
 
 ## Step 2a: Create Checkpoint
 
-Create a pre-build checkpoint for rollback safety:
-
-```bash
-${CLAUDE_PLUGIN_ROOT}/scripts/checkpoint.sh "pre-build-phase-${N}"
-```
+Follow **Checkpoint Protocol** (see `docs/PROTOCOLS.md`) -- create `pre-build-phase-{N}` checkpoint.
 
 ## Step 3: Execute by Wave
 
@@ -266,11 +252,7 @@ shipyard: complete phase {N} build
 
 ## Step 6a: Create Checkpoint
 
-Create a post-build checkpoint:
-
-```bash
-${CLAUDE_PLUGIN_ROOT}/scripts/checkpoint.sh "post-build-phase-${N}"
-```
+Follow **Checkpoint Protocol** (see `docs/PROTOCOLS.md`) -- create `post-build-phase-{N}` checkpoint.
 
 ## Step 7: Route Forward
 

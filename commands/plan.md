@@ -24,12 +24,7 @@ You are executing the Shipyard planning workflow. Follow these steps precisely.
 
 ## Step 1a: Load Model Routing
 
-Read `model_routing` from `.shipyard/config.json` for agent model selection:
-- Researcher agent: `model_routing.planning` (default: sonnet)
-- Architect agent: `model_routing.architecture` (default: opus)
-- Verifier agent: `model_routing.validation` (default: haiku)
-
-If `model_routing` is not present in config, use agent defaults.
+Follow **Model Routing Protocol** (see `docs/PROTOCOLS.md`) -- read `model_routing` from config for researcher, architect, and verifier model selection.
 
 ## Step 2: Mark Phase In Progress
 
@@ -140,11 +135,7 @@ shipyard: plan phase {N}
 
 ## Step 8a: Create Checkpoint
 
-Create a post-plan checkpoint:
-
-```bash
-${CLAUDE_PLUGIN_ROOT}/scripts/checkpoint.sh "post-plan-phase-${N}"
-```
+Follow **Checkpoint Protocol** (see `docs/PROTOCOLS.md`) -- create `post-plan-phase-{N}` checkpoint.
 
 ## Step 9: Present Summary & Route Forward
 
