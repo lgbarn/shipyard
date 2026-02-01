@@ -1,6 +1,6 @@
 {
   "name": "@lgbarn/shipyard",
-  "version": "1.2.0",
+  "version": "2.0.0",
   "description": "Ship software systematically: project lifecycle, TDD, parallel agents, code review, security auditing, and infrastructure validation — from idea to production",
   "keywords": [
     "claude-code-plugin",
@@ -17,6 +17,14 @@
   ],
   "author": "lgbarn",
   "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "systemDependencies": {
+    "bash": ">=4.0",
+    "jq": ">=1.6",
+    "git": ">=2.20"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/lgbarn/shipyard.git"
