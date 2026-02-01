@@ -2,12 +2,24 @@
 # SessionStart hook for Shipyard plugin
 # Reads project state and injects context at session start
 # Supports adaptive context loading (minimal/planning/execution/brownfield/full)
+#
+# Exit Codes:
+#   0 - Success (JSON context output produced)
+#   1 - User error (invalid tier value -- currently auto-corrected, reserved for future use)
+#   2 - State corruption (STATE.md missing required fields or malformed)
+#   3 - Missing dependency (jq not found)
 
 set -euo pipefail
 
 # Determine plugin root directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+# Check for jq dependency
+if ! command -v jq >/dev/null 2>&1; then
+    echo '{"error":"Missing dependency: jq is required but not found in PATH","exitCode":3}' >&2
+    exit 3
+fi
 
 # Read the using-shipyard skill content
 using_shipyard_content=$(cat "${PLUGIN_ROOT}/skills/using-shipyard/SKILL.md" 2>/dev/null || echo "Shipyard skill file not found.")
@@ -19,6 +31,29 @@ suggestion=""
 if [ -d ".shipyard" ] && [ -f ".shipyard/STATE.md" ]; then
     # Project has Shipyard state -- read it
     state_md=$(cat ".shipyard/STATE.md" 2>/dev/null || echo "")
+
+    # Validate STATE.md has required fields
+    if [ -z "$state_md" ]; then
+        jq -n '{
+            error: "STATE.md is corrupt or incomplete",
+            details: "Missing required field(s): Status, Current Phase",
+            exitCode: 2,
+            recovery: "Run: bash scripts/state-write.sh --recover"
+        }'
+        exit 2
+    fi
+    local_missing=""
+    echo "$state_md" | grep -q '\*\*Status:\*\*' || local_missing="Status"
+    echo "$state_md" | grep -q '\*\*Current Phase:\*\*' || local_missing="${local_missing:+$local_missing, }Current Phase"
+    if [ -n "$local_missing" ]; then
+        jq -n --arg missing "$local_missing" '{
+            error: "STATE.md is corrupt or incomplete",
+            details: ("Missing required field(s): " + $missing),
+            exitCode: 2,
+            recovery: "Run: bash scripts/state-write.sh --recover"
+        }'
+        exit 2
+    fi
 
     # Extract status and phase from STATE.md
     status=$(echo "$state_md" | sed -n 's/^.*\*\*Status:\*\* \(.*\)$/\1/p' | head -1)
@@ -71,23 +106,31 @@ if [ -d ".shipyard" ] && [ -f ".shipyard/STATE.md" ]; then
     if [ "$context_tier" = "execution" ] || [ "$context_tier" = "full" ]; then
         if [ -n "$phase" ]; then
             # Find phase directory (handles zero-padded names like 01-name)
-            phase_dir=$(find .shipyard/phases/ -maxdepth 1 -type d -name "${phase}*" -o -name "0${phase}*" 2>/dev/null | head -1)
+            if [ -d ".shipyard/phases" ]; then
+                phase_dir=$(find .shipyard/phases/ -maxdepth 1 -type d -name "${phase}*" -o -name "0${phase}*" 2>/dev/null | head -1)
+            else
+                phase_dir=""
+            fi
             if [ -n "$phase_dir" ]; then
                 plan_context=""
                 # Load plans (first 50 lines each, max 3)
-                plan_count=0
-                for plan_file in "${phase_dir}/plans/"PLAN-*.md; do
-                    [ -e "$plan_file" ] || continue
-                    [ "$plan_count" -ge 3 ] && break
-                    plan_count=$((plan_count + 1))
-                    plan_snippet=$(head -50 "$plan_file" 2>/dev/null || echo "")
-                    plan_context="${plan_context}\n#### $(basename "$plan_file")\n${plan_snippet}\n"
-                done
+                if [ -d "${phase_dir}/plans" ]; then
+                    plan_count=0
+                    for plan_file in "${phase_dir}/plans/"PLAN-*.md; do
+                        [ -e "$plan_file" ] || continue
+                        [ "$plan_count" -ge 3 ] && break
+                        plan_count=$((plan_count + 1))
+                        plan_snippet=$(head -50 "$plan_file" 2>/dev/null || echo "")
+                        plan_context="${plan_context}\n#### $(basename "$plan_file")\n${plan_snippet}\n"
+                    done
+                fi
                 # Load recent summaries (first 30 lines each, max 3)
                 summary_files=()
-                for f in "${phase_dir}/results/"SUMMARY-*.md; do
-                    [ -e "$f" ] && summary_files+=("$f")
-                done
+                if [ -d "${phase_dir}/results" ]; then
+                    for f in "${phase_dir}/results/"SUMMARY-*.md; do
+                        [ -e "$f" ] && summary_files+=("$f")
+                    done
+                fi
                 # Take last 3 entries (glob sorts lexicographically)
                 total=${#summary_files[@]}
                 start=$(( total > 3 ? total - 3 : 0 ))
