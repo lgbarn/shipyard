@@ -310,63 +310,26 @@ Edit skill without testing? Same violation.
 
 Different skill types need different test approaches:
 
-### Discipline-Enforcing Skills (rules/requirements)
+### Discipline-Enforcing Skills
+Test with academic questions, pressure scenarios (time + sunk cost + exhaustion combined), and rationalization tracking. **Pass:** Agent follows rule under maximum pressure.
 
-**Examples:** TDD, verification-before-completion, designing-before-coding
+### Technique Skills
+Test with application scenarios, edge-case variations, and gap detection. **Pass:** Agent applies technique correctly to new scenarios.
 
-**Test with:**
-- Academic questions: Do they understand the rules?
-- Pressure scenarios: Do they comply under stress?
-- Multiple pressures combined: time + sunk cost + exhaustion
-- Identify rationalizations and add explicit counters
+### Pattern Skills
+Test with recognition scenarios, application tasks, and counter-examples. **Pass:** Agent identifies when/how to apply pattern and when NOT to.
 
-**Success criteria:** Agent follows rule under maximum pressure
-
-### Technique Skills (how-to guides)
-
-**Examples:** condition-based-waiting, root-cause-tracing, defensive-programming
-
-**Test with:**
-- Application scenarios: Can they apply the technique correctly?
-- Variation scenarios: Do they handle edge cases?
-- Missing information tests: Do instructions have gaps?
-
-**Success criteria:** Agent successfully applies technique to new scenario
-
-### Pattern Skills (mental models)
-
-**Examples:** reducing-complexity, information-hiding concepts
-
-**Test with:**
-- Recognition scenarios: Do they recognize when pattern applies?
-- Application scenarios: Can they use the mental model?
-- Counter-examples: Do they know when NOT to apply?
-
-**Success criteria:** Agent correctly identifies when/how to apply pattern
-
-### Reference Skills (documentation/APIs)
-
-**Examples:** API documentation, command references, library guides
-
-**Test with:**
-- Retrieval scenarios: Can they find the right information?
-- Application scenarios: Can they use what they found correctly?
-- Gap testing: Are common use cases covered?
-
-**Success criteria:** Agent finds and correctly applies reference information
+### Reference Skills
+Test with retrieval tasks, application scenarios, and coverage gaps. **Pass:** Agent finds and correctly applies reference information.
 
 ## Common Rationalizations for Skipping Testing
 
 | Excuse | Reality |
 |--------|---------|
 | "Skill is obviously clear" | Clear to you ≠ clear to other agents. Test it. |
-| "It's just a reference" | References can have gaps, unclear sections. Test retrieval. |
-| "Testing is overkill" | Untested skills have issues. Always. 15 min testing saves hours. |
-| "I'll test if problems emerge" | Problems = agents can't use skill. Test BEFORE deploying. |
-| "Too tedious to test" | Testing is less tedious than debugging bad skill in production. |
-| "I'm confident it's good" | Overconfidence guarantees issues. Test anyway. |
+| "Testing is overkill" | Untested skills have issues. Always. 15 min saves hours. |
 | "Academic review is enough" | Reading ≠ using. Test application scenarios. |
-| "No time to test" | Deploying untested skill wastes more time fixing it later. |
+| "No time to test" | Deploying untested wastes more time fixing later. |
 
 **All of these mean: Test before deploying. No exceptions.**
 
@@ -429,42 +392,22 @@ Deploying untested skills = deploying untested code. It's a violation of quality
 
 ## Skill Creation Checklist (TDD Adapted)
 
-**IMPORTANT: Use TodoWrite to create todos for EACH checklist item below.**
+**Use TodoWrite to create todos for EACH item below.**
 
-**RED Phase - Write Failing Test:**
-- [ ] Create pressure scenarios (3+ combined pressures for discipline skills)
-- [ ] Run scenarios WITHOUT skill - document baseline behavior verbatim
-- [ ] Identify patterns in rationalizations/failures
+**RED:** Create pressure scenarios (3+ for discipline skills) -- run WITHOUT skill -- document baseline rationalizations
 
-**GREEN Phase - Write Minimal Skill:**
-- [ ] Name uses only letters, numbers, hyphens (no parentheses/special chars)
-- [ ] YAML frontmatter with only name and description (max 1024 chars)
-- [ ] Description starts with "Use when..." and includes specific triggers/symptoms
-- [ ] Description written in third person
-- [ ] Keywords throughout for search (errors, symptoms, tools)
-- [ ] Clear overview with core principle
-- [ ] Address specific baseline failures identified in RED
-- [ ] Code inline OR link to separate file
-- [ ] One excellent example (not multi-language)
-- [ ] Run scenarios WITH skill - verify agents now comply
+**GREEN:**
+- [ ] Name: letters/numbers/hyphens only; YAML frontmatter (name + description, max 1024 chars)
+- [ ] Description: "Use when..." + triggers/symptoms, third person, no workflow summary
+- [ ] Keywords for search, clear overview, address baseline failures from RED
+- [ ] Code inline or linked; one excellent example (not multi-language)
+- [ ] Run WITH skill -- verify compliance
 
-**REFACTOR Phase - Close Loopholes:**
-- [ ] Identify NEW rationalizations from testing
-- [ ] Add explicit counters (if discipline skill)
-- [ ] Build rationalization table from all test iterations
-- [ ] Create red flags list
-- [ ] Re-test until bulletproof
+**REFACTOR:** Find new rationalizations -- add counters -- build rationalization table + red flags -- re-test until bulletproof
 
-**Quality Checks:**
-- [ ] Small flowchart only if decision non-obvious
-- [ ] Quick reference table
-- [ ] Common mistakes section
-- [ ] No narrative storytelling
-- [ ] Supporting files only for tools or heavy reference
+**Quality:** Flowcharts only for non-obvious decisions; quick reference table; common mistakes; no narrative; supporting files only for tools/heavy reference
 
-**Deployment:**
-- [ ] Commit skill to git and push to your fork (if configured)
-- [ ] Consider contributing back via PR (if broadly useful)
+**Deploy:** Commit and push; consider contributing via PR if broadly useful
 
 ## Discovery Workflow
 
@@ -478,12 +421,3 @@ How future Claude finds your skill:
 
 **Optimize for this flow** - put searchable terms early and often.
 
-## The Bottom Line
-
-**Creating skills IS TDD for process documentation.**
-
-Same Iron Law: No skill without failing test first.
-Same cycle: RED (baseline) → GREEN (write skill) → REFACTOR (close loopholes).
-Same benefits: Better quality, fewer surprises, bulletproof results.
-
-If you follow TDD for code, follow it for skills. It's the same discipline applied to documentation.
