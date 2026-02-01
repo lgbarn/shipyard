@@ -11,10 +11,6 @@
 
 set -euo pipefail
 
-# Determine plugin root directory
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
-PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
-
 # Check for jq dependency
 if ! command -v jq >/dev/null 2>&1; then
     echo '{"error":"Missing dependency: jq is required but not found in PATH","exitCode":3}' >&2
