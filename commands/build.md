@@ -87,6 +87,14 @@ For each incomplete plan in this wave, dispatch a **builder agent** (subagent_ty
   - {results of running acceptance criteria checks}
   ```
 
+**Lesson Seeding:** Document all discoveries thoroughly in "Issues Encountered" and "Decisions Made":
+- Unexpected behaviors or edge cases found
+- Workarounds applied and why
+- Assumptions proven wrong during implementation
+- Things that were harder or easier than expected
+
+These entries will be used as pre-populated suggestions when capturing lessons at ship time.
+
 #### 3b. Collect Results
 
 Wait for all builders in the wave to complete. Read their SUMMARY.md files.
