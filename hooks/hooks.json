@@ -1,4 +1,5 @@
 {
+  "schemaVersion": "2.0",
   "hooks": {
     "SessionStart": [
       {
