@@ -122,3 +122,90 @@ EOF
     assert_success
     echo "$output" | jq -e '.hookSpecificOutput' >/dev/null
 }
+
+# --- Lessons loading tests ---
+
+@test "state-read: execution tier displays Recent Lessons when LESSONS.md exists" {
+    setup_shipyard_with_state
+    mkdir -p .shipyard/phases/1
+    cat > .shipyard/LESSONS.md <<'EOF'
+# Shipyard Lessons Learned
+
+## [2026-01-15] Phase 1: Security Hardening
+
+### What Went Well
+- shellcheck caught issues early
+
+### Pitfalls to Avoid
+- grep -oP is not POSIX-compatible
+
+---
+
+## [2026-01-20] Phase 2: Testing Foundation
+
+### What Went Well
+- bats-core integrates well with npm
+
+### Surprises / Discoveries
+- set -e interacts poorly with pipelines
+
+---
+
+## [2026-01-25] Phase 3: Reliability
+
+### What Went Well
+- atomic writes prevent corruption
+
+---
+EOF
+
+    run bash "$STATE_READ"
+    assert_success
+    assert_valid_json
+
+    # Should contain the section header
+    assert_output --partial "Recent Lessons"
+    # Should contain at least one lesson entry
+    assert_output --partial "Phase 1"
+}
+
+@test "state-read: no Recent Lessons section when LESSONS.md does not exist" {
+    setup_shipyard_with_state
+    mkdir -p .shipyard/phases/1
+    # No LESSONS.md file created
+
+    run bash "$STATE_READ"
+    assert_success
+    assert_valid_json
+
+    refute_output --partial "Recent Lessons"
+}
+
+@test "state-read: planning tier does not display lessons even when LESSONS.md exists" {
+    setup_shipyard_dir
+    cat > .shipyard/STATE.md <<'EOF'
+# Shipyard State
+
+**Last Updated:** 2026-01-01T00:00:00Z
+**Current Phase:** 1
+**Status:** planning
+EOF
+
+    mkdir -p .shipyard/phases
+    cat > .shipyard/LESSONS.md <<'EOF'
+# Shipyard Lessons Learned
+
+## [2026-01-15] Phase 1: Security Hardening
+
+### What Went Well
+- shellcheck caught issues early
+
+---
+EOF
+
+    run bash "$STATE_READ"
+    assert_success
+    assert_valid_json
+
+    refute_output --partial "Recent Lessons"
+}
