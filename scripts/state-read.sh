@@ -224,13 +224,12 @@ if [ -d ".shipyard" ] && [ -f ".shipyard/STATE.md" ]; then
         state_context="${state_context}\n### Recommended Action\n${suggestion}\n"
     fi
 
-    state_context="${state_context}\n### Available Commands\n- /shipyard:status - View progress and get routing suggestions\n- /shipyard:plan [phase] - Plan a phase\n- /shipyard:build [phase] - Execute plans\n- /shipyard:resume - Restore context and continue\n- /shipyard:quick [task] - Execute a small task\n- /shipyard:ship - Finish and deliver work\n- /shipyard:init - Re-initialize or add a milestone\n- /shipyard:issues - View and manage deferred issues\n- /shipyard:rollback - Revert to a previous checkpoint\n- /shipyard:recover - Diagnose and recover from interrupted state\n"
 else
-    state_context="## No Shipyard Project Detected\n\nThis project does not have a .shipyard/ directory.\n\n**To get started, the user can run:** /shipyard:init\n\nThis will analyze the codebase (if one exists), gather requirements, and create a structured roadmap.\n\n### Available Commands\n- /shipyard:init - Initialize Shipyard for this project\n- /shipyard:quick [task] - Execute a quick task (will create minimal state)\n"
+    state_context="## No Shipyard Project Detected\n\nThis project does not have a .shipyard/ directory.\n\n**To get started, the user can run:** /shipyard:init\n\nThis will analyze the codebase (if one exists), gather requirements, and create a structured roadmap.\n"
 fi
 
 # Combine all context
-full_context="<EXTREMELY_IMPORTANT>\nYou have Shipyard available -- a structured project execution framework.\n\n**Current State:**\n${state_context}\n\n**Below is the full content of the 'shipyard:using-shipyard' skill -- your guide to using Shipyard. For all other skills, use the 'Skill' tool:**\n\n${using_shipyard_content}\n</EXTREMELY_IMPORTANT>"
+full_context="<EXTREMELY_IMPORTANT>\nYou have Shipyard available -- a structured project execution framework.\n\n**Current State:**\n${state_context}\n\n**Below are available Shipyard skills and commands. Use the Skill tool to load any skill for full details.**\n\n${skill_summary}\n</EXTREMELY_IMPORTANT>"
 
 # Output JSON (jq handles escaping natively)
 jq -n --arg ctx "$full_context" '{
