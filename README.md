@@ -71,7 +71,7 @@ Once installed, navigate to any project directory and run:
 
 ## Skills (Auto-Activating)
 
-Shipyard includes 15 skills that activate automatically based on context:
+Shipyard includes 16 skills that activate automatically based on context:
 
 | Skill | When It Activates |
 |-------|-------------------|
@@ -88,6 +88,7 @@ Shipyard includes 15 skills that activate automatically based on context:
 | `shipyard-executing-plans` | Implementing from a written plan |
 | `git-workflow` | Branch management, commits, delivery |
 | `using-shipyard` | Every session (skill discovery protocol) |
+| `shipyard-testing` | Writing effective, maintainable tests |
 | `shipyard-writing-skills` | Creating new skills |
 | `lessons-learned` | After phase completion, before shipping, reflecting on work |
 
@@ -210,6 +211,7 @@ shipyard/
 │   ├── shipyard-debugging/
 │   ├── shipyard-executing-plans/
 │   ├── shipyard-tdd/
+│   ├── shipyard-testing/
 │   ├── shipyard-verification/
 │   ├── shipyard-writing-plans/
 │   ├── shipyard-writing-skills/
@@ -248,7 +250,7 @@ See `docs/PROTOCOLS.md` for model routing configuration and the full config.json
 
 ## Feature Comparison
 
-| Capability | Shipyard v2.0.0 | GSD v1.10.1 | Superpowers v3.6.2 |
+| Capability | Shipyard v2.1.0 | GSD v1.10.1 | Superpowers v3.6.2 |
 |-----------|:---:|:---:|:---:|
 | **Project Lifecycle** | | | |
 | Init / requirements gathering | ✅ | ✅ | ✅ |
@@ -284,7 +286,7 @@ See `docs/PROTOCOLS.md` for model routing configuration and the full config.json
 | State recovery | ✅ | ✅ (fork) | ❌ |
 | Issue tracking (cross-session) | ✅ | ✅ (todos) | ❌ |
 | **Skills & Extensibility** | | | |
-| Auto-activating skills | ✅ (15 skills) | ❌ | ✅ (15+ skills) |
+| Auto-activating skills | ✅ (16 skills) | ❌ | ✅ (15+ skills) |
 | Deterministic skill triggers | ✅ (4 trigger types) | ❌ | ❌ (description-based) |
 | Systematic debugging | ✅ | ✅ | ✅ (4-phase + escalation) |
 | Verification before completion | ✅ | ✅ | ✅ |
@@ -296,7 +298,7 @@ See `docs/PROTOCOLS.md` for model routing configuration and the full config.json
 | Multi-runtime | ❌ (Claude Code) | ✅ (Claude + OpenCode + Gemini) | ❌ (Claude Code) |
 | **Scale** | | | |
 | Commands | 11 | 20+ | 3 |
-| Skills | 15 | 0 | 15+ |
+| Skills | 16 | 0 | 15+ |
 | Named agents | 9 | implicit | implicit |
 
 ## Acknowledgments
