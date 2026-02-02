@@ -40,8 +40,8 @@ Update `.shipyard/STATE.md`:
 Dispatch a **researcher agent** (subagent_type: "shipyard:researcher") with:
 - The phase description from ROADMAP.md
 - PROJECT.md for overall context
-- Codebase analysis files (if they exist in `.shipyard/codebase/`)
-- Any CONCERNS.md content relevant to this phase
+- Codebase analysis files (read `codebase_docs_path` from `.shipyard/config.json`, default `.shipyard/codebase`, then load files from that directory if they exist)
+- Any CONCERNS.md content relevant to this phase (from the configured codebase docs path)
 
 The researcher agent should:
 - Investigate the existing codebase for relevant code paths

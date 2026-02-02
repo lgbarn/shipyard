@@ -50,7 +50,7 @@ For each incomplete plan in this wave, dispatch a **builder agent** (subagent_ty
 - The full plan content (PLAN-{W}.{P}.md)
 - `.shipyard/STATE.md` for project context
 - `.shipyard/PROJECT.md` for requirements context
-- Codebase conventions from `.shipyard/codebase/CONVENTIONS.md` (if exists)
+- Codebase conventions: read `codebase_docs_path` from `.shipyard/config.json` (default `.shipyard/codebase`), then load `CONVENTIONS.md` from that path (if exists)
 - Results from previous waves (SUMMARY.md files)
 - Working directory: the current working directory path
 - Current branch: the active git branch
@@ -175,7 +175,7 @@ Produce `.shipyard/phases/{N}/VERIFICATION.md` with:
 After verification passes, dispatch an **auditor agent** (subagent_type: "shipyard:auditor") with:
 - Git diff of all files changed during this phase
 - `.shipyard/PROJECT.md` for context
-- `.shipyard/codebase/CONVENTIONS.md` (if exists)
+- Codebase conventions: read `codebase_docs_path` from `.shipyard/config.json` (default `.shipyard/codebase`), then load `CONVENTIONS.md` from that path (if exists)
 - List of dependencies added/changed during the phase
 - Working directory, current branch, and worktree status
 

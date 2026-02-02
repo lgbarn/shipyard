@@ -47,7 +47,7 @@ Follow **Worktree Protocol** (see `docs/PROTOCOLS.md`) -- detect worktree, recor
 Dispatch an **architect agent** (subagent_type: "shipyard:architect") in quick mode with:
 - The task description
 - PROJECT.md context (if it exists)
-- Codebase conventions (if `.shipyard/codebase/CONVENTIONS.md` exists)
+- Codebase conventions: read `codebase_docs_path` from `.shipyard/config.json` (default `.shipyard/codebase`), then load `CONVENTIONS.md` from that path (if exists)
 - Working directory: the current working directory path
 - Current branch: the active git branch
 - Worktree status: whether this is a worktree or main working tree

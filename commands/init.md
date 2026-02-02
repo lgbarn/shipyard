@@ -27,30 +27,45 @@ Determine whether this is a **brownfield** (existing source code) or **greenfiel
 - If brownfield, proceed to Step 3.
 - If greenfield, skip to Step 4.
 
+## Step 2.5: Codebase Docs Location (Brownfield Only)
+
+If this is a brownfield project (determined in Step 2), ask the user where to store codebase analysis documentation using AskUserQuestion:
+
+> **Where should codebase analysis documentation be stored?**
+>
+> 1. **`.shipyard/codebase/`** -- Private, gitignored with the rest of `.shipyard/`
+> 2. **`docs/codebase/`** -- Committed to git, visible to collaborators in the repository
+
+Store the chosen path for use in Step 3 and Step 5:
+- Option 1: `codebase_docs_path = ".shipyard/codebase"`
+- Option 2: `codebase_docs_path = "docs/codebase"`
+
+Create the target directory if it does not exist (`mkdir -p`).
+
 ## Step 3: Codebase Mapping (Brownfield Only)
 
-Dispatch **4 parallel mapper agents** using the Task tool to analyze the existing codebase. Each agent writes its findings to `.shipyard/codebase/`.
+Dispatch **4 parallel mapper agents** using the Task tool to analyze the existing codebase. Each agent writes its findings to the configured codebase docs path (from Step 2.5).
 
-Use `subagent_type: "shipyard:mapper"` for each.
+Use `subagent_type: "shipyard:mapper"` for each. Pass the target output path to each agent.
 
 **Agent 1 -- Technology Focus:**
 - Analyze all package manifests, dependency files, and configuration
-- Produce `.shipyard/codebase/STACK.md` (languages, frameworks, versions, build tools)
-- Produce `.shipyard/codebase/INTEGRATIONS.md` (external services, APIs, databases)
+- Produce `{codebase_docs_path}/STACK.md` (languages, frameworks, versions, build tools)
+- Produce `{codebase_docs_path}/INTEGRATIONS.md` (external services, APIs, databases)
 
 **Agent 2 -- Architecture Focus:**
 - Analyze project structure, entry points, module boundaries
-- Produce `.shipyard/codebase/ARCHITECTURE.md` (patterns, layers, data flow)
-- Produce `.shipyard/codebase/STRUCTURE.md` (directory layout with purpose annotations)
+- Produce `{codebase_docs_path}/ARCHITECTURE.md` (patterns, layers, data flow)
+- Produce `{codebase_docs_path}/STRUCTURE.md` (directory layout with purpose annotations)
 
 **Agent 3 -- Quality Focus:**
 - Analyze code style, linting configs, test infrastructure
-- Produce `.shipyard/codebase/CONVENTIONS.md` (naming, formatting, patterns in use)
-- Produce `.shipyard/codebase/TESTING.md` (test framework, coverage, test patterns)
+- Produce `{codebase_docs_path}/CONVENTIONS.md` (naming, formatting, patterns in use)
+- Produce `{codebase_docs_path}/TESTING.md` (test framework, coverage, test patterns)
 
 **Agent 4 -- Concerns Focus:**
 - Identify technical debt, security concerns, performance issues
-- Produce `.shipyard/codebase/CONCERNS.md` (prioritized list with evidence)
+- Produce `{codebase_docs_path}/CONCERNS.md` (prioritized list with evidence)
 
 Wait for all 4 agents to complete before proceeding.
 
@@ -99,7 +114,7 @@ Also ask about model and context preferences:
 
 Store preferences in `.shipyard/config.json`. Follow **Model Routing Protocol** (see `docs/PROTOCOLS.md`) for the full `config.json` structure, model routing keys, and defaults.
 
-Non-routing fields: `interaction_mode`, `git_strategy`, `review_depth`, `security_audit`, `simplification_review`, `iac_validation`, `documentation_generation`, `context_tier`, `created_at`, `version`.
+Non-routing fields: `interaction_mode`, `git_strategy`, `review_depth`, `security_audit`, `simplification_review`, `iac_validation`, `documentation_generation`, `codebase_docs_path`, `context_tier`, `created_at`, `version`.
 
 **Defaults:** `security_audit: true`, `simplification_review: true`, `iac_validation: "auto"`, `documentation_generation: true`, `context_tier: "auto"`.
 
@@ -144,9 +159,12 @@ Create `.shipyard/STATE.md`:
 
 ## Step 9: Commit
 
-Create a git commit with the entire `.shipyard/` directory:
-```
-shipyard: initialize project
+Create a git commit with the `.shipyard/` directory and, if `codebase_docs_path` is `docs/codebase`, also stage `docs/codebase/`:
+```bash
+git add .shipyard/
+# If codebase docs are in docs/codebase/, also stage them (they are git-committed, not gitignored)
+git add docs/codebase/  # only if codebase_docs_path = "docs/codebase"
+git commit -m "shipyard: initialize project"
 ```
 
 ## Step 10: Route Forward
