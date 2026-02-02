@@ -44,6 +44,7 @@ If `model_routing` is not present in config, use agent defaults.
   "simplification_review": true,
   "iac_validation": "auto|true|false",
   "documentation_generation": true,
+  "codebase_docs_path": ".shipyard/codebase|docs/codebase",
   "model_routing": {
     "validation": "haiku",
     "building": "sonnet",
@@ -59,7 +60,7 @@ If `model_routing` is not present in config, use agent defaults.
 }
 ```
 
-**Defaults:** `security_audit: true`, `simplification_review: true`, `iac_validation: "auto"`, `documentation_generation: true`. Model routing defaults to the table above. Context tier defaults to `"auto"`.
+**Defaults:** `security_audit: true`, `simplification_review: true`, `iac_validation: "auto"`, `documentation_generation: true`, `codebase_docs_path: ".shipyard/codebase"`. Model routing defaults to the table above. Context tier defaults to `"auto"`.
 
 ## Checkpoint Protocol
 

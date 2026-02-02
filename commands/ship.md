@@ -44,7 +44,7 @@ Detect and run the project's test suite:
 Dispatch an **auditor agent** (subagent_type: "shipyard:auditor") with:
 - Git diff of ALL changes in the shipping scope (phase, milestone, or branch)
 - `.shipyard/PROJECT.md` for context
-- `.shipyard/codebase/CONVENTIONS.md` (if exists)
+- Codebase conventions: read `codebase_docs_path` from `.shipyard/config.json` (default `.shipyard/codebase`), then load `CONVENTIONS.md` from that path (if exists)
 - All dependency files (package.json, requirements.txt, Cargo.toml, go.mod, etc.)
 
 This is a comprehensive audit covering:

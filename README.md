@@ -67,6 +67,7 @@ Once installed, navigate to any project directory and run:
 | `/shipyard:issues [--add \| --resolve \| --list]` | View and manage deferred issues across sessions |
 | `/shipyard:rollback [checkpoint] [--list]` | Revert to a previous checkpoint |
 | `/shipyard:recover` | Diagnose and recover from interrupted state |
+| `/shipyard:move-docs` | Move codebase analysis docs between `.shipyard/codebase/` and `docs/codebase/` |
 | `/shipyard:worktree [create\|list\|switch\|remove] [name]` | Manage git worktrees for isolated feature development |
 
 ## Skills (Auto-Activating)
@@ -149,7 +150,7 @@ Shipyard uses a dual state system:
 ├── ROADMAP.md          # Phase structure with success criteria
 ├── STATE.md            # Current position, session memory
 ├── config.json         # Workflow preferences
-├── codebase/           # Brownfield analysis (optional)
+├── codebase/           # Brownfield analysis (default; or docs/codebase/ if configured)
 ├── phases/
 │   └── 01-{name}/
 │       ├── RESEARCH.md
@@ -188,6 +189,7 @@ shipyard/
 │   ├── quick.md           # /shipyard:quick
 │   ├── ship.md            # /shipyard:ship
 │   ├── issues.md          # /shipyard:issues
+│   ├── move-docs.md       # /shipyard:move-docs
 │   ├── rollback.md        # /shipyard:rollback
 │   ├── recover.md         # /shipyard:recover
 │   └── worktree.md        # /shipyard:worktree
@@ -243,6 +245,7 @@ When you run `/shipyard:init`, Shipyard creates a `.shipyard/config.json` in you
 | `simplification_review` | `true`, `false` | `true` | Check for duplication and complexity |
 | `iac_validation` | `auto`, `true`, `false` | `auto` | Validate Terraform/Ansible/Docker changes |
 | `documentation_generation` | `true`, `false` | `true` | Generate docs after each phase |
+| `codebase_docs_path` | `.shipyard/codebase`, `docs/codebase` | `.shipyard/codebase` | Where brownfield analysis docs are stored |
 | `model_routing` | object | see `docs/PROTOCOLS.md` | Model selection per task type |
 | `context_tier` | `auto`, `minimal`, `full` | `auto` | Context loading at session start |
 
@@ -250,7 +253,7 @@ See `docs/PROTOCOLS.md` for model routing configuration and the full config.json
 
 ## Feature Comparison
 
-| Capability | Shipyard v2.1.0 | GSD v1.10.1 | Superpowers v3.6.2 |
+| Capability | Shipyard v2.2.0 | GSD v1.10.1 | Superpowers v3.6.2 |
 |-----------|:---:|:---:|:---:|
 | **Project Lifecycle** | | | |
 | Init / requirements gathering | ✅ | ✅ | ✅ |
@@ -297,7 +300,7 @@ See `docs/PROTOCOLS.md` for model routing configuration and the full config.json
 | Install via CLI | ✅ (`lgbarn/shipyard`) | ✅ (`npx get-shit-done-cc`) | ✅ (marketplace) |
 | Multi-runtime | ❌ (Claude Code) | ✅ (Claude + OpenCode + Gemini) | ❌ (Claude Code) |
 | **Scale** | | | |
-| Commands | 11 | 20+ | 3 |
+| Commands | 12 | 20+ | 3 |
 | Skills | 16 | 0 | 15+ |
 | Named agents | 9 | implicit | implicit |
 

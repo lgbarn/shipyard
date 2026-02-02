@@ -40,7 +40,7 @@ read -r -d '' skill_summary <<'SKILLEOF' || true
 
 **Triggers:** File patterns (*.tf, Dockerfile, *.test.*), task markers (tdd="true"), state conditions (claiming done, errors), and content patterns (security, refactor) activate skills automatically. If even 1% chance a skill applies, invoke it.
 
-**Commands:** /init, /plan, /build, /status, /resume, /quick, /ship, /issues, /rollback, /recover, /worktree
+**Commands:** /init, /plan, /build, /status, /resume, /quick, /ship, /issues, /rollback, /recover, /move-docs, /worktree
 SKILLEOF
 
 # Build state context
@@ -181,16 +181,24 @@ if [ -d ".shipyard" ] && [ -f ".shipyard/STATE.md" ]; then
     fi
 
     # Brownfield/full tier: also load codebase analysis
-    if [ "$context_tier" = "full" ] && [ -d ".shipyard/codebase" ]; then
-        codebase_context=""
-        for doc in STACK.md ARCHITECTURE.md CONVENTIONS.md CONCERNS.md; do
-            if [ -f ".shipyard/codebase/$doc" ]; then
-                doc_snippet=$(head -40 ".shipyard/codebase/$doc" 2>/dev/null || echo "")
-                codebase_context="${codebase_context}\n#### ${doc}\n${doc_snippet}\n"
+    if [ "$context_tier" = "full" ]; then
+        # Read codebase docs path from config (default: .shipyard/codebase)
+        codebase_docs_path=".shipyard/codebase"
+        if [ -f ".shipyard/config.json" ]; then
+            codebase_docs_path=$(jq -r '.codebase_docs_path // ".shipyard/codebase"' ".shipyard/config.json" 2>/dev/null || echo ".shipyard/codebase")
+        fi
+
+        if [ -d "$codebase_docs_path" ]; then
+            codebase_context=""
+            for doc in STACK.md ARCHITECTURE.md CONVENTIONS.md CONCERNS.md; do
+                if [ -f "${codebase_docs_path}/$doc" ]; then
+                    doc_snippet=$(head -40 "${codebase_docs_path}/$doc" 2>/dev/null || echo "")
+                    codebase_context="${codebase_context}\n#### ${doc}\n${doc_snippet}\n"
+                fi
+            done
+            if [ -n "$codebase_context" ]; then
+                state_context="${state_context}\n### Codebase Analysis\n${codebase_context}\n"
             fi
-        done
-        if [ -n "$codebase_context" ]; then
-            state_context="${state_context}\n### Codebase Analysis\n${codebase_context}\n"
         fi
     fi
 
