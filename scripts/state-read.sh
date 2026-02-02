@@ -35,6 +35,7 @@ read -r -d '' skill_summary <<'SKILLEOF' || true
 - `shipyard:shipyard-executing-plans` - Executing plans with agents
 - `shipyard:git-workflow` - Branch, commit, worktree, and delivery
 - `shipyard:documentation` - Docs after implementation
+- `shipyard:shipyard-testing` - Writing effective, maintainable tests
 - `shipyard:shipyard-writing-skills` - Creating and testing new skills
 
 **Triggers:** File patterns (*.tf, Dockerfile, *.test.*), task markers (tdd="true"), state conditions (claiming done, errors), and content patterns (security, refactor) activate skills automatically. If even 1% chance a skill applies, invoke it.
