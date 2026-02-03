@@ -18,12 +18,7 @@ Check if `.shipyard/` directory exists.
 
 ## Step 2: Diagnose State
 
-Read the following files and check for inconsistencies:
-
-1. **`.shipyard/STATE.md`** — What does the system think is happening?
-2. **`.shipyard/ROADMAP.md`** — What phases exist and what are their statuses?
-3. **`.shipyard/config.json`** — Are preferences intact?
-4. **Phase directories** — What artifacts exist?
+Follow **State Loading Protocol** (see `docs/PROTOCOLS.md`) -- read STATE.md, ROADMAP.md, config.json, and recent artifacts. Then check for inconsistencies:
 
 ### Check for these inconsistencies:
 

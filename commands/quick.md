@@ -38,19 +38,16 @@ Look in `.shipyard/quick/` for existing quick task files. Generate the next sequ
 - First task: `001`
 - Format: zero-padded 3-digit number
 
-## Step 3a: Detect Working Directory
+## Step 3a: Detect Working Directory & Model Routing
 
 Follow **Worktree Protocol** (see `docs/PROTOCOLS.md`) -- detect worktree, record working directory and branch.
+Follow **Model Routing Protocol** (see `docs/PROTOCOLS.md`) -- read `model_routing` from config for agent model selection.
 
 ## Step 4: Quick Plan
 
-Dispatch an **architect agent** (subagent_type: "shipyard:architect") in quick mode with:
+Dispatch an **architect agent** (subagent_type: "shipyard:architect") in quick mode with context per **Agent Context Protocol** (see `docs/PROTOCOLS.md`):
 - The task description
-- PROJECT.md context (if it exists)
-- Codebase conventions: read `codebase_docs_path` from `.shipyard/config.json` (default `.shipyard/codebase`), then load `CONVENTIONS.md` from that path (if exists)
-- Working directory: the current working directory path
-- Current branch: the active git branch
-- Worktree status: whether this is a worktree or main working tree
+- Codebase docs per **Codebase Docs Protocol**
 
 The architect produces a simplified plan in `.shipyard/quick/QUICK-{NNN}.md`:
 ```markdown
@@ -93,8 +90,7 @@ The builder should:
 
 ## Step 6: Update State
 
-Update `.shipyard/STATE.md`:
-- Add to history: `[{timestamp}] Quick task {NNN}: {title} ({status})`
+Follow **State Update Protocol** (see `docs/PROTOCOLS.md`) -- append to history: `[{timestamp}] Quick task {NNN}: {title} ({status})`
 
 ## Step 7: Commit
 

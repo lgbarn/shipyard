@@ -1,7 +1,7 @@
 ---
 description: "Plan a phase by decomposing it into executable tasks"
 disable-model-invocation: true
-argument-hint: "[phase-number] [--skip-research]"
+argument-hint: "[phase-number] [--skip-research] [--no-discuss]"
 ---
 
 # /shipyard:plan - Phase Planning
@@ -12,6 +12,7 @@ You are executing the Shipyard planning workflow. Follow these steps precisely.
 
 - If a phase number is provided, use it.
 - If `--skip-research` is provided, skip the research step.
+- If `--no-discuss` is provided, skip the discussion capture step.
 - If `--gaps` is provided, this is a gap-filling re-plan (see note at bottom).
 - If no phase number is provided, read `.shipyard/STATE.md` to determine the current phase.
 
@@ -26,22 +27,36 @@ You are executing the Shipyard planning workflow. Follow these steps precisely.
 
 Follow **Model Routing Protocol** (see `docs/PROTOCOLS.md`) -- read `model_routing` from config for researcher, architect, and verifier model selection.
 
+## Step 1b: Discussion Capture (unless --no-discuss or --gaps)
+
+Follow **Discussion Capture Protocol** (see `docs/PROTOCOLS.md`).
+
+If `.shipyard/phases/{N}/CONTEXT-{N}.md` already exists, ask the user if they want to redo it or keep the existing decisions.
+
+1. Read the target phase description from ROADMAP.md
+2. Present the phase scope to the user
+3. Identify gray areas: ambiguous requirements, design choices, or approach decisions
+4. Ask targeted questions one at a time using AskUserQuestion (multiple choice preferred)
+5. Write user decisions to `.shipyard/phases/{N}/CONTEXT-{N}.md`
+
+This ensures downstream agents (researcher, architect, builder) work from shared understanding rather than making assumptions.
+
 ## Step 2: Mark Phase In Progress
 
-Update the native task for this phase to `in_progress` using TaskUpdate.
+Follow **Native Task Scaffolding Protocol** (see `docs/PROTOCOLS.md`) -- update the native task for this phase to `in_progress`.
 
-Update `.shipyard/STATE.md`:
+Follow **State Update Protocol** (see `docs/PROTOCOLS.md`) -- set:
 - **Current Phase:** {N}
 - **Current Position:** Planning phase {N}
 - **Status:** planning
 
 ## Step 3: Research (unless --skip-research)
 
-Dispatch a **researcher agent** (subagent_type: "shipyard:researcher") with:
+Follow **Agent Context Protocol** (see `docs/PROTOCOLS.md`) for standard context. Dispatch a **researcher agent** (subagent_type: "shipyard:researcher") with:
 - The phase description from ROADMAP.md
-- PROJECT.md for overall context
-- Codebase analysis files (read `codebase_docs_path` from `.shipyard/config.json`, default `.shipyard/codebase`, then load files from that directory if they exist)
-- Any CONCERNS.md content relevant to this phase (from the configured codebase docs path)
+- Essential and conditional context per **Agent Context Protocol**
+- Codebase docs per **Codebase Docs Protocol** (see `docs/PROTOCOLS.md`)
+- `.shipyard/phases/{N}/CONTEXT-{N}.md` (if exists) -- user decisions to focus research
 
 The researcher agent should:
 - Investigate the existing codebase for relevant code paths
@@ -52,11 +67,10 @@ The researcher agent should:
 
 ## Step 4: Architecture & Plan Generation
 
-Dispatch an **architect agent** (subagent_type: "shipyard:architect") with:
+Dispatch an **architect agent** (subagent_type: "shipyard:architect") with context per **Agent Context Protocol**:
 - Phase description from ROADMAP.md
-- Research findings (if available)
-- PROJECT.md
-- Codebase analysis
+- Research findings (RESEARCH.md, if available)
+- `.shipyard/phases/{N}/CONTEXT-{N}.md` (if exists) -- user decisions to guide planning
 - Previous phase summaries (if any exist in `.shipyard/phases/{N-1}/`)
 
 If `.shipyard/ISSUES.md` exists, also pass it to the architect agent. Open issues relevant to this phase should be considered during planning — they may warrant inclusion as tasks or inform design decisions.
@@ -115,14 +129,11 @@ If issues are found, feed them back to the architect agent for one revision cycl
 
 ## Step 6: Task Scaffolding
 
-For each plan, create a native task using TaskCreate:
-- Title: "Phase {N} / Plan {W}.{P}: {plan_title}"
-- Description: Plan summary
-- Status: not_started
+Follow **Native Task Scaffolding Protocol** (see `docs/PROTOCOLS.md`) -- create a native task for each plan.
 
 ## Step 7: Update State
 
-Update `.shipyard/STATE.md`:
+Follow **State Update Protocol** (see `docs/PROTOCOLS.md`) -- set:
 - **Current Position:** Phase {N} planned, ready for build
 - **Status:** planned
 

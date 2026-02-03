@@ -8,13 +8,16 @@ argument-hint: "[--phase | --milestone | --branch]"
 
 You are executing the Shipyard shipping workflow. Follow these steps precisely.
 
-## Step 0: Parse Arguments
+## Step 0: Parse Arguments & Load Context
 
 Determine the shipping scope:
 - `--phase` -- Ship only the current phase (partial delivery)
 - `--milestone` -- Ship the entire milestone (default if all phases complete)
 - `--branch` -- Ship whatever is on the current branch
 - No argument -- auto-detect the appropriate scope
+
+Follow **Worktree Protocol** (see `docs/PROTOCOLS.md`) -- detect worktree, record working directory and branch.
+Follow **Model Routing Protocol** (see `docs/PROTOCOLS.md`) -- read `model_routing` from config for agent model selection.
 
 ## Step 1: Pre-Ship Verification
 
@@ -41,10 +44,9 @@ Detect and run the project's test suite:
 
 **Note:** This audit runs regardless of `config.json` settings or `--light` usage during build. Shipping is the final gate — security is always checked here. If a passing `AUDIT-{N}.md` already exists from the build phase and no changes were made since, skip re-auditing and verify the existing report has no unresolved critical findings.
 
-Dispatch an **auditor agent** (subagent_type: "shipyard:auditor") with:
+Dispatch an **auditor agent** (subagent_type: "shipyard:auditor") with context per **Agent Context Protocol** (see `docs/PROTOCOLS.md`):
 - Git diff of ALL changes in the shipping scope (phase, milestone, or branch)
-- `.shipyard/PROJECT.md` for context
-- Codebase conventions: read `codebase_docs_path` from `.shipyard/config.json` (default `.shipyard/codebase`), then load `CONVENTIONS.md` from that path (if exists)
+- Codebase docs per **Codebase Docs Protocol**
 - All dependency files (package.json, requirements.txt, Cargo.toml, go.mod, etc.)
 
 This is a comprehensive audit covering:
@@ -256,21 +258,13 @@ If the milestone is complete (not just a phase):
 
 ## Step 7: Update Tasks & State
 
-Mark all relevant native tasks as `completed` using TaskUpdate.
+Follow **Native Task Scaffolding Protocol** (see `docs/PROTOCOLS.md`) -- mark all relevant native tasks as `completed`.
 
-Update `.shipyard/STATE.md`:
-```markdown
-# Shipyard State
-
-**Last Updated:** {timestamp}
-**Current Phase:** {N/A or next milestone}
-**Current Position:** Milestone shipped
-**Status:** shipped
-
-## History
-{previous history}
-- [{timestamp}] Milestone shipped via {method}
-```
+Follow **State Update Protocol** (see `docs/PROTOCOLS.md`) -- set:
+- **Current Phase:** N/A (or next milestone)
+- **Current Position:** Milestone shipped
+- **Status:** shipped
+- **History:** append `[{timestamp}] Milestone shipped via {method}`
 
 ## Step 8: Commit Archive
 

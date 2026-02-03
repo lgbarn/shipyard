@@ -65,13 +65,7 @@ Synthesize this into a brief context restoration message:
 
 ## Step 5: Recreate Native Tasks
 
-Check if native tasks exist (via TaskList). If they are missing or stale:
-
-For each phase in ROADMAP.md, create a native task using TaskCreate:
-- Set status based on phase completion (completed, in_progress, not_started)
-
-For each plan in the current phase, create a native task:
-- Set status based on whether SUMMARY.md exists and its status
+Follow **Native Task Scaffolding Protocol** (see `docs/PROTOCOLS.md`) -- check if native tasks exist (via TaskList), and recreate from ROADMAP.md and artifact existence if missing or stale.
 
 ## Step 6: Display Status Overview
 
