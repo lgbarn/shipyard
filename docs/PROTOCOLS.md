@@ -111,6 +111,127 @@ When non-blocking issues are found (Important or Suggestion severity):
 
 This ensures findings are tracked rather than lost between sessions.
 
+## Codebase Docs Protocol
+
+Resolve the configured codebase documentation path and load relevant files.
+
+1. Read `codebase_docs_path` from `.shipyard/config.json`
+   - If not specified, use default: `.shipyard/codebase`
+2. Load files from that path (skip any that don't exist):
+   - `CONVENTIONS.md` -- Code style and project conventions
+   - `STACK.md` -- Technology stack information
+   - `ARCHITECTURE.md` -- Project architecture
+   - `CONCERNS.md` -- Known technical concerns
+   - `TESTING.md` -- Test framework and patterns
+   - `INTEGRATIONS.md` -- External services and APIs
+   - `STRUCTURE.md` -- Directory layout with annotations
+3. Pass loaded content to agents as context
+
+The path is either `.shipyard/codebase/` (private, gitignored) or `docs/codebase/` (committed to git), based on user choice at init time.
+
+## Agent Context Protocol
+
+Standard context to pass when dispatching any agent via the Task tool.
+
+**Essential context (pass to all agents):**
+- `.shipyard/PROJECT.md` -- Project overview and requirements
+- `.shipyard/config.json` -- Workflow preferences
+- Working directory path (`$(pwd)`)
+- Current git branch (`$(git branch --show-current)`)
+- Worktree status (via **Worktree Protocol**)
+
+**Conditional context (pass if exists and relevant):**
+- `.shipyard/STATE.md` -- Current state and history
+- Codebase docs (via **Codebase Docs Protocol**)
+- Previous phase/plan results (SUMMARY.md, RESEARCH.md files)
+- `.shipyard/ISSUES.md` -- Open issues
+- `.shipyard/phases/{N}/CONTEXT-{N}.md` -- User decisions from discussion capture
+
+**Agent-specific additions:**
+- **Builder:** CONVENTIONS.md, results from previous waves, CONTEXT file
+- **Reviewer:** Git diff of changed files, the plan being reviewed, CONTEXT file
+- **Auditor:** All changed files, dependency manifests (package.json, Cargo.toml, etc.)
+- **Documenter:** Existing docs in `docs/`, all SUMMARY.md files
+
+## State Update Protocol
+
+Update `.shipyard/STATE.md` to reflect current progress after each workflow step.
+
+**Required fields to update:**
+- `**Last Updated:** {current timestamp}`
+- `**Current Phase:** {phase number, or "N/A" if between milestones}`
+- `**Current Position:** {human-readable description}`
+- `**Status:** {status value}`
+
+**Append to History section:**
+- `- [{timestamp}] {What action was just completed}`
+
+**Canonical status values:**
+- `ready` -- Initialized, ready to plan
+- `planning` -- Currently planning a phase
+- `planned` -- Phase planned, ready to build
+- `building` -- Currently executing a phase
+- `shipped` -- Delivery complete
+
+Always commit STATE.md updates along with related artifacts.
+
+## Native Task Scaffolding Protocol
+
+Map Shipyard workflow stages to native tasks (TaskCreate/TaskUpdate) for progress tracking.
+
+**At planning time (per phase):**
+- Create one task per plan: "Phase {N} / Plan {W}.{P}: {plan_title}"
+- Set status: `not_started`
+- Set `blockedBy` for plans that depend on earlier waves
+
+**At build time (per plan):**
+- When builder completes: check SUMMARY.md status
+  - `complete` → mark task as `completed`
+  - `partial` or `failed` → keep task as `in_progress`
+- When review has `CRITICAL_ISSUES` after retries → mark task as `blocked`
+
+**At resume time:**
+- Call TaskList to check for existing tasks
+- If missing or stale, recreate from ROADMAP.md and artifact existence
+- Set status based on whether SUMMARY.md exists and its content
+
+**At init time (per phase):**
+- Create one task per phase: "Phase {N}: {phase_title}"
+- All start as `not_started` except Phase 1 (next)
+
+## Discussion Capture Protocol
+
+Capture user decisions and preferences for a phase before planning begins.
+
+1. Read the target phase description from ROADMAP.md
+2. Present the phase scope to the user
+3. Identify gray areas: ambiguous requirements, design choices, approach decisions
+4. Ask targeted questions one at a time (multiple choice preferred via AskUserQuestion)
+5. Write decisions to `.shipyard/phases/{N}/CONTEXT-{N}.md`
+
+**CONTEXT file format:**
+```markdown
+# Phase {N} Context: {phase title}
+
+**Captured:** {timestamp}
+
+## Decisions
+
+### {Topic 1}
+**Question:** {What was asked}
+**Decision:** {What the user chose}
+**Rationale:** {Why, if provided}
+
+### {Topic 2}
+...
+```
+
+**Skip conditions:**
+- User passes `--no-discuss`
+- CONTEXT-{N}.md already exists (ask user if they want to redo it)
+
+All downstream agents (researcher, architect, builder, reviewer) should receive CONTEXT-{N}.md as input context when it exists.
+
 ## Commit Convention
 
 Use conventional commits for all Shipyard work.

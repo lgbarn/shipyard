@@ -23,7 +23,7 @@ Follow **State Loading Protocol** (see `docs/PROTOCOLS.md`) -- read STATE.md, RO
 
 ## Step 3: Display Native Task Progress
 
-Call TaskList to show the current state of all Shipyard-created native tasks.
+Follow **Native Task Scaffolding Protocol** (see `docs/PROTOCOLS.md`) -- call TaskList to show the current state of all Shipyard-created native tasks.
 
 ## Step 4: Display Dashboard
 

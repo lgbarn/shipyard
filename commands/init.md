@@ -136,26 +136,15 @@ Present the roadmap to the user for approval. Allow up to **3 revision cycles** 
 
 ## Step 7: Task Scaffolding
 
-For each phase in the approved roadmap, create a native task using TaskCreate:
-- Title: "Phase {N}: {phase_title}"
-- Description: Phase description from ROADMAP.md
-- Status: not_started (except Phase 1 which should be next)
+Follow **Native Task Scaffolding Protocol** (see `docs/PROTOCOLS.md`) -- create a native task for each phase in the approved roadmap.
 
 ## Step 8: Initialize State
 
-Create `.shipyard/STATE.md`:
-```markdown
-# Shipyard State
-
-**Last Updated:** <timestamp>
-**Current Phase:** 1
-**Current Position:** Initialization complete, ready for planning
-**Status:** ready
-
-## History
-
-- [<timestamp>] Project initialized
-```
+Follow **State Update Protocol** (see `docs/PROTOCOLS.md`) -- create `.shipyard/STATE.md` with:
+- **Current Phase:** 1
+- **Current Position:** Initialization complete, ready for planning
+- **Status:** ready
+- **History:** `[{timestamp}] Project initialized`
 
 ## Step 9: Commit
 

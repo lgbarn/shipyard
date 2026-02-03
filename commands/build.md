@@ -29,7 +29,7 @@ You are executing the Shipyard build workflow. Follow these steps precisely.
 
 ## Step 2: Update State
 
-Update `.shipyard/STATE.md`:
+Follow **State Update Protocol** (see `docs/PROTOCOLS.md`) -- set:
 - **Current Phase:** {N}
 - **Current Position:** Building phase {N}
 - **Status:** building
@@ -46,15 +46,11 @@ Group plans by wave number. Execute waves sequentially, plans within a wave in p
 
 #### 3a. Launch Builders (parallel within wave)
 
-For each incomplete plan in this wave, dispatch a **builder agent** (subagent_type: "shipyard:builder") with:
+For each incomplete plan in this wave, dispatch a **builder agent** (subagent_type: "shipyard:builder") with context per **Agent Context Protocol** (see `docs/PROTOCOLS.md`):
 - The full plan content (PLAN-{W}.{P}.md)
-- `.shipyard/STATE.md` for project context
-- `.shipyard/PROJECT.md` for requirements context
-- Codebase conventions: read `codebase_docs_path` from `.shipyard/config.json` (default `.shipyard/codebase`), then load `CONVENTIONS.md` from that path (if exists)
+- Codebase docs per **Codebase Docs Protocol**
+- `.shipyard/phases/{N}/CONTEXT-{N}.md` (if exists) -- user decisions to guide implementation
 - Results from previous waves (SUMMARY.md files)
-- Working directory: the current working directory path
-- Current branch: the active git branch
-- Worktree status: whether this is a worktree or main working tree
 
 **Builder agent instructions:**
 - Execute each task in the plan sequentially
@@ -101,7 +97,7 @@ Wait for all builders in the wave to complete. Read their SUMMARY.md files.
 
 #### 3c. Review Gate
 
-For each completed plan, dispatch a **reviewer agent** (subagent_type: "shipyard:reviewer") with the same working directory context (path, branch, worktree status), performing a **two-stage review**:
+For each completed plan, dispatch a **reviewer agent** (subagent_type: "shipyard:reviewer") with the same working directory context (path, branch, worktree status) and `.shipyard/phases/{N}/CONTEXT-{N}.md` (if exists) for user intent, performing a **two-stage review**:
 
 **Stage 1 -- Correctness Review:**
 - Read the plan and its SUMMARY.md
@@ -141,8 +137,7 @@ If any review has `CRITICAL_ISSUES`:
 
 #### 3e. Update Tasks
 
-For each plan that passed review, update its native task to `completed` using TaskUpdate.
-For plans needing attention, update to `blocked` with a note.
+Follow **Native Task Scaffolding Protocol** (see `docs/PROTOCOLS.md`) -- update task status based on build and review results.
 
 ### After all waves complete:
 
@@ -172,12 +167,10 @@ Produce `.shipyard/phases/{N}/VERIFICATION.md` with:
 
 **Skip this step if:** `--light` flag was passed, OR `config.json` has `"security_audit": false`.
 
-After verification passes, dispatch an **auditor agent** (subagent_type: "shipyard:auditor") with:
+After verification passes, dispatch an **auditor agent** (subagent_type: "shipyard:auditor") with context per **Agent Context Protocol** (see `docs/PROTOCOLS.md`):
 - Git diff of all files changed during this phase
-- `.shipyard/PROJECT.md` for context
-- Codebase conventions: read `codebase_docs_path` from `.shipyard/config.json` (default `.shipyard/codebase`), then load `CONVENTIONS.md` from that path (if exists)
+- Codebase docs per **Codebase Docs Protocol**
 - List of dependencies added/changed during the phase
-- Working directory, current branch, and worktree status
 
 The auditor performs comprehensive security analysis:
 - Code security (OWASP Top 10)
@@ -247,7 +240,7 @@ Produce `.shipyard/phases/{N}/results/DOCUMENTATION-{N}.md`.
 Update `.shipyard/ROADMAP.md`:
 - Mark the phase status (complete, complete_with_gaps, needs_attention)
 
-Update `.shipyard/STATE.md`:
+Follow **State Update Protocol** (see `docs/PROTOCOLS.md`) -- set:
 - **Current Position:** Phase {N} build complete
 - **Status:** {result}
 
