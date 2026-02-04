@@ -1,6 +1,6 @@
 {
   "name": "@lgbarn/shipyard",
-  "version": "2.5.2",
+  "version": "2.5.3",
   "description": "Ship software systematically: project lifecycle, TDD, parallel agents, code review, security auditing, infrastructure validation, and cross-session memory — from idea to production",
   "keywords": [
     "claude-code-plugin",
@@ -68,20 +68,20 @@
     "@xenova/transformers": "^2.17.2",
     "better-sqlite3": "^12.4.1",
     "sqlite-vec": "^0.1.7-alpha.2",
-    "zod": "^3.25.76"
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",
-    "@types/node": "^24.7.0",
+    "@types/node": "^25.2.0",
     "bats": "^1.13.0",
     "bats-assert": "^2.2.4",
     "bats-support": "^0.3.0",
     "husky": "^9.1.7",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3",
-    "vitest": "^3.2.4"
+    "vitest": "^4.0.18"
   },
   "optionalDependencies": {
-    "@anthropic-ai/sdk": "^0.52.0"
+    "@anthropic-ai/sdk": "^0.72.1"
   }
 }
