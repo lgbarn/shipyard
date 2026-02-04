@@ -7,28 +7,24 @@ load test_helper
 
 # Test AWS key detection patterns
 @test "scrubber: detects AWS access keys" {
-    local text="My AWS key is AKIAIOSFODNN7EXAMPLE"
-    run bash -c "echo '$text' | grep -oE 'AKIA[0-9A-Z]{16}'"
+    run bash -c "echo 'My AWS key is AKIAIOSFODNN7EXAMPLE' | grep -oE 'AKIA[0-9A-Z]{16}'"
     assert_success
     assert_output "AKIAIOSFODNN7EXAMPLE"
 }
 
 @test "scrubber: does not match short AKIA strings" {
-    local text="AKIAIOSFOD"  # Only 10 chars after AKIA
-    run bash -c "echo '$text' | grep -oE 'AKIA[0-9A-Z]{16}'"
+    run bash -c "echo 'AKIAIOSFOD' | grep -oE 'AKIA[0-9A-Z]{16}'"
     assert_failure
 }
 
-# Test GitHub token patterns
+# Test GitHub token patterns (36 chars after prefix)
 @test "scrubber: detects GitHub personal access tokens" {
-    local text="Token: ghp_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefgh"
-    run bash -c "echo '$text' | grep -oE 'ghp_[a-zA-Z0-9]{36}'"
+    run bash -c "echo 'Token: ghp_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghij' | grep -oE 'ghp_[a-zA-Z0-9]{36}'"
     assert_success
 }
 
 @test "scrubber: detects GitHub OAuth tokens" {
-    local text="OAuth: gho_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefgh"
-    run bash -c "echo '$text' | grep -oE 'gho_[a-zA-Z0-9]{36}'"
+    run bash -c "echo 'OAuth: gho_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghij' | grep -oE 'gho_[a-zA-Z0-9]{36}'"
     assert_success
 }
 
@@ -67,8 +63,7 @@ load test_helper
 
 # Test JWT patterns
 @test "scrubber: detects JWT tokens" {
-    local text="Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U"
-    run bash -c "echo '$text' | grep -oE 'eyJ[a-zA-Z0-9_-]+\\.eyJ[a-zA-Z0-9_-]+\\.[a-zA-Z0-9_-]+'"
+    run bash -c "echo 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U' | grep -oE 'eyJ[a-zA-Z0-9_-]+\\.eyJ[a-zA-Z0-9_-]+\\.[a-zA-Z0-9_-]+'"
     assert_success
 }
 
@@ -88,20 +83,17 @@ load test_helper
 
 # Test NPM token patterns
 @test "scrubber: detects NPM tokens" {
-    local text="npm_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghij"
-    run bash -c "echo '$text' | grep -oE 'npm_[a-zA-Z0-9]{36}'"
+    run bash -c "echo 'npm_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghij' | grep -oE 'npm_[a-zA-Z0-9]{36}'"
     assert_success
 }
 
 # Test that normal text passes through
 @test "scrubber: allows normal text without secrets" {
-    local text="This is normal text about AWS services and GitHub repositories"
-    run bash -c "echo '$text' | grep -oE 'AKIA[0-9A-Z]{16}'"
+    run bash -c "echo 'This is normal text about AWS services' | grep -oE 'AKIA[0-9A-Z]{16}'"
     assert_failure
 }
 
 @test "scrubber: allows code that mentions secrets conceptually" {
-    local text="Set the API_KEY environment variable to your key"
-    run bash -c "echo '$text' | grep -oE 'AKIA[0-9A-Z]{16}'"
+    run bash -c "echo 'Set the API_KEY environment variable' | grep -oE 'AKIA[0-9A-Z]{16}'"
     assert_failure
 }
