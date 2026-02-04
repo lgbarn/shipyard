@@ -13,6 +13,8 @@ SHIPYARD_CONFIG_DIR="${HOME}/.config/shipyard"
 SHIPYARD_CONFIG="${SHIPYARD_CONFIG_DIR}/config.json"
 SHIPYARD_LOG="${SHIPYARD_CONFIG_DIR}/memory.log"
 SHIPYARD_LOCK="${SHIPYARD_CONFIG_DIR}/memory.lock"
+SHIPYARD_LAST_INDEX="${SHIPYARD_CONFIG_DIR}/memory.last-index"
+SHIPYARD_INDEX_COOLDOWN=300  # 5 minutes between indexing runs
 
 # Ensure log directory exists
 mkdir -p "${SHIPYARD_CONFIG_DIR}"
@@ -104,10 +106,24 @@ main() {
         exit 0
     fi
 
+    # Throttle: skip if last index was less than SHIPYARD_INDEX_COOLDOWN seconds ago
+    if [[ -f "${SHIPYARD_LAST_INDEX}" ]]; then
+        local last_run
+        last_run=$(cat "${SHIPYARD_LAST_INDEX}" 2>/dev/null || echo "0")
+        local now
+        now=$(date +%s)
+        if (( now - last_run < SHIPYARD_INDEX_COOLDOWN )); then
+            exit 0
+        fi
+    fi
+
     # Try to acquire lock
     if ! acquire_lock; then
         exit 0
     fi
+
+    # Record this run's timestamp
+    date +%s > "${SHIPYARD_LAST_INDEX}"
 
     # Run indexing
     run_index
