@@ -8,6 +8,10 @@ import * as path from 'path';
 import { DATABASE_PATH, ensureConfigDir } from './config';
 import type { Exchange, MemoryStats, SearchResult } from './types';
 
+// Import sqlite-vec for loading the extension
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const sqliteVec = require('sqlite-vec');
+
 let db: Database.Database | null = null;
 
 /**
@@ -23,31 +27,11 @@ export function initDatabase(): Database.Database {
   // Enable WAL mode for better concurrency
   db.pragma('journal_mode = WAL');
 
-  // Load sqlite-vec extension
+  // Load sqlite-vec extension using the package's helper
   try {
-    db.loadExtension('vec0');
+    sqliteVec.load(db);
   } catch {
-    // Try alternative paths for sqlite-vec
-    const possiblePaths = [
-      'sqlite-vec',
-      path.join(__dirname, '../../node_modules/sqlite-vec/dist/vec0'),
-      path.join(__dirname, '../../../node_modules/sqlite-vec/dist/vec0'),
-    ];
-
-    let loaded = false;
-    for (const extPath of possiblePaths) {
-      try {
-        db.loadExtension(extPath);
-        loaded = true;
-        break;
-      } catch {
-        continue;
-      }
-    }
-
-    if (!loaded) {
-      console.warn('Warning: sqlite-vec extension not loaded. Vector search will be unavailable.');
-    }
+    console.warn('Warning: sqlite-vec extension not loaded. Vector search will be unavailable.');
   }
 
   // Create schema
@@ -240,46 +224,65 @@ export function vectorSearch(
   const database = getDatabase();
 
   try {
-    // Build filter conditions
-    const conditions: string[] = [];
-    const params: (number | string | Buffer)[] = [Buffer.from(embedding.buffer), limit * 2]; // Fetch extra for filtering
-
-    if (filters?.afterTimestamp) {
-      conditions.push('e.timestamp >= ?');
-      params.push(filters.afterTimestamp);
-    }
-    if (filters?.beforeTimestamp) {
-      conditions.push('e.timestamp < ?');
-      params.push(filters.beforeTimestamp);
-    }
-    if (filters?.projectPath) {
-      conditions.push('e.project_path = ?');
-      params.push(filters.projectPath);
-    }
-
-    const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
-
-    const query = `
-      SELECT
-        e.*,
-        vec.distance as score
-      FROM vec_exchanges vec
-      JOIN exchanges e ON vec.id = e.id
-      ${whereClause}
-      ORDER BY vec.distance
+    // First, perform KNN search on vec_exchanges to get candidate IDs
+    const knnQuery = `
+      SELECT id, distance
+      FROM vec_exchanges
+      WHERE embedding MATCH ?
+      ORDER BY distance
       LIMIT ?
     `;
 
-    // Note: This is a simplified query. Real sqlite-vec requires proper vector distance functions
-    // The actual query would use: vec_distance_L2(embedding, ?) or similar
-    const rows = database.prepare(query).all(...params) as Array<Record<string, unknown>>;
+    const knnResults = database.prepare(knnQuery).all(
+      Buffer.from(embedding.buffer),
+      limit * 3 // Fetch extra to allow for filtering
+    ) as Array<{ id: string; distance: number }>;
 
-    return rows.slice(0, limit).map((row) => ({
-      exchange: rowToExchange(row),
-      score: (row.score as number) || 0,
-    }));
-  } catch {
+    if (knnResults.length === 0) {
+      return [];
+    }
+
+    // Get the full exchange data for matched IDs
+    const ids = knnResults.map(r => r.id);
+    const distanceMap = new Map(knnResults.map(r => [r.id, r.distance]));
+
+    // Build filter conditions for the exchanges query
+    const conditions: string[] = [`id IN (${ids.map(() => '?').join(',')})`];
+    const params: (string | number)[] = [...ids];
+
+    if (filters?.afterTimestamp) {
+      conditions.push('timestamp >= ?');
+      params.push(filters.afterTimestamp);
+    }
+    if (filters?.beforeTimestamp) {
+      conditions.push('timestamp < ?');
+      params.push(filters.beforeTimestamp);
+    }
+    if (filters?.projectPath) {
+      conditions.push('project_path = ?');
+      params.push(filters.projectPath);
+    }
+
+    const exchangeQuery = `
+      SELECT * FROM exchanges
+      WHERE ${conditions.join(' AND ')}
+    `;
+
+    const rows = database.prepare(exchangeQuery).all(...params) as Array<Record<string, unknown>>;
+
+    // Convert to results with scores, sorted by distance
+    const results = rows
+      .map((row) => ({
+        exchange: rowToExchange(row),
+        score: 1 - (distanceMap.get(row.id as string) || 0), // Convert distance to similarity score
+      }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, limit);
+
+    return results;
+  } catch (error) {
     // Fall back to text search if vector search fails
+    console.warn('Vector search failed:', error);
     return [];
   }
 }
