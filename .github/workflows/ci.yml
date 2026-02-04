@@ -62,6 +62,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Check version sync across files
+        run: bash scripts/check-versions.sh
+
       - name: Get version from PR branch
         id: pr_version
         run: |
