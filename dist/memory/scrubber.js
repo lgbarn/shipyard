@@ -1,0 +1,123 @@
+"use strict";
+/**
+ * Shipyard Memory - Secret Scrubber
+ *
+ * Detects and redacts sensitive information before indexing.
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.scrubSecrets = scrubSecrets;
+exports.containsSecrets = containsSecrets;
+exports.analyzeSecrets = analyzeSecrets;
+// Secret patterns to detect and redact
+const SECRET_PATTERNS = [
+    {
+        name: 'AWS Access Key',
+        pattern: /AKIA[0-9A-Z]{16}/g,
+    },
+    {
+        name: 'GitHub Token',
+        pattern: /ghp_[a-zA-Z0-9]{36}/g,
+    },
+    {
+        name: 'GitHub OAuth Token',
+        pattern: /gho_[a-zA-Z0-9]{36}/g,
+    },
+    {
+        name: 'GitHub App Token',
+        pattern: /ghu_[a-zA-Z0-9]{36}/g,
+    },
+    {
+        name: 'GitHub Refresh Token',
+        pattern: /ghr_[a-zA-Z0-9]{36}/g,
+    },
+    {
+        name: 'Generic API Key',
+        pattern: /[aA][pP][iI][-_]?[kK][eE][yY]\s*[=:]\s*['"]?[a-zA-Z0-9_-]{20,}['"]?/g,
+    },
+    {
+        name: 'Private Key Header',
+        pattern: /-----BEGIN[A-Z\s]+PRIVATE KEY-----[\s\S]*?-----END[A-Z\s]+PRIVATE KEY-----/g,
+    },
+    {
+        name: 'Password Assignment',
+        pattern: /password\s*[=:]\s*['"]?[^\s'"]{8,}['"]?/gi,
+    },
+    {
+        name: 'Bearer Token',
+        pattern: /[Bb]earer\s+[a-zA-Z0-9_-]{20,}/g,
+    },
+    {
+        name: 'Slack Token',
+        pattern: /xox[baprs]-[0-9]{10,13}-[0-9]{10,13}-[a-zA-Z0-9]{24}/g,
+    },
+    {
+        name: 'Stripe Key',
+        pattern: /sk_live_[a-zA-Z0-9]{24,}/g,
+    },
+    {
+        name: 'Stripe Test Key',
+        pattern: /sk_test_[a-zA-Z0-9]{24,}/g,
+    },
+    {
+        name: 'NPM Token',
+        pattern: /npm_[a-zA-Z0-9]{36}/g,
+    },
+    {
+        name: 'Database URL',
+        pattern: /(postgres|mysql|mongodb|redis):\/\/[^:]+:[^@]+@[^\s]+/gi,
+    },
+    {
+        name: 'JWT Token',
+        pattern: /eyJ[a-zA-Z0-9_-]*\.eyJ[a-zA-Z0-9_-]*\.[a-zA-Z0-9_-]*/g,
+    },
+];
+/**
+ * Scrub sensitive information from text
+ */
+function scrubSecrets(text) {
+    let scrubbed = text;
+    let redactionCount = 0;
+    const redactedTypes = [];
+    for (const { name, pattern } of SECRET_PATTERNS) {
+        const matches = scrubbed.match(pattern);
+        if (matches) {
+            redactionCount += matches.length;
+            if (!redactedTypes.includes(name)) {
+                redactedTypes.push(name);
+            }
+            scrubbed = scrubbed.replace(pattern, '[REDACTED]');
+        }
+    }
+    return {
+        text: scrubbed,
+        redactionCount,
+        redactedTypes,
+    };
+}
+/**
+ * Check if text contains any secrets (without modifying)
+ */
+function containsSecrets(text) {
+    for (const { pattern } of SECRET_PATTERNS) {
+        // Reset lastIndex for global patterns
+        pattern.lastIndex = 0;
+        if (pattern.test(text)) {
+            return true;
+        }
+    }
+    return false;
+}
+/**
+ * Get a summary of what would be redacted
+ */
+function analyzeSecrets(text) {
+    const results = [];
+    for (const { name, pattern } of SECRET_PATTERNS) {
+        const matches = text.match(pattern);
+        if (matches) {
+            results.push({ type: name, count: matches.length });
+        }
+    }
+    return results;
+}
+//# sourceMappingURL=scrubber.js.map

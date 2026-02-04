@@ -168,7 +168,7 @@ export async function runFullIndex(
       }
 
       // Index the file
-      const indexed = await indexFile(file.path, decodedProjectPath, (current, total) => {
+      const indexed = await indexFile(file.path, decodedProjectPath, (_current, total) => {
         progress.totalExchanges = total;
         if (onProgress) onProgress(progress);
       });

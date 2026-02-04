@@ -77,7 +77,6 @@ export async function parseConversationFile(filePath: string): Promise<ParsedExc
 
   let lineNumber = 0;
   let currentUserMessage: string | null = null;
-  let currentUserLine = 0;
   let currentToolNames: string[] = [];
   let currentTimestamp = Date.now();
   let currentSessionId = '';
@@ -127,7 +126,6 @@ export async function parseConversationFile(filePath: string): Promise<ParsedExc
       if (role === 'user') {
         // Start of a new exchange
         currentUserMessage = extractTextContent(content);
-        currentUserLine = lineNumber;
         currentToolNames = [];
       } else if (role === 'assistant' && currentUserMessage !== null) {
         // Complete the exchange
