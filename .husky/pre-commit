@@ -1,0 +1,2 @@
+# Pre-commit hook: catch TypeScript errors and test failures before committing
+npm run build && npm run test:memory && npm test
