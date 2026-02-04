@@ -25,7 +25,8 @@ describe('scrubSecrets', () => {
 
   describe('GitHub tokens', () => {
     it('should redact GitHub personal access tokens', () => {
-      const text = 'Token: ghp_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefgh';
+      // GitHub tokens are 36 chars after the prefix
+      const text = 'Token: ghp_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghij';
       const result = scrubSecrets(text);
       expect(result.text).toBe('Token: [REDACTED]');
       expect(result.redactionCount).toBe(1);
@@ -33,14 +34,14 @@ describe('scrubSecrets', () => {
     });
 
     it('should redact GitHub OAuth tokens', () => {
-      const text = 'OAuth: gho_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefgh';
+      const text = 'OAuth: gho_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghij';
       const result = scrubSecrets(text);
       expect(result.text).toBe('OAuth: [REDACTED]');
       expect(result.redactedTypes).toContain('GitHub OAuth Token');
     });
 
     it('should redact GitHub App tokens', () => {
-      const text = 'App: ghu_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefgh';
+      const text = 'App: ghu_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghij';
       const result = scrubSecrets(text);
       expect(result.text).toBe('App: [REDACTED]');
       expect(result.redactedTypes).toContain('GitHub App Token');
@@ -144,7 +145,7 @@ MIIEvQIBADANBgkqhkiG9w0BAQEFAASC...
     it('should redact multiple secrets in the same text', () => {
       const text = `
         AWS_KEY=AKIAIOSFODNN7EXAMPLE
-        GITHUB_TOKEN=ghp_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefgh
+        GITHUB_TOKEN=ghp_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghij
         password = "secret123"
       `;
       const result = scrubSecrets(text);
@@ -176,7 +177,7 @@ MIIEvQIBADANBgkqhkiG9w0BAQEFAASC...
 describe('containsSecrets', () => {
   it('should return true when text contains secrets', () => {
     expect(containsSecrets('key: AKIAIOSFODNN7EXAMPLE')).toBe(true);
-    expect(containsSecrets('token: ghp_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefgh')).toBe(true);
+    expect(containsSecrets('token: ghp_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghij')).toBe(true);
   });
 
   it('should return false when text is clean', () => {
@@ -190,7 +191,7 @@ describe('analyzeSecrets', () => {
     const text = `
       AKIAIOSFODNN7EXAMPLE
       AKIAIOSFODNN7EXAMPL2
-      ghp_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefgh
+      ghp_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghij
     `;
     const analysis = analyzeSecrets(text);
 
