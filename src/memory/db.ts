@@ -156,6 +156,23 @@ export function insertExchange(exchange: Exchange): void {
 }
 
 /**
+ * Upsert a session record
+ */
+export function upsertSession(sessionId: string, projectPath: string | null, timestamp: number): void {
+  const database = getDatabase();
+  database
+    .prepare(
+      `
+    INSERT INTO sessions (id, project_path, started_at, exchange_count)
+    VALUES (?, ?, ?, 1)
+    ON CONFLICT(id) DO UPDATE SET
+      exchange_count = exchange_count + 1
+  `
+    )
+    .run(sessionId, projectPath, timestamp);
+}
+
+/**
  * Delete exchanges by session ID
  */
 export function deleteExchangesBySession(sessionId: string): number {
@@ -270,11 +287,15 @@ export function vectorSearch(
 
     const rows = database.prepare(exchangeQuery).all(...params) as Array<Record<string, unknown>>;
 
-    // Convert to results with scores, sorted by distance
+    // Convert L2 distance to cosine similarity for normalized vectors:
+    // cos_similarity = 1 - (L2_distance² / 2)
+    const distanceToScore = (d: number) => 1 - (d * d) / 2;
+
+    // Convert to results with scores, sorted by similarity
     const results = rows
       .map((row) => ({
         exchange: rowToExchange(row),
-        score: 1 - (distanceMap.get(row.id as string) || 0), // Convert distance to similarity score
+        score: distanceToScore(distanceMap.get(row.id as string) || 0),
       }))
       .sort((a, b) => b.score - a.score)
       .slice(0, limit);

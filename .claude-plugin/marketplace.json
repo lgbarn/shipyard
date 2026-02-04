@@ -9,7 +9,7 @@
   "plugins": [
     {
       "name": "shipyard",
-      "version": "2.5.0",
+      "version": "2.5.1",
       "description": "Ship software systematically: project lifecycle, TDD, parallel agents, code review, security auditing, and infrastructure validation",
       "source": "./",
       "category": "development"

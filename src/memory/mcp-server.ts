@@ -305,10 +305,28 @@ export async function startServer(): Promise<void> {
   await server.connect(transport);
 }
 
-// Run server if this is the main module
+// Run server or indexer if this is the main module
 if (require.main === module) {
-  startServer().catch((error) => {
-    console.error('Failed to start MCP server:', error);
-    process.exit(1);
-  });
+  const args = process.argv.slice(2);
+
+  if (args.includes('--index')) {
+    // Run incremental indexing and exit
+    initDatabase();
+    runIncrementalIndex((progress) => {
+      console.log(`Indexed ${progress.indexedExchanges} exchanges from ${progress.processedFiles}/${progress.totalFiles} files`);
+    })
+      .then((progress) => {
+        console.log(`Done. ${progress.indexedExchanges} new exchanges indexed, ${progress.errors} errors.`);
+        process.exit(0);
+      })
+      .catch((error) => {
+        console.error('Indexing failed:', error);
+        process.exit(1);
+      });
+  } else {
+    startServer().catch((error) => {
+      console.error('Failed to start MCP server:', error);
+      process.exit(1);
+    });
+  }
 }

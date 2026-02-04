@@ -8,6 +8,7 @@ import * as crypto from 'crypto';
 import { CLAUDE_PROJECTS_DIR, isProjectExcluded, getStorageCapBytes } from './config';
 import {
   insertExchange,
+  upsertSession,
   getImportState,
   setImportState,
   pruneToCapacity,
@@ -58,6 +59,8 @@ function isFileIndexed(filePath: string, modifiedAt: number): boolean {
 /**
  * Index a single exchange
  */
+const MIN_CONTENT_LENGTH = 50;
+
 async function indexExchange(
   parsed: ParsedExchange,
   sourceFile: string,
@@ -65,6 +68,11 @@ async function indexExchange(
   lineEnd: number,
   projectPath: string
 ): Promise<void> {
+  // Skip noisy/empty exchanges
+  if (parsed.userMessage.length + parsed.assistantMessage.length < MIN_CONTENT_LENGTH) {
+    return;
+  }
+
   // Scrub secrets before indexing
   const scrubbedUser = scrubSecrets(parsed.userMessage);
   const scrubbedAssistant = scrubSecrets(parsed.assistantMessage);
@@ -93,6 +101,7 @@ async function indexExchange(
   };
 
   insertExchange(exchange);
+  upsertSession(exchange.sessionId, exchange.projectPath, exchange.timestamp);
 }
 
 /**
