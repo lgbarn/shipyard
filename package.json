@@ -47,7 +47,8 @@
     "test:memory": "vitest run src/memory",
     "memory:server": "tsx src/memory/mcp-server.ts",
     "memory:index": "tsx src/memory/mcp-server.ts --index",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "prepare": "husky"
   },
   "files": [
     ".claude-plugin/",
@@ -75,6 +76,7 @@
     "bats": "^1.13.0",
     "bats-assert": "^2.2.4",
     "bats-support": "^0.3.0",
+    "husky": "^9.1.7",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3",
     "vitest": "^3.2.4"
