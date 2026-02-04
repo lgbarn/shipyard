@@ -1,0 +1,109 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        node-version: [18, 20, 22]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run BATS tests
+        run: npm test
+
+      - name: Run TypeScript tests
+        run: npm run test:memory
+
+      - name: Build TypeScript
+        run: npm run build
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install shellcheck
+        run: sudo apt-get install -y shellcheck
+
+      - name: Shellcheck scripts
+        run: shellcheck scripts/*.sh hooks/*.sh
+
+  version-check:
+    name: Version Check
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.base_ref == 'main'
+
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get version from PR branch
+        id: pr_version
+        run: |
+          PR_VERSION=$(jq -r '.version' package.json)
+          echo "version=$PR_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Get version from main branch
+        id: main_version
+        run: |
+          git fetch origin main
+          MAIN_VERSION=$(git show origin/main:package.json | jq -r '.version')
+          echo "version=$MAIN_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Compare versions
+        run: |
+          PR_VERSION="${{ steps.pr_version.outputs.version }}"
+          MAIN_VERSION="${{ steps.main_version.outputs.version }}"
+
+          echo "PR version: $PR_VERSION"
+          echo "Main version: $MAIN_VERSION"
+
+          if [ "$PR_VERSION" = "$MAIN_VERSION" ]; then
+            echo "::error::Version in package.json ($PR_VERSION) has not been updated. Please bump the version before merging to main."
+            exit 1
+          fi
+
+          # Verify PR version is greater than main version using sort -V
+          HIGHER=$(printf '%s\n%s' "$MAIN_VERSION" "$PR_VERSION" | sort -V | tail -n1)
+          if [ "$HIGHER" != "$PR_VERSION" ]; then
+            echo "::error::PR version ($PR_VERSION) must be greater than main version ($MAIN_VERSION)"
+            exit 1
+          fi
+
+          echo "✓ Version updated: $MAIN_VERSION → $PR_VERSION"
+
+      - name: Check CHANGELOG updated
+        run: |
+          PR_VERSION="${{ steps.pr_version.outputs.version }}"
+
+          if ! grep -q "## \[$PR_VERSION\]" CHANGELOG.md; then
+            echo "::error::CHANGELOG.md does not contain an entry for version $PR_VERSION"
+            exit 1
+          fi
+
+          echo "✓ CHANGELOG.md contains entry for $PR_VERSION"
