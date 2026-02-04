@@ -11,6 +11,22 @@
           }
         ]
       }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/memory-indexer.sh",
+            "timeout": 5000,
+            "background": true
+          }
+        ],
+        "condition": {
+          "every_n_calls": 100
+        }
+      }
     ]
   }
 }

@@ -112,6 +112,29 @@ Also ask about model and context preferences:
    - **Minimal:** Always load minimal context
    - **Full:** Always load everything
 
+Also ask about memory (cross-session recall):
+10. **Memory:** Present this question using AskUserQuestion:
+
+> **Enable Memory?**
+>
+> This lets Claude recall past conversations across all your projects.
+> When you're stuck on a problem, Claude can search previous sessions
+> to find how you solved similar issues before.
+>
+> Conversations are stored locally on your machine in `~/.config/shipyard/memory.db`.
+> You can disable this anytime with `/memory:disable`.
+>
+> 1. **Yes, enable Memory** (Recommended) -- Index conversations for cross-session recall
+> 2. **No, skip Memory** -- Conversations are not indexed
+
+If user selects "Yes":
+- Update `~/.config/shipyard/config.json` with `"memory": true`
+- Trigger a one-time background import of existing conversation history from `~/.claude/projects/`
+- Display: "Memory enabled. Background import of existing conversations started."
+
+If user selects "No":
+- Note that memory can be enabled later with `/memory:enable`
+
 Store preferences in `.shipyard/config.json`. Follow **Model Routing Protocol** (see `docs/PROTOCOLS.md`) for the full `config.json` structure, model routing keys, and defaults.
 
 Non-routing fields: `interaction_mode`, `git_strategy`, `review_depth`, `security_audit`, `simplification_review`, `iac_validation`, `documentation_generation`, `codebase_docs_path`, `context_tier`, `created_at`, `version`.
