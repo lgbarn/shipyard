@@ -8,17 +8,19 @@ argument-hint: "[phase-number] [--plan N] [--light]"
 
 You are executing the Shipyard build workflow. Follow these steps precisely.
 
-## Step 0: Parse Arguments
+<prerequisites>
+
+## Step 1: Parse Arguments
 
 - If a phase number is provided, use it.
 - If `--plan N` is provided, execute only that specific plan (format: W.P).
-- If `--light` is provided, skip post-phase auditor and simplifier (Steps 4a and 4b). Use this during early iteration — the full pipeline runs at ship time regardless.
+- If `--light` is provided, skip post-phase auditor and simplifier (Steps 5a and 5b). Use this during early iteration — the full pipeline runs at ship time regardless.
 - If no phase number, read `.shipyard/STATE.md` for the current phase.
 - Read `.shipyard/config.json` for gate preferences (`security_audit`, `simplification_review`, `iac_validation`, `documentation_generation`).
-- Follow **Worktree Protocol** (see `docs/PROTOCOLS.md`) -- detect worktree, record working directory and branch.
-- Follow **Model Routing Protocol** (see `docs/PROTOCOLS.md`) -- read `model_routing` from config for agent model selection.
+- Follow **Worktree Protocol** (detect if running in a git worktree; if so, use worktree root for paths and record the branch name; see `docs/PROTOCOLS.md`) -- detect worktree, record working directory and branch.
+- Follow **Model Routing Protocol** (select the correct model for each agent role using `model_routing` from config; see `docs/PROTOCOLS.md`) -- read `model_routing` from config for agent model selection.
 
-## Step 1: Validate State
+## Step 2: Validate State
 
 1. Verify `.shipyard/` exists. If not, tell the user to run `/shipyard:init` first.
 2. Read `.shipyard/ROADMAP.md` and locate the target phase.
@@ -27,28 +29,32 @@ You are executing the Shipyard build workflow. Follow these steps precisely.
 5. Check which plans have already been completed (have SUMMARY.md files in `.shipyard/phases/{N}/results/`).
 6. If all plans are complete, inform the user and suggest `/shipyard:ship` or next phase.
 
-## Step 2: Update State
+</prerequisites>
 
-Follow **State Update Protocol** (see `docs/PROTOCOLS.md`) -- set:
+<execution>
+
+## Step 3: Update State
+
+Follow **State Update Protocol** (update `.shipyard/STATE.md` with current phase, position, status, and append to history; see `docs/PROTOCOLS.md`) -- set:
 - **Current Phase:** {N}
 - **Current Position:** Building phase {N}
 - **Status:** building
 
-## Step 2a: Create Checkpoint
+## Step 3a: Create Checkpoint
 
-Follow **Checkpoint Protocol** (see `docs/PROTOCOLS.md`) -- create `pre-build-phase-{N}` checkpoint.
+Follow **Checkpoint Protocol** (create a named git tag for rollback safety at key pipeline stages; see `docs/PROTOCOLS.md`) -- create `pre-build-phase-{N}` checkpoint.
 
-## Step 3: Execute by Wave
+## Step 4: Execute by Wave
 
 Group plans by wave number. Execute waves sequentially, plans within a wave in parallel.
 
 ### For each wave (sequential):
 
-#### 3a. Launch Builders (parallel within wave)
+#### Step 4a: Launch Builders (parallel within wave)
 
-For each incomplete plan in this wave, dispatch a **builder agent** (subagent_type: "shipyard:builder") with context per **Agent Context Protocol** (see `docs/PROTOCOLS.md`):
+For each incomplete plan in this wave, dispatch a **builder agent** (subagent_type: "shipyard:builder") with context per **Agent Context Protocol** (pass PROJECT.md, config.json, working directory, branch, and worktree status to all agents; see `docs/PROTOCOLS.md`):
 - The full plan content (PLAN-{W}.{P}.md)
-- Codebase docs per **Codebase Docs Protocol**
+- Codebase docs per **Codebase Docs Protocol** (resolve configured codebase docs path and load CONVENTIONS.md, STACK.md, ARCHITECTURE.md, etc.; see `docs/PROTOCOLS.md`)
 - `.shipyard/phases/{N}/CONTEXT-{N}.md` (if exists) -- user decisions to guide implementation
 - Results from previous waves (SUMMARY.md files)
 
@@ -91,11 +97,11 @@ For each incomplete plan in this wave, dispatch a **builder agent** (subagent_ty
 
 These entries will be used as pre-populated suggestions when capturing lessons at ship time.
 
-#### 3b. Collect Results
+#### Step 4b: Collect Results
 
 Wait for all builders in the wave to complete. Read their SUMMARY.md files.
 
-#### 3c. Review Gate
+#### Step 4c: Review Gate
 
 For each completed plan, dispatch a **reviewer agent** (subagent_type: "shipyard:reviewer") with the same working directory context (path, branch, worktree status) and `.shipyard/phases/{N}/CONTEXT-{N}.md` (if exists) for user intent, performing a **two-stage review**:
 
@@ -127,21 +133,21 @@ The reviewer produces `.shipyard/phases/{N}/results/REVIEW-{W}.{P}.md`:
 - {things done well}
 ```
 
-#### 3d. Handle Critical Issues
+#### Step 4d: Handle Critical Issues
 
 If any review has `CRITICAL_ISSUES`:
-1. Dispatch the builder agent again with the review feedback (max **2 retries**)
+1. Dispatch the builder agent again with the review feedback (max **2 retries** -- each retry is one additional builder dispatch that attempts to fix critical issues; if the second retry still fails, the plan is marked `needs_attention`)
 2. The builder should fix only the critical issues
 3. Re-run the review after fixes
 4. If still failing after 2 retries, mark the plan as `needs_attention` and continue
 
-#### 3e. Update Tasks
+#### Step 4e: Update Tasks
 
-Follow **Native Task Scaffolding Protocol** (see `docs/PROTOCOLS.md`) -- update task status based on build and review results.
+Follow **Native Task Scaffolding Protocol** (create/update native tasks for progress tracking via TaskCreate/TaskUpdate; see `docs/PROTOCOLS.md`) -- update task status based on build and review results.
 
 ### After all waves complete:
 
-## Step 4: Phase Verification
+## Step 5: Phase Verification
 
 Dispatch a **verifier agent** (subagent_type: "shipyard:verifier") with:
 - All SUMMARY.md and REVIEW.md files for this phase
@@ -163,13 +169,13 @@ Produce `.shipyard/phases/{N}/VERIFICATION.md` with:
 - Infrastructure validation results (if applicable)
 - Recommendations
 
-## Step 4a: Security Audit
+## Step 5a: Security Audit
 
 **Skip this step if:** `--light` flag was passed, OR `config.json` has `"security_audit": false`.
 
-After verification passes, dispatch an **auditor agent** (subagent_type: "shipyard:auditor") with context per **Agent Context Protocol** (see `docs/PROTOCOLS.md`):
+After verification passes, dispatch an **auditor agent** (subagent_type: "shipyard:auditor") with context per **Agent Context Protocol** (pass PROJECT.md, config.json, working directory, branch, and worktree status to all agents; see `docs/PROTOCOLS.md`):
 - Git diff of all files changed during this phase
-- Codebase docs per **Codebase Docs Protocol**
+- Codebase docs per **Codebase Docs Protocol** (resolve configured codebase docs path and load CONVENTIONS.md, STACK.md, ARCHITECTURE.md, etc.; see `docs/PROTOCOLS.md`)
 - List of dependencies added/changed during the phase
 
 The auditor performs comprehensive security analysis:
@@ -187,7 +193,7 @@ Produce `.shipyard/phases/{N}/results/AUDIT-{N}.md`.
 2. The user must decide: fix now (dispatch builder with audit feedback) or acknowledge and proceed
 3. Critical findings will also block `/shipyard:ship` unless resolved
 
-## Step 4b: Simplification Review
+## Step 5b: Simplification Review
 
 **Skip this step if:** `--light` flag was passed, OR `config.json` has `"simplification_review": false`.
 
@@ -211,7 +217,7 @@ Produce `.shipyard/phases/{N}/results/SIMPLIFICATION-{N}.md`.
 2. **Defer to later** — Note findings for a future cleanup phase
 3. **Dismiss** — Acknowledge and proceed without changes
 
-## Step 4c: Documentation Generation
+## Step 5c: Documentation Generation
 
 **Skip this step if:** `--light` flag was passed, OR `config.json` has `"documentation_generation": false`.
 
@@ -235,29 +241,33 @@ Produce `.shipyard/phases/{N}/results/DOCUMENTATION-{N}.md`.
 2. **Defer to ship time** — Note findings for comprehensive documentation at ship time
 3. **Dismiss** — Acknowledge and proceed without documentation changes
 
-## Step 5: Update Roadmap & State
+## Step 6: Update Roadmap & State
 
 Update `.shipyard/ROADMAP.md`:
 - Mark the phase status (complete, complete_with_gaps, needs_attention)
 
-Follow **State Update Protocol** (see `docs/PROTOCOLS.md`) -- set:
+Follow **State Update Protocol** (update `.shipyard/STATE.md` with current phase, position, status, and append to history; see `docs/PROTOCOLS.md`) -- set:
 - **Current Position:** Phase {N} build complete
 - **Status:** {result}
 
-## Step 6: Commit Artifacts
+</execution>
+
+<output>
+
+## Step 7: Commit Artifacts
 
 Create a git commit with build artifacts:
 ```
 shipyard: complete phase {N} build
 ```
 
-## Step 6a: Create Checkpoint
+## Step 7a: Create Checkpoint
 
-Follow **Checkpoint Protocol** (see `docs/PROTOCOLS.md`) -- create `post-build-phase-{N}` checkpoint.
+Follow **Checkpoint Protocol** (create a named git tag for rollback safety at key pipeline stages; see `docs/PROTOCOLS.md`) -- create `post-build-phase-{N}` checkpoint.
 
-## Step 7: Route Forward
+## Step 8: Route Forward
 
-Based on the verification result:
+Display the appropriate next step based on the verification result:
 
 - **Gaps found:**
   > "Phase {N} is mostly complete but has gaps. Run `/shipyard:plan {N} --gaps` to create plans for the remaining work."
@@ -273,3 +283,5 @@ Based on the verification result:
 
 Also check `.shipyard/ISSUES.md` for open issues. If open issues exist, append:
 > "Note: {count} open issue(s) tracked. Run `/shipyard:issues` to review."
+
+</output>

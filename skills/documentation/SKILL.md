@@ -3,13 +3,11 @@ name: documentation
 description: Use when generating documentation, updating README files, writing API docs, creating architecture documentation, or when documentation is incomplete or outdated
 ---
 
-<!-- TOKEN BUDGET: 160 lines / ~480 tokens -->
+<!-- TOKEN BUDGET: 175 lines / ~525 tokens -->
 
 # Documentation Generation
 
-Generate accurate, useful documentation that serves its audience. API docs for developers, guides for users, architecture docs for maintainers.
-
-**The documenter agent references this skill for systematic documentation generation.**
+<activation>
 
 ## When to Use
 
@@ -18,6 +16,15 @@ Generate accurate, useful documentation that serves its audience. API docs for d
 - When adding complex algorithms or business logic
 - Before shipping a phase or milestone
 - When documentation is flagged as incomplete
+- When conversation mentions: document, README, API docs, changelog
+
+</activation>
+
+Generate accurate, useful documentation that serves its audience. API docs for developers, guides for users, architecture docs for maintainers.
+
+**The documenter agent references this skill for systematic documentation generation.**
+
+<instructions>
 
 ## Documentation Types
 
@@ -31,16 +38,7 @@ Document non-obvious code for developers reading the implementation.
 - Workarounds and edge cases
 - Performance considerations
 
-**What NOT to document:**
-```python
-# BAD: Obvious
-x = x + 1  # increment x
-
-# GOOD: Explains why
-# Cache invalidation here because user permissions
-# affect multiple downstream services
-invalidate_permission_cache(user.id)
-```
+**What NOT to document:** Anything a competent developer can understand by reading the code itself.
 
 **Format:** Docstrings with parameters, returns, exceptions, and examples for functions. Purpose and responsibilities for classes. Overview for modules.
 
@@ -67,20 +65,13 @@ Help developers use public interfaces correctly.
 
 Help developers understand system design and make consistent changes.
 
-**Components:**
-- System overview with component diagram
-- Each component's responsibility
-- Data flow (with mermaid diagrams if complex)
-- Key design decisions with rationale
-- External dependencies
-- Deployment architecture (for production systems)
+**Must include:** System overview with component diagram, each component's responsibility, data flow, key design decisions with rationale, external dependencies, deployment architecture.
 
 **Checklist:**
 - [ ] System overview exists
 - [ ] Component responsibilities documented
 - [ ] Data flow explained
 - [ ] Design decisions recorded with rationale
-- [ ] Dependencies listed
 
 ### 4. User Documentation
 
@@ -99,38 +90,77 @@ Help end-users accomplish tasks.
 - [ ] Configuration options documented
 - [ ] Troubleshooting section exists
 
+</instructions>
+
+<rules>
+
 ## Quality Standards
 
-### Clarity
-- Write for the intended audience
-- Use examples — one good example beats three paragraphs
-- Define jargon on first use: "JWT (JSON Web Token)"
-
-### Accuracy
+- Write for the intended audience; define jargon on first use
 - Document actual behavior, not intended behavior
 - Verify code samples compile/run
-- Keep examples simple and focused
-
-### Completeness
-- 100% of public APIs documented
-- All user-facing features explained
-- All architecture components described
-- Breaking changes have migration paths
-
-### Maintainability
-- Inline docs (docstrings/comments) for implementation details
-- Centralized docs (docs/ directory) for architecture and user guides
+- 100% of public APIs documented; breaking changes have migration paths
 - Update docs in the same commit as code changes
 - Remove deprecated documentation
 
-## Anti-Patterns
-
+### Anti-Patterns
 - Documenting the obvious (`x = 5  # set x to 5`)
 - Duplicating information across files
 - Including example code that doesn't work
 - Letting docs drift from code
 - Writing novels when a sentence suffices
-- Commenting out code instead of deleting it
+
+</rules>
+
+<examples>
+
+## Documentation Output Examples
+
+### Good: Inline code comment -- explains the "why"
+
+```python
+# Cache invalidation here because user permissions
+# affect multiple downstream services. Without this,
+# stale permissions persist for up to 5 minutes (TTL).
+invalidate_permission_cache(user.id)
+```
+
+### Bad: Inline code comment -- restates the "what"
+
+```python
+x = x + 1  # increment x by 1
+```
+
+### Good: API function docstring -- complete, has example
+
+```python
+def create_user(name: str, email: str, role: str = "viewer") -> User:
+    """Create a new user account.
+
+    Args:
+        name: Display name (1-100 characters).
+        email: Must be unique across all accounts.
+        role: One of "viewer", "editor", "admin". Defaults to "viewer".
+
+    Returns:
+        The newly created User object with generated ID.
+
+    Raises:
+        DuplicateEmailError: If email is already registered.
+
+    Example:
+        user = create_user("Alice", "alice@example.com", role="editor")
+    """
+```
+
+### Bad: API function docstring -- no types, no detail
+
+```python
+def create_user(name, email, role="viewer"):
+    """Creates a user."""
+```
+
+</examples>
 
 ## Integration
 

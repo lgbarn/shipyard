@@ -3,19 +3,25 @@ name: lessons-learned
 description: Use when capturing discoveries after phase completion, before shipping, or when reflecting on completed work to extract reusable patterns
 ---
 
-<!-- TOKEN BUDGET: 150 lines / ~450 tokens -->
+<!-- TOKEN BUDGET: 155 lines / ~465 tokens -->
 
 # Lessons Learned
 
-## Overview
-
-The lessons-learned system captures discoveries, patterns, and pitfalls found during implementation and feeds them back into project memory. Lessons are stored in `.shipyard/LESSONS.md` and optionally surfaced in `CLAUDE.md` so future agents benefit from past experience.
+<activation>
 
 ## When to Use
 
 - After phase completion during `/shipyard:ship` (Step 3a)
 - When reflecting on completed work to extract reusable knowledge
 - When a build summary contains notable discoveries worth preserving
+
+</activation>
+
+## Overview
+
+The lessons-learned system captures discoveries, patterns, and pitfalls found during implementation and feeds them back into project memory. Lessons are stored in `.shipyard/LESSONS.md` and optionally surfaced in `CLAUDE.md` so future agents benefit from past experience.
+
+<instructions>
 
 ## LESSONS.md Format
 
@@ -67,52 +73,81 @@ This reduces friction and ensures discoveries documented during building are not
 
 ## Memory Enrichment
 
-If the `shipyard:memory` skill is available and memory is enabled:
-
-1. Search memory for the milestone's date range and project path.
-2. Use Haiku to extract insights about:
-   - Debugging struggles and resolutions
-   - Rejected approaches and why they failed
-   - Key decisions and their rationale
-3. Add memory-derived insights to candidates (marked separately from summary-derived).
-
-Memory captures implicit knowledge from conversation context that may not appear in formal SUMMARY.md files.
+If `shipyard:memory` is available, search memory for the milestone's date range to extract debugging struggles, rejected approaches, and key decisions. Add memory-derived insights to candidates (marked separately from summary-derived).
 
 ## CLAUDE.md Integration
 
-After the user approves lessons, optionally append a summary to the project's `CLAUDE.md`:
+After the user approves lessons, optionally append to `CLAUDE.md`:
 
-1. **Check for CLAUDE.md** -- If no `CLAUDE.md` exists in the project root, skip this step entirely.
-2. **Find existing section** -- Look for a `## Lessons Learned` heading in `CLAUDE.md`.
-3. **Append if exists** -- Add new bullet points under the existing `## Lessons Learned` section.
-4. **Create if missing** -- If `CLAUDE.md` exists but has no `## Lessons Learned` section, append the section at the end of the file.
-5. **Format for CLAUDE.md** -- Use concise single-line bullets. Omit phase dates; focus on actionable guidance:
-   ```markdown
-   ## Lessons Learned
-   - Bash `set -e` interacts poorly with pipelines -- use explicit error checks after pipes
-   - jq `.field // "default"` prevents null propagation in optional config values
-   ```
+1. If no `CLAUDE.md` exists, skip entirely.
+2. Find or create a `## Lessons Learned` section.
+3. Append concise single-line bullets (omit phase dates, focus on actionable guidance).
+
+</instructions>
+
+<rules>
 
 ## Quality Standards
 
 Lessons must be **specific, actionable, and reusable**. Apply these filters:
-
-**Good lessons** (specific, transferable):
-- "Bash `set -e` interacts poorly with pipelines -- use explicit error checks after pipes"
-- "jq `.field // \"default\"` prevents null propagation in optional config values"
-- "bats-core `run` captures exit code but swallows stderr -- use `2>&1` to capture both"
-
-**Bad lessons** (too vague or too specific):
-- "Tests are important" -- too generic, not actionable
-- "Fixed a bug on line 47" -- too specific, not transferable
-- "Code should be clean" -- vague platitude
-- "Changed variable name from x to y" -- implementation detail, not a lesson
 
 **Anti-Patterns to reject:**
 - Lessons that duplicate existing entries in LESSONS.md
 - Lessons that reference specific line numbers or ephemeral file locations
 - Lessons that are generic truisms rather than discovered knowledge
 - Lessons longer than two sentences -- split or summarize
+
+</rules>
+
+<examples>
+
+## Lesson Quality Examples
+
+### Good Lesson -- specific, transferable, actionable
+
+```
+### Pitfalls to Avoid
+- bats-core `run` captures exit code but swallows stderr -- use `2>&1` to capture both
+```
+
+Why it works: Names the exact tool and behavior, explains the symptom, and gives the fix.
+
+### Good Lesson -- documents a non-obvious decision
+
+```
+### Surprises / Discoveries
+- jq `.field // "default"` prevents null propagation in optional config values --
+  without the fallback, downstream commands silently receive "null" as a string
+```
+
+### Bad Lesson -- vague platitude
+
+```
+### What Went Well
+- Tests are important
+```
+
+Why it fails: Generic truism. Zero discovered knowledge.
+
+### Bad Lesson -- too specific, not transferable
+
+```
+### Pitfalls to Avoid
+- Fixed a bug on line 47 of parser.py
+```
+
+Why it fails: Line 47 will change. Future readers cannot act on this.
+
+### Bad Lesson -- implementation detail, not a lesson
+
+```
+### Process Improvements
+- Changed variable name from x to y
+```
+
+Why it fails: A code change, not a reusable insight.
+
+</examples>
 
 ## Integration
 

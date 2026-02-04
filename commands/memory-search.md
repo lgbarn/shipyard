@@ -8,7 +8,9 @@ argument-hint: "<query> [--after YYYY-MM-DD] [--before YYYY-MM-DD] [--project pa
 
 You are executing the memory search workflow. Follow these steps precisely.
 
-## Step 0: Parse Arguments
+<prerequisites>
+
+## Step 1: Parse Arguments
 
 Extract from the command:
 - `query` (required): The semantic search query
@@ -18,7 +20,7 @@ Extract from the command:
 
 If no query is provided, ask the user what they want to search for.
 
-## Step 1: Check Memory Enabled
+## Step 2: Check Memory Enabled
 
 Check `~/.config/shipyard/config.json` for memory settings.
 
@@ -27,7 +29,7 @@ Check `~/.config/shipyard/config.json` for memory settings.
   > "Memory is not enabled. Run `/shipyard:init` and enable memory when prompted, or use `/shipyard:memory-enable` to turn it on."
   Stop here.
 
-## Step 2: Check Project Exclusion
+## Step 3: Check Project Exclusion
 
 If `--project` is not specified, use the current working directory.
 
@@ -38,7 +40,11 @@ Check if the target project has `"memory": false` in `.shipyard/config.json`.
   > "This project has memory disabled. Results will not include exchanges from this project."
   Continue with search (will search other projects).
 
-## Step 3: Execute Search
+</prerequisites>
+
+<execution>
+
+## Step 4: Execute Search
 
 Call the memory MCP server's `memory_search` tool with:
 ```json
@@ -51,7 +57,7 @@ Call the memory MCP server's `memory_search` tool with:
 }
 ```
 
-## Step 4: Summarize Results
+## Step 5: Summarize Results
 
 If results are returned:
 
@@ -80,10 +86,16 @@ If no results:
 > - Relevant conversations haven't been indexed yet
 > - The project(s) are excluded from memory"
 
-## Step 5: Offer Follow-up
+</execution>
+
+<output>
+
+## Step 6: Offer Follow-up
 
 If results were found, offer:
 > "Would you like me to:
 > - Search with different terms
 > - Apply these insights to the current problem
 > - Show more details from a specific exchange"
+
+</output>

@@ -8,6 +8,8 @@ argument-hint: ""
 
 You are executing the memory status workflow. Follow these steps precisely.
 
+<prerequisites>
+
 ## Step 1: Check Memory Configuration
 
 Read `~/.config/shipyard/config.json` for memory settings.
@@ -26,6 +28,10 @@ Check if `~/.config/shipyard/memory.db` exists.
   > Run `/shipyard:memory-import` to initialize and import existing conversation history."
   Stop here.
 
+</prerequisites>
+
+<execution>
+
 ## Step 3: Query Statistics
 
 Call the memory MCP server's `memory_status` tool to retrieve:
@@ -35,6 +41,10 @@ Call the memory MCP server's `memory_status` tool to retrieve:
 - Newest exchange date
 - Last index run time
 - Projects with indexed exchanges
+
+</execution>
+
+<output>
 
 ## Step 4: Display Dashboard
 
@@ -75,3 +85,5 @@ Based on status, suggest relevant actions:
 | Last index > 1 hour ago | Background indexer may be paused; check logs |
 | Index error | Check `~/.config/shipyard/memory.log` for details |
 | Memory disabled | Use `/shipyard:memory-enable` to start indexing |
+
+</output>

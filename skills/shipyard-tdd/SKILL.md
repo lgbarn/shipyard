@@ -3,14 +3,19 @@ name: shipyard-tdd
 description: Use when implementing any feature or bugfix, before writing implementation code
 ---
 
-<!-- TOKEN BUDGET: 450 lines / ~1350 tokens -->
+<!-- TOKEN BUDGET: 480 lines / ~1440 tokens -->
 
 # Test-Driven Development (TDD)
 
-## Activation Triggers
+<activation>
+
+## When This Skill Activates
+
 - Any feature or bugfix implementation before writing production code
 - Plan tasks with `tdd="true"` marker
 - Files matching: `*.test.*`, `*.spec.*`, `__tests__/`, `*_test.go`
+
+</activation>
 
 ## Overview
 
@@ -51,6 +56,8 @@ Write code before the test? Delete it. Start over.
 
 Implement fresh from tests. Period.
 
+<instructions>
+
 ## Red-Green-Refactor
 
 ```dot
@@ -79,7 +86,9 @@ digraph tdd_cycle {
 
 Write one minimal test showing what should happen.
 
-<Good>
+<examples>
+
+<example type="good" title="Clear behavior test with descriptive name">
 ```typescript
 test('retries failed operations 3 times', async () => {
   let attempts = 0;
@@ -95,10 +104,10 @@ test('retries failed operations 3 times', async () => {
   expect(attempts).toBe(3);
 });
 ```
-Clear name, tests real behavior, one thing
-</Good>
+Clear name, tests real behavior, one thing.
+</example>
 
-<Bad>
+<example type="bad" title="Vague name, tests mock not code">
 ```typescript
 test('retry works', async () => {
   const mock = jest.fn()
@@ -109,8 +118,10 @@ test('retry works', async () => {
   expect(mock).toHaveBeenCalledTimes(3);
 });
 ```
-Vague name, tests mock not code
-</Bad>
+Vague name, tests mock not code.
+</example>
+
+</examples>
 
 **Requirements:**
 - One behavior
@@ -138,7 +149,9 @@ Confirm:
 
 Write simplest code to pass the test.
 
-<Good>
+<examples>
+
+<example type="good" title="Just enough to pass">
 ```typescript
 async function retryOperation<T>(fn: () => Promise<T>): Promise<T> {
   for (let i = 0; i < 3; i++) {
@@ -151,10 +164,10 @@ async function retryOperation<T>(fn: () => Promise<T>): Promise<T> {
   throw new Error('unreachable');
 }
 ```
-Just enough to pass
-</Good>
+Just enough to pass.
+</example>
 
-<Bad>
+<example type="bad" title="Over-engineered beyond test requirements">
 ```typescript
 async function retryOperation<T>(
   fn: () => Promise<T>,
@@ -167,8 +180,10 @@ async function retryOperation<T>(
   // YAGNI
 }
 ```
-Over-engineered
-</Bad>
+Over-engineered.
+</example>
+
+</examples>
 
 Don't add features, refactor other code, or "improve" beyond the test.
 
@@ -202,6 +217,8 @@ Keep tests green. Don't add behavior.
 
 Next failing test for next feature.
 
+</instructions>
+
 ## Good Tests
 
 | Quality | Good | Bad |
@@ -228,7 +245,7 @@ Manual testing is ad-hoc. You think you tested everything but:
 - No record of what you tested
 - Can't re-run when code changes
 - Easy to forget cases under pressure
-- "It worked when I tried it" ≠ comprehensive
+- "It worked when I tried it" does not equal comprehensive
 
 Automated tests are systematic. They run the same way every time.
 
@@ -258,7 +275,9 @@ Tests-after are biased by your implementation. You test what you built, not what
 
 Tests-first force edge case discovery before implementing. Tests-after verify you remembered everything (you didn't).
 
-30 minutes of tests after ≠ TDD. You get coverage, lose proof tests work.
+30 minutes of tests after does not equal TDD. You get coverage, lose proof tests work.
+
+<rules>
 
 ## Common Rationalizations
 
@@ -267,7 +286,7 @@ Tests-first force edge case discovery before implementing. Tests-after verify yo
 | "Too simple to test" | Simple code breaks. Test takes 30 seconds. |
 | "I'll test after" | Tests passing immediately prove nothing. |
 | "Tests after achieve same goals" | Tests-after = "what does this do?" Tests-first = "what should this do?" |
-| "Already manually tested" | Ad-hoc ≠ systematic. No record, can't re-run. |
+| "Already manually tested" | Ad-hoc does not equal systematic. No record, can't re-run. |
 | "Deleting X hours is wasteful" | Sunk cost fallacy. Keeping unverified code is technical debt. |
 | "Keep as reference, write tests first" | You'll adapt it. That's testing after. Delete means delete. |
 | "Need to explore first" | Fine. Throw away exploration, start with TDD. |
@@ -294,8 +313,13 @@ Tests-first force edge case discovery before implementing. Tests-after verify yo
 
 **All of these mean: Delete code. Start over with TDD.**
 
-## Example: Bug Fix
+</rules>
 
+<examples>
+
+## Example: Bug Fix with TDD
+
+<example type="good" title="TDD bug fix cycle">
 **Bug:** Empty email accepted
 
 **RED**
@@ -330,6 +354,9 @@ PASS
 
 **REFACTOR**
 Extract validation for multiple fields if needed.
+</example>
+
+</examples>
 
 ## Verification Checklist
 
@@ -371,8 +398,8 @@ When adding mocks or test utilities, invoke `shipyard:shipyard-testing` for guid
 ## Final Rule
 
 ```
-Production code → test exists and failed first
-Otherwise → not TDD
+Production code -> test exists and failed first
+Otherwise -> not TDD
 ```
 
 No exceptions without your human partner's permission.

@@ -3,29 +3,27 @@ name: infrastructure-validation
 description: Use when working with Terraform (.tf, .tfvars), Ansible (playbooks, roles, inventory), Docker (Dockerfile, docker-compose.yml), CloudFormation, or any infrastructure-as-code files — provides validation workflows, tool chains, and common mistake prevention
 ---
 
-<!-- TOKEN BUDGET: 130 lines / ~390 tokens -->
+<!-- TOKEN BUDGET: 140 lines / ~420 tokens -->
 
 # Infrastructure Validation
+
+<activation>
 
 ## Activation Triggers
 - Files matching: `*.tf`, `*.tfvars`, `Dockerfile`, `docker-compose.yml`, `playbook*.yml`, `roles/`, `inventory/`
 - Config: `.shipyard/config.json` has `iac_validation` set to `"auto"` or `true`
+- Templates with `AWSTemplateFormatVersion` (CloudFormation)
+- YAML with `apiVersion:` (Kubernetes)
+
+</activation>
 
 ## Overview
 
-IaC mistakes don't cause test failures — they cause outages, breaches, and cost overruns. Validate before every change.
+IaC mistakes don't cause test failures -- they cause outages, breaches, and cost overruns. Validate before every change.
 
 **Core principle:** Never apply without plan review. Like TDD requires tests before code, IaC requires validation before apply.
 
-## File Detection
-
-| Files Present | Workflow |
-|--------------|----------|
-| `*.tf` | Terraform |
-| `playbook*.yml`, `roles/`, `inventory/` | Ansible |
-| `Dockerfile`, `docker-compose.yml` | Docker |
-| Templates with `AWSTemplateFormatVersion` | CloudFormation |
-| YAML with `apiVersion:` | Kubernetes |
+<instructions>
 
 ## Terraform Workflow
 
@@ -34,12 +32,12 @@ Run in order. Each step must pass before proceeding.
 ```
 terraform fmt -check          # 1. Format (auto-fix with fmt if needed)
 terraform validate            # 2. Syntax validation
-terraform plan -out=tfplan    # 3. Review every change — NEVER skip
+terraform plan -out=tfplan    # 3. Review every change -- NEVER skip
 tflint --recursive            # 4. Lint (if installed)
 tfsec . OR checkov -d .       # 5. Security scan (if installed)
 ```
 
-**Drift detection:** `terraform plan -detailed-exitcode` — exit code 2 means drift. Document what drifted and why before overwriting.
+**Drift detection:** `terraform plan -detailed-exitcode` -- exit code 2 means drift. Document what drifted and why before overwriting.
 
 ## Ansible Workflow
 
@@ -59,6 +57,8 @@ docker build -t test-build .            # 2. Build
 trivy image test-build                  # 3. Security scan (if installed)
 docker compose config                   # 4. Validate compose (if applicable)
 ```
+
+</instructions>
 
 ## Common Mistakes
 
@@ -89,7 +89,9 @@ docker compose config                   # 4. Validate compose (if applicable)
 | No health check | Add `HEALTHCHECK` instruction |
 | Single-stage build | Use multi-stage builds |
 
-## Red Flags — STOP
+<rules>
+
+## Red Flags -- STOP
 
 - `terraform apply -auto-approve` without prior plan review
 - Security group with `0.0.0.0/0` on non-HTTP ports
@@ -98,6 +100,35 @@ docker compose config                   # 4. Validate compose (if applicable)
 - State file committed to git
 - `latest` tag on any base image
 - Container running as root in production
+
+</rules>
+
+<examples>
+
+## Validation Finding Examples
+
+### Good Finding -- specific, shows the problem, gives the fix
+
+```
+**IaC-Critical: Overly permissive security group in modules/network/main.tf**
+
+Resource: aws_security_group_rule.allow_all (line 34)
+Problem: Ingress rule allows 0.0.0.0/0 on port 22 (SSH).
+         This exposes SSH to the entire internet.
+Fix: Restrict to bastion host CIDR or VPN range:
+     cidr_blocks = [var.vpn_cidr]
+Validation: `tfsec .` flagged this as HIGH severity (AWS018).
+```
+
+### Bad Finding -- vague, no location, no evidence
+
+```
+**Security Issue: Network configuration may be too open.**
+
+Review the security groups for potential issues.
+```
+
+</examples>
 
 ## Integration
 

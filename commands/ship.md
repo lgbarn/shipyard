@@ -8,7 +8,9 @@ argument-hint: "[--phase | --milestone | --branch]"
 
 You are executing the Shipyard shipping workflow. Follow these steps precisely.
 
-## Step 0: Parse Arguments & Load Context
+<prerequisites>
+
+## Step 1: Parse Arguments & Load Context
 
 Determine the shipping scope:
 - `--phase` -- Ship only the current phase (partial delivery)
@@ -16,20 +18,20 @@ Determine the shipping scope:
 - `--branch` -- Ship whatever is on the current branch
 - No argument -- auto-detect the appropriate scope
 
-Follow **Worktree Protocol** (see `docs/PROTOCOLS.md`) -- detect worktree, record working directory and branch.
-Follow **Model Routing Protocol** (see `docs/PROTOCOLS.md`) -- read `model_routing` from config for agent model selection.
+Follow **Worktree Protocol** (detect if running in a git worktree; if so, use worktree root for paths and record the branch name; see `docs/PROTOCOLS.md`) -- detect worktree, record working directory and branch.
+Follow **Model Routing Protocol** (select the correct model for each agent role using `model_routing` from config; see `docs/PROTOCOLS.md`) -- read `model_routing` from config for agent model selection.
 
-## Step 1: Pre-Ship Verification
+## Step 2: Pre-Ship Verification
 
 Invoke the `shipyard:shipyard-verification` skill to run a comprehensive check.
 
-This should verify:
+Verify:
 - All acceptance criteria from plans are met
 - No critical review findings are unresolved
 - Code compiles/builds without errors
 - Linting passes (if configured)
 
-## Step 2: Run Test Suite
+## Step 3: Run Test Suite
 
 Detect and run the project's test suite:
 - Look for test commands in package.json, Makefile, Cargo.toml, etc.
@@ -40,13 +42,17 @@ Detect and run the project's test suite:
   Do not proceed.
 - **If no test suite exists:** Note this and continue with a warning.
 
-## Step 2a: Pre-Ship Security Audit
+</prerequisites>
+
+<execution>
+
+## Step 3a: Pre-Ship Security Audit
 
 **Note:** This audit runs regardless of `config.json` settings or `--light` usage during build. Shipping is the final gate — security is always checked here. If a passing `AUDIT-{N}.md` already exists from the build phase and no changes were made since, skip re-auditing and verify the existing report has no unresolved critical findings.
 
-Dispatch an **auditor agent** (subagent_type: "shipyard:auditor") with context per **Agent Context Protocol** (see `docs/PROTOCOLS.md`):
+Dispatch an **auditor agent** (subagent_type: "shipyard:auditor") with context per **Agent Context Protocol** (pass PROJECT.md, config.json, working directory, branch, and worktree status to all agents; see `docs/PROTOCOLS.md`):
 - Git diff of ALL changes in the shipping scope (phase, milestone, or branch)
-- Codebase docs per **Codebase Docs Protocol**
+- Codebase docs per **Codebase Docs Protocol** (resolve configured codebase docs path and load CONVENTIONS.md, STACK.md, ARCHITECTURE.md, etc.; see `docs/PROTOCOLS.md`)
 - All dependency files (package.json, requirements.txt, Cargo.toml, go.mod, etc.)
 
 This is a comprehensive audit covering:
@@ -70,7 +76,7 @@ Produce audit report.
 - Only re-audit if new changes were made after the build audit
 - Otherwise, verify the existing audit report shows no unresolved critical findings
 
-## Step 2b: Comprehensive Documentation Generation
+## Step 3b: Comprehensive Documentation Generation
 
 **Note:** This step runs regardless of `config.json` settings or `--light` usage during build. Shipping should produce comprehensive documentation.
 
@@ -98,7 +104,7 @@ The documenter produces:
 
 **If no critical gaps:** Continue. Display informational findings about optional improvements.
 
-## Step 3: Determine Scope
+## Step 4: Determine Scope
 
 Based on the argument and project state:
 
@@ -144,11 +150,11 @@ Based on the argument and project state:
 **Branch scope:**
 - Use whatever is on the current branch regardless of phase state
 
-## Step 3a: Capture Lessons Learned
+## Step 4a: Capture Lessons Learned
 
 Invoke the `shipyard:lessons-learned` skill for format and quality guidance.
 
-### Extract Candidate Lessons from Build Summaries
+### Step 4a-i: Extract Candidate Lessons from Build Summaries
 
 Read all SUMMARY.md files in the shipping scope:
 - For phase scope: `.shipyard/phases/{N}/results/SUMMARY-*.md`
@@ -156,7 +162,7 @@ Read all SUMMARY.md files in the shipping scope:
 
 Extract content from "Issues Encountered" and "Decisions Made" sections as candidate lessons.
 
-### Enrich with Memory (if enabled)
+### Step 4a-ii: Enrich with Memory (if enabled)
 
 Check if Memory is enabled via `~/.config/shipyard/config.json`:
 
@@ -184,7 +190,7 @@ Check if Memory is enabled via `~/.config/shipyard/config.json`:
 
 **If memory is disabled:** Skip memory enrichment and continue with build summary lessons only.
 
-### Present to User
+### Step 4a-iii: Present to User
 
 Use AskUserQuestion to present:
 
@@ -202,7 +208,7 @@ Use AskUserQuestion to present:
 >
 > Edit, add to, or approve the above. Type "skip" to skip lesson capture.
 
-### Persist Lessons
+### Step 4a-iv: Persist Lessons
 
 If user does not type "skip":
 
@@ -232,9 +238,9 @@ If user does not type "skip":
      - If not: append `## Lessons Learned` section at end of file
 4. Commit: `shipyard(phase-{N}): capture lessons learned`
 
-If user types "skip", continue to Step 4 with no lesson capture.
+If user types "skip", continue to Step 5 with no lesson capture.
 
-## Step 4: Present Delivery Options
+## Step 5: Present Delivery Options
 
 Use AskUserQuestion to present four options:
 
@@ -247,7 +253,7 @@ Use AskUserQuestion to present four options:
 >
 > Enter 1, 2, 3, or 4:
 
-## Step 5: Execute Delivery
+## Step 6: Execute Delivery
 
 ### Option 1: Merge Locally
 1. Identify the base branch (main/master/develop)
@@ -276,7 +282,7 @@ Use AskUserQuestion to present four options:
 4. Delete the working branch
 5. Display: "Branch deleted. All work has been discarded."
 
-## Step 6: Archive Artifacts
+## Step 7: Archive Artifacts
 
 If the milestone is complete (not just a phase):
 1. Create `.shipyard/archive/{milestone-name}/` directory
@@ -284,32 +290,39 @@ If the milestone is complete (not just a phase):
 3. Move ROADMAP.md, PROJECT.md, MILESTONE-REPORT.md to archive
 4. Keep STATE.md and config.json in `.shipyard/` (reset state for next milestone)
 
-## Step 7: Update Tasks & State
+## Step 8: Update Tasks & State
 
-Follow **Native Task Scaffolding Protocol** (see `docs/PROTOCOLS.md`) -- mark all relevant native tasks as `completed`.
+Follow **Native Task Scaffolding Protocol** (create/update native tasks for progress tracking via TaskCreate/TaskUpdate; see `docs/PROTOCOLS.md`) -- mark all relevant native tasks as `completed`.
 
-Follow **State Update Protocol** (see `docs/PROTOCOLS.md`) -- set:
+Follow **State Update Protocol** (update `.shipyard/STATE.md` with current phase, position, status, and append to history; see `docs/PROTOCOLS.md`) -- set:
 - **Current Phase:** N/A (or next milestone)
 - **Current Position:** Milestone shipped
 - **Status:** shipped
 - **History:** append `[{timestamp}] Milestone shipped via {method}`
 
-## Step 8: Commit Archive
+## Step 9: Commit Archive
 
 If archiving was done:
 ```
 shipyard: archive milestone {name}
 ```
 
-## Step 9: Final Message
+</execution>
 
+<output>
+
+## Step 10: Final Message
+
+Display:
 > "Ship complete! {summary of what was delivered}"
 >
 > If there are more milestones planned:
 > "To start the next milestone, run `/shipyard:init` to define new goals."
 >
-> If lessons were captured in Step 3a:
+> If lessons were captured in Step 4a:
 > "Lessons learned have been saved to `.shipyard/LESSONS.md`."
 >
 > If `.shipyard/ISSUES.md` has open issues:
 > "Note: {count} issue(s) remain open and have been preserved in `.shipyard/ISSUES.md` for the next milestone. Run `/shipyard:issues` to review."
+
+</output>

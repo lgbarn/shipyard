@@ -3,9 +3,20 @@ name: shipyard-writing-skills
 description: Use when creating new skills, editing existing skills, or verifying skills work before deployment
 ---
 
-<!-- TOKEN BUDGET: 500 lines / ~1500 tokens -->
+<!-- TOKEN BUDGET: 530 lines / ~1590 tokens -->
 
 # Writing Skills
+
+<activation>
+
+## When This Skill Activates
+
+- Creating a new skill (SKILL.md file)
+- Editing or improving an existing skill
+- Verifying a skill works before deployment
+- Reviewing skill quality or effectiveness
+
+</activation>
 
 ## Overview
 
@@ -29,6 +40,8 @@ A **skill** is a reference guide for proven techniques, patterns, or tools. Skil
 
 **Skills are NOT:** Narratives about how you solved a problem once
 
+<instructions>
+
 ## TDD Mapping for Skills
 
 | TDD Concept | Skill Creation |
@@ -42,7 +55,7 @@ A **skill** is a reference guide for proven techniques, patterns, or tools. Skil
 | **Watch it fail** | Document exact rationalizations agent uses |
 | **Minimal code** | Write skill addressing those specific violations |
 | **Watch it pass** | Verify agent now complies |
-| **Refactor cycle** | Find new rationalizations → plug → re-verify |
+| **Refactor cycle** | Find new rationalizations -> plug -> re-verify |
 
 The entire skill creation process follows RED-GREEN-REFACTOR.
 
@@ -58,7 +71,7 @@ The entire skill creation process follows RED-GREEN-REFACTOR.
 - One-off solutions
 - Standard practices well-documented elsewhere
 - Project-specific conventions (put in CLAUDE.md)
-- Mechanical constraints (if it's enforceable with regex/validation, automate it—save documentation for judgment calls)
+- Mechanical constraints (if it's enforceable with regex/validation, automate it -- save documentation for judgment calls)
 
 ## Skill Types
 
@@ -138,7 +151,6 @@ What goes wrong + fixes
 Concrete results
 ```
 
-
 ## Claude Search Optimization (CSO)
 
 **Critical for discovery:** Future Claude needs to FIND your skill
@@ -159,15 +171,72 @@ When the description was changed to just "Use when executing implementation plan
 
 **The trap:** Descriptions that summarize workflow create a shortcut Claude will take. The skill body becomes documentation Claude skips.
 
-```yaml
-# BAD: Summarizes workflow - Claude follows description instead of reading skill
-description: Use when executing plans - dispatches subagent per task with code review between tasks
+</instructions>
 
-# GOOD: Just triggering conditions, no workflow summary
+<examples>
+
+## CSO Description Examples
+
+<example type="good" title="Triggering conditions only, no workflow summary">
+```yaml
 description: Use when executing implementation plans with independent tasks in the current session
 ```
+Just triggering conditions -- Claude reads the full skill to learn the workflow.
+</example>
 
-See EXAMPLES.md for additional good/bad description patterns.
+<example type="bad" title="Workflow summary in description">
+```yaml
+description: Use when executing plans - dispatches subagent per task with code review between tasks
+```
+Summarizes workflow -- Claude follows description instead of reading skill body, misses two-stage review.
+</example>
+
+## Skill Content Examples
+
+<example type="good" title="Well-structured skill with XML tags and clear activation">
+```markdown
+---
+name: condition-based-waiting
+description: Use when tests need to wait for async operations, processes, or state changes instead of using arbitrary sleep/timeouts
+---
+
+<activation>
+## When This Skill Activates
+- Tests using sleep(), setTimeout(), or fixed delays
+- Flaky tests that pass/fail based on timing
+- Waiting for processes, servers, or async state
+</activation>
+
+<instructions>
+## Core Pattern
+Poll for condition instead of sleeping...
+</instructions>
+
+<rules>
+## Never
+- Use fixed sleep() in tests
+- Assume operation completes in N seconds
+</rules>
+```
+Clear activation, XML structure, rules separated.
+</example>
+
+<example type="bad" title="Missing structure, narrative style">
+```markdown
+# Waiting in Tests
+
+Last week I was working on a project where tests were flaky. I found that
+using sleep(5) was unreliable. After some experimentation, I discovered
+that polling for conditions works better...
+```
+Narrative style, no activation triggers, no XML structure, not reusable.
+</example>
+
+</examples>
+
+<instructions>
+
+### CSO Continued
 
 **Content:**
 - Use concrete triggers, symptoms, situations -- describe the *problem* not language-specific symptoms
@@ -230,9 +299,9 @@ digraph when_flowchart {
 - "When to use A vs B" decisions
 
 **Never use flowcharts for:**
-- Reference material → Tables, lists
-- Code examples → Markdown blocks
-- Linear instructions → Numbered lists
+- Reference material -- Tables, lists
+- Code examples -- Markdown blocks
+- Linear instructions -- Numbered lists
 - Labels without semantic meaning (step1, helper2)
 
 See @graphviz-conventions.dot for graphviz style rules.
@@ -242,9 +311,9 @@ See @graphviz-conventions.dot for graphviz style rules.
 **One excellent example beats many mediocre ones**
 
 Choose most relevant language:
-- Testing techniques → TypeScript/JavaScript
-- System debugging → Shell/Python
-- Data processing → Python
+- Testing techniques -- TypeScript/JavaScript
+- System debugging -- Shell/Python
+- Data processing -- Python
 
 **Good example:**
 - Complete and runnable
@@ -287,6 +356,10 @@ pptx/
 ```
 When: Reference material too large for inline
 
+</instructions>
+
+<rules>
+
 ## The Iron Law (Same as TDD)
 
 ```
@@ -328,9 +401,9 @@ Test with retrieval tasks, application scenarios, and coverage gaps. **Pass:** A
 
 | Excuse | Reality |
 |--------|---------|
-| "Skill is obviously clear" | Clear to you ≠ clear to other agents. Test it. |
+| "Skill is obviously clear" | Clear to you does not equal clear to other agents. Test it. |
 | "Testing is overkill" | Untested skills have issues. Always. 15 min saves hours. |
-| "Academic review is enough" | Reading ≠ using. Test application scenarios. |
+| "Academic review is enough" | Reading does not equal using. Test application scenarios. |
 | "No time to test" | Deploying untested wastes more time fixing later. |
 
 **All of these mean: Test before deploying. No exceptions.**
@@ -346,6 +419,8 @@ Discipline skills must resist rationalization. Key strategies:
 5. **Update CSO descriptions** with violation symptoms as triggers
 
 See EXAMPLES.md for detailed good/bad examples of each strategy.
+
+</rules>
 
 ## RED-GREEN-REFACTOR for Skills
 
@@ -422,4 +497,3 @@ How future Claude finds your skill:
 5. **Loads example** (only when implementing)
 
 **Optimize for this flow** - put searchable terms early and often.
-

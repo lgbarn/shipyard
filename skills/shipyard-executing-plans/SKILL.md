@@ -3,19 +3,27 @@ name: shipyard-executing-plans
 description: Use when you have a written implementation plan to execute, either in the current session with builder/reviewer agents or in a separate session with review checkpoints
 ---
 
-<!-- TOKEN BUDGET: 240 lines / ~720 tokens -->
+<!-- TOKEN BUDGET: 300 lines / ~900 tokens -->
 
 # Executing Plans
+
+<activation>
+
+## When This Skill Activates
+
+- You have a written implementation plan (from shipyard:shipyard-writing-plans or similar)
+- Plan contains independent tasks suitable for agent dispatch or batch execution
+- You need structured execution with two-stage review gates
+
+**Announce at start:** "I'm using the executing-plans skill to implement this plan."
+
+</activation>
 
 ## Overview
 
 Execute implementation plans by dispatching fresh builder agents per task, with two-stage review after each: spec compliance review first, then code quality review. Can also run as batch execution with human checkpoints.
 
 **Core principle:** Fresh agent per task + two-stage review (spec then quality) = high quality, fast iteration.
-
-**Announce at start:** "I'm using the executing-plans skill to implement this plan."
-
-## When to Use
 
 ```dot
 digraph when_to_use {
@@ -34,6 +42,8 @@ digraph when_to_use {
     "Stay in this session?" -> "Batch execution with checkpoints" [label="no - parallel session"];
 }
 ```
+
+<instructions>
 
 ## The Process
 
@@ -115,7 +125,7 @@ Based on feedback:
 - Execute next batch
 - Repeat until complete
 
-## Two-Stage Review Pattern
+### Two-Stage Review Pattern
 
 **Stage 1: Spec Compliance Review**
 - Does the code match the plan's specification?
@@ -131,12 +141,45 @@ Based on feedback:
 
 **IMPORTANT:** Always complete spec compliance before code quality. Wrong order wastes time reviewing quality of code that doesn't meet spec.
 
-## Step 3: Complete Development
+### Step 3: Complete Development
 
 After all tasks complete and verified:
 - Announce: "I'm using the git-workflow skill to complete this work."
 - **REQUIRED SUB-SKILL:** Use shipyard:git-workflow
 - Follow that skill to verify tests, present options, execute choice
+
+</instructions>
+
+<examples>
+
+## Example: Good vs Bad Execution
+
+<example type="good" title="Proper two-stage review execution">
+Task 3: Add retry logic to API client
+
+1. Dispatch builder agent with full task context from plan
+2. Builder implements, writes tests, commits, self-reviews
+3. Dispatch spec reviewer:
+   - "Plan says: retry 3 times with exponential backoff. Code retries 3 times but uses fixed delay."
+   - FAIL -- send back to builder
+4. Builder fixes to exponential backoff, re-commits
+5. Dispatch spec reviewer again:
+   - "All spec requirements met." PASS
+6. Dispatch code quality reviewer:
+   - "Code is clean, tests comprehensive." PASS
+7. Mark task complete, move to Task 4
+</example>
+
+<example type="bad" title="Skipping review stages">
+Task 3: Add retry logic to API client
+
+1. Builder implements and commits
+2. "Looks good to me" -- skip spec review, jump to next task
+3. Task 5 fails because Task 3 used fixed delay instead of exponential backoff
+4. Now must revisit Task 3, causing cascading rework
+</example>
+
+</examples>
 
 ## When to Stop and Ask for Help
 
@@ -147,6 +190,8 @@ After all tasks complete and verified:
 - Verification fails repeatedly
 
 **Ask for clarification rather than guessing.**
+
+<rules>
 
 ## Builder Agent Guidelines
 
@@ -185,6 +230,8 @@ Builder agents should:
 **If agent fails task:**
 - Dispatch fix agent with specific instructions
 - Don't try to fix manually (context pollution)
+
+</rules>
 
 ## Integration
 

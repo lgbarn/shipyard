@@ -3,21 +3,28 @@ name: git-workflow
 description: Use when starting feature work that needs a branch, creating worktrees for isolation, making atomic commits during development, or completing a development branch via merge, PR, preserve, or discard
 ---
 
-<!-- TOKEN BUDGET: 450 lines / ~1350 tokens -->
+<!-- TOKEN BUDGET: 480 lines / ~1440 tokens -->
 
 # Git Workflow
 
-## Activation Triggers
+<activation>
+
+## When This Skill Activates
+
 - Starting feature work that needs branch isolation
 - Creating, switching, or removing worktrees
 - Completing a development branch (merge, PR, preserve, discard)
 - `/shipyard:worktree` command invoked
+
+</activation>
 
 ## Overview
 
 Comprehensive git workflow covering the full development lifecycle: branch creation, worktree isolation, atomic commits, and branch completion.
 
 **Core principle:** Systematic directory selection + safety verification + structured completion options = reliable development workflow.
+
+<instructions>
 
 ## Part 1: Branch and Worktree Setup
 
@@ -299,6 +306,48 @@ git worktree remove <worktree-path>
 
 **For Option 3:** Keep worktree.
 
+</instructions>
+
+<examples>
+
+## Example: Worktree Setup Decision
+
+<example type="good" title="Following directory priority correctly">
+1. Check: `ls -d .worktrees` -- found!
+2. Verify: `git check-ignore -q .worktrees` -- ignored, safe
+3. Create: `git worktree add .worktrees/feat-retry -b feat-retry`
+4. Setup: `npm install` (package.json detected)
+5. Baseline: `npm test` -- 47 tests, 0 failures
+6. Report: "Worktree ready at /project/.worktrees/feat-retry"
+</example>
+
+<example type="bad" title="Skipping safety checks">
+1. Assume `.worktrees/` exists and is ignored
+2. Create worktree without checking
+3. Worktree contents show up in `git status`
+4. Accidentally commit worktree files to repository
+</example>
+
+## Example: Branch Completion
+
+<example type="good" title="Proper completion flow">
+1. Run tests: `npm test` -- all pass
+2. Present 4 options
+3. User picks "2. Push and create PR"
+4. Push: `git push -u origin feat-retry`
+5. Create PR with summary and test plan
+6. Cleanup: `git worktree remove .worktrees/feat-retry`
+</example>
+
+<example type="bad" title="Skipping test verification">
+1. Skip tests -- "I ran them earlier"
+2. User picks merge
+3. Merge broken code into main
+4. CI fails, team blocked
+</example>
+
+</examples>
+
 ## Quick Reference
 
 | Situation | Action |
@@ -306,7 +355,7 @@ git worktree remove <worktree-path>
 | `.worktrees/` exists | Use it (verify ignored) |
 | `worktrees/` exists | Use it (verify ignored) |
 | Both exist | Use `.worktrees/` |
-| Neither exists | Check CLAUDE.md → Ask user |
+| Neither exists | Check CLAUDE.md -> Ask user |
 | Directory not ignored | Add to .gitignore + commit |
 | Tests fail during baseline | Report failures + ask |
 | No package.json/Cargo.toml | Skip dependency install |
@@ -317,6 +366,8 @@ git worktree remove <worktree-path>
 | 2. Create PR | - | Yes | Yes | - |
 | 3. Keep as-is | - | - | Yes | - |
 | 4. Discard | - | - | - | Yes (force) |
+
+<rules>
 
 ## Common Mistakes
 
@@ -361,6 +412,8 @@ git worktree remove <worktree-path>
 - Present exactly 4 completion options
 - Get typed confirmation for Option 4
 - Clean up worktree for Options 1 & 4 only
+
+</rules>
 
 ## Integration
 

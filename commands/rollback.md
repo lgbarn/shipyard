@@ -8,6 +8,8 @@ argument-hint: "[checkpoint-tag] [--list]"
 
 You are executing the Shipyard rollback workflow. Follow these steps precisely.
 
+<prerequisites>
+
 ## Step 1: Verify State
 
 1. Verify `.shipyard/` exists. If not, tell the user there is nothing to roll back.
@@ -20,6 +22,10 @@ Run `git tag -l "shipyard-checkpoint-*" --sort=-version:refname` to find all che
 - **If `--list` was passed**, display checkpoints with dates and labels, then stop.
 - **If no checkpoints exist**, inform the user:
   > "No Shipyard checkpoints found. Checkpoints are created automatically during `/shipyard:plan` and `/shipyard:build`."
+
+</prerequisites>
+
+<execution>
 
 ## Step 3: Select Checkpoint
 
@@ -90,9 +96,15 @@ Add a history entry to `.shipyard/STATE.md`:
 - [<timestamp>] Rolled back to <checkpoint-tag> (<scope>)
 ```
 
+</execution>
+
+<output>
+
 ## Step 8: Confirm
 
 Display:
 > "Rollback complete. Reverted to `<checkpoint-tag>` (<scope> scope)."
 > "Safety checkpoint created: `shipyard-checkpoint-pre-rollback-<timestamp>`"
 > "Run `/shipyard:status` to see current state."
+
+</output>

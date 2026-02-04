@@ -8,6 +8,8 @@ argument-hint: ""
 
 You are executing the Shipyard initialization workflow. Follow these steps precisely and in order.
 
+<prerequisites>
+
 ## Step 1: Check Existing State
 
 Check if a `.shipyard/` directory already exists in the current project root.
@@ -16,7 +18,7 @@ Check if a `.shipyard/` directory already exists in the current project root.
   - Create a new milestone within the existing project
   - Refresh the codebase analysis
   - Start fresh (requires explicit confirmation -- this will archive the current state)
-  If they choose a new milestone, skip to Step 4 (brainstorming). If refresh, repeat Step 3 only.
+  If they choose a new milestone, skip to Step 5 (brainstorming). If refresh, repeat Step 4 only.
 - **If it does not exist:** Create the `.shipyard/` directory and proceed.
 
 ## Step 2: Detect Project Type
@@ -25,9 +27,9 @@ Determine whether this is a **brownfield** (existing source code) or **greenfiel
 
 - Look for source files, package manifests, configuration files, etc.
 - If brownfield, proceed to Step 3.
-- If greenfield, skip to Step 4.
+- If greenfield, skip to Step 5.
 
-## Step 2.5: Codebase Docs Location (Brownfield Only)
+## Step 3: Codebase Docs Location (Brownfield Only)
 
 If this is a brownfield project (determined in Step 2), ask the user where to store codebase analysis documentation using AskUserQuestion:
 
@@ -36,15 +38,19 @@ If this is a brownfield project (determined in Step 2), ask the user where to st
 > 1. **`.shipyard/codebase/`** -- Private, gitignored with the rest of `.shipyard/`
 > 2. **`docs/codebase/`** -- Committed to git, visible to collaborators in the repository
 
-Store the chosen path for use in Step 3 and Step 5:
+Store the chosen path for use in Step 4 and Step 6:
 - Option 1: `codebase_docs_path = ".shipyard/codebase"`
 - Option 2: `codebase_docs_path = "docs/codebase"`
 
 Create the target directory if it does not exist (`mkdir -p`).
 
-## Step 3: Codebase Mapping (Brownfield Only)
+</prerequisites>
 
-Dispatch **4 parallel mapper agents** using the Task tool to analyze the existing codebase. Each agent writes its findings to the configured codebase docs path (from Step 2.5).
+<execution>
+
+## Step 4: Codebase Mapping (Brownfield Only)
+
+Dispatch **4 parallel mapper agents** using the Task tool to analyze the existing codebase. Each agent writes its findings to the configured codebase docs path (from Step 3).
 
 Use `subagent_type: "shipyard:mapper"` for each. Pass the target output path to each agent.
 
@@ -69,7 +75,7 @@ Use `subagent_type: "shipyard:mapper"` for each. Pass the target output path to 
 
 Wait for all 4 agents to complete before proceeding.
 
-## Step 4: Requirements Brainstorming
+## Step 5: Requirements Brainstorming
 
 Invoke the `shipyard:shipyard-brainstorming` skill to conduct a Socratic dialogue with the user.
 
@@ -88,7 +94,7 @@ When the user indicates they are satisfied with the requirements exploration, ca
 - **Success Criteria**
 - **Constraints** (technical, timeline, budget)
 
-## Step 5: Workflow Preferences
+## Step 6: Workflow Preferences
 
 Ask the user about their preferred workflow using these questions:
 
@@ -135,13 +141,13 @@ If user selects "Yes":
 If user selects "No":
 - Note that memory can be enabled later with `/shipyard:memory-enable`
 
-Store preferences in `.shipyard/config.json`. Follow **Model Routing Protocol** (see `docs/PROTOCOLS.md`) for the full `config.json` structure, model routing keys, and defaults.
+Store preferences in `.shipyard/config.json`. Follow **Model Routing Protocol** (select the correct model for each agent role using `model_routing` from config; see `docs/PROTOCOLS.md`) for the full `config.json` structure, model routing keys, and defaults.
 
 Non-routing fields: `interaction_mode`, `git_strategy`, `review_depth`, `security_audit`, `simplification_review`, `iac_validation`, `documentation_generation`, `codebase_docs_path`, `context_tier`, `created_at`, `version`.
 
 **Defaults:** `security_audit: true`, `simplification_review: true`, `iac_validation: "auto"`, `documentation_generation: true`, `context_tier: "auto"`.
 
-## Step 6: Roadmap Generation
+## Step 7: Roadmap Generation
 
 Dispatch an **architect agent** (subagent_type: "shipyard:architect") with:
 - The full PROJECT.md content
@@ -157,19 +163,23 @@ The architect agent must produce `.shipyard/ROADMAP.md` containing:
 
 Present the roadmap to the user for approval. Allow up to **3 revision cycles** where the user can request changes. After approval (or 3 rounds), finalize.
 
-## Step 7: Task Scaffolding
+## Step 8: Task Scaffolding
 
-Follow **Native Task Scaffolding Protocol** (see `docs/PROTOCOLS.md`) -- create a native task for each phase in the approved roadmap.
+Follow **Native Task Scaffolding Protocol** (create native tasks for each phase/plan to enable progress tracking via TaskCreate/TaskUpdate; see `docs/PROTOCOLS.md`) -- create a native task for each phase in the approved roadmap.
 
-## Step 8: Initialize State
+## Step 9: Initialize State
 
-Follow **State Update Protocol** (see `docs/PROTOCOLS.md`) -- create `.shipyard/STATE.md` with:
+Follow **State Update Protocol** (update `.shipyard/STATE.md` with current phase, position, status, and append to history; see `docs/PROTOCOLS.md`) -- create `.shipyard/STATE.md` with:
 - **Current Phase:** 1
 - **Current Position:** Initialization complete, ready for planning
 - **Status:** ready
 - **History:** `[{timestamp}] Project initialized`
 
-## Step 9: Commit
+</execution>
+
+<output>
+
+## Step 10: Commit
 
 Create a git commit with the `.shipyard/` directory and, if `codebase_docs_path` is `docs/codebase`, also stage `docs/codebase/`:
 ```bash
@@ -179,9 +189,9 @@ git add docs/codebase/  # only if codebase_docs_path = "docs/codebase"
 git commit -m "shipyard: initialize project"
 ```
 
-## Step 10: Route Forward
+## Step 11: Route Forward
 
-Tell the user initialization is complete and suggest:
+Display a summary of the roadmap phases and tell the user initialization is complete:
 > "Project initialized! Run `/shipyard:plan 1` to begin planning Phase 1."
 
-Display a brief summary of the roadmap phases.
+</output>

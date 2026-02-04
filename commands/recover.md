@@ -8,6 +8,8 @@ argument-hint: ""
 
 You are executing the Shipyard recovery workflow. Follow these steps precisely.
 
+<prerequisites>
+
 ## Step 1: Verify State Exists
 
 Check if `.shipyard/` directory exists.
@@ -16,9 +18,13 @@ Check if `.shipyard/` directory exists.
   > "No Shipyard project detected. Nothing to recover. Run `/shipyard:init` to start fresh."
   Stop here.
 
+</prerequisites>
+
+<execution>
+
 ## Step 2: Diagnose State
 
-Follow **State Loading Protocol** (see `docs/PROTOCOLS.md`) -- read STATE.md, ROADMAP.md, config.json, and recent artifacts. Then check for inconsistencies:
+Follow **State Loading Protocol** (read STATE.md, ROADMAP.md, PROJECT.md, config.json, and recent SUMMARY/VERIFICATION files to establish session context; see `docs/PROTOCOLS.md`) -- read STATE.md, ROADMAP.md, config.json, and recent artifacts. Then check for inconsistencies:
 
 ### Check for these inconsistencies:
 
@@ -51,6 +57,10 @@ Last checkpoint: {most recent checkpoint tag, or "none"}
 
 Recommended action: {see options below}
 ```
+
+</execution>
+
+<error-handling>
 
 ## Step 5: Present Recovery Options
 
@@ -94,5 +104,7 @@ If the user selects this option:
 
 **Best when:** State is severely corrupted and no checkpoint is usable.
 
-**Requires explicit confirmation:**
+**Require explicit confirmation:**
 > "This will archive all Shipyard state. Type 'RESET' to confirm."
+
+</error-handling>

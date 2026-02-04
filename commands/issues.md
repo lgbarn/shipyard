@@ -8,6 +8,8 @@ argument-hint: "[--add <description>] [--resolve <id>] [--list]"
 
 You are executing the Shipyard issue tracking workflow. Follow these steps precisely.
 
+<prerequisites>
+
 ## Step 1: Check State Exists
 
 Check if `.shipyard/` directory exists.
@@ -44,6 +46,10 @@ Deferred enhancements and non-blocking findings tracked across sessions.
 - `--add <description>`: Add a new issue. Ask for severity (high/medium/low) if not obvious from context. Auto-increment ID from highest existing ID + 1. Set source to "manual" and date to current timestamp.
 - `--resolve <id>`: Move the issue from Open to Resolved. Ask for a brief resolution note.
 - `--list` (default when no arguments): Display current issues.
+
+</prerequisites>
+
+<execution>
 
 ## Step 4: Execute Action
 
@@ -89,6 +95,10 @@ Total: {open_count} open, {resolved_count} resolved
 If no open issues exist:
 > "No open issues. Clean slate!"
 
+</execution>
+
+<output>
+
 ## Step 5: Suggest Next Action
 
 If there are high-priority issues:
@@ -96,3 +106,5 @@ If there are high-priority issues:
 
 If viewing issues during planning:
 > "Open issues relevant to the current phase can be incorporated into `/shipyard:plan`."
+
+</output>

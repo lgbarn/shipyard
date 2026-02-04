@@ -8,6 +8,8 @@ argument-hint: ""
 
 Move brownfield codebase analysis documentation between `.shipyard/codebase/` and `docs/codebase/`, updating configuration and committing the change.
 
+<prerequisites>
+
 ## Step 1: Validate State
 
 1. Verify `.shipyard/` exists. If not, tell the user to run `/shipyard:init` first.
@@ -17,6 +19,10 @@ Move brownfield codebase analysis documentation between `.shipyard/codebase/` an
    - If `docs/codebase/` has docs: current = `docs/codebase`
    - If neither has docs: display error and suggest `/shipyard:init` on a brownfield project. Stop.
 4. If docs exist in **both** locations: display conflict error and ask the user to resolve manually. Stop.
+
+</prerequisites>
+
+<execution>
 
 ## Step 2: Determine Target & Confirm
 
@@ -84,6 +90,10 @@ git add .shipyard/config.json {target_path}/
 git commit -m "shipyard: move codebase docs to {target_path}"
 ```
 
+</execution>
+
+<output>
+
 ## Step 7: Report
 
 Display:
@@ -105,3 +115,5 @@ If moved to `docs/codebase/`:
 
 If moved to `.shipyard/codebase/`:
 > Documentation is now gitignored and private to your local workspace.
+
+</output>

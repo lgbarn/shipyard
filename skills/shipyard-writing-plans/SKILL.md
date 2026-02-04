@@ -3,21 +3,33 @@ name: shipyard-writing-plans
 description: Use when you have a spec or requirements for a multi-step task, before touching code
 ---
 
-<!-- TOKEN BUDGET: 170 lines / ~510 tokens -->
+<!-- TOKEN BUDGET: 220 lines / ~660 tokens -->
 
 # Writing Plans
 
-## Overview
+<activation>
 
-Write comprehensive implementation plans assuming the engineer has zero context for our codebase and questionable taste. Document everything they need to know: which files to touch for each task, code, testing, docs they might need to check, how to test it. Give them the whole plan as bite-sized tasks. DRY. YAGNI. TDD. Frequent commits.
+## When This Skill Activates
 
-Assume they are a skilled developer, but know almost nothing about our toolset or problem domain. Assume they don't know good test design very well.
+- You have a spec, requirements, or design for a multi-step implementation task
+- You need to break work into bite-sized, executable tasks before touching code
+- You are preparing work for builder agents or a parallel execution session
 
 **Announce at start:** "I'm using the writing-plans skill to create the implementation plan."
 
 **Context:** This should be run in a dedicated worktree (created by brainstorming skill).
 
 **Save plans to:** `docs/plans/YYYY-MM-DD-<feature-name>.md`
+
+</activation>
+
+<instructions>
+
+## Overview
+
+Write comprehensive implementation plans assuming the engineer has zero context for our codebase and questionable taste. Document everything they need to know: which files to touch for each task, code, testing, docs they might need to check, how to test it. Give them the whole plan as bite-sized tasks. DRY. YAGNI. TDD. Frequent commits.
+
+Assume they are a skilled developer, but know almost nothing about our toolset or problem domain. Assume they don't know good test design very well.
 
 ## Shipyard Plan Format
 
@@ -117,12 +129,71 @@ git commit -m "feat: add specific feature"
 ```
 ```
 
+</instructions>
+
+<examples>
+
+## Example: Well-Written vs Poorly-Written Plan Task
+
+<example type="good" title="Clear, executable task with exact paths and code">
+### Task 2: Add Email Validation
+
+**Files:**
+- Create: `src/validators/email.py`
+- Test: `tests/validators/test_email.py`
+
+**Step 1: Write the failing test**
+```python
+def test_rejects_empty_email():
+    with pytest.raises(ValidationError, match="email is required"):
+        validate_email("")
+```
+
+**Step 2: Run test to verify it fails**
+Run: `pytest tests/validators/test_email.py::test_rejects_empty_email -v`
+Expected: FAIL with "cannot import name 'validate_email'"
+
+**Step 3: Write minimal implementation**
+```python
+from src.errors import ValidationError
+
+def validate_email(email: str) -> str:
+    if not email or not email.strip():
+        raise ValidationError("email is required")
+    return email.strip()
+```
+
+**Step 4: Run test to verify it passes**
+Run: `pytest tests/validators/test_email.py::test_rejects_empty_email -v`
+Expected: PASS
+
+**Step 5: Commit**
+```bash
+git add src/validators/email.py tests/validators/test_email.py
+git commit -m "feat: add email validation with empty check"
+```
+</example>
+
+<example type="bad" title="Vague task that leaves builder guessing">
+### Task 2: Add Validation
+
+Add email validation to the project. Make sure it handles edge cases. Write tests.
+</example>
+
+The good example provides exact file paths, complete code, exact commands with expected output, and a single commit per TDD cycle. The bad example forces the builder to guess paths, invent code, and figure out what "edge cases" means.
+
+</examples>
+
+<rules>
+
 ## Remember
 - Exact file paths always
 - Complete code in plan (not "add validation")
 - Exact commands with expected output
 - Reference relevant skills with @ syntax
 - DRY, YAGNI, TDD, frequent commits
+
+</rules>
 
 ## Execution Handoff
 

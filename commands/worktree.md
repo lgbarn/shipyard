@@ -8,7 +8,9 @@ argument-hint: "[create <name>] [list] [switch <name>] [remove <name>]"
 
 You are executing the Shipyard worktree management workflow. This provides explicit worktree lifecycle management for isolated feature development.
 
-## Step 0: Parse Arguments
+<prerequisites>
+
+## Step 1: Parse Arguments
 
 Parse the subcommand from arguments:
 - `create <name>` — Create a new worktree for isolated development
@@ -18,12 +20,16 @@ Parse the subcommand from arguments:
 
 If no subcommand is provided, default to `list`.
 
-## Step 1: Validate Git State
+## Step 2: Validate Git State
 
 1. Verify this is a git repository: `git rev-parse --show-toplevel`
 2. If not a git repo, tell the user: "Not a git repository. Initialize with `git init` first."
 
+</prerequisites>
+
 ---
+
+<execution>
 
 ## Subcommand: create
 
@@ -36,7 +42,7 @@ If no subcommand is provided, default to `list`.
 
 ### Step C2: Select Worktree Directory
 
-Follow the git-workflow skill's directory selection priority:
+Follow the git-workflow skill's directory selection priority (checks existing dirs, CLAUDE.md prefs, then asks user):
 
 1. **Check existing directories:**
    ```bash
@@ -61,7 +67,7 @@ Follow the git-workflow skill's directory selection priority:
    Which would you prefer?
    ```
 
-### Step C3: Safety Verification
+### Step C3: Verify Safety
 
 **For project-local directories (.worktrees or worktrees):**
 
@@ -124,6 +130,8 @@ npm test / cargo test / pytest / go test ./...
 - **If tests pass:** Report ready.
 - **If tests fail:** Report failures, ask whether to proceed or investigate.
 
+<output>
+
 ### Step C7: Report
 
 ```
@@ -134,6 +142,8 @@ Worktree created:
 
 Ready to develop. Run `/shipyard:build` or `/shipyard:quick` from the worktree.
 ```
+
+</output>
 
 ---
 
@@ -153,6 +163,8 @@ For each worktree:
 - Check if the branch has unpushed commits: `git log origin/<branch>..HEAD --oneline 2>/dev/null`
 - Mark the current worktree with `(current)`
 
+<output>
+
 ### Step L3: Display
 
 ```
@@ -161,6 +173,8 @@ Worktrees:
     /path/to/.worktrees/feature-x  feature-x   (3 unpushed commits)
     /path/to/.worktrees/phase-2    phase-2     (clean)
 ```
+
+</output>
 
 ---
 
@@ -173,6 +187,8 @@ git worktree list | grep "<name>"
 ```
 
 If not found, show available worktrees and ask the user to pick one.
+
+<output>
 
 ### Step S2: Switch
 
@@ -187,6 +203,8 @@ Navigate to: cd <full-path>
 ```
 
 Note: Claude Code operates in the directory it was started in. The user will need to `cd` to the worktree path or start a new session from there.
+
+</output>
 
 ---
 
@@ -237,6 +255,8 @@ If the branch should also be deleted (user confirmed), optionally:
 git branch -d <branch-name>
 ```
 
+<output>
+
 ### Step R5: Report
 
 ```
@@ -244,3 +264,7 @@ Worktree removed:
   Path: <path> (deleted)
   Branch: <branch-name> (preserved / deleted)
 ```
+
+</output>
+
+</execution>

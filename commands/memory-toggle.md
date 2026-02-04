@@ -8,16 +8,22 @@ argument-hint: ""
 
 You are executing the memory toggle workflow. Determine from the command which action to take.
 
-## Step 0: Determine Action
+<prerequisites>
+
+## Step 1: Determine Action
 
 - `/shipyard:memory-enable` → Enable memory
 - `/shipyard:memory-disable` → Disable memory
 
-## Step 1: Read Current Configuration
+## Step 2: Read Current Configuration
 
 Read `~/.config/shipyard/config.json` if it exists. Note current memory setting.
 
-## Step 2: Handle Enable
+</prerequisites>
+
+<execution>
+
+## Step 3: Handle Enable
 
 If enabling and memory is already enabled:
 > "Memory is already enabled. Use `/shipyard:memory-status` to see current statistics."
@@ -40,7 +46,7 @@ If enabling and memory is disabled (or not configured):
    >
    > To import existing conversation history, run `/shipyard:memory-import`."
 
-## Step 3: Handle Disable
+## Step 4: Handle Disable
 
 If disabling and memory is already disabled:
 > "Memory is already disabled."
@@ -74,7 +80,13 @@ If disabling and memory is enabled:
    > - Delete specific sessions with context
    > - Delete the database: `rm ~/.config/shipyard/memory.db`"
 
-## Step 4: Verify
+</execution>
+
+<output>
+
+## Step 5: Verify
 
 Display the new configuration state:
 > "Memory is now: **{enabled/disabled}**"
+
+</output>

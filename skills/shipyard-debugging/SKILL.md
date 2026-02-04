@@ -3,14 +3,19 @@ name: shipyard-debugging
 description: Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes
 ---
 
-<!-- TOKEN BUDGET: 360 lines / ~1080 tokens -->
+<!-- TOKEN BUDGET: 380 lines / ~1140 tokens -->
 
 # Systematic Debugging
 
-## Activation Triggers
+<activation>
+
+## When This Skill Activates
+
 - Any bug, error, test failure, or unexpected behavior encountered
 - Error/exception/traceback/failure appearing in output
-- Before proposing any fix — must investigate root cause first
+- Before proposing any fix -- must investigate root cause first
+
+</activation>
 
 ## Overview
 
@@ -50,6 +55,8 @@ Use for ANY technical issue:
 - You're in a hurry (rushing guarantees rework)
 - Manager wants it fixed NOW (systematic is faster than thrashing)
 
+<instructions>
+
 ## The Four Phases
 
 You MUST complete each phase before proceeding to the next.
@@ -68,7 +75,7 @@ You MUST complete each phase before proceeding to the next.
    - Can you trigger it reliably?
    - What are the exact steps?
    - Does it happen every time?
-   - If not reproducible → gather more data, don't guess
+   - If not reproducible -- gather more data, don't guess
 
 3. **Check Recent Changes**
    - What changed that could cause this?
@@ -78,7 +85,7 @@ You MUST complete each phase before proceeding to the next.
 
 4. **Gather Evidence in Multi-Component Systems**
 
-   **WHEN system has multiple components (CI → build → signing, API → service → database):**
+   **WHEN system has multiple components (CI -> build -> signing, API -> service -> database):**
 
    **BEFORE proposing fixes, add diagnostic instrumentation:**
    ```
@@ -112,7 +119,7 @@ You MUST complete each phase before proceeding to the next.
    codesign --sign "$IDENTITY" --verbose=4 "$APP"
    ```
 
-   **This reveals:** Which layer fails (secrets → workflow ✓, workflow → build ✗)
+   **This reveals:** Which layer fails (secrets -> workflow ok, workflow -> build FAIL)
 
 5. **Trace Data Flow**
 
@@ -164,7 +171,7 @@ You MUST complete each phase before proceeding to the next.
    - Don't fix multiple things at once
 
 3. **Verify Before Continuing**
-   - Did it work? Yes → Phase 4
+   - Did it work? Yes -- Phase 4
    - Didn't work? Form NEW hypothesis
    - DON'T add more fixes on top
 
@@ -219,6 +226,43 @@ You MUST complete each phase before proceeding to the next.
 
    This is NOT a failed hypothesis - this is a wrong architecture.
 
+</instructions>
+
+<examples>
+
+## Example: Systematic vs Random Debugging
+
+<example type="good" title="Systematic root cause investigation">
+**Bug:** API returns 500 on user creation
+
+Phase 1: Read error -- "UNIQUE constraint failed: users.email"
+Phase 1: Reproduce -- POST /users with email "test@example.com" -- 500 every time
+Phase 1: Check changes -- git log shows migration added unique constraint yesterday
+Phase 2: Find working -- GET /users works fine; POST /users with new email works
+Phase 2: Difference -- failing requests use emails already in database
+Phase 3: Hypothesis -- "The endpoint doesn't check for existing email before INSERT"
+Phase 3: Test -- Add SELECT before INSERT, confirm 409 Conflict returned
+Phase 4: Write failing test for duplicate email, implement check, verify all tests pass
+
+Result: 20 minutes, root cause found, proper fix with test.
+</example>
+
+<example type="bad" title="Random fix attempts">
+**Bug:** API returns 500 on user creation
+
+1. "Probably a database issue" -- restart database -- still fails
+2. "Maybe the ORM is stale" -- clear ORM cache -- still fails
+3. "Try adding error handling" -- wrap in try/except, return 500 -- now returns 500 with no info
+4. "Add more logging" -- still don't know why
+5. 2 hours later, read the actual error message: "UNIQUE constraint failed"
+
+Result: 2 hours of thrashing, same fix needed.
+</example>
+
+</examples>
+
+<rules>
+
 ## Red Flags - STOP and Follow Process
 
 If you catch yourself thinking:
@@ -259,8 +303,10 @@ If you catch yourself thinking:
 | "I'll write test after confirming fix works" | Untested fixes don't stick. Test first proves it. |
 | "Multiple fixes at once saves time" | Can't isolate what worked. Causes new bugs. |
 | "Reference too long, I'll adapt the pattern" | Partial understanding guarantees bugs. Read it completely. |
-| "I see the problem, let me fix it" | Seeing symptoms ≠ understanding root cause. |
+| "I see the problem, let me fix it" | Seeing symptoms does not equal understanding root cause. |
 | "One more fix attempt" (after 2+ failures) | 3+ failures = architectural problem. Question pattern, don't fix again. |
+
+</rules>
 
 ## Quick Reference
 

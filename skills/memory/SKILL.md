@@ -3,11 +3,13 @@ name: memory
 description: Use when user asks 'how should I...' or 'what's the best approach...' after exploring code, OR when you've tried to solve something and are stuck, OR for unfamiliar workflows, OR when user references past work. Searches conversation history.
 ---
 
-<!-- TOKEN BUDGET: 200 lines / ~600 tokens -->
+<!-- TOKEN BUDGET: 140 lines / ~420 tokens -->
 
 # Memory
 
 **Core principle:** Search before reinventing. Searching costs nothing; reinventing or repeating mistakes costs everything.
+
+<instructions>
 
 ## Mandatory: Use the Search Agent
 
@@ -31,6 +33,10 @@ The agent will:
 
 **Saves 50-100x context vs. loading raw exchanges.**
 
+</instructions>
+
+<activation>
+
 ## When to Use
 
 You often get value from consulting memory once you understand what you're being asked. Search in these situations:
@@ -53,16 +59,49 @@ You often get value from consulting memory once you understand what you're being
 **During lessons-learned:**
 - Proposing lessons during `/shipyard:ship`
 
-**Don't search first:**
-- For current codebase structure (use Grep/Read to explore first)
-- For info in current conversation
-- Before understanding what you're being asked to do
-- When the problem is clearly novel
-- When the user explicitly wants a fresh approach
+## When NOT to Search
+
+Do not reach for memory when the answer is right in front of you:
+
+- **Current codebase questions** -- use Grep/Read to explore first; memory stores conversations, not file contents
+- **Information already in this conversation** -- scroll up, don't search
+- **Before understanding the ask** -- understand first, then search for prior art
+- **Clearly novel work** -- if nothing similar has been done before, searching wastes time
+- **User explicitly wants a fresh approach** -- respect "from scratch" requests
+
+</activation>
+
+<examples>
+
+## Search Query Examples
+
+**Good query** -- specific, scoped, tells the agent what to look for:
+```
+Search for "Terraform remote state configuration". Focus on backend setup
+decisions, gotchas with S3 state locking, and any migrations we performed.
+```
+
+**Bad query** -- vague, overly broad, no focus:
+```
+Search for "Terraform stuff".
+```
+
+**Good query** -- references a concrete problem:
+```
+Search for "Flask rate limiting middleware". Focus on which library we chose,
+how we configured per-endpoint limits, and any issues with Redis token buckets.
+```
+
+**Bad query** -- too generic to produce useful results:
+```
+Search for "API best practices".
+```
+
+</examples>
 
 ## Direct Tool Access (Discouraged)
 
-You CAN use the `memory_search` MCP tool directly, but DON'T — it wastes your context window. Always dispatch the search-memory agent instead.
+You CAN use the `memory_search` MCP tool directly, but DON'T -- it wastes your context window. Always dispatch the search-memory agent instead.
 
 ## Transparency
 

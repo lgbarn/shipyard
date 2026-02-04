@@ -8,6 +8,8 @@ argument-hint: ""
 
 You are executing the Shipyard status workflow. Follow these steps precisely.
 
+<prerequisites>
+
 ## Step 1: Check State Exists
 
 Check if `.shipyard/` directory exists.
@@ -19,11 +21,15 @@ Check if `.shipyard/` directory exists.
 
 ## Step 2: Read State Files
 
-Follow **State Loading Protocol** (see `docs/PROTOCOLS.md`) -- read STATE.md, ROADMAP.md, PROJECT.md, config.json, and recent SUMMARY/VERIFICATION files.
+Follow **State Loading Protocol** (read STATE.md, ROADMAP.md, PROJECT.md, config.json, and recent SUMMARY/VERIFICATION files to establish session context; see `docs/PROTOCOLS.md`).
+
+</prerequisites>
+
+<execution>
 
 ## Step 3: Display Native Task Progress
 
-Follow **Native Task Scaffolding Protocol** (see `docs/PROTOCOLS.md`) -- call TaskList to show the current state of all Shipyard-created native tasks.
+Follow **Native Task Scaffolding Protocol** (create/update native tasks for progress tracking via TaskCreate/TaskUpdate; see `docs/PROTOCOLS.md`) -- call TaskList to show the current state of all Shipyard-created native tasks.
 
 ## Step 4: Display Dashboard
 
@@ -67,6 +73,10 @@ From STATE.md and REVIEW.md files:
 - Any blocked tasks
 - Any gaps identified
 
+</execution>
+
+<output>
+
 ## Step 5: Intelligent Routing
 
 Based on the current state, suggest the most appropriate next action:
@@ -87,3 +97,5 @@ Present the suggestion clearly:
 > "**Recommended next step:** `/shipyard:{command}` -- {reason}"
 
 If multiple actions are reasonable, list them in priority order.
+
+</output>

@@ -8,12 +8,14 @@ argument-hint: "[--all-sessions-today]"
 
 You are executing the memory forget workflow. Follow these steps precisely.
 
-## Step 0: Parse Arguments
+<prerequisites>
+
+## Step 1: Parse Arguments
 
 Check for flags:
 - `--all-sessions-today`: Delete all sessions from today, not just current session
 
-## Step 1: Check Memory Enabled
+## Step 2: Check Memory Enabled
 
 Check `~/.config/shipyard/config.json` for memory settings.
 
@@ -22,11 +24,15 @@ Check `~/.config/shipyard/config.json` for memory settings.
   > "Memory is not enabled. Nothing to forget."
   Stop here.
 
-## Step 2: Get Current Session ID
+## Step 3: Get Current Session ID
 
 Determine the current session ID from the conversation context.
 
-## Step 3: Confirm Deletion
+</prerequisites>
+
+<execution>
+
+## Step 4: Confirm Deletion
 
 Ask for confirmation using AskUserQuestion:
 
@@ -40,7 +46,7 @@ Ask for confirmation using AskUserQuestion:
 
 Where `{scope}` is either "this session" or "all sessions today" based on flags.
 
-## Step 4: Execute Deletion
+## Step 5: Execute Deletion
 
 If confirmed, call the memory MCP server's `memory_forget` tool:
 
@@ -59,10 +65,16 @@ For all sessions today:
 }
 ```
 
-## Step 5: Confirm Result
+</execution>
+
+<output>
+
+## Step 6: Confirm Result
 
 Display the result:
 
 > "Deleted {N} exchanges from memory.
 >
 > Note: New exchanges in this session will still be indexed unless you run `/shipyard:memory-forget` again before the session ends, or disable memory entirely with `/shipyard:memory-disable`."
+
+</output>

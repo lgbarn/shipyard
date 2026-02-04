@@ -8,6 +8,8 @@ argument-hint: "[task description]"
 
 You are executing the Shipyard quick task workflow. This is for small, self-contained tasks that don't need the full phase/plan/build cycle but still benefit from structured execution.
 
+<prerequisites>
+
 ## Step 1: Validate State
 
 Check if `.shipyard/` exists.
@@ -38,16 +40,20 @@ Look in `.shipyard/quick/` for existing quick task files. Generate the next sequ
 - First task: `001`
 - Format: zero-padded 3-digit number
 
-## Step 3a: Detect Working Directory & Model Routing
+## Step 4: Detect Working Directory & Model Routing
 
-Follow **Worktree Protocol** (see `docs/PROTOCOLS.md`) -- detect worktree, record working directory and branch.
-Follow **Model Routing Protocol** (see `docs/PROTOCOLS.md`) -- read `model_routing` from config for agent model selection.
+Follow **Worktree Protocol** (detect if running in a git worktree; if so, use worktree root for paths and record the branch name; see `docs/PROTOCOLS.md`) -- detect worktree, record working directory and branch.
+Follow **Model Routing Protocol** (select the correct model for each agent role using `model_routing` from config; see `docs/PROTOCOLS.md`) -- read `model_routing` from config for agent model selection.
 
-## Step 4: Quick Plan
+</prerequisites>
 
-Dispatch an **architect agent** (subagent_type: "shipyard:architect") in quick mode with context per **Agent Context Protocol** (see `docs/PROTOCOLS.md`):
+<execution>
+
+## Step 5: Quick Plan
+
+Dispatch an **architect agent** (subagent_type: "shipyard:architect") in quick mode with context per **Agent Context Protocol** (pass PROJECT.md, config.json, working directory, branch, and worktree status to all agents; see `docs/PROTOCOLS.md`):
 - The task description
-- Codebase docs per **Codebase Docs Protocol**
+- Codebase docs per **Codebase Docs Protocol** (resolve configured codebase docs path and load CONVENTIONS.md, STACK.md, ARCHITECTURE.md, etc.; see `docs/PROTOCOLS.md`)
 
 The architect produces a simplified plan in `.shipyard/quick/QUICK-{NNN}.md`:
 ```markdown
@@ -68,7 +74,7 @@ The architect produces a simplified plan in `.shipyard/quick/QUICK-{NNN}.md`:
 - {how to verify it worked}
 ```
 
-## Step 5: Execute
+## Step 6: Execute
 
 Dispatch a **builder agent** (subagent_type: "shipyard:builder") with:
 - The quick plan
@@ -88,11 +94,11 @@ The builder should:
   **Completed:** {timestamp}
   ```
 
-## Step 6: Update State
+## Step 7: Update State
 
-Follow **State Update Protocol** (see `docs/PROTOCOLS.md`) -- append to history: `[{timestamp}] Quick task {NNN}: {title} ({status})`
+Follow **State Update Protocol** (update `.shipyard/STATE.md` with current phase, position, status, and append to history; see `docs/PROTOCOLS.md`) -- append to history: `[{timestamp}] Quick task {NNN}: {title} ({status})`
 
-## Step 7: Commit
+## Step 8: Commit
 
 Create an atomic git commit:
 ```
@@ -101,7 +107,11 @@ shipyard(quick-{NNN}): {task title}
 
 Include both the code changes and the quick task file.
 
-## Step 8: Report
+</execution>
+
+<output>
+
+## Step 9: Report
 
 Display the result:
 ```
@@ -114,3 +124,5 @@ Files changed: {count}
 If failed, explain why and suggest options:
 - Retry with `/shipyard:quick {refined description}`
 - Escalate to full planning with `/shipyard:init`
+
+</output>

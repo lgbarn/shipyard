@@ -1,26 +1,54 @@
 # Shipyard Protocols
 
-Shared protocols referenced by commands and agents. Each protocol is self-contained.
+Shared protocols referenced by commands and agents. Each protocol is self-contained — copy the relevant section into agent prompts as needed.
+
+---
 
 ## State Loading Protocol
 
-Load project state files to establish context for the current session.
+<purpose>
+Load project state files to establish context for the current session. This is the first step in every command that needs to understand where the project is.
+</purpose>
 
+<instructions>
 Read the following files (skip any that don't exist):
-- `.shipyard/STATE.md` -- current phase, position, status, and history
-- `.shipyard/ROADMAP.md` -- phases and progress
-- `.shipyard/PROJECT.md` -- project overview and requirements
-- `.shipyard/config.json` -- workflow preferences, model routing, gate settings
-- Recent `SUMMARY.md` files from `.shipyard/phases/` -- decisions and results
-- Any `VERIFICATION.md` files from `.shipyard/phases/` -- phase-level outcomes
 
-Use STATE.md to determine the current phase and what was last completed. Use ROADMAP.md to understand the full scope. Use PROJECT.md for requirements context.
+1. `.shipyard/STATE.md` — current phase, position, status, and history
+2. `.shipyard/ROADMAP.md` — phases, scope, and progress markers
+3. `.shipyard/PROJECT.md` — project overview, goals, requirements, constraints
+4. `.shipyard/config.json` — workflow preferences, model routing, gate settings
+5. Recent `SUMMARY.md` files from `.shipyard/phases/` — decisions and results from completed work
+6. Any `VERIFICATION.md` files from `.shipyard/phases/` — phase-level verification outcomes
+
+Use STATE.md to determine the current phase and what was last completed. Use ROADMAP.md to understand the full scope and phase ordering. Use PROJECT.md for requirements context and success criteria.
+</instructions>
+
+<rules>
+- Never fail if a file is missing — skip it and proceed with available context
+- STATE.md is the single source of truth for current position
+- If STATE.md and ROADMAP.md disagree on phase status, trust STATE.md (it's updated more frequently)
+- Load SUMMARY.md files only for the current and immediately preceding phase (avoid stale context)
+</rules>
+
+<example description="Correct state loading order and usage">
+1. Read STATE.md → "Current Phase: 3, Status: building, Position: Plan 2.1 in progress"
+2. Read ROADMAP.md → Phase 3 has 3 plans across 2 waves
+3. Read config.json → model_routing, gate settings
+4. Read .shipyard/phases/3/wave-1/plan-1/SUMMARY.md → Wave 1 complete
+5. Conclusion: Resume building at Plan 2.1 in Phase 3
+</example>
+
+---
 
 ## Model Routing Protocol
 
-Select the correct model for each agent role using `model_routing` from `.shipyard/config.json`.
+<purpose>
+Select the correct model for each agent dispatch. Respects user-configured overrides in config.json while providing sensible defaults. This ensures expensive models are used only where they add value.
+</purpose>
 
-**Role-to-key mapping:**
+<instructions>
+Read `model_routing` from `.shipyard/config.json` and map agent roles to model keys:
+
 | Agent Role | Config Key | Default |
 |---|---|---|
 | Builder | `model_routing.building` | sonnet |
@@ -32,7 +60,23 @@ Select the correct model for each agent role using `model_routing` from `.shipya
 | Researcher | `model_routing.planning` | sonnet |
 | Architect | `model_routing.architecture` | opus |
 
-If `model_routing` is not present in config, use agent defaults.
+Pass the resolved model name as the `model` parameter in the Task tool call.
+</instructions>
+
+<rules>
+- If `model_routing` is absent from config.json, use the defaults from the table above
+- Never hardcode a model — always check config first
+- The user may override any role; respect their choice even if it seems suboptimal
+</rules>
+
+<example description="Correct model resolution">
+config.json contains: `"model_routing": { "building": "opus", "review": "haiku" }`
+
+Dispatching a Builder → use "opus" (user override)
+Dispatching a Reviewer → use "haiku" (user override)
+Dispatching a Verifier → use "haiku" (default — no override specified)
+Dispatching an Architect → use "opus" (default — no override specified)
+</example>
 
 **Full config.json structure** (used during `/shipyard:init`):
 ```json
@@ -60,160 +104,334 @@ If `model_routing` is not present in config, use agent defaults.
 }
 ```
 
-**Defaults:** `security_audit: true`, `simplification_review: true`, `iac_validation: "auto"`, `documentation_generation: true`, `codebase_docs_path: ".shipyard/codebase"`. Model routing defaults to the table above. Context tier defaults to `"auto"`.
+**Defaults:** `security_audit: true`, `simplification_review: true`, `iac_validation: "auto"`, `documentation_generation: true`, `codebase_docs_path: ".shipyard/codebase"`. Context tier defaults to `"auto"`.
+
+---
 
 ## Checkpoint Protocol
 
-Create named checkpoints for rollback safety at key pipeline stages.
+<purpose>
+Create named git tag checkpoints at key pipeline stages so the user can roll back if a subsequent step fails. Checkpoints are lightweight — they add no overhead but provide critical safety nets.
+</purpose>
 
-**Command:**
+<instructions>
+Run the checkpoint script with a descriptive label:
+
 ```bash
 ${CLAUDE_PLUGIN_ROOT}/scripts/checkpoint.sh "<label>"
 ```
 
-**Standard checkpoint names:**
-- `pre-build-phase-{N}` -- before build execution starts
-- `post-plan-phase-{N}` -- after planning completes
-- `post-build-phase-{N}` -- after build and verification complete
+Create checkpoints at the pipeline stages specified by the command workflow.
+</instructions>
 
-Create checkpoints at the pipeline stages specified by the command workflow. Each checkpoint is a lightweight git tag that enables rollback if a subsequent step fails.
+<rules>
+- Labels must be alphanumeric with hyphens only (no spaces, no special characters)
+- Always create the checkpoint before the risky operation, not after
+- Each checkpoint creates a lightweight git tag — it does not create a commit
+</rules>
+
+**Standard checkpoint names:**
+- `pre-build-phase-{N}` — before build execution starts
+- `post-plan-phase-{N}` — after planning completes
+- `post-build-phase-{N}` — after build and verification complete
+
+<example description="Checkpoint placement in build pipeline">
+1. Planning completes → checkpoint "post-plan-phase-3"
+2. About to start building → checkpoint "pre-build-phase-3"
+3. Builder runs, reviewer approves, verifier passes
+4. All gates pass → checkpoint "post-build-phase-3"
+5. If step 3 fails → user can rollback to "pre-build-phase-3"
+</example>
+
+---
 
 ## Worktree Protocol
 
-Detect and record the git worktree context so agents operate on the correct paths and branch.
+<purpose>
+Detect and record the git worktree context so agents operate on the correct paths and branch. Without this, agents may modify files in the wrong working tree or commit to the wrong branch.
+</purpose>
 
-**Detection steps:**
+<instructions>
 1. Run `git worktree list` to identify if operating in a worktree
 2. Record `$(pwd)` as the working directory
 3. Record `$(git branch --show-current)` as the current branch
+4. Pass working directory, current branch, and worktree status to all dispatched agents
+</instructions>
 
-**If operating in a worktree:**
-- All file operations should be relative to the worktree directory
-- Git operations (commit, diff, status) operate on the worktree's branch
-- The `.shipyard/` directory lives in the main working tree -- reference it via the path provided
+<rules>
+- **In a worktree:** All file operations are relative to the worktree directory. Git operations (commit, diff, status) operate on the worktree's branch. The `.shipyard/` directory lives in the main working tree — reference it via the path from `git worktree list`.
+- **In the main working tree:** Assume standard paths relative to the project root.
+- Always pass these three values to every agent dispatch: working directory, branch name, worktree boolean.
+</rules>
 
-**If operating in the main working tree:**
-- Assume standard paths relative to the project root
+<example description="Worktree detection and agent dispatch">
+`git worktree list` output:
+```
+/home/user/myproject          abc1234 [main]
+/home/user/myproject-phase-3  def5678 [phase-3-auth]
+```
 
-Pass working directory, current branch, and worktree status to all dispatched agents.
+Current directory is `/home/user/myproject-phase-3` → operating in worktree.
+- Working directory: `/home/user/myproject-phase-3`
+- Branch: `phase-3-auth`
+- .shipyard/ path: `/home/user/myproject/.shipyard/`
+- Pass all three to agent prompts
+</example>
+
+---
 
 ## Issue Tracking Protocol
 
-Append non-blocking findings to `.shipyard/ISSUES.md` so they persist across sessions.
+<purpose>
+Persist non-blocking findings in `.shipyard/ISSUES.md` so they survive across sessions and accumulate for later resolution. Without this, reviewer and auditor suggestions are lost when the session ends.
+</purpose>
 
+<instructions>
 When non-blocking issues are found (Important or Suggestion severity):
-1. Check if `.shipyard/ISSUES.md` exists
+
+1. Check if `.shipyard/ISSUES.md` exists; if not, create it with the table header
 2. Append findings as new rows to the Open Issues table
 3. Auto-increment the ID from the highest existing ID
-4. Set `source` to the agent role (e.g., "reviewer", "auditor")
-5. Set severity: Important -> medium, Suggestion -> low
-6. Set date to current timestamp
+4. Set `source` to the agent role (e.g., "reviewer", "auditor", "simplifier")
+5. Map severity: Important → medium, Suggestion → low
+6. Set date to current date (YYYY-MM-DD)
+</instructions>
 
-This ensures findings are tracked rather than lost between sessions.
+<rules>
+- Never overwrite existing issues — only append new rows
+- Critical findings are NOT issues — they block the pipeline and must be resolved immediately
+- Do not duplicate: check if a similar issue already exists before appending
+- Issues are resolved via `/shipyard:issues` which marks them as closed
+</rules>
+
+<example description="Appending a reviewer finding to ISSUES.md">
+Reviewer finds: "The `processPayment` function has no input validation but is not blocking."
+
+Append to ISSUES.md:
+```markdown
+| 7 | reviewer | medium | 2026-02-04 | `processPayment` in `src/payments.ts` lacks input validation for amount parameter |
+```
+</example>
+
+---
 
 ## Codebase Docs Protocol
 
-Resolve the configured codebase documentation path and load relevant files.
+<purpose>
+Load project-specific documentation (conventions, architecture, stack) so agents understand the codebase context. This replaces generic assumptions with project-specific knowledge.
+</purpose>
 
+<instructions>
 1. Read `codebase_docs_path` from `.shipyard/config.json`
    - If not specified, use default: `.shipyard/codebase`
 2. Load files from that path (skip any that don't exist):
-   - `CONVENTIONS.md` -- Code style and project conventions
-   - `STACK.md` -- Technology stack information
-   - `ARCHITECTURE.md` -- Project architecture
-   - `CONCERNS.md` -- Known technical concerns
-   - `TESTING.md` -- Test framework and patterns
-   - `INTEGRATIONS.md` -- External services and APIs
-   - `STRUCTURE.md` -- Directory layout with annotations
-3. Pass loaded content to agents as context
+   - `CONVENTIONS.md` — Code style and project conventions
+   - `STACK.md` — Technology stack and versions
+   - `ARCHITECTURE.md` — System architecture and design patterns
+   - `CONCERNS.md` — Known technical concerns and tech debt
+   - `TESTING.md` — Test framework, patterns, and coverage expectations
+   - `INTEGRATIONS.md` — External services and APIs
+   - `STRUCTURE.md` — Directory layout with annotations
+3. Pass loaded content to agents as context alongside the agent prompt
+</instructions>
 
-The path is either `.shipyard/codebase/` (private, gitignored) or `docs/codebase/` (committed to git), based on user choice at init time.
+<rules>
+- The path is either `.shipyard/codebase/` (private, gitignored) or `docs/codebase/` (committed to git), based on user choice at init time
+- Never fail if the directory or any file is missing — these are optional
+- Pass only the files that exist; do not generate placeholders
+- CONVENTIONS.md is the highest-priority file — if only one file exists, pass that one
+</rules>
+
+---
 
 ## Agent Context Protocol
 
-Standard context to pass when dispatching any agent via the Task tool.
+<purpose>
+Define the standard context bundle to pass when dispatching any agent via the Task tool. Ensures agents have the information they need without overloading them with irrelevant content.
+</purpose>
 
-**Essential context (pass to all agents):**
-- `.shipyard/PROJECT.md` -- Project overview and requirements
-- `.shipyard/config.json` -- Workflow preferences
+<instructions>
+**Essential context (pass to every agent):**
+- `.shipyard/PROJECT.md` — Project overview and requirements
+- `.shipyard/config.json` — Workflow preferences and model routing
 - Working directory path (`$(pwd)`)
 - Current git branch (`$(git branch --show-current)`)
-- Worktree status (via **Worktree Protocol**)
+- Worktree status (via Worktree Protocol above)
 
-**Conditional context (pass if exists and relevant):**
-- `.shipyard/STATE.md` -- Current state and history
-- Codebase docs (via **Codebase Docs Protocol**)
-- Previous phase/plan results (SUMMARY.md, RESEARCH.md files)
-- `.shipyard/ISSUES.md` -- Open issues
-- `.shipyard/phases/{N}/CONTEXT-{N}.md` -- User decisions from discussion capture
+**Conditional context (pass if exists and is relevant to the agent's task):**
+- `.shipyard/STATE.md` — Current state and history
+- Codebase docs (via Codebase Docs Protocol above)
+- Previous phase/plan results (`SUMMARY.md`, `RESEARCH.md` files)
+- `.shipyard/ISSUES.md` — Open issues
+- `.shipyard/phases/{N}/CONTEXT-{N}.md` — User decisions from Discussion Capture
 
 **Agent-specific additions:**
-- **Builder:** CONVENTIONS.md, results from previous waves, CONTEXT file
+- **Builder:** CONVENTIONS.md, results from previous waves in the same phase, CONTEXT file
 - **Reviewer:** Git diff of changed files, the plan being reviewed, CONTEXT file
-- **Auditor:** All changed files, dependency manifests (package.json, Cargo.toml, etc.)
-- **Documenter:** Existing docs in `docs/`, all SUMMARY.md files
+- **Auditor:** All changed files across the phase, dependency manifests (package.json, Cargo.toml, go.mod, etc.)
+- **Documenter:** Existing docs in `docs/`, all SUMMARY.md files from the milestone
+- **Simplifier:** All changed files across the phase, original plan scope for comparison
+</instructions>
+
+<rules>
+- Never pass the entire `.shipyard/` directory — select only relevant files
+- Essential context is mandatory; skipping it causes agents to make incorrect assumptions
+- For multi-wave builds, pass SUMMARY.md from completed waves so later builders know what was already done
+- Context file paths must be absolute or relative to the working directory — never use `~` or environment variables in agent prompts
+</rules>
+
+<example description="Context bundle for a Builder agent">
+Good — focused context:
+```
+Project: .shipyard/PROJECT.md (requirements)
+Config: .shipyard/config.json (git_strategy, model_routing)
+Conventions: .shipyard/codebase/CONVENTIONS.md (code style)
+Plan: .shipyard/phases/3/wave-2/plan-1/PLAN.md (what to build)
+Prior work: .shipyard/phases/3/wave-1/plan-1/SUMMARY.md (wave 1 results)
+Decisions: .shipyard/phases/3/CONTEXT-3.md (user preferences)
+Branch: feature/phase-3-auth
+Working dir: /home/user/myproject
+```
+
+Bad — context overload:
+```
+Passing all 7 codebase docs + all phase summaries from phases 1-6 + full ROADMAP.md + full ISSUES.md
+```
+Agents perform better with focused, relevant context than with everything available.
+</example>
+
+---
 
 ## State Update Protocol
 
-Update `.shipyard/STATE.md` to reflect current progress after each workflow step.
+<purpose>
+Keep `.shipyard/STATE.md` current after every workflow step. STATE.md is the single source of truth for project progress — stale state causes incorrect resume behavior and confuses subsequent commands.
+</purpose>
 
-**Required fields to update:**
-- `**Last Updated:** {current timestamp}`
+<instructions>
+After each workflow step, update these fields in STATE.md:
+
+**Required fields:**
+- `**Last Updated:** {current date, YYYY-MM-DD}`
 - `**Current Phase:** {phase number, or "N/A" if between milestones}`
-- `**Current Position:** {human-readable description}`
-- `**Status:** {status value}`
+- `**Current Position:** {human-readable description of where work stands}`
+- `**Status:** {one of the canonical status values below}`
 
 **Append to History section:**
-- `- [{timestamp}] {What action was just completed}`
+- `- [{YYYY-MM-DD}] {What action was just completed}`
+</instructions>
 
 **Canonical status values:**
-- `ready` -- Initialized, ready to plan
-- `planning` -- Currently planning a phase
-- `planned` -- Phase planned, ready to build
-- `building` -- Currently executing a phase
-- `shipped` -- Delivery complete
+| Status | Meaning |
+|---|---|
+| `ready` | Initialized, ready to plan |
+| `planning` | Currently planning a phase |
+| `planned` | Phase planned, ready to build |
+| `building` | Currently executing a phase |
+| `shipped` | Delivery complete |
 
-Always commit STATE.md updates along with related artifacts.
+<rules>
+- Always commit STATE.md updates along with related artifacts in the same commit
+- History entries are append-only — never remove or edit previous entries
+- Current Position should be specific enough to enable resume (e.g., "Plan 2.1 building, wave 1 complete" not just "building")
+- Status transitions follow the order: ready → planning → planned → building → (back to planning for next phase, or shipped)
+</rules>
+
+<example description="State update after completing Phase 3 planning">
+Before:
+```markdown
+**Last Updated:** 2026-02-03
+**Current Phase:** 3
+**Current Position:** Discussion capture complete
+**Status:** planning
+```
+
+After:
+```markdown
+**Last Updated:** 2026-02-04
+**Current Phase:** 3
+**Current Position:** Phase planned (3 plans, 2 waves)
+**Status:** planned
+
+## History
+- [2026-02-04] Phase 3 planned (3 plans, 2 waves)
+- [2026-02-03] Phase 3 discussion captured (4 decisions)
+- [2026-02-03] Phase 2 build complete (all 5 plans passed, verified, audited)
+```
+</example>
+
+---
 
 ## Native Task Scaffolding Protocol
 
-Map Shipyard workflow stages to native tasks (TaskCreate/TaskUpdate) for progress tracking.
+<purpose>
+Map Shipyard workflow stages to native Claude Code tasks (TaskCreate/TaskUpdate) so the user sees real-time progress tracking in their terminal. This provides visibility without requiring users to check STATE.md manually.
+</purpose>
+
+<instructions>
+**At init time (per phase):**
+- Create one task per phase: "Phase {N}: {phase_title}"
+- All start as `pending` except Phase 1 (set to `in_progress`)
 
 **At planning time (per phase):**
 - Create one task per plan: "Phase {N} / Plan {W}.{P}: {plan_title}"
-- Set status: `not_started`
-- Set `blockedBy` for plans that depend on earlier waves
+- Set status: `pending`
+- Set `blockedBy` for plans that depend on earlier waves completing
 
 **At build time (per plan):**
-- When builder completes: check SUMMARY.md status
+- Mark the plan's task as `in_progress` when the builder starts
+- When builder completes, check SUMMARY.md status:
   - `complete` → mark task as `completed`
   - `partial` or `failed` → keep task as `in_progress`
-- When review has `CRITICAL_ISSUES` after retries → mark task as `blocked`
+- When review has `CRITICAL_ISSUES` after max retries → keep task as `in_progress` and create a new blocking task describing the issue
 
 **At resume time:**
 - Call TaskList to check for existing tasks
 - If missing or stale, recreate from ROADMAP.md and artifact existence
 - Set status based on whether SUMMARY.md exists and its content
+</instructions>
 
-**At init time (per phase):**
-- Create one task per phase: "Phase {N}: {phase_title}"
-- All start as `not_started` except Phase 1 (next)
+<rules>
+- Task subjects should be concise and follow the naming patterns above
+- Always provide `activeForm` (present continuous) when creating tasks: "Building Phase 3 / Plan 2.1"
+- Do not create tasks for internal steps (checkpoints, state updates) — only for user-visible milestones
+- When a phase completes, mark its parent task as `completed` as well
+</rules>
+
+<example description="Task scaffolding for a 2-wave phase">
+After planning Phase 3 (2 waves, 3 plans):
+
+Task 1: "Phase 3 / Plan 1.1: Auth middleware" — pending
+Task 2: "Phase 3 / Plan 1.2: Token refresh" — pending
+Task 3: "Phase 3 / Plan 2.1: Integration tests" — pending, blockedBy: [1, 2]
+
+After wave 1 completes:
+Task 1: completed
+Task 2: completed
+Task 3: in_progress (automatically unblocked)
+</example>
+
+---
 
 ## Discussion Capture Protocol
 
-Capture user decisions and preferences for a phase before planning begins.
+<purpose>
+Capture user decisions and preferences for a phase before planning begins. This prevents architects and builders from making assumptions about ambiguous requirements, and ensures the user's intent is preserved across sessions.
+</purpose>
 
+<instructions>
 1. Read the target phase description from ROADMAP.md
-2. Present the phase scope to the user
-3. Identify gray areas: ambiguous requirements, design choices, approach decisions
-4. Ask targeted questions one at a time (multiple choice preferred via AskUserQuestion)
-5. Write decisions to `.shipyard/phases/{N}/CONTEXT-{N}.md`
+2. Present the phase scope to the user in a concise summary
+3. Identify gray areas: ambiguous requirements, multiple valid approaches, design choices with tradeoffs
+4. Ask targeted questions one at a time (use AskUserQuestion with multiple-choice options preferred)
+5. Write all decisions to `.shipyard/phases/{N}/CONTEXT-{N}.md`
+</instructions>
 
 **CONTEXT file format:**
 ```markdown
 # Phase {N} Context: {phase title}
 
-**Captured:** {timestamp}
+**Captured:** {YYYY-MM-DD}
 
 ## Decisions
 
@@ -226,26 +444,73 @@ Capture user decisions and preferences for a phase before planning begins.
 ...
 ```
 
-**Skip conditions:**
-- User passes `--no-discuss`
-- CONTEXT-{N}.md already exists (ask user if they want to redo it)
+<rules>
+- Skip discussion capture if:
+  - User passes `--no-discuss`
+  - `CONTEXT-{N}.md` already exists (ask user if they want to redo it)
+- Questions should be specific and actionable — not "what do you want?" but "Should auth use JWT or session cookies?"
+- Limit to 3-5 questions per phase; prioritize decisions that affect architecture
+- All downstream agents (researcher, architect, builder, reviewer) must receive CONTEXT-{N}.md as input context when it exists
+</rules>
 
-All downstream agents (researcher, architect, builder, reviewer) should receive CONTEXT-{N}.md as input context when it exists.
+<example description="Good vs bad discussion questions">
+Good questions (specific, actionable, affect architecture):
+- "Should the API use REST or GraphQL for the new endpoints?"
+- "Should auth tokens be stored in httpOnly cookies or localStorage?"
+- "Should we add database migrations or recreate the schema?"
+
+Bad questions (vague, no architectural impact):
+- "What do you think about the phase scope?"
+- "Any preferences for how we should proceed?"
+- "Do you want me to use best practices?"
+</example>
+
+---
 
 ## Commit Convention
 
-Use conventional commits for all Shipyard work.
+<purpose>
+Standardize commit messages across all Shipyard work for consistent history and changelog generation. Conventional commits enable automated tooling and make git history scannable.
+</purpose>
+
+<instructions>
+Use conventional commit format: `type(scope): description`
 
 **Standard prefixes:**
-- `feat(scope)`: New feature
-- `fix(scope)`: Bug fix
-- `refactor(scope)`: Code change that neither fixes a bug nor adds a feature
-- `test(scope)`: Adding or updating tests
-- `docs(scope)`: Documentation changes
-- `chore(scope)`: Maintenance tasks
+| Prefix | Usage |
+|---|---|
+| `feat(scope)` | New feature or capability |
+| `fix(scope)` | Bug fix |
+| `refactor(scope)` | Code change that neither fixes a bug nor adds a feature |
+| `test(scope)` | Adding or updating tests |
+| `docs(scope)` | Documentation changes |
+| `chore(scope)` | Maintenance tasks (deps, config, CI) |
 
 **IaC prefixes** (for infrastructure-as-code changes):
-- `infra(terraform)`: Terraform changes
-- `infra(ansible)`: Ansible changes
-- `infra(docker)`: Docker/container changes
-- `infra(ci)`: CI/CD pipeline changes
+| Prefix | Usage |
+|---|---|
+| `infra(terraform)` | Terraform changes |
+| `infra(ansible)` | Ansible changes |
+| `infra(docker)` | Docker/container changes |
+| `infra(ci)` | CI/CD pipeline changes |
+</instructions>
+
+<rules>
+- Scope should match the module or area affected (e.g., `auth`, `api`, `db`)
+- Description should be imperative mood, lowercase, no period: "add user validation" not "Added user validation."
+- Keep the first line under 72 characters
+- For Shipyard-generated commits, scope is typically the phase or plan: `feat(phase-3)` or `fix(plan-2.1)`
+</rules>
+
+<example description="Good vs bad commit messages">
+Good:
+- `feat(auth): add JWT refresh token rotation`
+- `fix(api): handle null response from payment gateway`
+- `test(phase-3): add integration tests for auth middleware`
+- `infra(docker): reduce image size with multi-stage build`
+
+Bad:
+- `updated stuff` (no type, no scope, vague)
+- `feat: Changes` (vague description, capitalized)
+- `fix(auth): Fixed the bug where users couldn't log in when they had special characters in their password and the server was running in production mode` (too long)
+</example>

@@ -3,21 +3,31 @@ name: security-audit
 description: Use when working with any code, infrastructure-as-code, configuration files, dependencies, or before claiming security posture is adequate — covers OWASP Top 10, secrets detection, dependency vulnerabilities, IaC security, Docker hardening, and supply chain risks
 ---
 
-<!-- TOKEN BUDGET: 90 lines / ~270 tokens -->
+<!-- TOKEN BUDGET: 110 lines / ~330 tokens -->
 
 # Security Audit
 
-## Overview
+<activation>
 
-Security is not a phase — it's a continuous practice. Every code change, dependency addition, and infrastructure modification has security implications.
+## When to Use
+
+- Working with any code that handles user input, authentication, or authorization
+- Adding or updating dependencies
+- Reviewing infrastructure-as-code (Terraform, Ansible, Docker, CloudFormation)
+- Before claiming security posture is adequate
+- When conversation mentions: security, vulnerability, CVE, OWASP, secrets, hardening
+
+</activation>
 
 **Core principle:** Assume every change introduces risk until proven otherwise.
+
+<instructions>
 
 ## OWASP Top 10 Quick Checks
 
 For every code change, verify:
 
-- [ ] **Injection:** All user input parameterized/escaped — no string concatenation in queries or commands
+- [ ] **Injection:** All user input parameterized/escaped -- no string concatenation in queries or commands
 - [ ] **Broken Auth:** Passwords hashed properly (bcrypt/argon2), session tokens random, rate limiting on auth endpoints
 - [ ] **Data Exposure:** Encryption at rest and transit, no sensitive data in logs/errors, proper key management
 - [ ] **XXE:** XML parsers disable external entities
@@ -49,7 +59,7 @@ Flag these patterns in ANY file (code, config, IaC, docs, tests):
 
 1. Check for known CVEs: `npm audit` / `pip-audit` / `cargo audit` / `govulncheck`
 2. Verify exact version pins (not ranges) and lock files committed
-3. Minimize dependency footprint — is this package necessary?
+3. Minimize dependency footprint -- is this package necessary?
 
 ## IaC Security Quick Checks
 
@@ -59,6 +69,8 @@ Flag these patterns in ANY file (code, config, IaC, docs, tests):
 | **Ansible** | Vault for secrets, SSH key auth, `become` only where needed |
 | **Docker** | Pinned base image (not `latest`), non-root `USER`, no secrets in ENV/ARG, `.dockerignore` configured, health check present, multi-stage build |
 
+</instructions>
+
 ## Finding Severity
 
 | Severity | Definition | Action |
@@ -66,6 +78,31 @@ Flag these patterns in ANY file (code, config, IaC, docs, tests):
 | **Security-Critical** | Exploitable vulnerability or data exposure | Must fix before merge |
 | **Security-Important** | Increases attack surface | Should fix |
 | **Security-Advisory** | Best practice not followed | Note for improvement |
+
+<examples>
+
+## Finding Report Examples
+
+### Good Finding -- specific, evidenced, actionable
+
+```
+**Security-Critical: SQL Injection in user search endpoint**
+
+File: src/routes/users.py, line 42
+Code: `cursor.execute(f"SELECT * FROM users WHERE name = '{request.args['q']}'")`
+Risk: Attacker can execute arbitrary SQL via the `q` query parameter.
+Fix: Use parameterized query: `cursor.execute("SELECT * FROM users WHERE name = %s", (request.args['q'],))`
+```
+
+### Bad Finding -- vague, no evidence, not actionable
+
+```
+**Security Issue: Possible injection**
+
+The code might have injection vulnerabilities. Consider reviewing input handling.
+```
+
+</examples>
 
 ## Integration
 

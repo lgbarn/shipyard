@@ -7,13 +7,17 @@ description: Use when writing tests, structuring test suites, choosing test boun
 
 # Writing Effective Tests
 
-## Activation Triggers
+<activation>
+
+## When This Skill Activates
 
 - Writing or modifying test files (`*.test.*`, `*.spec.*`, `*_test.go`, `test_*.py`)
 - Setting up test infrastructure or test utilities
 - Debugging flaky, brittle, or slow tests
 - Deciding between unit, integration, and E2E tests
 - Choosing when and how to use mocks, stubs, or fakes
+
+</activation>
 
 ## Overview
 
@@ -29,7 +33,7 @@ Test behaviors through public APIs. Verify state, not interactions.
 TEST BEHAVIORS, NOT IMPLEMENTATIONS
 ```
 
-A test should break only when the system's observable behavior changes — never because of refactoring, renaming internals, or restructuring code.
+A test should break only when the system's observable behavior changes -- never because of refactoring, renaming internals, or restructuring code.
 
 **No exceptions:**
 - Don't test private methods
@@ -37,19 +41,23 @@ A test should break only when the system's observable behavior changes — never
 - Don't verify method call sequences
 - Don't couple tests to data structures users never see
 
+<instructions>
+
 ## Test Structure (AAA)
 
 Every test follows Arrange-Act-Assert:
 
 ```
-Arrange — Set up preconditions and inputs
-Act     — Execute the behavior under test
-Assert  — Verify the expected outcome
+Arrange -- Set up preconditions and inputs
+Act     -- Execute the behavior under test
+Assert  -- Verify the expected outcome
 ```
 
 Separate the three sections with blank lines. One Act per test. One logical assertion per test.
 
-<Good>
+<examples>
+
+<example type="good" title="Clear AAA structure, one behavior per test">
 ```python
 def test_expired_subscription_denies_access():
     # Arrange
@@ -62,10 +70,10 @@ def test_expired_subscription_denies_access():
     assert result.denied is True
     assert result.reason == "subscription expired"
 ```
-Clear name, tests one behavior, obvious structure
-</Good>
+Clear name, tests one behavior, obvious structure.
+</example>
 
-<Bad>
+<example type="bad" title="Multiple behaviors, internal state tested">
 ```python
 def test_subscription():
     user = create_user(subscription_end=yesterday())
@@ -74,8 +82,10 @@ def test_subscription():
     assert check_access(user, "premium-content").allowed
     assert user.access_log == [("denied", "premium-content"), ("allowed", "premium-content")]
 ```
-Two behaviors in one test, tests internal log, vague name
-</Bad>
+Two behaviors in one test, tests internal log, vague name.
+</example>
+
+</examples>
 
 ### Keep Tests DAMP, Not DRY
 
@@ -83,7 +93,7 @@ Prefer **Descriptive And Meaningful Phrases** over eliminating duplication. Dupl
 
 ### No Logic in Tests
 
-Tests are straight-line code. No loops, conditionals, ternaries, or string concatenation. If you need logic, the test is too complex — split it or simplify the design.
+Tests are straight-line code. No loops, conditionals, ternaries, or string concatenation. If you need logic, the test is too complex -- split it or simplify the design.
 
 ## What to Test
 
@@ -103,7 +113,7 @@ Tests are straight-line code. No loops, conditionals, ternaries, or string conca
 
 ### Test Via Public APIs
 
-Invoke the system the same way its callers do. If the only way to test something is through a private method, the design needs to change — extract it into a collaborator with its own public interface.
+Invoke the system the same way its callers do. If the only way to test something is through a private method, the design needs to change -- extract it into a collaborator with its own public interface.
 
 ## Naming Tests
 
@@ -169,7 +179,7 @@ digraph test_level {
 
 - **Stub:** Returns canned responses. Use when you need a dependency to return specific data.
 - **Fake:** Working implementation with shortcuts (in-memory DB, local file store). Preferred over mocks for complex interactions.
-- **Mock:** Records calls and asserts on them. Use sparingly — only when the interaction IS the behavior (e.g., "sends an email").
+- **Mock:** Records calls and asserts on them. Use sparingly -- only when the interaction IS the behavior (e.g., "sends an email").
 
 ### The Mocking Rule
 
@@ -178,7 +188,9 @@ Verify STATE over INTERACTIONS.
 Mock only when the side effect IS the behavior under test.
 ```
 
-<Good>
+<examples>
+
+<example type="good" title="Testing resulting state">
 ```typescript
 // Testing that withdrawal updates balance (state)
 test('withdrawal reduces account balance', () => {
@@ -189,10 +201,10 @@ test('withdrawal reduces account balance', () => {
   expect(account.balance).toBe(70);
 });
 ```
-Tests resulting state
-</Good>
+Tests resulting state -- survives internal refactoring.
+</example>
 
-<Bad>
+<example type="bad" title="Testing internal interaction">
 ```typescript
 // Testing that withdrawal calls the right methods (interaction)
 test('withdrawal calls debit', () => {
@@ -204,15 +216,17 @@ test('withdrawal calls debit', () => {
   expect(ledger.debit).toHaveBeenCalledWith(30);
 });
 ```
-Tests internal interaction — breaks if refactored
-</Bad>
+Tests internal interaction -- breaks if refactored.
+</example>
+
+</examples>
 
 ## Unchanging Tests
 
 A well-written test changes only when requirements change. It survives:
-- **Refactoring** — internal restructuring, no behavior change
-- **Bug fixes** — new tests added, existing tests unchanged
-- **New features** — unrelated tests unaffected
+- **Refactoring** -- internal restructuring, no behavior change
+- **Bug fixes** -- new tests added, existing tests unchanged
+- **New features** -- unrelated tests unaffected
 
 If your tests break during refactoring, they're testing implementation details. Fix the tests to test behavior instead.
 
@@ -220,24 +234,32 @@ If your tests break during refactoring, they're testing implementation details. 
 
 A failure message should let you diagnose the problem without reading the test code.
 
-<Good>
+<examples>
+
+<example type="good" title="Descriptive failure message">
 ```
 FAIL: rejects_empty_email_with_validation_error
   Expected: ValidationError("email is required")
   Actual:   None (no error raised)
 ```
-Shows expected vs actual with context
-</Good>
+Shows expected vs actual with context.
+</example>
 
-<Bad>
+<example type="bad" title="Opaque failure message">
 ```
 FAIL: test_validate
   AssertionError: False is not True
 ```
-No context, unclear what was tested
-</Bad>
+No context, unclear what was tested.
+</example>
+
+</examples>
 
 Use assertion libraries that produce descriptive messages. Prefer `assertEqual(expected, actual)` over bare `assert`.
+
+</instructions>
+
+<rules>
 
 ## Anti-Patterns
 
@@ -253,16 +275,16 @@ Use assertion libraries that produce descriptive messages. Prefer `assertEqual(e
 | Assertion-free tests | Test runs but verifies nothing | Every test must assert expected outcome |
 | Giant setup | 50 lines before the act | Simplify design; extract builder/factory |
 
-## Red Flags — STOP and Rethink
+## Red Flags -- STOP and Rethink
 
-- Mocking more than 2 dependencies → class has too many responsibilities
-- Test setup exceeds 20 lines → design is too complex or test scope too broad
-- Test name contains "and" → split into two tests
-- Tests break when you refactor → testing implementation, not behavior
-- Tests pass but bugs ship → testing the wrong things
-- Can't explain what behavior a test verifies → rewrite or delete it
-- All tests use mocks → not testing real behavior
-- Test file is longer than production file → over-testing or testing internals
+- Mocking more than 2 dependencies -- class has too many responsibilities
+- Test setup exceeds 20 lines -- design is too complex or test scope too broad
+- Test name contains "and" -- split into two tests
+- Tests break when you refactor -- testing implementation, not behavior
+- Tests pass but bugs ship -- testing the wrong things
+- Can't explain what behavior a test verifies -- rewrite or delete it
+- All tests use mocks -- not testing real behavior
+- Test file is longer than production file -- over-testing or testing internals
 
 ## Common Rationalizations
 
@@ -276,13 +298,15 @@ Use assertion libraries that produce descriptive messages. Prefer `assertEqual(e
 | "One big test is easier" | One big test = one useless failure message. Split by behavior. |
 | "Helper makes it DRY" | If the helper obscures what's tested, inline it. DAMP > DRY. |
 
+</rules>
+
 ## Quick Reference: FIRST Principles
 
-- **Fast** — Tests run in seconds, not minutes. Slow tests get skipped.
-- **Independent** — No test depends on another. Any order, any subset.
-- **Repeatable** — Same result every run, any machine, any time.
-- **Self-checking** — Pass/fail without human inspection.
-- **Timely** — Written close to the code. Not "later." Not "before release."
+- **Fast** -- Tests run in seconds, not minutes. Slow tests get skipped.
+- **Independent** -- No test depends on another. Any order, any subset.
+- **Repeatable** -- Same result every run, any machine, any time.
+- **Self-checking** -- Pass/fail without human inspection.
+- **Timely** -- Written close to the code. Not "later." Not "before release."
 
 ## Final Rule
 

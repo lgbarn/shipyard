@@ -8,6 +8,8 @@ argument-hint: ""
 
 You are executing the Shipyard resume workflow. Follow these steps precisely.
 
+<prerequisites>
+
 ## Step 1: Verify State Exists
 
 Check if `.shipyard/` directory exists.
@@ -19,7 +21,11 @@ Check if `.shipyard/` directory exists.
 
 ## Step 2: Read Last Position
 
-Follow **State Loading Protocol** (see `docs/PROTOCOLS.md`) -- read STATE.md for current phase, position, status, and history.
+Follow **State Loading Protocol** (read STATE.md, ROADMAP.md, PROJECT.md, config.json, and recent SUMMARY/VERIFICATION files to establish session context; see `docs/PROTOCOLS.md`) -- read STATE.md for current phase, position, status, and history.
+
+</prerequisites>
+
+<execution>
 
 ## Step 3: Detect Incomplete Work
 
@@ -65,7 +71,7 @@ Synthesize this into a brief context restoration message:
 
 ## Step 5: Recreate Native Tasks
 
-Follow **Native Task Scaffolding Protocol** (see `docs/PROTOCOLS.md`) -- check if native tasks exist (via TaskList), and recreate from ROADMAP.md and artifact existence if missing or stale.
+Follow **Native Task Scaffolding Protocol** (create/update native tasks for progress tracking via TaskCreate/TaskUpdate; see `docs/PROTOCOLS.md`) -- check if native tasks exist (via TaskList), and recreate from ROADMAP.md and artifact existence if missing or stale.
 
 ## Step 6: Display Status Overview
 
@@ -74,6 +80,10 @@ Run the same display logic as `/shipyard:status` (Step 4 from status.md):
 - Show current position
 - Show recent activity
 - Show blockers
+
+</execution>
+
+<output>
 
 ## Step 7: Route to Next Action
 
@@ -91,3 +101,5 @@ Based on where work was interrupted, suggest the specific next step:
 
 Present clearly:
 > "**Session restored.** You were {doing X} when the session ended. Run `{command}` to continue."
+
+</output>
