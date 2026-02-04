@@ -1,65 +1,70 @@
 ---
 name: memory
-description: Use when needing past context from previous sessions, when stuck on a problem you may have solved before, or when proposing lessons-learned during shipping
+description: Use when user asks 'how should I...' or 'what's the best approach...' after exploring code, OR when you've tried to solve something and are stuck, OR for unfamiliar workflows, OR when user references past work. Searches conversation history.
 ---
 
 <!-- TOKEN BUDGET: 200 lines / ~600 tokens -->
 
 # Memory
 
-## Overview
+**Core principle:** Search before reinventing. Searching costs nothing; reinventing or repeating mistakes costs everything.
 
-Memory provides searchable cross-session conversation recall. When you're stuck or need context from past work, search memory for relevant exchanges.
+## Mandatory: Use the Search Agent
 
-**Core principle:** Memory helps you find how problems were solved before, not just recall that they were solved.
+**YOU MUST dispatch the search-memory agent for any historical search.**
+
+Announce: "Dispatching search agent to find [topic]."
+
+Then use the Task tool with `subagent_type: "search-memory"`:
+
+```
+Task tool:
+  description: "Search past conversations for [topic]"
+  prompt: "Search for [specific query]. Focus on [decisions, patterns, gotchas, code examples]."
+  subagent_type: "search-memory"
+```
+
+The agent will:
+1. Search with the `memory_search` MCP tool
+2. Synthesize findings (200-1000 words)
+3. Return actionable insights + sources
+
+**Saves 50-100x context vs. loading raw exchanges.**
 
 ## When to Use
 
-**Search memory when:**
-- Stuck on a problem you may have encountered before
-- User mentions "we did this before" or "remember when"
-- Need context about past decisions or approaches
-- Proposing lessons-learned during `/shipyard:ship`
+You often get value from consulting memory once you understand what you're being asked. Search in these situations:
 
-**Don't search when:**
-- Current session has all needed context
-- Problem is clearly novel
-- User explicitly wants a fresh approach
+**After understanding the task:**
+- User asks "how should I..." or "what's the best approach..."
+- You've explored current codebase and need to make architectural decisions
+- User asks for implementation approach after describing what they want
 
-## How It Works
+**When you're stuck:**
+- You've investigated a problem and can't find the solution
+- Facing a complex problem without obvious solution in current code
+- Need to follow an unfamiliar workflow or process
 
-Memory indexes conversation exchanges (user message + assistant response + tool names) across all projects. It stores them locally in `~/.config/shipyard/memory.db` with semantic embeddings for search.
+**When historical signals are present:**
+- User says "last time", "before", "we discussed", "you implemented"
+- User asks "why did we...", "what was the reason..."
+- User says "do you remember...", "what do we know about..."
 
-**What's indexed:**
-- User messages and assistant responses
-- Tool names used (not tool inputs/outputs)
-- Project path, timestamp, git branch
+**During lessons-learned:**
+- Proposing lessons during `/shipyard:ship`
 
-**What's excluded:**
-- Tool inputs and outputs (file contents, command results)
-- Projects with `"memory": false` in config
-- Secrets (auto-scrubbed before indexing)
+**Don't search first:**
+- For current codebase structure (use Grep/Read to explore first)
+- For info in current conversation
+- Before understanding what you're being asked to do
+- When the problem is clearly novel
+- When the user explicitly wants a fresh approach
 
-## Using Memory
+## Direct Tool Access (Discouraged)
 
-### Explicit Search
+You CAN use the `memory_search` MCP tool directly, but DON'T — it wastes your context window. Always dispatch the search-memory agent instead.
 
-```
-/shipyard:memory-search <query>
-```
-
-Returns semantically relevant past exchanges. Haiku summarizes results to extract key insights.
-
-### During Lessons-Learned
-
-When running `/shipyard:ship`, memory automatically searches for:
-- Debugging struggles in this milestone's timeframe
-- Rejected approaches and why
-- Key decisions and their rationale
-
-This enriches lesson suggestions with conversation context.
-
-### Transparency
+## Transparency
 
 When memory is consulted, explicitly mention it:
 > "I searched memory for similar issues and found..."
