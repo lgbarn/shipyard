@@ -4,7 +4,7 @@ disable-model-invocation: true
 argument-hint: "<query> [--after YYYY-MM-DD] [--before YYYY-MM-DD] [--project path]"
 ---
 
-# /memory:search - Search Past Conversations
+# /shipyard:memory-search - Search Past Conversations
 
 You are executing the memory search workflow. Follow these steps precisely.
 
@@ -24,7 +24,7 @@ Check `~/.config/shipyard/config.json` for memory settings.
 
 - **If memory is disabled or file doesn't exist:**
   Display:
-  > "Memory is not enabled. Run `/shipyard:init` and enable memory when prompted, or use `/memory:enable` to turn it on."
+  > "Memory is not enabled. Run `/shipyard:init` and enable memory when prompted, or use `/shipyard:memory-enable` to turn it on."
   Stop here.
 
 ## Step 2: Check Project Exclusion

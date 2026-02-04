@@ -4,7 +4,7 @@ disable-model-invocation: true
 argument-hint: "[--all-sessions-today]"
 ---
 
-# /memory:forget - Delete Session from Memory
+# /shipyard:memory-forget - Delete Session from Memory
 
 You are executing the memory forget workflow. Follow these steps precisely.
 
@@ -65,4 +65,4 @@ Display the result:
 
 > "Deleted {N} exchanges from memory.
 >
-> Note: New exchanges in this session will still be indexed unless you run `/memory:forget` again before the session ends, or disable memory entirely with `/memory:disable`."
+> Note: New exchanges in this session will still be indexed unless you run `/shipyard:memory-forget` again before the session ends, or disable memory entirely with `/shipyard:memory-disable`."

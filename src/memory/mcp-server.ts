@@ -237,7 +237,7 @@ async function handleIndex(): Promise<string> {
 export async function startServer(): Promise<void> {
   // Check if memory is enabled
   if (!isMemoryEnabled()) {
-    console.error('Memory is not enabled. Enable it with /memory:enable or during /shipyard:init');
+    console.error('Memory is not enabled. Enable it with /shipyard:memory-enable or during /shipyard:init');
     process.exit(1);
   }
 

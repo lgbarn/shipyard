@@ -85,7 +85,7 @@ The indexer is designed to be non-blocking during active work.
 
 When memory is first enabled, a one-time import processes existing conversation history from `~/.claude/projects/`. This can take several minutes for large histories.
 
-The import runs in the background and does not block work. Use `/memory:status` to check progress.
+The import runs in the background and does not block work. Use `/shipyard:memory-status` to check progress.
 
 ## Lessons-Learned Integration
 
@@ -117,7 +117,7 @@ When the cap is reached, the pruner removes oldest exchanges first. Pruning happ
 
 ### Checking Status
 
-`/memory:status` shows:
+`/shipyard:memory-status` shows:
 - Total database size
 - Number of indexed exchanges
 - Oldest and newest exchange dates
@@ -126,9 +126,9 @@ When the cap is reached, the pruner removes oldest exchanges first. Pruning happ
 
 ### Manual Cleanup
 
-Beyond `/memory:forget` for current session, you can exclude a project retroactively:
+Beyond `/shipyard:memory-forget` for current session, you can exclude a project retroactively:
 1. Set `"memory": false` in `.shipyard/config.json`
-2. Run `/memory:import` to re-index (excluded project's exchanges are removed)
+2. Run `/shipyard:memory-import` to re-index (excluded project's exchanges are removed)
 
 ## Troubleshooting
 
@@ -136,7 +136,7 @@ Beyond `/memory:forget` for current session, you can exclude a project retroacti
 
 - Check if the project has `"memory": false`
 - Try more specific search terms
-- Check date ranges with `/memory:status`
+- Check date ranges with `/shipyard:memory-status`
 - Wait for background indexing to complete
 
 ### Database grows too large
@@ -148,7 +148,7 @@ Beyond `/memory:forget` for current session, you can exclude a project retroacti
 ### Import seems stuck
 
 - Check `~/.config/shipyard/memory.log` for errors
-- Large histories can take time; use `/memory:status` to monitor progress
+- Large histories can take time; use `/shipyard:memory-status` to monitor progress
 - Ensure sufficient disk space
 
 ## Privacy Considerations
@@ -158,7 +158,7 @@ Memory is designed with privacy in mind:
 1. **Local only:** All data stays on your machine
 2. **Opt-in:** Prompted during `/shipyard:init`
 3. **Scrubbing:** Secrets auto-redacted before storage
-4. **Forgetting:** Delete any session with `/memory:forget`
+4. **Forgetting:** Delete any session with `/shipyard:memory-forget`
 5. **Project exclusion:** Opt-out per-project
 6. **No external calls:** Embeddings generated locally
 

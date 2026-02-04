@@ -17,11 +17,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
   - MCP server interface for future-proofing
 - New skill: `memory` — when needing past context or solving problems you've encountered before
 - New commands:
-  - `/memory:search <query>` — semantic search across past conversations
-  - `/memory:forget` — delete current session from memory
-  - `/memory:status` — storage statistics and health check
-  - `/memory:enable` / `/memory:disable` — toggle memory on/off
-  - `/memory:import` — re-run history import
+  - `/shipyard:memory-search <query>` — semantic search across past conversations
+  - `/shipyard:memory-forget` — delete current session from memory
+  - `/shipyard:memory-status` — storage statistics and health check
+  - `/shipyard:memory-enable` / `memory-disable` — toggle memory on/off
+  - `/shipyard:memory-import` — re-run history import
 - Memory opt-in prompt during `/shipyard:init`
 - Memory enrichment in lessons-learned workflow during `/shipyard:ship`
 - TypeScript implementation in `src/memory/` with full test suite

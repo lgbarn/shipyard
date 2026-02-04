@@ -69,11 +69,11 @@ Once installed, navigate to any project directory and run:
 | `/shipyard:recover` | Diagnose and recover from interrupted state |
 | `/shipyard:move-docs` | Move codebase analysis docs between `.shipyard/codebase/` and `docs/codebase/` |
 | `/shipyard:worktree [create\|list\|switch\|remove] [name]` | Manage git worktrees for isolated feature development |
-| `/memory:search <query>` | Search past conversations for relevant context |
-| `/memory:forget` | Delete current session from memory |
-| `/memory:status` | Show memory storage statistics |
-| `/memory:enable` / `disable` | Toggle memory on or off |
-| `/memory:import` | Import existing conversation history |
+| `/shipyard:memory-search <query>` | Search past conversations for relevant context |
+| `/shipyard:memory-forget` | Delete current session from memory |
+| `/shipyard:memory-status` | Show memory storage statistics |
+| `/shipyard:memory-enable` / `memory-disable` | Toggle memory on or off |
+| `/shipyard:memory-import` | Import existing conversation history |
 
 ## Skills (Auto-Activating)
 

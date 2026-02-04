@@ -45,7 +45,7 @@ Memory indexes conversation exchanges (user message + assistant response + tool 
 ### Explicit Search
 
 ```
-/memory:search <query>
+/shipyard:memory-search <query>
 ```
 
 Returns semantically relevant past exchanges. Haiku summarizes results to extract key insights.
@@ -68,11 +68,11 @@ When memory is consulted, explicitly mention it:
 
 | Command | Purpose |
 |---------|---------|
-| `/memory:search <query>` | Search past conversations |
-| `/memory:forget` | Delete current session from memory |
-| `/memory:status` | Show storage stats |
-| `/memory:enable` / `disable` | Toggle memory |
-| `/memory:import` | Re-run history import |
+| `/shipyard:memory-search <query>` | Search past conversations |
+| `/shipyard:memory-forget` | Delete current session from memory |
+| `/shipyard:memory-status` | Show storage stats |
+| `/shipyard:memory-enable` / `disable` | Toggle memory |
+| `/shipyard:memory-import` | Re-run history import |
 
 ## Configuration
 
@@ -95,5 +95,5 @@ When memory is consulted, explicitly mention it:
 
 - All data stored locally on your machine
 - Secrets auto-scrubbed (AWS keys, GitHub tokens, API keys, private keys)
-- `/memory:forget` deletes current session
+- `/shipyard:memory-forget` deletes current session
 - Per-project opt-out available
