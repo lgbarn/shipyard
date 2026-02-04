@@ -4,6 +4,40 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [2.4.0] - 2026-02-03
+
+### Added
+- **Memory**: Episodic memory for cross-session conversation recall
+  - Local SQLite database with sqlite-vec for semantic vector search
+  - Automatic secret scrubbing (AWS keys, GitHub tokens, API keys, private keys, passwords)
+  - Per-project opt-out via `"memory": false` in `.shipyard/config.json`
+  - 1 GB storage cap with automatic pruning of oldest exchanges
+  - Background indexing every 5 minutes
+  - One-time import of existing `~/.claude/projects/` history
+  - MCP server interface for future-proofing
+- New skill: `memory` — when needing past context or solving problems you've encountered before
+- New commands:
+  - `/memory:search <query>` — semantic search across past conversations
+  - `/memory:forget` — delete current session from memory
+  - `/memory:status` — storage statistics and health check
+  - `/memory:enable` / `/memory:disable` — toggle memory on/off
+  - `/memory:import` — re-run history import
+- Memory opt-in prompt during `/shipyard:init`
+- Memory enrichment in lessons-learned workflow during `/shipyard:ship`
+- TypeScript implementation in `src/memory/` with full test suite
+
+### Changed
+- Lessons-learned skill enhanced to query memory for debugging struggles and decisions
+- `/shipyard:ship` Step 3a now enriches lesson candidates with conversation memory
+- `/shipyard:init` Step 5 now asks about memory preferences
+- Node.js minimum version raised to 18.0.0 (for native fetch in MCP server)
+- package.json version bumped to 2.4.0
+
+### Dependencies
+- Added: `@modelcontextprotocol/sdk`, `@xenova/transformers`, `better-sqlite3`, `sqlite-vec`, `zod`
+- Added dev: `@types/better-sqlite3`, `@types/node`, `tsx`, `typescript`, `vitest`
+- Added optional: `@anthropic-ai/sdk` (for Haiku summarization)
+
 ## [2.0.0] - 2026-02-01
 
 ### Added

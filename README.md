@@ -69,10 +69,15 @@ Once installed, navigate to any project directory and run:
 | `/shipyard:recover` | Diagnose and recover from interrupted state |
 | `/shipyard:move-docs` | Move codebase analysis docs between `.shipyard/codebase/` and `docs/codebase/` |
 | `/shipyard:worktree [create\|list\|switch\|remove] [name]` | Manage git worktrees for isolated feature development |
+| `/memory:search <query>` | Search past conversations for relevant context |
+| `/memory:forget` | Delete current session from memory |
+| `/memory:status` | Show memory storage statistics |
+| `/memory:enable` / `disable` | Toggle memory on or off |
+| `/memory:import` | Import existing conversation history |
 
 ## Skills (Auto-Activating)
 
-Shipyard includes 16 skills that activate automatically based on context:
+Shipyard includes 17 skills that activate automatically based on context:
 
 | Skill | When It Activates |
 |-------|-------------------|
@@ -92,6 +97,7 @@ Shipyard includes 16 skills that activate automatically based on context:
 | `shipyard-testing` | Writing effective, maintainable tests |
 | `shipyard-writing-skills` | Creating new skills |
 | `lessons-learned` | After phase completion, before shipping, reflecting on work |
+| `memory` | When needing past context from previous sessions or solving problems you've encountered before |
 
 ## Agents
 
@@ -282,7 +288,7 @@ See `docs/PROTOCOLS.md` for model routing configuration and the full config.json
 | Multi-model routing | ✅ (7 categories) | ✅ (profiles) | ❌ |
 | Adaptive context loading | ✅ (4 tiers) | ✅ (5 tiers, fork) | ✅ (<2k bootstrap) |
 | Session resume / state persistence | ✅ | ✅ | ❌ |
-| Episodic memory | ❌ | ❌ | ✅ (plugin) |
+| Episodic memory | ✅ (built-in) | ❌ | ✅ (plugin) |
 | **Git & Recovery** | | | |
 | Git worktree management | ✅ (command + agent context) | ❌ | ✅ (skill) |
 | Rollback / checkpoints | ✅ | ✅ (fork) | ❌ |
@@ -300,8 +306,8 @@ See `docs/PROTOCOLS.md` for model routing configuration and the full config.json
 | Install via CLI | ✅ (`lgbarn/shipyard`) | ✅ (`npx get-shit-done-cc`) | ✅ (marketplace) |
 | Multi-runtime | ❌ (Claude Code) | ✅ (Claude + OpenCode + Gemini) | ❌ (Claude Code) |
 | **Scale** | | | |
-| Commands | 12 | 20+ | 3 |
-| Skills | 16 | 0 | 15+ |
+| Commands | 17 | 20+ | 3 |
+| Skills | 17 | 0 | 15+ |
 | Named agents | 9 | implicit | implicit |
 
 ## Acknowledgments

@@ -148,13 +148,41 @@ Based on the argument and project state:
 
 Invoke the `shipyard:lessons-learned` skill for format and quality guidance.
 
-### Extract Candidate Lessons
+### Extract Candidate Lessons from Build Summaries
 
 Read all SUMMARY.md files in the shipping scope:
 - For phase scope: `.shipyard/phases/{N}/results/SUMMARY-*.md`
 - For milestone scope: all phases' SUMMARY files
 
 Extract content from "Issues Encountered" and "Decisions Made" sections as candidate lessons.
+
+### Enrich with Memory (if enabled)
+
+Check if Memory is enabled via `~/.config/shipyard/config.json`:
+
+**If memory is enabled:**
+
+1. Calculate the milestone's date range from `.shipyard/STATE.md` history entries
+2. Use `/memory:search` (or call the memory MCP server) to search for exchanges matching:
+   - Date range of the current milestone
+   - Current project path
+   - Query: "debugging struggles, rejected approaches, decisions, issues resolved"
+3. Dispatch a **Haiku subagent** to analyze memory results and extract:
+   - Debugging struggles and their resolutions
+   - Approaches that were tried and rejected (with reasons)
+   - Key decisions made during implementation
+   - Patterns that worked well or poorly
+4. Add memory-derived insights to the candidate lessons, clearly marked:
+   ```
+   **From build summaries:**
+   - {summary-derived lesson}
+
+   **From conversation memory:**
+   - {memory-derived insight about debugging X}
+   - {memory-derived insight about decision Y}
+   ```
+
+**If memory is disabled:** Skip memory enrichment and continue with build summary lessons only.
 
 ### Present to User
 
@@ -164,8 +192,8 @@ Use AskUserQuestion to present:
 >
 > These will be saved to `.shipyard/LESSONS.md` and optionally to your project's `CLAUDE.md`.
 >
-> Based on the build summaries, here are some candidate lessons:
-> {Pre-populated from SUMMARY.md extracts, or "No candidates found" if empty}
+> Based on the build summaries{and memory if enabled}, here are some candidate lessons:
+> {Pre-populated from SUMMARY.md extracts and memory insights, or "No candidates found" if empty}
 >
 > **What went well?**
 > **What surprised you or what did you learn?**

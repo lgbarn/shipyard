@@ -1,7 +1,7 @@
 {
   "name": "@lgbarn/shipyard",
-  "version": "2.3.0",
-  "description": "Ship software systematically: project lifecycle, TDD, parallel agents, code review, security auditing, and infrastructure validation — from idea to production",
+  "version": "2.4.0",
+  "description": "Ship software systematically: project lifecycle, TDD, parallel agents, code review, security auditing, infrastructure validation, and cross-session memory — from idea to production",
   "keywords": [
     "claude-code-plugin",
     "workflow",
@@ -13,12 +13,19 @@
     "parallel-agents",
     "lifecycle",
     "security",
-    "infrastructure-as-code"
+    "infrastructure-as-code",
+    "episodic-memory",
+    "mcp"
   ],
   "author": "lgbarn",
   "license": "MIT",
+  "main": "dist/memory/index.js",
+  "types": "dist/memory/index.d.ts",
+  "bin": {
+    "shipyard-memory": "dist/memory/mcp-server.js"
+  },
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=18.0.0"
   },
   "systemDependencies": {
     "bash": ">=4.0",
@@ -34,7 +41,13 @@
     "url": "https://github.com/lgbarn/shipyard/issues"
   },
   "scripts": {
-    "test": "bash test/run.sh"
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "test": "bash test/run.sh",
+    "test:memory": "vitest run src/memory",
+    "memory:server": "tsx src/memory/mcp-server.ts",
+    "memory:index": "tsx src/memory/mcp-server.ts --index",
+    "prepublishOnly": "npm run build"
   },
   "files": [
     ".claude-plugin/",
@@ -43,13 +56,30 @@
     "skills/",
     "hooks/",
     "scripts/",
+    "dist/",
+    "src/",
     "README.md",
     "LICENSE",
     "CHANGELOG.md"
   ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.20.0",
+    "@xenova/transformers": "^2.17.2",
+    "better-sqlite3": "^12.4.1",
+    "sqlite-vec": "^0.1.7-alpha.2",
+    "zod": "^3.25.76"
+  },
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^24.7.0",
     "bats": "^1.13.0",
     "bats-assert": "^2.2.4",
-    "bats-support": "^0.3.0"
+    "bats-support": "^0.3.0",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
+  },
+  "optionalDependencies": {
+    "@anthropic-ai/sdk": "^0.52.0"
   }
 }
