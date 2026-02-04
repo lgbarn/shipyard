@@ -82,6 +82,6 @@
     "vitest": "^3.2.4"
   },
   "optionalDependencies": {
-    "@anthropic-ai/sdk": "^0.52.0"
+    "@anthropic-ai/sdk": "^0.72.1"
   }
 }
