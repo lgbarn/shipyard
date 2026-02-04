@@ -6,7 +6,7 @@ import Database from 'better-sqlite3';
 import * as fs from 'fs';
 import * as path from 'path';
 import { DATABASE_PATH, ensureConfigDir } from './config';
-import type { Exchange, Session, MemoryStats, SearchResult } from './types';
+import type { Exchange, MemoryStats, SearchResult } from './types';
 
 let db: Database.Database | null = null;
 

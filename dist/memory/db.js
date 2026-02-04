@@ -1,0 +1,435 @@
+"use strict";
+/**
+ * Shipyard Memory - Database Operations
+ */
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.initDatabase = initDatabase;
+exports.getDatabase = getDatabase;
+exports.closeDatabase = closeDatabase;
+exports.insertExchange = insertExchange;
+exports.deleteExchangesBySession = deleteExchangesBySession;
+exports.deleteExchangesByDateRange = deleteExchangesByDateRange;
+exports.vectorSearch = vectorSearch;
+exports.textSearch = textSearch;
+exports.getStats = getStats;
+exports.setImportState = setImportState;
+exports.getImportState = getImportState;
+exports.pruneToCapacity = pruneToCapacity;
+const better_sqlite3_1 = __importDefault(require("better-sqlite3"));
+const fs = __importStar(require("fs"));
+const path = __importStar(require("path"));
+const config_1 = require("./config");
+let db = null;
+/**
+ * Initialize the database with schema
+ */
+function initDatabase() {
+    if (db)
+        return db;
+    (0, config_1.ensureConfigDir)();
+    db = new better_sqlite3_1.default(config_1.DATABASE_PATH);
+    // Enable WAL mode for better concurrency
+    db.pragma('journal_mode = WAL');
+    // Load sqlite-vec extension
+    try {
+        db.loadExtension('vec0');
+    }
+    catch {
+        // Try alternative paths for sqlite-vec
+        const possiblePaths = [
+            'sqlite-vec',
+            path.join(__dirname, '../../node_modules/sqlite-vec/dist/vec0'),
+            path.join(__dirname, '../../../node_modules/sqlite-vec/dist/vec0'),
+        ];
+        let loaded = false;
+        for (const extPath of possiblePaths) {
+            try {
+                db.loadExtension(extPath);
+                loaded = true;
+                break;
+            }
+            catch {
+                continue;
+            }
+        }
+        if (!loaded) {
+            console.warn('Warning: sqlite-vec extension not loaded. Vector search will be unavailable.');
+        }
+    }
+    // Create schema
+    const schemaPath = path.join(__dirname, 'schema.sql');
+    if (fs.existsSync(schemaPath)) {
+        const schema = fs.readFileSync(schemaPath, 'utf-8');
+        db.exec(schema);
+    }
+    else {
+        // Inline schema for bundled distribution
+        createSchemaInline(db);
+    }
+    return db;
+}
+function createSchemaInline(database) {
+    database.exec(`
+    CREATE TABLE IF NOT EXISTS exchanges (
+      id TEXT PRIMARY KEY,
+      session_id TEXT NOT NULL,
+      project_path TEXT,
+      user_message TEXT NOT NULL,
+      assistant_message TEXT NOT NULL,
+      tool_names TEXT,
+      timestamp INTEGER NOT NULL,
+      git_branch TEXT,
+      source_file TEXT,
+      line_start INTEGER,
+      line_end INTEGER,
+      embedding BLOB,
+      indexed_at INTEGER NOT NULL
+    );
+
+    CREATE VIRTUAL TABLE IF NOT EXISTS vec_exchanges USING vec0(
+      id TEXT PRIMARY KEY,
+      embedding FLOAT[384]
+    );
+
+    CREATE TABLE IF NOT EXISTS sessions (
+      id TEXT PRIMARY KEY,
+      project_path TEXT,
+      started_at INTEGER NOT NULL,
+      exchange_count INTEGER DEFAULT 0
+    );
+
+    CREATE TABLE IF NOT EXISTS import_state (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_exchanges_timestamp ON exchanges(timestamp DESC);
+    CREATE INDEX IF NOT EXISTS idx_exchanges_session ON exchanges(session_id);
+    CREATE INDEX IF NOT EXISTS idx_exchanges_project ON exchanges(project_path);
+    CREATE INDEX IF NOT EXISTS idx_exchanges_git_branch ON exchanges(git_branch);
+
+    INSERT OR IGNORE INTO import_state (key, value) VALUES ('schema_version', '1');
+    INSERT OR IGNORE INTO import_state (key, value) VALUES ('import_completed', 'false');
+  `);
+}
+/**
+ * Get database instance
+ */
+function getDatabase() {
+    if (!db) {
+        return initDatabase();
+    }
+    return db;
+}
+/**
+ * Close database connection
+ */
+function closeDatabase() {
+    if (db) {
+        db.close();
+        db = null;
+    }
+}
+/**
+ * Insert an exchange into the database
+ */
+function insertExchange(exchange) {
+    const database = getDatabase();
+    const stmt = database.prepare(`
+    INSERT OR REPLACE INTO exchanges (
+      id, session_id, project_path, user_message, assistant_message,
+      tool_names, timestamp, git_branch, source_file, line_start,
+      line_end, embedding, indexed_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+    stmt.run(exchange.id, exchange.sessionId, exchange.projectPath, exchange.userMessage, exchange.assistantMessage, JSON.stringify(exchange.toolNames), exchange.timestamp, exchange.gitBranch, exchange.sourceFile, exchange.lineStart, exchange.lineEnd, exchange.embedding ? Buffer.from(exchange.embedding.buffer) : null, exchange.indexedAt);
+    // Also insert into vector table if embedding exists
+    if (exchange.embedding) {
+        try {
+            const vecStmt = database.prepare(`
+        INSERT OR REPLACE INTO vec_exchanges (id, embedding) VALUES (?, ?)
+      `);
+            vecStmt.run(exchange.id, Buffer.from(exchange.embedding.buffer));
+        }
+        catch {
+            // Vector table may not exist if extension not loaded
+        }
+    }
+}
+/**
+ * Delete exchanges by session ID
+ */
+function deleteExchangesBySession(sessionId) {
+    const database = getDatabase();
+    // Delete from vector table first
+    try {
+        database
+            .prepare(`
+      DELETE FROM vec_exchanges WHERE id IN (
+        SELECT id FROM exchanges WHERE session_id = ?
+      )
+    `)
+            .run(sessionId);
+    }
+    catch {
+        // Vector table may not exist
+    }
+    const result = database.prepare('DELETE FROM exchanges WHERE session_id = ?').run(sessionId);
+    return result.changes;
+}
+/**
+ * Delete exchanges by date range
+ */
+function deleteExchangesByDateRange(afterTimestamp, beforeTimestamp) {
+    const database = getDatabase();
+    // Delete from vector table first
+    try {
+        database
+            .prepare(`
+      DELETE FROM vec_exchanges WHERE id IN (
+        SELECT id FROM exchanges WHERE timestamp >= ? AND timestamp < ?
+      )
+    `)
+            .run(afterTimestamp, beforeTimestamp);
+    }
+    catch {
+        // Vector table may not exist
+    }
+    const result = database
+        .prepare('DELETE FROM exchanges WHERE timestamp >= ? AND timestamp < ?')
+        .run(afterTimestamp, beforeTimestamp);
+    return result.changes;
+}
+/**
+ * Vector similarity search
+ */
+function vectorSearch(embedding, limit = 10, filters) {
+    const database = getDatabase();
+    try {
+        // Build filter conditions
+        const conditions = [];
+        const params = [Buffer.from(embedding.buffer), limit * 2]; // Fetch extra for filtering
+        if (filters?.afterTimestamp) {
+            conditions.push('e.timestamp >= ?');
+            params.push(filters.afterTimestamp);
+        }
+        if (filters?.beforeTimestamp) {
+            conditions.push('e.timestamp < ?');
+            params.push(filters.beforeTimestamp);
+        }
+        if (filters?.projectPath) {
+            conditions.push('e.project_path = ?');
+            params.push(filters.projectPath);
+        }
+        const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+        const query = `
+      SELECT
+        e.*,
+        vec.distance as score
+      FROM vec_exchanges vec
+      JOIN exchanges e ON vec.id = e.id
+      ${whereClause}
+      ORDER BY vec.distance
+      LIMIT ?
+    `;
+        // Note: This is a simplified query. Real sqlite-vec requires proper vector distance functions
+        // The actual query would use: vec_distance_L2(embedding, ?) or similar
+        const rows = database.prepare(query).all(...params);
+        return rows.slice(0, limit).map((row) => ({
+            exchange: rowToExchange(row),
+            score: row.score || 0,
+        }));
+    }
+    catch {
+        // Fall back to text search if vector search fails
+        return [];
+    }
+}
+/**
+ * Text-based search (fallback)
+ */
+function textSearch(query, limit = 10, filters) {
+    const database = getDatabase();
+    const conditions = ['(user_message LIKE ? OR assistant_message LIKE ?)'];
+    const params = [`%${query}%`, `%${query}%`];
+    if (filters?.afterTimestamp) {
+        conditions.push('timestamp >= ?');
+        params.push(filters.afterTimestamp);
+    }
+    if (filters?.beforeTimestamp) {
+        conditions.push('timestamp < ?');
+        params.push(filters.beforeTimestamp);
+    }
+    if (filters?.projectPath) {
+        conditions.push('project_path = ?');
+        params.push(filters.projectPath);
+    }
+    params.push(limit);
+    const sql = `
+    SELECT * FROM exchanges
+    WHERE ${conditions.join(' AND ')}
+    ORDER BY timestamp DESC
+    LIMIT ?
+  `;
+    const rows = database.prepare(sql).all(...params);
+    return rows.map((row) => ({
+        exchange: rowToExchange(row),
+        score: 0.5, // Arbitrary score for text matches
+    }));
+}
+/**
+ * Get memory statistics
+ */
+function getStats() {
+    const database = getDatabase();
+    // Get database file size
+    const dbStats = fs.statSync(config_1.DATABASE_PATH);
+    const databaseSizeMb = dbStats.size / (1024 * 1024);
+    // Get exchange count
+    const countRow = database.prepare('SELECT COUNT(*) as count FROM exchanges').get();
+    // Get date range
+    const rangeRow = database
+        .prepare('SELECT MIN(timestamp) as oldest, MAX(timestamp) as newest FROM exchanges')
+        .get();
+    // Get project counts
+    const projectRows = database
+        .prepare(`
+    SELECT project_path as project, COUNT(*) as count
+    FROM exchanges
+    WHERE project_path IS NOT NULL
+    GROUP BY project_path
+    ORDER BY count DESC
+    LIMIT 10
+  `)
+        .all();
+    // Get import state
+    const importRow = database
+        .prepare("SELECT value FROM import_state WHERE key = 'import_completed'")
+        .get();
+    // Get last indexed time
+    const lastIndexedRow = database
+        .prepare('SELECT MAX(indexed_at) as last_indexed FROM exchanges')
+        .get();
+    return {
+        databaseSizeMb,
+        exchangeCount: countRow.count,
+        oldestExchange: rangeRow.oldest,
+        newestExchange: rangeRow.newest,
+        lastIndexedAt: lastIndexedRow.last_indexed,
+        projectCounts: projectRows,
+        importCompleted: importRow?.value === 'true',
+    };
+}
+/**
+ * Set import state
+ */
+function setImportState(key, value) {
+    const database = getDatabase();
+    database.prepare('INSERT OR REPLACE INTO import_state (key, value) VALUES (?, ?)').run(key, value);
+}
+/**
+ * Get import state
+ */
+function getImportState(key) {
+    const database = getDatabase();
+    const row = database.prepare('SELECT value FROM import_state WHERE key = ?').get(key);
+    return row?.value ?? null;
+}
+/**
+ * Convert database row to Exchange object
+ */
+function rowToExchange(row) {
+    return {
+        id: row.id,
+        sessionId: row.session_id,
+        projectPath: row.project_path,
+        userMessage: row.user_message,
+        assistantMessage: row.assistant_message,
+        toolNames: JSON.parse(row.tool_names || '[]'),
+        timestamp: row.timestamp,
+        gitBranch: row.git_branch,
+        sourceFile: row.source_file,
+        lineStart: row.line_start,
+        lineEnd: row.line_end,
+        indexedAt: row.indexed_at,
+    };
+}
+/**
+ * Prune old exchanges to stay within storage cap
+ */
+function pruneToCapacity(capBytes) {
+    const database = getDatabase();
+    // Get current size
+    const stats = fs.statSync(config_1.DATABASE_PATH);
+    if (stats.size <= capBytes) {
+        return 0;
+    }
+    // Calculate how much to delete (aim for 90% of cap after pruning)
+    const targetSize = capBytes * 0.9;
+    const toDelete = stats.size - targetSize;
+    // Estimate rows to delete (rough approximation)
+    const avgRowSize = stats.size / (getStats().exchangeCount || 1);
+    const rowsToDelete = Math.ceil(toDelete / avgRowSize);
+    // Get IDs of oldest exchanges to delete
+    const oldestRows = database
+        .prepare(`
+    SELECT id FROM exchanges
+    ORDER BY timestamp ASC
+    LIMIT ?
+  `)
+        .all(rowsToDelete);
+    if (oldestRows.length === 0) {
+        return 0;
+    }
+    const ids = oldestRows.map((r) => r.id);
+    const placeholders = ids.map(() => '?').join(',');
+    // Delete from vector table
+    try {
+        database.prepare(`DELETE FROM vec_exchanges WHERE id IN (${placeholders})`).run(...ids);
+    }
+    catch {
+        // Vector table may not exist
+    }
+    // Delete from exchanges
+    const result = database.prepare(`DELETE FROM exchanges WHERE id IN (${placeholders})`).run(...ids);
+    // Vacuum to reclaim space
+    database.exec('VACUUM');
+    return result.changes;
+}
+//# sourceMappingURL=db.js.map

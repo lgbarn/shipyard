@@ -8,7 +8,6 @@ import * as os from 'os';
 import * as path from 'path';
 
 // We need to mock the config paths for testing
-let originalConfigDir: string;
 let tmpDir: string;
 
 beforeEach(() => {
