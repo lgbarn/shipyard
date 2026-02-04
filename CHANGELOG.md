@@ -4,6 +4,85 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [Unreleased]
+
+## [2.6.1] - 2026-02-04
+
+### Fixed
+- Trap collision risk in `state-write.sh` replaced with cleanup stack pattern
+- SQL injection surface hardened with input validation on dynamic placeholders in `db.ts`
+- Recovery regex tightened to reject non-numeric directory names (`state-write.sh`)
+- `echo` replaced with `printf` for POSIX safety in recovery loop (`state-write.sh`)
+- Untracked file detection added to checkpoint dirty worktree check (`checkpoint.sh`)
+- Exit code 3 now emitted for actual git errors in `checkpoint.sh` (was always exit 0)
+- Hardcoded skill list replaced with auto-discovery from `skills/*/SKILL.md` glob (`state-read.sh`)
+- E2E test setup refactored to use shared `setup_git_repo` helper (`e2e-smoke.bats`)
+- Redundant bats install check removed from `test/run.sh`
+- sqlite-vec extension load status now tracked via `isVecEnabled()` export
+
+### Security
+- MCP SDK vulnerability patched via npm audit fix (GHSA-345p-7cg4-v4c7)
+- Database file permissions set to `0600` after creation
+- Secret scrubber expanded with Anthropic (`sk-ant-api03-`), OpenAI (`sk-proj-`), and Azure connection string patterns
+
+### Added
+- Structured JSON logger (`src/memory/logger.ts`) replacing bare `console.*` across 4 TypeScript files
+- Log rotation for `memory.log` (truncates to last 1000 lines when >10MB)
+- Structured warning emitted when storage cap pruning deletes exchanges
+- `.nvmrc` file enforcing Node 20
+- ShellCheck `--severity=warning` and `tsc --noEmit` added to CI lint job
+- 3 new Vitest tests for Anthropic, OpenAI, and Azure secret patterns (49 total)
+
+### Changed
+- CI lint job now installs Node.js and runs TypeScript type checking
+- ShellCheck scope expanded to include `test/run.sh`
+
+## [2.6.0] - 2026-02-04
+
+### Added
+- All 45 agent, command, skill, and protocol files improved with Claude API best practices
+
+### Fixed
+- `dist/` committed for plugin marketplace distribution
+- npm publish step removed from release workflow (no NPM_TOKEN needed)
+
+### Changed
+- `plugin.json` now includes version field for correct cache versioning
+
+## [2.5.3] - 2026-02-04
+
+### Changed
+- All dependencies and CI actions updated to latest versions
+
+## [2.5.2] - 2026-02-04
+
+### Fixed
+- Hooks updated to use correct Claude Code hooks schema fields
+- Memory indexer throttle added to prevent excessive indexing
+
+## [2.5.0] - 2026-02-03
+
+### Breaking
+- Memory commands renamed to use `shipyard:` prefix (e.g., `/shipyard:memory-search`)
+
+### Added
+- Auto-recall via `search-memory` agent with stronger skill triggers
+
+### Fixed
+- Search scores, background indexer, and version sync checks
+
+## [2.4.1] - 2026-02-03
+
+### Fixed
+- sqlite-vec extension loading via package helper and KNN query fix
+- Unused TypeScript variables removed
+- GitHub token length corrected in scrubber tests
+- BATS test syntax for piped commands
+
+### Changed
+- Node 18 support dropped, Node 20+ required
+- Husky pre-commit hook added
+
 ## [2.4.0] - 2026-02-03
 
 ### Added
