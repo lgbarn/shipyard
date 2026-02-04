@@ -3,11 +3,7 @@ load test_helper
 
 # E2e setup: create a fully isolated temp git repo with .shipyard skeleton
 setup() {
-    cd "$BATS_TEST_TMPDIR"
-    git init -q
-    git config user.email "test@shipyard.dev"
-    git config user.name "Shipyard Test"
-    git commit -q --allow-empty -m "initial"
+    setup_git_repo
     mkdir -p .shipyard/phases
 }
 

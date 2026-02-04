@@ -8,6 +8,7 @@ import { generateEmbedding } from './embeddings';
 import { vectorSearch, textSearch, getStats as getDbStats } from './db';
 import { readGlobalConfig, isProjectExcluded } from './config';
 import type { SearchOptions, SearchResult, MemoryStats } from './types';
+import { logger } from './logger';
 
 /**
  * Parse date string (YYYY-MM-DD) to timestamp
@@ -58,7 +59,7 @@ export async function search(options: SearchOptions): Promise<SearchResult[]> {
       return results;
     }
   } catch (error) {
-    console.warn('Vector search failed, falling back to text search:', error);
+    logger.warn('Vector search failed, falling back to text search', { error: String(error) });
   }
 
   // Fall back to text search

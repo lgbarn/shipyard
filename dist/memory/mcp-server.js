@@ -14,6 +14,7 @@ const search_1 = require("./search");
 const db_1 = require("./db");
 const indexer_1 = require("./indexer");
 const config_1 = require("./config");
+const logger_1 = require("./logger");
 // Input schemas
 const SearchInputSchema = zod_1.z.union([
     zod_1.z.string(), // Simple query string
@@ -212,7 +213,7 @@ async function handleIndex() {
 async function startServer() {
     // Check if memory is enabled
     if (!(0, config_1.isMemoryEnabled)()) {
-        console.error('Memory is not enabled. Enable it with /shipyard:memory-enable or during /shipyard:init');
+        logger_1.logger.error('Memory is not enabled. Enable it with /shipyard:memory-enable or during /shipyard:init');
         process.exit(1);
     }
     // Initialize database
@@ -276,20 +277,20 @@ if (require.main === module) {
         // Run incremental indexing and exit
         (0, db_1.initDatabase)();
         (0, indexer_1.runIncrementalIndex)((progress) => {
-            console.log(`Indexed ${progress.indexedExchanges} exchanges from ${progress.processedFiles}/${progress.totalFiles} files`);
+            logger_1.logger.info('Indexing progress', { indexed: progress.indexedExchanges, processed: progress.processedFiles, total: progress.totalFiles });
         })
             .then((progress) => {
-            console.log(`Done. ${progress.indexedExchanges} new exchanges indexed, ${progress.errors} errors.`);
+            logger_1.logger.info('Indexing complete', { indexed: progress.indexedExchanges, errors: progress.errors });
             process.exit(0);
         })
             .catch((error) => {
-            console.error('Indexing failed:', error);
+            logger_1.logger.error('Indexing failed', { error: String(error) });
             process.exit(1);
         });
     }
     else {
         startServer().catch((error) => {
-            console.error('Failed to start MCP server:', error);
+            logger_1.logger.error('Failed to start MCP server', { error: String(error) });
             process.exit(1);
         });
     }

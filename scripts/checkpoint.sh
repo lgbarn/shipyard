@@ -50,16 +50,23 @@ fi
 TIMESTAMP=$(date -u +"%Y%m%dT%H%M%SZ")
 TAG="shipyard-checkpoint-${LABEL}-${TIMESTAMP}"
 
-git tag -a "$TAG" -m "Shipyard checkpoint: ${LABEL}" 2>/dev/null || {
-    echo "Warning: Could not create checkpoint tag (not in a git repo or no commits yet)" >&2
+if ! git rev-parse --git-dir >/dev/null 2>&1; then
+    echo "Warning: Not in a git repository; skipping checkpoint tag" >&2
     exit 0
+fi
+git tag -a "$TAG" -m "Shipyard checkpoint: ${LABEL}" 2>/dev/null || {
+    echo "Error: git tag failed" >&2
+    exit 3
 }
 
 echo "Checkpoint created: ${TAG}"
 
-# Warn if worktree has uncommitted changes
+# Warn if worktree has uncommitted changes (tracked or untracked)
 if ! git diff-index --quiet HEAD -- 2>/dev/null; then
     echo "Warning: Git worktree has uncommitted changes" >&2
     echo "  Consider committing before checkpointing for clean rollback points" >&2
+elif [ -n "$(git ls-files --others --exclude-standard 2>/dev/null)" ]; then
+    echo "Warning: Git worktree has untracked files" >&2
+    echo "  Consider adding and committing before checkpointing for clean rollback points" >&2
 fi
 exit 0

@@ -48,6 +48,7 @@ const db_1 = require("./db");
 const parser_1 = require("./parser");
 const embeddings_1 = require("./embeddings");
 const scrubber_1 = require("./scrubber");
+const logger_1 = require("./logger");
 /**
  * Generate a unique ID for an exchange
  */
@@ -123,7 +124,7 @@ async function indexFile(filePath, projectPath, onProgress) {
             }
         }
         catch (error) {
-            console.error(`Error indexing exchange from ${filePath}:`, error);
+            logger_1.logger.error('Error indexing exchange', { file: filePath, error: String(error) });
         }
     }
     return indexed;
@@ -174,7 +175,7 @@ async function runFullIndex(onProgress) {
                 onProgress(progress);
         }
         catch (error) {
-            console.error(`Error processing file ${file.path}:`, error);
+            logger_1.logger.error('Error processing file', { file: file.path, error: String(error) });
             progress.errors++;
             progress.processedFiles++;
             if (onProgress)
@@ -234,7 +235,7 @@ async function indexCurrentSession(sessionId, exchanges, projectPath) {
             indexed++;
         }
         catch (error) {
-            console.error(`Error indexing exchange from session ${sessionId}:`, error);
+            logger_1.logger.error('Error indexing exchange from session', { sessionId, error: String(error) });
         }
     }
     // Prune to stay within storage cap

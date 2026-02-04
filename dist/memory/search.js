@@ -13,6 +13,7 @@ exports.formatResultsAsJson = formatResultsAsJson;
 const embeddings_1 = require("./embeddings");
 const db_1 = require("./db");
 const config_1 = require("./config");
+const logger_1 = require("./logger");
 /**
  * Parse date string (YYYY-MM-DD) to timestamp
  */
@@ -55,7 +56,7 @@ async function search(options) {
         }
     }
     catch (error) {
-        console.warn('Vector search failed, falling back to text search:', error);
+        logger_1.logger.warn('Vector search failed, falling back to text search', { error: String(error) });
     }
     // Fall back to text search
     return (0, db_1.textSearch)(query, limit, filters);

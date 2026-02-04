@@ -8,12 +8,8 @@ PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 cd "$PROJECT_ROOT"
 
-# Ensure bats is available
+# bats is installed via devDependencies (npm ci)
 BATS="./node_modules/.bin/bats"
-if [ ! -x "$BATS" ]; then
-    echo "bats not found. Installing via npm..."
-    npm install --save-dev bats bats-support bats-assert
-fi
 
 # Run all .bats files in test/
 echo "Running Shipyard test suite..."

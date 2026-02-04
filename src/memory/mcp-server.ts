@@ -15,6 +15,7 @@ import { search, searchMultipleConcepts, getMemoryStats, formatResultsAsMarkdown
 import { deleteExchangesBySession, deleteExchangesByDateRange, initDatabase } from './db';
 import { runImport, runIncrementalIndex } from './indexer';
 import { isMemoryEnabled } from './config';
+import { logger } from './logger';
 
 // Input schemas
 const SearchInputSchema = z.union([
@@ -237,7 +238,7 @@ async function handleIndex(): Promise<string> {
 export async function startServer(): Promise<void> {
   // Check if memory is enabled
   if (!isMemoryEnabled()) {
-    console.error('Memory is not enabled. Enable it with /shipyard:memory-enable or during /shipyard:init');
+    logger.error('Memory is not enabled. Enable it with /shipyard:memory-enable or during /shipyard:init');
     process.exit(1);
   }
 
@@ -313,19 +314,19 @@ if (require.main === module) {
     // Run incremental indexing and exit
     initDatabase();
     runIncrementalIndex((progress) => {
-      console.log(`Indexed ${progress.indexedExchanges} exchanges from ${progress.processedFiles}/${progress.totalFiles} files`);
+      logger.info('Indexing progress', { indexed: progress.indexedExchanges, processed: progress.processedFiles, total: progress.totalFiles });
     })
       .then((progress) => {
-        console.log(`Done. ${progress.indexedExchanges} new exchanges indexed, ${progress.errors} errors.`);
+        logger.info('Indexing complete', { indexed: progress.indexedExchanges, errors: progress.errors });
         process.exit(0);
       })
       .catch((error) => {
-        console.error('Indexing failed:', error);
+        logger.error('Indexing failed', { error: String(error) });
         process.exit(1);
       });
   } else {
     startServer().catch((error) => {
-      console.error('Failed to start MCP server:', error);
+      logger.error('Failed to start MCP server', { error: String(error) });
       process.exit(1);
     });
   }

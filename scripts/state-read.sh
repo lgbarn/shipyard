@@ -17,27 +17,27 @@ if ! command -v jq >/dev/null 2>&1; then
     exit 3
 fi
 
-# Compact skill summary (replaces full SKILL.md injection for token efficiency)
-read -r -d '' skill_summary <<'SKILLEOF' || true
+# Build compact skill summary from discovered skills (auto-discovers from skills/*/SKILL.md)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+skill_list=""
+for skill_dir in "${PLUGIN_ROOT}"/skills/*/; do
+    [ -f "${skill_dir}SKILL.md" ] || continue
+    skill_name=$(basename "$skill_dir")
+    # Extract first line description from SKILL.md (after the # header)
+    desc=$(sed -n '/^[^#]/{ s/^[[:space:]]*//; p; q; }' "${skill_dir}SKILL.md" 2>/dev/null || echo "")
+    [ -z "$desc" ] && desc="(no description)"
+    # Truncate long descriptions
+    [ "${#desc}" -gt 80 ] && desc="${desc:0:77}..."
+    skill_list="${skill_list}\n- \`shipyard:${skill_name}\` - ${desc}"
+done
+
+read -r -d '' skill_summary <<SKILLEOF || true
 ## Shipyard Skills & Commands
 
 **Skills** (invoke via Skill tool for full details):
-- `shipyard:using-shipyard` - How to find and use skills
-- `shipyard:shipyard-tdd` - TDD discipline for implementation
-- `shipyard:shipyard-debugging` - Root cause investigation before fixes
-- `shipyard:shipyard-verification` - Evidence before completion claims
-- `shipyard:shipyard-brainstorming` - Requirements gathering and design
-- `shipyard:security-audit` - OWASP, secrets, dependency security
-- `shipyard:code-simplification` - Duplication and dead code detection
-- `shipyard:infrastructure-validation` - Terraform, Ansible, Docker validation
-- `shipyard:parallel-dispatch` - Concurrent agent dispatch
-- `shipyard:shipyard-writing-plans` - Creating implementation plans
-- `shipyard:shipyard-executing-plans` - Executing plans with agents
-- `shipyard:git-workflow` - Branch, commit, worktree, and delivery
-- `shipyard:documentation` - Docs after implementation
-- `shipyard:shipyard-testing` - Writing effective, maintainable tests
-- `shipyard:shipyard-writing-skills` - Creating and testing new skills
-- `shipyard:memory` - Cross-session recall for past conversations
+$(printf '%b' "$skill_list")
 
 **Triggers:** File patterns (*.tf, Dockerfile, *.test.*), task markers (tdd="true"), state conditions (claiming done, errors), and content patterns (security, refactor) activate skills automatically. If even 1% chance a skill applies, invoke it.
 
@@ -171,6 +171,7 @@ if [ -d ".shipyard" ] && [ -f ".shipyard/STATE.md" ]; then
                 last_five=$(echo "$lesson_headers" | tail -5)
                 lesson_snippet=""
                 while IFS=: read -r line_num _; do
+                    # Extract header + ~7 lines of lesson content (8 lines total per lesson)
                     chunk=$(sed -n "${line_num},$((line_num + 8))p" ".shipyard/LESSONS.md" 2>/dev/null || echo "")
                     lesson_snippet="${lesson_snippet}${chunk}\n"
                 done <<< "$last_five"

@@ -19,6 +19,18 @@ SHIPYARD_INDEX_COOLDOWN=300  # 5 minutes between indexing runs
 # Ensure log directory exists
 mkdir -p "${SHIPYARD_CONFIG_DIR}"
 
+# Log rotation: truncate to last 1000 lines if log exceeds 10MB
+rotate_log() {
+    if [[ -f "${SHIPYARD_LOG}" ]]; then
+        local size
+        size=$(stat -f %z "${SHIPYARD_LOG}" 2>/dev/null || stat -c %s "${SHIPYARD_LOG}" 2>/dev/null || echo "0")
+        if (( size > 10485760 )); then
+            local tmplog="${SHIPYARD_LOG}.tmp"
+            tail -1000 "${SHIPYARD_LOG}" > "$tmplog" && mv "$tmplog" "${SHIPYARD_LOG}"
+        fi
+    fi
+}
+
 # Log function
 log() {
     echo "[$(date -u +"%Y-%m-%dT%H:%M:%SZ")] $*" >> "${SHIPYARD_LOG}"
@@ -124,6 +136,9 @@ main() {
 
     # Record this run's timestamp
     date +%s > "${SHIPYARD_LAST_INDEX}"
+
+    # Rotate log if needed
+    rotate_log
 
     # Run indexing
     run_index

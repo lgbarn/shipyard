@@ -7,12 +7,21 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { DATABASE_PATH, ensureConfigDir } from './config';
 import type { Exchange, MemoryStats, SearchResult } from './types';
+import { logger } from './logger';
 
 // Import sqlite-vec for loading the extension
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const sqliteVec = require('sqlite-vec');
 
 let db: Database.Database | null = null;
+let vecEnabled = false;
+
+/**
+ * Check if vector search is available (sqlite-vec loaded successfully)
+ */
+export function isVecEnabled(): boolean {
+  return vecEnabled;
+}
 
 /**
  * Initialize the database with schema
@@ -24,14 +33,22 @@ export function initDatabase(): Database.Database {
 
   db = new Database(DATABASE_PATH);
 
+  // Set restrictive permissions to prevent world-readable access on shared systems
+  try {
+    fs.chmodSync(DATABASE_PATH, 0o600);
+  } catch {
+    // May fail on some filesystems; non-fatal
+  }
+
   // Enable WAL mode for better concurrency
   db.pragma('journal_mode = WAL');
 
   // Load sqlite-vec extension using the package's helper
   try {
     sqliteVec.load(db);
+    vecEnabled = true;
   } catch {
-    console.warn('Warning: sqlite-vec extension not loaded. Vector search will be unavailable.');
+    vecEnabled = false;
   }
 
   // Create schema
@@ -263,6 +280,10 @@ export function vectorSearch(
     const ids = knnResults.map(r => r.id);
     const distanceMap = new Map(knnResults.map(r => [r.id, r.distance]));
 
+    // Validate IDs before building dynamic placeholders
+    if (ids.length === 0 || ids.length > 10000) return [];
+    if (!ids.every(id => typeof id === 'string' && id.length > 0 && id.length <= 256)) return [];
+
     // Build filter conditions for the exchanges query
     const conditions: string[] = [`id IN (${ids.map(() => '?').join(',')})`];
     const params: (string | number)[] = [...ids];
@@ -303,7 +324,7 @@ export function vectorSearch(
     return results;
   } catch (error) {
     // Fall back to text search if vector search fails
-    console.warn('Vector search failed:', error);
+    logger.warn('Vector search failed', { error: String(error) });
     return [];
   }
 }
@@ -485,6 +506,11 @@ export function pruneToCapacity(capBytes: number): number {
   }
 
   const ids = oldestRows.map((r) => r.id);
+
+  // Validate IDs before building dynamic placeholders
+  if (ids.length === 0) return 0;
+  if (!ids.every(id => typeof id === 'string' && id.length > 0 && id.length <= 256)) return 0;
+
   const placeholders = ids.map(() => '?').join(',');
 
   // Delete from vector table
@@ -496,6 +522,17 @@ export function pruneToCapacity(capBytes: number): number {
 
   // Delete from exchanges
   const result = database.prepare(`DELETE FROM exchanges WHERE id IN (${placeholders})`).run(...ids);
+
+  if (result.changes > 0) {
+    const totalCount = (database.prepare('SELECT COUNT(*) as count FROM exchanges').get() as { count: number }).count;
+    const pctUsed = ((stats.size - (result.changes * (stats.size / (totalCount + result.changes)))) / capBytes * 100).toFixed(1);
+    logger.warn('Storage cap exceeded, pruned old exchanges', {
+      deleted: result.changes,
+      remaining: totalCount,
+      capBytes,
+      pctCapUsed: pctUsed,
+    });
+  }
 
   // Vacuum to reclaim space
   database.exec('VACUUM');

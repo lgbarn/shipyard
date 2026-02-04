@@ -18,6 +18,7 @@ import { parseConversationFile, findConversationFiles, decodeProjectPath } from 
 import { generateExchangeEmbedding } from './embeddings';
 import { scrubSecrets } from './scrubber';
 import type { Exchange, ParsedExchange } from './types';
+import { logger } from './logger';
 
 interface IndexProgress {
   totalFiles: number;
@@ -130,7 +131,7 @@ async function indexFile(
         onProgress(indexed, exchanges.length);
       }
     } catch (error) {
-      console.error(`Error indexing exchange from ${filePath}:`, error);
+      logger.error('Error indexing exchange', { file: filePath, error: String(error) });
     }
   }
 
@@ -187,7 +188,7 @@ export async function runFullIndex(
 
       if (onProgress) onProgress(progress);
     } catch (error) {
-      console.error(`Error processing file ${file.path}:`, error);
+      logger.error('Error processing file', { file: file.path, error: String(error) });
       progress.errors++;
       progress.processedFiles++;
 
@@ -272,7 +273,7 @@ export async function indexCurrentSession(
       );
       indexed++;
     } catch (error) {
-      console.error(`Error indexing exchange from session ${sessionId}:`, error);
+      logger.error('Error indexing exchange from session', { sessionId, error: String(error) });
     }
   }
 

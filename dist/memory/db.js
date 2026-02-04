@@ -39,6 +39,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.isVecEnabled = isVecEnabled;
 exports.initDatabase = initDatabase;
 exports.getDatabase = getDatabase;
 exports.closeDatabase = closeDatabase;
@@ -56,10 +57,18 @@ const better_sqlite3_1 = __importDefault(require("better-sqlite3"));
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
 const config_1 = require("./config");
+const logger_1 = require("./logger");
 // Import sqlite-vec for loading the extension
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const sqliteVec = require('sqlite-vec');
 let db = null;
+let vecEnabled = false;
+/**
+ * Check if vector search is available (sqlite-vec loaded successfully)
+ */
+function isVecEnabled() {
+    return vecEnabled;
+}
 /**
  * Initialize the database with schema
  */
@@ -68,14 +77,22 @@ function initDatabase() {
         return db;
     (0, config_1.ensureConfigDir)();
     db = new better_sqlite3_1.default(config_1.DATABASE_PATH);
+    // Set restrictive permissions to prevent world-readable access on shared systems
+    try {
+        fs.chmodSync(config_1.DATABASE_PATH, 0o600);
+    }
+    catch {
+        // May fail on some filesystems; non-fatal
+    }
     // Enable WAL mode for better concurrency
     db.pragma('journal_mode = WAL');
     // Load sqlite-vec extension using the package's helper
     try {
         sqliteVec.load(db);
+        vecEnabled = true;
     }
     catch {
-        console.warn('Warning: sqlite-vec extension not loaded. Vector search will be unavailable.');
+        vecEnabled = false;
     }
     // Create schema
     const schemaPath = path.join(__dirname, 'schema.sql');
@@ -257,6 +274,11 @@ function vectorSearch(embedding, limit = 10, filters) {
         // Get the full exchange data for matched IDs
         const ids = knnResults.map(r => r.id);
         const distanceMap = new Map(knnResults.map(r => [r.id, r.distance]));
+        // Validate IDs before building dynamic placeholders
+        if (ids.length === 0 || ids.length > 10000)
+            return [];
+        if (!ids.every(id => typeof id === 'string' && id.length > 0 && id.length <= 256))
+            return [];
         // Build filter conditions for the exchanges query
         const conditions = [`id IN (${ids.map(() => '?').join(',')})`];
         const params = [...ids];
@@ -292,7 +314,7 @@ function vectorSearch(embedding, limit = 10, filters) {
     }
     catch (error) {
         // Fall back to text search if vector search fails
-        console.warn('Vector search failed:', error);
+        logger_1.logger.warn('Vector search failed', { error: String(error) });
         return [];
     }
 }
@@ -433,6 +455,11 @@ function pruneToCapacity(capBytes) {
         return 0;
     }
     const ids = oldestRows.map((r) => r.id);
+    // Validate IDs before building dynamic placeholders
+    if (ids.length === 0)
+        return 0;
+    if (!ids.every(id => typeof id === 'string' && id.length > 0 && id.length <= 256))
+        return 0;
     const placeholders = ids.map(() => '?').join(',');
     // Delete from vector table
     try {
@@ -443,6 +470,16 @@ function pruneToCapacity(capBytes) {
     }
     // Delete from exchanges
     const result = database.prepare(`DELETE FROM exchanges WHERE id IN (${placeholders})`).run(...ids);
+    if (result.changes > 0) {
+        const totalCount = database.prepare('SELECT COUNT(*) as count FROM exchanges').get().count;
+        const pctUsed = ((stats.size - (result.changes * (stats.size / (totalCount + result.changes)))) / capBytes * 100).toFixed(1);
+        logger_1.logger.warn('Storage cap exceeded, pruned old exchanges', {
+            deleted: result.changes,
+            remaining: totalCount,
+            capBytes,
+            pctCapUsed: pctUsed,
+        });
+    }
     // Vacuum to reclaim space
     database.exec('VACUUM');
     return result.changes;

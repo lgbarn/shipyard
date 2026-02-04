@@ -26,6 +26,15 @@ fi
 
 STATE_FILE=".shipyard/STATE.md"
 
+# Cleanup stack for safe multi-call trap handling
+_CLEANUP_FILES=()
+_cleanup_stack() {
+    for f in "${_CLEANUP_FILES[@]}"; do
+        rm -f "$f"
+    done
+}
+trap '_cleanup_stack' EXIT INT TERM
+
 # Atomic write: write to temp file, validate, then mv (POSIX-atomic replacement)
 atomic_write() {
     local content="$1"
@@ -36,8 +45,8 @@ atomic_write() {
         echo "Error: Failed to create temporary file" >&2
         exit 3
     }
-    # Cleanup on unexpected exit
-    trap 'rm -f "$tmpfile"' EXIT INT TERM
+    # Register temp file for cleanup on unexpected exit
+    _CLEANUP_FILES+=("$tmpfile")
 
     printf '%s\n' "$content" > "$tmpfile"
 
@@ -54,8 +63,8 @@ atomic_write() {
         rm -f "$tmpfile"
         exit 2
     }
-    # Clear the trap since file is moved
-    trap - EXIT INT TERM
+    # Remove from cleanup stack since file was successfully moved
+    _CLEANUP_FILES=("${_CLEANUP_FILES[@]/$tmpfile/}")
 }
 
 # Parse arguments
@@ -125,7 +134,7 @@ if [ "$RECOVER" = true ]; then
     latest_phase=""
     if [ -d ".shipyard/phases" ]; then
         latest_phase=$(find .shipyard/phases/ -maxdepth 1 -type d 2>/dev/null | \
-            sed 's|.*/||' | grep '^[0-9]' | sort -n | tail -1)
+            sed 's|.*/||' | grep '^[0-9][0-9]*$' | sort -n | tail -1)
     fi
     latest_phase="${latest_phase:-1}"
 
@@ -152,8 +161,8 @@ if [ "$RECOVER" = true ]; then
     if command -v git >/dev/null 2>&1 && git rev-parse --git-dir >/dev/null 2>&1; then
         while IFS= read -r tag; do
             [ -z "$tag" ] && continue
-            tag_date=$(echo "$tag" | grep -oE '[0-9]{8}T[0-9]{6}Z' | head -1 || echo "")
-            tag_label=$(echo "$tag" | sed 's/^shipyard-checkpoint-//' | sed 's/-[0-9]*T[0-9]*Z$//')
+            tag_date=$(printf '%s\n' "$tag" | grep -oE '[0-9]{8}T[0-9]{6}Z' | head -1 || echo "")
+            tag_label=$(printf '%s\n' "$tag" | sed 's/^shipyard-checkpoint-//' | sed 's/-[0-9]*T[0-9]*Z$//')
             recovered_history="${recovered_history}- [${tag_date:-unknown}] Checkpoint: ${tag_label}
 "
         done < <(git tag -l "shipyard-checkpoint-*" 2>/dev/null | sort)

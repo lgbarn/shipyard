@@ -4,6 +4,10 @@
 import Database from 'better-sqlite3';
 import type { Exchange, MemoryStats, SearchResult } from './types';
 /**
+ * Check if vector search is available (sqlite-vec loaded successfully)
+ */
+export declare function isVecEnabled(): boolean;
+/**
  * Initialize the database with schema
  */
 export declare function initDatabase(): Database.Database;

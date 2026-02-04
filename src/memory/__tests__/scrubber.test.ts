@@ -156,6 +156,33 @@ MIIEvQIBADANBgkqhkiG9w0BAQEFAASC...
     });
   });
 
+  describe('Anthropic API keys', () => {
+    it('should redact Anthropic API keys', () => {
+      const text = 'Token: sk-ant-api03-' + 'a'.repeat(95);
+      const result = scrubSecrets(text);
+      expect(result.text).toBe('Token: [REDACTED]');
+      expect(result.redactedTypes).toContain('Anthropic API Key');
+    });
+  });
+
+  describe('OpenAI API keys', () => {
+    it('should redact OpenAI project keys', () => {
+      const text = 'Token: sk-proj-' + 'A1b2C3d4E5f6G7h8'.repeat(3);
+      const result = scrubSecrets(text);
+      expect(result.text).toBe('Token: [REDACTED]');
+      expect(result.redactedTypes).toContain('OpenAI API Key');
+    });
+  });
+
+  describe('Azure connection strings', () => {
+    it('should redact Azure storage connection strings', () => {
+      const text = 'CONN=DefaultEndpointsProtocol=https;AccountName=myacct;AccountKey=abc123key==;EndpointSuffix=core.windows.net';
+      const result = scrubSecrets(text);
+      expect(result.text).toContain('[REDACTED]');
+      expect(result.redactedTypes).toContain('Azure Connection String');
+    });
+  });
+
   describe('safe text', () => {
     it('should not modify text without secrets', () => {
       const text = 'This is normal text about AWS services and GitHub repositories';
