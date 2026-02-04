@@ -1,12 +1,11 @@
 # Code Conventions
 
-**Project:** Shipyard
-**Analysis Date:** 2026-02-01
-**Language:** Markdown, Bash, JSON
+**Last Updated:** 2026-02-03
+**Analyzed Version:** 2.3.0
 
 ## Overview
 
-Shipyard is a Claude Code plugin written primarily in Markdown for documentation and agent definitions, with Bash scripts for state management and lifecycle hooks. The codebase follows a structured, self-documenting approach with strong emphasis on explicit workflows, deterministic triggers, and rigorous verification protocols.
+Shipyard is a Claude Code plugin implementing a systematic software delivery workflow. The codebase prioritizes **clarity over cleverness**, **explicitness over inference**, and **verification over assumption**. Conventions are not suggestions - they are enforced in code review, automated tests, and workflow protocols.
 
 ## File Organization Conventions
 
@@ -19,9 +18,13 @@ shipyard/
 ├── commands/               # Slash command workflows (Markdown)
 ├── hooks/                  # Session lifecycle hooks (JSON + Bash)
 ├── scripts/                # Utility scripts (Bash)
-└── skills/                 # Auto-activating skill definitions (Markdown)
-    └── {skill-name}/
-        └── SKILL.md        # Skill content
+├── skills/                 # Auto-activating skill definitions (Markdown)
+│   └── {skill-name}/
+│       └── SKILL.md        # Skill content (uppercase SKILL.md)
+└── test/                   # Test suite (Bats)
+    ├── run.sh              # Test runner
+    ├── test_helper.bash    # Shared test utilities
+    └── *.bats              # Test files
 ```
 
 ### Naming Patterns
@@ -29,9 +32,11 @@ shipyard/
 **Files:**
 - Agent definitions: `{role}.md` (e.g., `builder.md`, `reviewer.md`)
 - Commands: `{command-name}.md` (e.g., `init.md`, `build.md`)
-- Skills: `SKILL.md` (uppercase, consistent across all skills)
+- Skills: `SKILL.md` (uppercase, consistent across all 16 skills)
 - Scripts: `{function}-{action}.sh` (e.g., `state-read.sh`, `checkpoint.sh`)
 - Configuration: `{purpose}.json` (e.g., `plugin.json`, `hooks.json`)
+- Test files: `{subject}.bats` (e.g., `checkpoint.bats`, `state-read.bats`)
+- Test helpers: `test_helper.bash` (shared setup and assertion utilities)
 
 **Directories:**
 - Skills use kebab-case: `shipyard-tdd/`, `code-simplification/`, `git-workflow/`
@@ -128,12 +133,34 @@ You are a Code Reviewer performing two-stage review.
 
 **Standard Sections:**
 1. Front matter with name and description
-2. Overview with core principle
-3. When to use / Activation triggers
-4. Detailed workflow or protocol
-5. Examples (Good/Bad)
-6. Red flags and common rationalizations
-7. Integration notes
+2. Token budget comment (advisory, not enforced - see CONTRIBUTING.md)
+3. Overview with core principle
+4. When to use / Activation triggers
+5. Detailed workflow or protocol
+6. Examples (Good/Bad)
+7. Red flags and common rationalizations
+8. Integration notes
+
+**File Structure:**
+```markdown
+---
+name: skill-name
+description: Use when [trigger context description]
+---
+
+<!-- TOKEN BUDGET: N lines / ~M tokens -->
+
+# Skill Title
+
+## Overview
+...
+```
+
+**Token Budget Comments:**
+- Format: `<!-- TOKEN BUDGET: N lines / ~M tokens -->`
+- Status: Advisory guideline, not enforced (see [Issue #19](https://github.com/lgbarn/shipyard/issues/19))
+- Purpose: Signal approximate size for context planning
+- Placement: Always immediately after frontmatter, before title
 
 **Trigger Specification:**
 Skills explicitly define their activation conditions:
@@ -185,10 +212,11 @@ set -euo pipefail
 
 1. Header comment describing purpose and usage
 2. Shebang and set flags
-3. Variable initialization
-4. Argument parsing
-5. Main logic
-6. Exit with status code
+3. Exit code documentation (in header comment)
+4. Variable initialization
+5. Argument parsing
+6. Main logic
+7. Exit with documented status code
 
 **Example:**
 ```bash
@@ -198,6 +226,12 @@ set -euo pipefail
 #
 # Usage:
 #   state-write.sh --phase <N> --position <desc>
+#
+# Exit Codes:
+#   0 - Success (STATE.md written)
+#   1 - User error (invalid arguments)
+#   2 - State corruption (validation failed)
+#   3 - Missing dependency (.shipyard/ missing)
 
 set -euo pipefail
 
@@ -206,6 +240,13 @@ PHASE=""
 POSITION=""
 ...
 ```
+
+**Exit Code Convention:**
+All scripts document exit codes in their header:
+- `0`: Success
+- `1`: User error (invalid arguments, missing required parameters)
+- `2`: Data corruption or validation failure
+- `3`: Missing dependency (directory, command, file)
 
 ### Variable Naming
 
@@ -270,6 +311,155 @@ POSITION=""
       }
     ]
   }
+}
+```
+
+## Test File Conventions
+
+### Bats Test Framework
+
+**Framework:** bats-core (Bash Automated Testing System)
+
+**Dependencies:**
+- `bats` (test runner)
+- `bats-support` (test helpers)
+- `bats-assert` (assertion library)
+
+### Test File Structure
+
+**All test files follow this pattern:**
+```bash
+#!/usr/bin/env bats
+load test_helper
+
+@test "component: behavior description" {
+    # Arrange
+    setup_shipyard_dir
+
+    # Act
+    run bash "$SCRIPT_PATH" --arg value
+
+    # Assert
+    assert_success
+    assert_output --partial "expected"
+}
+```
+
+**Header:**
+1. Shebang: `#!/usr/bin/env bats`
+2. Load helpers: `load test_helper` (first line after shebang)
+3. Setup functions (if needed): `setup() { ... }`
+
+**Test Naming:**
+```bash
+# Pattern: @test "component: behavior description"
+@test "state-read: no .shipyard directory outputs 'No Shipyard Project Detected' JSON"
+@test "integration: write then read round-trip preserves state data"
+@test "e2e: structured write creates valid state then read returns JSON"
+```
+
+**Conventions:**
+- Prefix with component name: `state-read:`, `checkpoint:`, `integration:`, `e2e:`
+- Describe expected behavior, not implementation
+- One behavior per test
+- Clear, complete descriptions (not abbreviated)
+
+### Test Helper Patterns
+
+**File:** `test/test_helper.bash`
+
+**Purpose:** Shared setup functions, common assertions, path constants
+
+**Standard exports:**
+```bash
+PROJECT_ROOT="$(cd "$(dirname "${BATS_TEST_FILENAME}")/.." && pwd)"
+STATE_READ="${PROJECT_ROOT}/scripts/state-read.sh"
+STATE_WRITE="${PROJECT_ROOT}/scripts/state-write.sh"
+CHECKPOINT="${PROJECT_ROOT}/scripts/checkpoint.sh"
+```
+
+**Helper Function Naming:**
+```bash
+setup_shipyard_dir()              # Creates isolated .shipyard skeleton
+setup_shipyard_with_state()       # Creates .shipyard with STATE.md
+setup_shipyard_corrupt_state()    # Creates corrupted state for error testing
+setup_shipyard_empty_state()      # Creates empty STATE.md for edge cases
+setup_git_repo()                  # Initializes test git repo with config
+
+assert_valid_json()               # Custom assertion for JSON validation
+```
+
+**Naming conventions:**
+- `setup_*` for test environment preparation
+- `assert_*` for custom assertions
+- Descriptive, not abbreviated: `setup_shipyard_with_state` not `setup_state`
+
+### Test Organization
+
+**Test files by component:**
+```
+test/
+├── checkpoint.bats         # checkpoint.sh tests (90 lines)
+├── state-read.bats         # state-read.sh tests (211 lines)
+├── state-write.bats        # state-write.sh tests (137 lines)
+├── integration.bats        # Cross-component integration (138 lines)
+└── e2e-smoke.bats         # End-to-end smoke tests (92 lines)
+```
+
+**Total:** 668 lines of test code across 5 files
+
+### Assertion Patterns
+
+**From bats-assert library:**
+```bash
+assert_success                      # Exit code 0
+assert_failure                      # Exit code non-zero
+assert_equal "$expected" "$actual"  # String equality
+assert_output "exact match"         # Exact output match
+assert_output --partial "substring" # Substring match
+refute_output --partial "not this"  # Assert substring absent
+```
+
+**Custom assertions:**
+```bash
+assert_valid_json()  # Validates JSON output via jq
+```
+
+### Test Execution
+
+**Via npm:**
+```bash
+npm test
+```
+
+**Direct execution:**
+```bash
+bash test/run.sh
+./node_modules/.bin/bats test/*.bats
+```
+
+**Test runner behavior:**
+- TAP (Test Anything Protocol) formatted output
+- Runs all `*.bats` files in `test/` directory
+- Auto-installs bats if missing (via npm)
+- Exit code 0 if all tests pass, non-zero otherwise
+
+### Test Isolation
+
+**All tests use isolated environments:**
+- `BATS_TEST_TMPDIR`: Temporary directory per test run
+- `cd "$BATS_TEST_TMPDIR"`: Change to isolated directory
+- Fresh git repos: `git init -q` in test setup
+- Cleanup handled automatically by bats framework
+
+**Example isolation:**
+```bash
+@test "checkpoint: creates tag with valid label" {
+    setup_git_repo              # Fresh git repo in BATS_TEST_TMPDIR
+    cd "$BATS_TEST_TMPDIR"      # Isolated directory
+    run bash "$CHECKPOINT" "pre-build-phase-2"
+    assert_success
+    # Cleanup automatic on test completion
 }
 ```
 
@@ -513,15 +703,35 @@ Error: File not found
 Error: .shipyard/STATE.md does not exist. Run /shipyard:init first.
 ```
 
+## Protocol Reference Pattern
+
+All commands, skills, and agents reference shared protocols using this format:
+
+```markdown
+Follow **Protocol Name** (see `docs/PROTOCOLS.md`) -- inline summary of what to do.
+```
+
+Examples:
+- `Follow **State Update Protocol** (see docs/PROTOCOLS.md) -- set status, position, timestamp.`
+- `Follow **Worktree Protocol** (see docs/PROTOCOLS.md) -- detect worktree, record working directory and branch.`
+- `Follow **Commit Convention** (see docs/PROTOCOLS.md) -- use conventional commit prefixes.`
+
+This pattern ensures:
+1. Readers know where to find the full protocol
+2. Inline summary provides immediate guidance
+3. Consistency across all workflow documents
+
 ## Summary of Key Conventions
 
-1. **File naming:** Lowercase with hyphens, SKILL.md for skills
-2. **Documentation:** YAML front matter, clear sections, examples with Good/Bad tags
-3. **Bash scripts:** Strict mode (`set -euo pipefail`), quoted paths, descriptive variables
-4. **JSON:** Schema references, consistent structure, no trailing commas
-5. **Commits:** Conventional format with scope, descriptive messages
-6. **Verification:** Evidence before claims, multi-stage review, categorized findings
-7. **Integration:** Explicit cross-references, clear invocation patterns
-8. **Error handling:** Validate early, fail clearly, guide user to resolution
+1. **File naming:** kebab-case for all files, `SKILL.md` (uppercase) for skill entry points
+2. **Documentation:** Required YAML frontmatter, token budget comments (advisory), numbered steps in commands
+3. **Bash scripts:** Strict mode (`set -euo pipefail`), documented exit codes (0/1/2/3 pattern), atomic writes
+4. **JSON:** Consistent schema, defaults documented, no trailing commas
+5. **Commits:** Conventional format (`type(scope): description`), shipyard-specific patterns
+6. **Verification:** Evidence before claims (enforced via `shipyard-verification` skill)
+7. **TDD:** Test-first development (enforced via `shipyard-tdd` skill)
+8. **Error handling:** Validate early, specific exit codes, recovery guidance
+9. **Testing:** Bats framework, isolated environments, `component: behavior` naming
+10. **Quality gates:** ShellCheck for bash, test suite for all changes
 
-This codebase prioritizes **clarity over cleverness**, **explicitness over inference**, and **verification over assumption**.
+These conventions are enforced through automated testing, code review, and workflow skills.

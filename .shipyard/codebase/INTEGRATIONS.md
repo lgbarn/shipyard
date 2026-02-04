@@ -1,5 +1,12 @@
 # External Integrations
 
+**Last Updated:** 2026-02-03
+**Analyzed Version:** 2.3.0
+**Integration Model:** Tool-based (CLI invocations)
+**Network Dependencies:** Zero outbound HTTP/HTTPS
+
+---
+
 ## Overview
 
 Shipyard is a **standalone plugin** with **zero runtime API dependencies**. It operates entirely within the Claude Code environment, coordinating local tools and git operations. All integrations are **tool-based** (CLI invocations) rather than API-based (HTTP requests).

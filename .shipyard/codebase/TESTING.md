@@ -1,17 +1,28 @@
 # Testing Infrastructure
 
-**Project:** Shipyard
-**Analysis Date:** 2026-02-01
-**Test Framework:** Self-testing via TDD skill enforcement and verification protocols
+**Last Updated:** 2026-02-03
+**Analyzed Version:** 2.3.0
 
 ## Overview
 
-Shipyard is a Claude Code plugin that **enforces testing practices rather than containing traditional unit tests**. The project implements a meta-testing approach where:
+Shipyard implements a **dual testing approach**:
 
-1. **Skills define testing protocols** that agents must follow
-2. **Verification skills enforce evidence-based completion claims**
-3. **Workflow commands validate state and outputs at each step**
-4. **No traditional test suite exists** because the codebase consists of Markdown documentation and Bash scripts with deterministic behaviors
+### 1. Self-Testing (Shipyard's Own Code)
+- **Framework:** bats-core (Bash Automated Testing System)
+- **Coverage:** 668 lines of test code across 5 test files
+- **Scope:** Bash scripts with executable logic (`state-read.sh`, `state-write.sh`, `checkpoint.sh`)
+- **Execution:** `npm test` or `bash test/run.sh`
+- **Philosophy:** Test executable code, not declarative content
+
+### 2. Meta-Testing (Enforced in Managed Projects)
+- **TDD skill (`shipyard-tdd`)** enforces test-first development
+- **Verification skill (`shipyard-verification`)** prevents completion claims without evidence
+- **Testing skill (`shipyard-testing`)** guides effective test patterns
+- **Workflow commands** validate state and outputs at each pipeline stage
+
+**Key insight:** Shipyard uses the right tool for each job - bats tests for executable scripts, enforced protocols for managed projects.
+
+This document covers both approaches: how Shipyard tests itself AND how it enforces testing in projects it manages.
 
 ## Testing Philosophy
 
@@ -38,11 +49,343 @@ Write code before the test? Delete it. Start over.
 4. **Verify GREEN:** Confirm it passes
 5. **REFACTOR:** Clean up while staying green
 
+## Part 1: Shipyard's Own Test Suite
+
+### Test Framework: bats-core
+
+**What is Bats?**
+Bats (Bash Automated Testing System) is a TAP-compliant testing framework for Bash scripts. It provides a simple, readable syntax for testing command-line tools and shell scripts.
+
+**Dependencies:**
+```json
+"devDependencies": {
+  "bats": "^1.13.0",
+  "bats-assert": "^2.2.4",
+  "bats-support": "^0.3.0"
+}
+```
+
+**Installation:**
+```bash
+npm install --save-dev bats bats-support bats-assert
+```
+
+### Test File Organization
+
+```
+test/
+├── run.sh                  # Test runner (569 bytes)
+├── test_helper.bash        # Shared utilities (68 lines)
+├── checkpoint.bats         # Checkpoint tests (90 lines)
+├── state-read.bats         # State reading tests (211 lines)
+├── state-write.bats        # State writing tests (137 lines)
+├── integration.bats        # Integration tests (138 lines)
+└── e2e-smoke.bats         # E2E smoke tests (92 lines)
+```
+
+**Total Test Coverage:** 668 lines of test code
+
+### Test Execution
+
+**Via npm (recommended):**
+```bash
+npm test
+```
+
+**Direct execution:**
+```bash
+bash test/run.sh
+./node_modules/.bin/bats test/*.bats
+```
+
+**Test runner behavior:**
+- Auto-installs bats if not found
+- Runs all `.bats` files in `test/` directory
+- TAP (Test Anything Protocol) formatted output
+- Exit code 0 if all pass, non-zero on any failure
+
+### Test Structure and Patterns
+
+**Standard test file structure:**
+```bash
+#!/usr/bin/env bats
+load test_helper
+
+@test "component: behavior description" {
+    # Arrange
+    setup_shipyard_with_state
+
+    # Act
+    run bash "$STATE_READ"
+
+    # Assert
+    assert_success
+    assert_output --partial "Current Phase"
+}
+```
+
+**Test naming convention:**
+```
+@test "script-name: specific behavior description"
+```
+
+**Examples from actual tests:**
+```bash
+@test "state-read: no .shipyard directory outputs 'No Shipyard Project Detected' JSON"
+@test "checkpoint: creates tag with valid label"
+@test "integration: write then read round-trip preserves state data"
+@test "e2e: structured write creates valid state then read returns JSON"
+```
+
+### Test Helper Utilities
+
+**File:** `test/test_helper.bash`
+
+**Exported constants:**
+```bash
+PROJECT_ROOT="$(cd "$(dirname "${BATS_TEST_FILENAME}")/.." && pwd)"
+STATE_READ="${PROJECT_ROOT}/scripts/state-read.sh"
+STATE_WRITE="${PROJECT_ROOT}/scripts/state-write.sh"
+CHECKPOINT="${PROJECT_ROOT}/scripts/checkpoint.sh"
+```
+
+**Setup functions:**
+```bash
+setup_shipyard_dir()              # Creates isolated .shipyard skeleton
+setup_shipyard_with_state()       # Creates .shipyard with valid STATE.md
+setup_shipyard_corrupt_state()    # Creates corrupt STATE.md for error testing
+setup_shipyard_empty_state()      # Creates empty STATE.md for edge cases
+setup_git_repo()                  # Initializes test git repo with user config
+```
+
+**Custom assertions:**
+```bash
+assert_valid_json()               # Validates output is parseable JSON via jq
+```
+
+### Test Categories
+
+#### 1. Unit Tests (Component-Specific)
+
+**checkpoint.bats** (90 lines)
+- Tag creation with valid labels
+- Label sanitization (special characters)
+- Prune functionality (remove old tags)
+- Dirty worktree warnings
+- Non-git-repo handling
+- Edge cases (empty labels, invalid days)
+
+**state-read.bats** (211 lines)
+- No project detection
+- JSON structure validation
+- Context tier auto-detection
+- Minimal/planning/execution tier loading
+- STATE.md corruption detection
+- Missing phases directory handling (Issue #4)
+- Lessons loading
+
+**state-write.bats** (137 lines)
+- Structured writes (phase, position, status)
+- Raw content writes
+- History accumulation
+- Atomic writes (validation)
+- Recovery mode (rebuild from artifacts)
+- Exit code validation
+- Input validation (phase numbers, status values)
+
+#### 2. Integration Tests
+
+**integration.bats** (138 lines)
+- Write → read round-trip preservation
+- Checkpoint create → prune lifecycle
+- Multiple writes accumulating history
+- Cross-component interactions
+
+**Example integration test:**
+```bash
+@test "integration: write then read round-trip preserves state data" {
+    setup_shipyard_dir
+    mkdir -p .shipyard/phases
+
+    # Write known state
+    bash "$STATE_WRITE" --phase 3 --position "Integration testing" --status in_progress
+
+    # Read state back via state-read.sh
+    run bash "$STATE_READ"
+    assert_success
+    assert_output --partial "Phase"
+    assert_output --partial "3"
+    assert_output --partial "in_progress"
+}
+```
+
+#### 3. End-to-End Tests
+
+**e2e-smoke.bats** (92 lines)
+- Full lifecycle scenarios
+- Structured write → STATE.md → read → JSON
+- Checkpoint create → verify tag → prune → verify removal
+- State recovery from artifacts
+
+**Example E2E test:**
+```bash
+@test "e2e: recovery rebuilds state from artifacts" {
+    cd "$BATS_TEST_TMPDIR"
+
+    # Create phase artifacts
+    mkdir -p .shipyard/phases/2/plans
+    echo "# Plan 2.1" > .shipyard/phases/2/plans/PLAN-1.1.md
+
+    # Remove STATE.md
+    rm -f .shipyard/STATE.md
+
+    # Recover state
+    run bash "$STATE_WRITE" --recover
+    assert_success
+
+    # Verify recovered STATE.md
+    run cat .shipyard/STATE.md
+    assert_output --partial "Phase"
+    assert_output --partial "2"
+}
+```
+
+### Test Isolation
+
+**All tests run in isolated environments:**
+- `BATS_TEST_TMPDIR`: Unique temp directory per test run
+- Fresh git repos initialized in setup (not reused between tests)
+- No shared state between tests
+- Automatic cleanup on test completion
+
+**Example:**
+```bash
+@test "checkpoint: creates tag with valid label" {
+    setup_git_repo              # Fresh git repo in BATS_TEST_TMPDIR
+    run bash "$CHECKPOINT" "pre-build-phase-2"
+    assert_success
+    # Cleanup handled automatically by bats
+}
+```
+
+### Assertions Used
+
+**From bats-assert:**
+```bash
+assert_success                      # Exit code 0
+assert_failure                      # Exit code non-zero
+assert_equal "$expected" "$actual"  # String equality
+assert_output "exact"               # Exact output match
+assert_output --partial "substring" # Contains substring
+refute_output --partial "not this"  # Does not contain substring
+```
+
+**Custom assertions:**
+```bash
+assert_valid_json                   # Validates JSON via jq
+```
+
+### Test Coverage by Component
+
+| Component | Test File | Lines | Focus |
+|-----------|-----------|-------|-------|
+| `checkpoint.sh` | checkpoint.bats | 90 | Tag creation, pruning, validation |
+| `state-read.sh` | state-read.bats | 211 | JSON output, tier detection, corruption handling |
+| `state-write.sh` | state-write.bats | 137 | Structured writes, atomic operations, recovery |
+| Cross-component | integration.bats | 138 | Write→read cycles, multi-step workflows |
+| Full scenarios | e2e-smoke.bats | 92 | Complete user journeys |
+
+### What Gets Tested
+
+**Script functionality:**
+- Argument parsing and validation
+- File creation and modification (atomic writes)
+- Git operations (tags, status checks)
+- JSON generation and structure
+- Error handling and exit codes
+- Edge cases (empty inputs, missing files, corrupted state)
+- Context tier auto-detection
+- State recovery from artifacts
+
+**Error scenarios:**
+- Missing .shipyard directory
+- Corrupt STATE.md files
+- Invalid arguments
+- Non-git repositories
+- Missing dependencies (jq)
+- Concurrent write safety (atomic operations)
+
+### What Is NOT Tested
+
+**Out of scope for bats tests:**
+- Markdown documentation content (declarative, no logic)
+- Agent instructions (natural language, not code)
+- Command workflows (orchestration, not algorithms)
+- Skill content (guidelines, not executable logic)
+- Claude Code integration (external system)
+- Hook execution within Claude Code (platform-specific)
+
+**Why these are excluded:**
+- Markdown files are documentation, not executable code
+- Agent/skill definitions are LLM instructions, not testable functions
+- Integration with Claude Code requires platform testing, not unit tests
+- The value is in the protocols enforced, not the markdown syntax
+
+### Running Tests
+
+**Run all tests:**
+```bash
+npm test
+```
+
+**Run specific test file:**
+```bash
+./node_modules/.bin/bats test/checkpoint.bats
+```
+
+**Run with verbose output:**
+```bash
+./node_modules/.bin/bats --formatter pretty test/*.bats
+```
+
+**Expected output (all passing):**
+```
+Running Shipyard test suite...
+ ✓ checkpoint: creates tag with valid label
+ ✓ checkpoint: sanitizes label with special characters
+ ✓ state-read: no .shipyard directory outputs JSON
+ ✓ state-write: structured write creates STATE.md
+ ...
+34 tests, 0 failures
+```
+
+### Test Maintenance
+
+**Adding new tests:**
+1. Create or modify `.bats` file in `test/`
+2. Use `@test "component: description" { ... }` syntax
+3. Load test_helper: `load test_helper`
+4. Use setup functions for isolation
+5. Assert expected behavior, not implementation
+
+**Test quality standards:**
+- One behavior per test
+- Descriptive test names (not abbreviated)
+- Arrange-Act-Assert structure
+- Isolated (no shared state)
+- Fast (no sleep/wait unless absolutely necessary)
+
+## Part 2: Meta-Testing (Enforced in Managed Projects)
+
+The following sections describe how Shipyard enforces testing discipline in the projects it manages.
+
 ## Testing Infrastructure Components
 
 ### 1. TDD Skill (`shipyard:shipyard-tdd`)
 
 **Purpose:** Enforce test-first development for all implementation work
+
+**File:** `/Users/lgbarn/Personal/shipyard/skills/shipyard-tdd/SKILL.md` (379 lines)
 
 **Activation Triggers:**
 - File patterns: `*.test.*`, `*.spec.*`, `__tests__/`, `*_test.go`
@@ -60,6 +403,13 @@ Before ANY production code:
 6. Repeat
 ```
 
+**The Iron Law:**
+```
+NO PRODUCTION CODE WITHOUT A FAILING TEST FIRST
+
+Write code before the test? Delete it. Start over.
+```
+
 **Verification Checklist:**
 ```markdown
 - [ ] Every new function/method has a test
@@ -72,14 +422,23 @@ Before ANY production code:
 - [ ] Edge cases and errors covered
 ```
 
+**Integration:** References `shipyard:shipyard-testing` for test structure patterns.
+
 ### 2. Verification Skill (`shipyard:shipyard-verification`)
 
 **Purpose:** Prevent completion claims without evidence
+
+**File:** `/Users/lgbarn/Personal/shipyard/skills/shipyard-verification/SKILL.md` (147 lines)
 
 **Activation Triggers:**
 - About to claim "done", "complete", "fixed", "passing"
 - Before commit, PR creation, or merge
 - Before any success assertion
+
+**The Iron Law:**
+```
+NO COMPLETION CLAIMS WITHOUT FRESH VERIFICATION EVIDENCE
+```
 
 **The Gate Function:**
 ```
@@ -99,11 +458,55 @@ BEFORE claiming any status:
 | Tests pass | Test command output: 0 failures | Previous run, "should pass" |
 | Build succeeds | Build command: exit 0 | Linter passing |
 | Bug fixed | Test original symptom: passes | Code changed, assumed fixed |
+| Regression test works | Red-green cycle verified | Test passes once |
 ```
 
-### 3. Builder Agent Testing Protocol
+**Historical context:** Created after incidents where claims were made without verification, leading to shipped bugs and broken trust.
 
-**From `agents/builder.md`:**
+### 3. Testing Skill (`shipyard:shipyard-testing`)
+
+**Purpose:** Guide effective test structure and patterns
+
+**File:** `/Users/lgbarn/Personal/shipyard/skills/shipyard-testing/SKILL.md` (400 lines estimated)
+
+**Activation Triggers:**
+- Writing or modifying test files
+- Setting up test infrastructure or utilities
+- Debugging flaky, brittle, or slow tests
+- Deciding between unit, integration, and E2E tests
+- Choosing when and how to use mocks, stubs, or fakes
+
+**The Iron Law:**
+```
+TEST BEHAVIORS, NOT IMPLEMENTATIONS
+```
+
+**Core Principle:** If refactoring breaks your tests but not your users, your tests are wrong.
+
+**Test Structure (AAA):**
+```
+Arrange — Set up preconditions and inputs
+Act     — Execute the behavior under test
+Assert  — Verify the expected outcome
+```
+
+**What to test:**
+- Behaviors: What the system does from a user's perspective
+- Edge cases: Empty inputs, boundaries, overflow, zero, null
+- Error paths: Invalid input, missing dependencies, timeouts
+- State transitions: Before and after an operation
+
+**What to skip:**
+- Trivial getters/setters with no logic
+- Generated code (protobuf, ORM migrations)
+- Framework internals
+- Private methods (test through public API)
+
+**Relationship to TDD skill:** `shipyard-tdd` covers WHEN to write tests (test-first), while `shipyard-testing` covers HOW to write effective, maintainable tests.
+
+### 4. Builder Agent Testing Protocol
+
+**File:** `/Users/lgbarn/Personal/shipyard/agents/builder.md`
 
 **Task Execution Sequence:**
 1. If `tdd="true"`: Write failing test FIRST, run to confirm failure
@@ -118,9 +521,9 @@ BEFORE claiming any status:
 - NEVER combine multiple tasks into single commit
 - NEVER commit without evidence of success
 
-### 4. Reviewer Agent Testing Review
+### 5. Reviewer Agent Testing Review
 
-**From `agents/reviewer.md`:**
+**File:** `/Users/lgbarn/Personal/shipyard/agents/reviewer.md`
 
 **Stage 1: Spec Compliance**
 - Verify TDD protocol was followed
@@ -132,15 +535,19 @@ BEFORE claiming any status:
 - Check for proper error handling in tests
 - Verify tests aren't testing mock behavior instead of real behavior
 
-### 5. Verifier Agent Execution Validation
+**Finding categories:** Critical (must fix), Important (should fix), Suggestion (nice to have)
 
-**From `agents/verifier.md`:**
+### 6. Verifier Agent Execution Validation
+
+**File:** `/Users/lgbarn/Personal/shipyard/agents/verifier.md`
 
 **Phase Verification Checks:**
 - All phase goals met
 - **Tests pass** (run the test suite if one exists)
 - Integration between plans is sound
 - Infrastructure validation passes (for IaC changes)
+
+Produces `VERIFICATION.md` with overall status, coverage analysis, and gaps identified.
 
 ## Testing Patterns Enforced
 
@@ -222,9 +629,9 @@ Regression tests (TDD Red-Green):
 ❌ "I've written a regression test" (without red-green verification)
 ```
 
-## Test Coverage Expectations
+## Test Coverage Expectations in Managed Projects
 
-While Shipyard itself has no test coverage (being a documentation-based plugin), it enforces comprehensive testing in managed projects:
+Shipyard enforces comprehensive testing in projects it manages:
 
 ### Per-Task Coverage
 
@@ -456,33 +863,47 @@ If tests pass: Report ready
 - Tests are clear and maintainable ✓
 ```
 
-## No Traditional Test Suite Rationale
+## Testing Approach Rationale
 
-**Why Shipyard itself has no test suite:**
+### Why the Dual Approach?
 
-1. **Declarative configuration:** Most code is Markdown documentation
-2. **Bash scripts are simple:** State management scripts are single-purpose with minimal logic
-3. **Self-enforcing design:** The skills themselves define and enforce testing protocols
-4. **Meta-testing approach:** Shipyard tests its effectiveness by the quality of projects it manages
-5. **Verification protocols:** Each script has clear inputs/outputs validated by hooks
+**Shipyard's own tests (bats-core):**
+- Tests executable Bash scripts (`state-read.sh`, `state-write.sh`, `checkpoint.sh`)
+- Validates critical infrastructure (state management, atomic writes, recovery)
+- Ensures script behavior is deterministic and correct
+- Prevents regressions in core functionality
+- **668 lines of tests** for scripts with logic and edge cases
 
-**What would be tested if we added tests:**
-- Script error handling and edge cases
-- JSON schema validation
-- Markdown parsing and structure
-- Hook execution and state injection
-- Agent dispatch and result handling
+**What is NOT tested (and why):**
+- **Markdown documentation:** Declarative content, no executable logic
+- **Agent instructions:** Natural language prompts for LLMs, not testable code
+- **Command workflows:** Orchestration steps, validated by agent execution
+- **Skill definitions:** Guidelines enforced by agents, not executable functions
+- **Claude Code integration:** Platform-specific, requires integration testing
 
-These are **simple, deterministic behaviors** where tests would add limited value compared to the documentation-driven design.
+**Why this makes sense:**
+1. **Bash scripts have logic** → need unit tests for correctness
+2. **Markdown has no logic** → testing would verify file contents, not behavior
+3. **Agent prompts guide LLMs** → effectiveness measured by outcomes, not syntax
+4. **Skills enforce protocols** → meta-testing approach validates enforcement
+
+### The Meta-Testing Approach
+
+While Markdown/agent files don't need tests themselves, they **define and enforce testing in managed projects**. This is meta-testing: testing through enforcement rather than direct validation.
 
 ## Summary
 
-Shipyard's testing approach is **prescriptive rather than introspective**:
+Shipyard implements a **hybrid testing strategy**:
 
-### What Shipyard Tests
-- **Nothing directly** - it's a documentation plugin
+### What Shipyard Tests (Self-Testing)
+- **Bash scripts** with bats-core (668 lines of tests)
+- State management logic (read, write, recovery)
+- Checkpoint functionality (create, prune, validate)
+- Error handling and edge cases
+- Atomic operations and data integrity
+- JSON generation and structure
 
-### What Shipyard Enforces
+### What Shipyard Enforces (Meta-Testing)
 - **TDD protocol** in all managed projects
 - **Verification before completion** claims
 - **Evidence-based quality gates** at task, plan, and phase levels
@@ -490,6 +911,14 @@ Shipyard's testing approach is **prescriptive rather than introspective**:
 - **Red-green cycles** for all features and bug fixes
 
 ### Testing Guarantees Provided
+
+**For Shipyard itself:**
+1. Core scripts function correctly (validated by bats tests)
+2. State management is atomic and recoverable (integration tests)
+3. Error handling works as documented (unit tests)
+4. Edge cases handled gracefully (comprehensive test coverage)
+
+**For managed projects:**
 1. No production code without tests (enforced by TDD skill)
 2. No completion claims without evidence (enforced by verification skill)
 3. Test quality reviewed at multiple levels (builder, reviewer, verifier)
@@ -498,6 +927,9 @@ Shipyard's testing approach is **prescriptive rather than introspective**:
 
 ### Key Insight
 
-Shipyard doesn't need tests because **it IS a testing framework**. Its purpose is to ensure rigorous testing practices in projects it manages, making it a **meta-testing tool** rather than a tested component.
+Shipyard uses **the right tool for the job**:
+- **Bats tests** for executable Bash scripts with logic
+- **Meta-testing enforcement** for ensuring quality in managed projects
+- **Documentation** for agent instructions and workflow orchestration
 
-The absence of a traditional test suite is **intentional and appropriate** for a plugin composed of declarative workflows, simple scripts, and enforcement protocols.
+This dual approach ensures both **Shipyard's reliability** (via bats tests) and **managed project quality** (via enforced protocols).
