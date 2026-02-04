@@ -4,7 +4,7 @@ disable-model-invocation: true
 argument-hint: "[--force]"
 ---
 
-# /memory:import - Import Conversation History
+# /shipyard:memory-import - Import Conversation History
 
 You are executing the memory import workflow. Follow these steps precisely.
 
@@ -19,7 +19,7 @@ Check `~/.config/shipyard/config.json` for memory settings.
 
 - **If memory is disabled:**
   Display:
-  > "Memory is not enabled. Use `/memory:enable` first, then run this command."
+  > "Memory is not enabled. Use `/shipyard:memory-enable` first, then run this command."
   Stop here.
 
 ## Step 2: Check Existing Import
@@ -82,7 +82,7 @@ If confirmed:
 2. Display:
    > "Import started in background.
    >
-   > Use `/memory:status` to check progress.
+   > Use `/shipyard:memory-status` to check progress.
    > You can continue working -- indexing won't interrupt your session.
    >
    > The import will:
@@ -93,6 +93,6 @@ If confirmed:
 ## Step 7: Monitor Progress (Optional)
 
 If user wants to wait:
-> "Import is running. Check `/memory:status` periodically for progress.
+> "Import is running. Check `/shipyard:memory-status` periodically for progress.
 >
 > Current: {indexed} / {total} files processed"

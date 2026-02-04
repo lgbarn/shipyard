@@ -4,7 +4,7 @@ disable-model-invocation: true
 argument-hint: ""
 ---
 
-# /memory:status - Memory Statistics
+# /shipyard:memory-status - Memory Statistics
 
 You are executing the memory status workflow. Follow these steps precisely.
 
@@ -23,7 +23,7 @@ Check if `~/.config/shipyard/memory.db` exists.
 - **If it does not exist:**
   Display:
   > "Memory database not found. Memory may not have been initialized yet.
-  > Run `/memory:import` to initialize and import existing conversation history."
+  > Run `/shipyard:memory-import` to initialize and import existing conversation history."
   Stop here.
 
 ## Step 3: Query Statistics
@@ -71,7 +71,7 @@ Based on status, suggest relevant actions:
 | Condition | Suggestion |
 |-----------|------------|
 | Storage > 80% of cap | Consider increasing cap or pruning old exchanges |
-| No exchanges | Run `/memory:import` to index existing history |
+| No exchanges | Run `/shipyard:memory-import` to index existing history |
 | Last index > 1 hour ago | Background indexer may be paused; check logs |
 | Index error | Check `~/.config/shipyard/memory.log` for details |
-| Memory disabled | Use `/memory:enable` to start indexing |
+| Memory disabled | Use `/shipyard:memory-enable` to start indexing |

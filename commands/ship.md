@@ -163,7 +163,7 @@ Check if Memory is enabled via `~/.config/shipyard/config.json`:
 **If memory is enabled:**
 
 1. Calculate the milestone's date range from `.shipyard/STATE.md` history entries
-2. Use `/memory:search` (or call the memory MCP server) to search for exchanges matching:
+2. Use `/shipyard:memory-search` (or call the memory MCP server) to search for exchanges matching:
    - Date range of the current milestone
    - Current project path
    - Query: "debugging struggles, rejected approaches, decisions, issues resolved"

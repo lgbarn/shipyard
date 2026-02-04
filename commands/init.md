@@ -122,7 +122,7 @@ Also ask about memory (cross-session recall):
 > to find how you solved similar issues before.
 >
 > Conversations are stored locally on your machine in `~/.config/shipyard/memory.db`.
-> You can disable this anytime with `/memory:disable`.
+> You can disable this anytime with `/shipyard:memory-disable`.
 >
 > 1. **Yes, enable Memory** (Recommended) -- Index conversations for cross-session recall
 > 2. **No, skip Memory** -- Conversations are not indexed
@@ -133,7 +133,7 @@ If user selects "Yes":
 - Display: "Memory enabled. Background import of existing conversations started."
 
 If user selects "No":
-- Note that memory can be enabled later with `/memory:enable`
+- Note that memory can be enabled later with `/shipyard:memory-enable`
 
 Store preferences in `.shipyard/config.json`. Follow **Model Routing Protocol** (see `docs/PROTOCOLS.md`) for the full `config.json` structure, model routing keys, and defaults.
 
