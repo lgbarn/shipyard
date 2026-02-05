@@ -55,13 +55,22 @@ const logger_1 = require("./logger");
  */
 async function runExport(outputPath) {
     const db = (0, db_1.getDatabase)();
+    const exportsDir = path.join(config_1.CONFIG_DIR, 'exports');
+    (0, config_1.ensureConfigDir)();
+    fs.mkdirSync(exportsDir, { recursive: true });
     // Generate default path if not provided
     if (!outputPath) {
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        const exportsDir = path.join(config_1.CONFIG_DIR, 'exports');
-        (0, config_1.ensureConfigDir)();
-        fs.mkdirSync(exportsDir, { recursive: true });
         outputPath = path.join(exportsDir, `memory-export-${timestamp}.json`);
+    }
+    else {
+        // Validate custom path is within exports directory to prevent path traversal
+        const resolved = path.resolve(outputPath);
+        const resolvedExportsDir = path.resolve(exportsDir);
+        if (!resolved.startsWith(resolvedExportsDir + path.sep) && resolved !== resolvedExportsDir) {
+            throw new Error(`Export path must be within ${resolvedExportsDir}. Got: ${resolved}`);
+        }
+        outputPath = resolved;
     }
     // Gather metadata
     const metadata = gatherMetadata(db);

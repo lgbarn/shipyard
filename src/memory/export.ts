@@ -23,13 +23,22 @@ import type { ExportMetadata, ExportResult } from './types'
 export async function runExport(outputPath?: string): Promise<ExportResult> {
   const db = getDatabase()
 
+  const exportsDir = path.join(CONFIG_DIR, 'exports')
+  ensureConfigDir()
+  fs.mkdirSync(exportsDir, { recursive: true })
+
   // Generate default path if not provided
   if (!outputPath) {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
-    const exportsDir = path.join(CONFIG_DIR, 'exports')
-    ensureConfigDir()
-    fs.mkdirSync(exportsDir, { recursive: true })
     outputPath = path.join(exportsDir, `memory-export-${timestamp}.json`)
+  } else {
+    // Validate custom path is within exports directory to prevent path traversal
+    const resolved = path.resolve(outputPath)
+    const resolvedExportsDir = path.resolve(exportsDir)
+    if (!resolved.startsWith(resolvedExportsDir + path.sep) && resolved !== resolvedExportsDir) {
+      throw new Error(`Export path must be within ${resolvedExportsDir}. Got: ${resolved}`)
+    }
+    outputPath = resolved
   }
 
   // Gather metadata

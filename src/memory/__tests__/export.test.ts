@@ -80,7 +80,9 @@ describe('runExport - empty database', () => {
     initDatabase()
 
     const { runExport } = await import('../export')
-    const exportPath = path.join(tmpDir, 'empty-export.json')
+    const exportsDir = path.join(tmpDir, 'exports')
+    fs.mkdirSync(exportsDir, { recursive: true })
+    const exportPath = path.join(exportsDir, 'empty-export.json')
     const result = await runExport(exportPath)
 
     // Read and parse exported file
@@ -116,7 +118,9 @@ describe('runExport - metadata completeness', () => {
     await seedSession('sess-1', '/test/project', 1000, 2)
 
     const { runExport } = await import('../export')
-    const exportPath = path.join(tmpDir, 'meta-test.json')
+    const exportsDir = path.join(tmpDir, 'exports')
+    fs.mkdirSync(exportsDir, { recursive: true })
+    const exportPath = path.join(exportsDir, 'meta-test.json')
     await runExport(exportPath)
 
     // Parse exported file
@@ -146,7 +150,9 @@ describe('runExport - metadata completeness', () => {
     await seedSession('sess-1', '/test/project', 1000, 3)
 
     const { runExport } = await import('../export')
-    const exportPath = path.join(tmpDir, 'count-test.json')
+    const exportsDir = path.join(tmpDir, 'exports')
+    fs.mkdirSync(exportsDir, { recursive: true })
+    const exportPath = path.join(exportsDir, 'count-test.json')
     await runExport(exportPath)
 
     const content = fs.readFileSync(exportPath, 'utf-8')
@@ -168,7 +174,9 @@ describe('runExport - metadata completeness', () => {
     await seedSession('sess-2', '/test/project', 2000, 1)
 
     const { runExport } = await import('../export')
-    const exportPath = path.join(tmpDir, 'session-count-test.json')
+    const exportsDir = path.join(tmpDir, 'exports')
+    fs.mkdirSync(exportsDir, { recursive: true })
+    const exportPath = path.join(exportsDir, 'session-count-test.json')
     await runExport(exportPath)
 
     const content = fs.readFileSync(exportPath, 'utf-8')
@@ -189,7 +197,9 @@ describe('runExport - exchange field handling', () => {
     insertExchange(makeExchange({ id: 'ex1', embedding: new Float32Array(384).fill(0.5) }))
 
     const { runExport } = await import('../export')
-    const exportPath = path.join(tmpDir, 'no-embedding-test.json')
+    const exportsDir = path.join(tmpDir, 'exports')
+    fs.mkdirSync(exportsDir, { recursive: true })
+    const exportPath = path.join(exportsDir, 'no-embedding-test.json')
     await runExport(exportPath)
 
     const content = fs.readFileSync(exportPath, 'utf-8')
@@ -217,7 +227,9 @@ describe('runExport - exchange field handling', () => {
     insertExchange(makeExchange({ id: 'ex1', toolNames: ['Read', 'Write', 'Bash'] }))
 
     const { runExport } = await import('../export')
-    const exportPath = path.join(tmpDir, 'tool-names-test.json')
+    const exportsDir = path.join(tmpDir, 'exports')
+    fs.mkdirSync(exportsDir, { recursive: true })
+    const exportPath = path.join(exportsDir, 'tool-names-test.json')
     await runExport(exportPath)
 
     const content = fs.readFileSync(exportPath, 'utf-8')
@@ -241,7 +253,9 @@ describe('runExport - exchange field handling', () => {
     }))
 
     const { runExport } = await import('../export')
-    const exportPath = path.join(tmpDir, 'special-chars-test.json')
+    const exportsDir = path.join(tmpDir, 'exports')
+    fs.mkdirSync(exportsDir, { recursive: true })
+    const exportPath = path.join(exportsDir, 'special-chars-test.json')
     await runExport(exportPath)
 
     const content = fs.readFileSync(exportPath, 'utf-8')
@@ -261,7 +275,9 @@ describe('runExport - exchange field handling', () => {
     insertExchange(makeExchange({ id: 'ex1', projectPath: null, gitBranch: null }))
 
     const { runExport } = await import('../export')
-    const exportPath = path.join(tmpDir, 'null-fields-test.json')
+    const exportsDir = path.join(tmpDir, 'exports')
+    fs.mkdirSync(exportsDir, { recursive: true })
+    const exportPath = path.join(exportsDir, 'null-fields-test.json')
     await runExport(exportPath)
 
     const content = fs.readFileSync(exportPath, 'utf-8')
@@ -279,7 +295,9 @@ describe('runExport - file permissions and path', () => {
     initDatabase()
 
     const { runExport } = await import('../export')
-    const exportPath = path.join(tmpDir, 'perm-test.json')
+    const exportsDir = path.join(tmpDir, 'exports')
+    fs.mkdirSync(exportsDir, { recursive: true })
+    const exportPath = path.join(exportsDir, 'perm-test.json')
     await runExport(exportPath)
 
     const stats = fs.statSync(exportPath)
@@ -304,6 +322,26 @@ describe('runExport - file permissions and path', () => {
     expect(fs.existsSync(result.outputPath)).toBe(true)
   })
 
+  it('rejects output path outside exports directory', async () => {
+    const { initDatabase } = await import('../db')
+    initDatabase()
+
+    const { runExport } = await import('../export')
+    const outsidePath = path.join(tmpDir, 'outside-export.json')
+
+    await expect(runExport(outsidePath)).rejects.toThrow('Export path must be within')
+  })
+
+  it('rejects path traversal attempts', async () => {
+    const { initDatabase } = await import('../db')
+    initDatabase()
+
+    const { runExport } = await import('../export')
+    const traversalPath = path.join(tmpDir, 'exports', '..', '..', 'etc', 'passwd')
+
+    await expect(runExport(traversalPath)).rejects.toThrow('Export path must be within')
+  })
+
   it('custom output path creates file at specified location', async () => {
     const { initDatabase, insertExchange } = await import('../db')
     initDatabase()
@@ -312,8 +350,10 @@ describe('runExport - file permissions and path', () => {
     insertExchange(makeExchange({ id: 'ex1' }))
 
     const { runExport } = await import('../export')
-    const customPath = path.join(tmpDir, 'custom', 'my-export.json')
-    fs.mkdirSync(path.join(tmpDir, 'custom'), { recursive: true })
+    const exportsDir = path.join(tmpDir, 'exports')
+    const customDir = path.join(exportsDir, 'custom')
+    fs.mkdirSync(customDir, { recursive: true })
+    const customPath = path.join(customDir, 'my-export.json')
 
     const result = await runExport(customPath)
 
@@ -337,7 +377,9 @@ describe('runExport - session export', () => {
     await seedSession('sess-2', null, 2000, 3)
 
     const { runExport } = await import('../export')
-    const exportPath = path.join(tmpDir, 'sessions-test.json')
+    const exportsDir = path.join(tmpDir, 'exports')
+    fs.mkdirSync(exportsDir, { recursive: true })
+    const exportPath = path.join(exportsDir, 'sessions-test.json')
     await runExport(exportPath)
 
     const content = fs.readFileSync(exportPath, 'utf-8')
@@ -418,7 +460,9 @@ describe('runExport - ExportResult fields', () => {
     await seedSession('sess-2', '/test/project', 2000, 1)
 
     const { runExport } = await import('../export')
-    const result = await runExport(path.join(tmpDir, 'result-test.json'))
+    const exportsDir = path.join(tmpDir, 'exports')
+    fs.mkdirSync(exportsDir, { recursive: true })
+    const result = await runExport(path.join(exportsDir, 'result-test.json'))
 
     // Verify all ExportResult fields
     expect(result.outputPath).toContain('result-test.json')
