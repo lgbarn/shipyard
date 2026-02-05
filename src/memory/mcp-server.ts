@@ -47,7 +47,7 @@ const ImportInputSchema = z.object({
 });
 
 // Tool definitions
-const TOOLS = [
+export const TOOLS = [
   {
     name: 'memory_search',
     description:

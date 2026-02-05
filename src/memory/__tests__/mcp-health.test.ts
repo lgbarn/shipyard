@@ -4,28 +4,24 @@
 
 import { describe, it, expect } from 'vitest';
 import { initDatabase, closeDatabase } from '../db';
-import { handleHealth } from '../mcp-server';
+import { handleHealth, TOOLS } from '../mcp-server';
 
 describe('memory_health', () => {
   describe('tool definition', () => {
-    it('should define the expected tool interface', () => {
-      const toolDef = {
-        name: 'memory_health',
-        description: 'Check MCP server health and configuration status.',
-        inputSchema: { type: 'object', properties: {}, required: [] },
-      };
-      expect(toolDef.name).toBe('memory_health');
-      expect(toolDef.description).toContain('health');
-      expect(toolDef.inputSchema.type).toBe('object');
-      expect(toolDef.inputSchema.required).toHaveLength(0);
+    it('should include memory_health in the exported TOOLS array', () => {
+      const tool = TOOLS.find(t => t.name === 'memory_health');
+      expect(tool).toBeDefined();
+      expect(tool!.inputSchema.type).toBe('object');
+      expect(tool!.inputSchema.required).toHaveLength(0);
     });
 
-    it('should accept no required parameters', () => {
-      const toolDef = {
-        name: 'memory_health',
-        inputSchema: { type: 'object', properties: {}, required: [] },
-      };
-      expect(Object.keys(toolDef.inputSchema.properties)).toHaveLength(0);
+    it('should define all tools with required properties', () => {
+      expect(TOOLS.length).toBeGreaterThanOrEqual(7);
+      for (const tool of TOOLS) {
+        expect(tool).toHaveProperty('name');
+        expect(tool).toHaveProperty('description');
+        expect(tool).toHaveProperty('inputSchema');
+      }
     });
   });
 
