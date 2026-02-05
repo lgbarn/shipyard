@@ -138,6 +138,15 @@ const TOOLS = [
         },
     },
     {
+        name: 'memory_backup',
+        description: 'Create a backup of the memory database.',
+        inputSchema: {
+            type: 'object',
+            properties: {},
+            required: [],
+        },
+    },
+    {
         name: 'memory_health',
         description: 'Check MCP server health and configuration status.',
         inputSchema: {
@@ -253,6 +262,21 @@ async function handleIndex() {
     ].join('\n');
 }
 /**
+ * Handle memory_backup tool call
+ */
+async function handleBackup() {
+    const backupPath = await (0, db_1.createTimestampedBackup)();
+    const stats = fs.statSync(backupPath);
+    return [
+        '## Backup Created',
+        '',
+        `**Path:** ${backupPath}`,
+        `**Size:** ${(stats.size / 1024 / 1024).toFixed(2)} MB`,
+        '',
+        'The database has been backed up successfully. Up to 5 backups are retained.',
+    ].join('\n');
+}
+/**
  * Handle memory_health tool call
  */
 function handleHealth() {
@@ -356,6 +380,9 @@ async function startServer() {
                 case 'memory_index':
                     result = await handleIndex();
                     break;
+                case 'memory_backup':
+                    result = await handleBackup();
+                    break;
                 case 'memory_health':
                     result = handleHealth();
                     break;
@@ -393,6 +420,19 @@ if (require.main === module) {
         })
             .catch((error) => {
             logger_1.logger.error('Indexing failed', { error: String(error) });
+            process.exit(1);
+        });
+    }
+    else if (args.includes('--backup')) {
+        // Run backup and exit
+        (0, db_1.initDatabase)();
+        (0, db_1.createTimestampedBackup)()
+            .then((backupPath) => {
+            logger_1.logger.info('Backup created', { path: backupPath });
+            process.exit(0);
+        })
+            .catch((error) => {
+            logger_1.logger.error('Backup failed', { error: String(error) });
             process.exit(1);
         });
     }
