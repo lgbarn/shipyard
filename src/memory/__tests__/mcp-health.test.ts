@@ -16,7 +16,7 @@ describe('memory_health', () => {
     });
 
     it('should define all tools with required properties', () => {
-      expect(TOOLS.length).toBeGreaterThanOrEqual(7);
+      expect(TOOLS.length).toBeGreaterThanOrEqual(10);
       for (const tool of TOOLS) {
         expect(tool).toHaveProperty('name');
         expect(tool).toHaveProperty('description');
@@ -97,6 +97,31 @@ describe('memory_health', () => {
       } finally {
         closeDatabase();
       }
+    });
+  });
+
+  describe('new tool definitions', () => {
+    it('should include memory_repair in TOOLS array', () => {
+      const tool = TOOLS.find(t => t.name === 'memory_repair');
+      expect(tool).toBeDefined();
+      expect(tool!.inputSchema.type).toBe('object');
+      expect(tool!.inputSchema.properties).toHaveProperty('dry_run');
+      expect(tool!.inputSchema.required).toHaveLength(0);
+    });
+
+    it('should include memory_export in TOOLS array', () => {
+      const tool = TOOLS.find(t => t.name === 'memory_export');
+      expect(tool).toBeDefined();
+      expect(tool!.inputSchema.type).toBe('object');
+      expect(tool!.inputSchema.properties).toHaveProperty('output_path');
+      expect(tool!.inputSchema.required).toHaveLength(0);
+    });
+
+    it('should include memory_migrate in TOOLS array', () => {
+      const tool = TOOLS.find(t => t.name === 'memory_migrate');
+      expect(tool).toBeDefined();
+      expect(tool!.inputSchema.type).toBe('object');
+      expect(tool!.inputSchema.required).toHaveLength(0);
     });
   });
 });
