@@ -561,6 +561,9 @@ export async function backupDatabase(
       return 100; // Pages per backup step cycle
     },
   });
+
+  // Set restrictive permissions on backup file (match source DB at 0600)
+  fs.chmodSync(destinationPath, 0o600);
 }
 
 /**

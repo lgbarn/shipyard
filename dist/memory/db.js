@@ -502,6 +502,8 @@ async function backupDatabase(destinationPath, onProgress) {
             return 100; // Pages per backup step cycle
         },
     });
+    // Set restrictive permissions on backup file (match source DB at 0600)
+    fs.chmodSync(destinationPath, 0o600);
 }
 /**
  * Create a timestamped backup and rotate old backups (keep last 5).
