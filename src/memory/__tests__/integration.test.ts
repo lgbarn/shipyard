@@ -274,3 +274,80 @@ describe('Scenario 4: prune oldest exchanges', () => {
     }
   })
 })
+
+describe('Scenario 5: export roundtrip', () => {
+  it('should export database to JSON with correct metadata and no embeddings', async () => {
+    // Initialize database and import functions
+    const { initDatabase, insertExchange, upsertSession } = await import('../db')
+    const { runExport } = await import('../export')
+    initDatabase()
+
+    // Insert 3 exchanges with the same sessionId
+    const sessionId = 'session-export'
+    const projectPath = '/test/project'
+
+    insertExchange(makeExchange({
+      id: 'exp-1',
+      sessionId,
+      projectPath,
+      timestamp: 1000,
+      userMessage: 'First export test message with enough content for indexing',
+      assistantMessage: 'First export response with enough content'
+    }))
+
+    insertExchange(makeExchange({
+      id: 'exp-2',
+      sessionId,
+      projectPath,
+      timestamp: 2000,
+      userMessage: 'Second export test message with enough content for indexing',
+      assistantMessage: 'Second export response with enough content'
+    }))
+
+    insertExchange(makeExchange({
+      id: 'exp-3',
+      sessionId,
+      projectPath,
+      timestamp: 3000,
+      userMessage: 'Third export test message with enough content for indexing',
+      assistantMessage: 'Third export response with enough content'
+    }))
+
+    // Upsert session for each exchange
+    upsertSession(sessionId, projectPath, 1000)
+    upsertSession(sessionId, projectPath, 2000)
+    upsertSession(sessionId, projectPath, 3000)
+
+    // Create valid export path within CONFIG_DIR/exports/
+    const exportPath = path.join(tmpDir, 'exports', 'test-export.json')
+
+    // Run export
+    const result = await runExport(exportPath)
+
+    // Verify export result
+    expect(result.exchangeCount).toBe(3)
+    expect(result.sessionCount).toBe(1)
+    expect(result.outputPath).toBe(exportPath)
+    expect(result.fileSizeBytes).toBeGreaterThan(0)
+
+    // Read and parse exported file
+    const exportedContent = fs.readFileSync(exportPath, 'utf-8')
+    const parsed = JSON.parse(exportedContent)
+
+    // Verify metadata
+    expect(parsed.metadata.exchange_count).toBe(3)
+    expect(parsed.metadata.session_count).toBe(1)
+    expect(parsed.metadata.version).toBe('1.0.0')
+
+    // Verify exchanges and sessions arrays
+    expect(Array.isArray(parsed.exchanges)).toBe(true)
+    expect(parsed.exchanges.length).toBe(3)
+    expect(Array.isArray(parsed.sessions)).toBe(true)
+    expect(parsed.sessions.length).toBe(1)
+
+    // Verify no exchange has an embedding field (embeddings are stripped on export)
+    for (const exchange of parsed.exchanges) {
+      expect(exchange.embedding).toBeUndefined()
+    }
+  })
+})
