@@ -48,6 +48,7 @@
     "test:coverage": "vitest run src/memory --coverage",
     "memory:server": "tsx src/memory/mcp-server.ts",
     "memory:index": "tsx src/memory/mcp-server.ts --index",
+    "memory:backup": "tsx src/memory/mcp-server.ts --backup",
     "prepublishOnly": "npm run build",
     "prepare": "husky"
   },

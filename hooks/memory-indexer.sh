@@ -108,6 +108,45 @@ run_index() {
     fi
 
     log "Incremental index complete"
+
+    # Backup database after successful indexing (non-fatal)
+    run_backup || log "WARNING: Backup failed but indexing was successful"
+}
+
+# Backup database after successful indexing
+run_backup() {
+    log "Creating database backup"
+
+    # Reuse the same mcp_script discovery from run_index
+    local mcp_script=""
+    for location in \
+        "${CLAUDE_PLUGIN_ROOT:-}/dist/memory/mcp-server.js" \
+        "${CLAUDE_PLUGIN_ROOT:-}/src/memory/mcp-server.ts" \
+        "$(npm root -g 2>/dev/null)/@lgbarn/shipyard/dist/memory/mcp-server.js" \
+        "$(dirname "$0")/../dist/memory/mcp-server.js" \
+    ; do
+        if [[ -f "${location}" ]]; then
+            mcp_script="${location}"
+            break
+        fi
+    done
+
+    if [[ -z "${mcp_script}" ]]; then
+        log "BACKUP: Could not find MCP server script, skipping backup"
+        return 0
+    fi
+
+    if [[ "${mcp_script}" == *.ts ]]; then
+        npx tsx "${mcp_script}" --backup 2>&1 | while read -r line; do
+            log "BACKUP: ${line}"
+        done
+    else
+        node "${mcp_script}" --backup 2>&1 | while read -r line; do
+            log "BACKUP: ${line}"
+        done
+    fi
+
+    log "Database backup complete"
 }
 
 # Main entry point
