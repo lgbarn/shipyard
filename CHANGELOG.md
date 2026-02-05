@@ -6,6 +6,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [2.8.0] - 2026-02-05
+
+### Added
+- **Migration framework**: Sequential SQL migration system (`src/memory/migrate.ts`) with `schema_migrations` tracking table. Migrations run automatically on database initialization. Failed migrations roll back and halt.
+- **Repair tool**: `src/memory/repair.ts` with 7-check pipeline — structural integrity, referential integrity, orphaned vectors, stale source refs, missing embeddings, REINDEX, VACUUM. Supports dry-run (read-only) and fix modes.
+- **Export tool**: `src/memory/export.ts` with streaming JSON writer for constant-memory exports. Excludes embeddings (derived data), sets 0600 permissions.
+- **3 new MCP tools**: `memory_repair`, `memory_export`, `memory_migrate` (10 tools total)
+- **107 new Vitest tests** across 7 new test files: db.test.ts (18), search.test.ts (15), indexer.test.ts (15), migrate.test.ts (5), repair.test.ts (13), export.test.ts (17), integration.test.ts (11)
+- **Integration test suite**: 9 end-to-end scenarios against real SQLite — import/recall, text search, vector search, prune, export roundtrip, repair dry run/fix, migration application, MCP handler integration
+- Shared TypeScript interfaces in `src/memory/types.ts` (RepairCheck, RepairReport, ExportMetadata, ExportResult)
+- Structured JSON logger at `src/memory/logger.ts`
+
+### Security
+- Path traversal prevention: `memory_export` output_path restricted to `CONFIG_DIR/exports/` directory
+- Zod input validation for all new MCP tools
+
+### Changed
+- `initDatabase()` now uses migration runner instead of executing schema.sql directly
+- `schema.sql` retained as reference but no longer executed at runtime
+- Total test count: 218 (62 BATS + 156 Vitest, 149 pass + 7 skip)
+
 ## [2.7.0] - 2026-02-04
 
 ### Added
