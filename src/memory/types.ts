@@ -73,3 +73,19 @@ export interface ConversationFile {
   projectPath: string;
   modifiedAt: number;
 }
+
+export interface RepairCheck {
+  name: string;
+  status: 'ok' | 'warning' | 'error' | 'fixed' | 'skipped';
+  details: string;
+  count?: number;
+}
+
+export interface RepairReport {
+  checks: RepairCheck[];
+  dryRun: boolean;
+  totalIssues: number;
+  timestamp: number;
+  databaseSizeBefore?: number;
+  databaseSizeAfter?: number;
+}
