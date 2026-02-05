@@ -76,8 +76,25 @@ export function applyMigration(db: Database.Database, migration: Migration): voi
 
     db.exec('COMMIT')
   } catch (error) {
-    db.exec('ROLLBACK')
+    // Attempt ROLLBACK, but if it fails, log separately and preserve original error
+    try {
+      db.exec('ROLLBACK')
+    } catch (rollbackError) {
+      logger.error('ROLLBACK failed after migration error', {
+        filename: migration.filename,
+        version: migration.version,
+        rollbackError: rollbackError instanceof Error ? rollbackError.message : String(rollbackError)
+      })
+    }
+
+    // Log the original migration error before re-throwing
     const errorMessage = error instanceof Error ? error.message : String(error)
+    logger.error('Migration failed', {
+      filename: migration.filename,
+      version: migration.version,
+      error: errorMessage
+    })
+
     throw new Error(`Migration ${migration.filename} failed: ${errorMessage}`)
   }
 }
