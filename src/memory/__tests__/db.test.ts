@@ -306,3 +306,92 @@ describe('deleteExchangesByDateRange', () => {
     expect(remaining.map(r => r.id)).toEqual(['ex1', 'ex3']);
   });
 });
+
+describe('getStats', () => {
+  it('should return correct stats for an empty database', async () => {
+    const { initDatabase, getStats } = await import('../db');
+    initDatabase();
+
+    const stats = getStats();
+
+    expect(stats.exchangeCount).toBe(0);
+    expect(stats.oldestExchange).toBeNull();
+    expect(stats.newestExchange).toBeNull();
+    expect(stats.lastIndexedAt).toBeNull();
+    expect(stats.projectCounts).toEqual([]);
+    expect(stats.importCompleted).toBe(false);
+    expect(stats.databaseSizeMb).toBeGreaterThan(0);
+  });
+
+  it('should return correct stats for a database with 3 exchanges', async () => {
+    const { initDatabase, insertExchange, getStats } = await import('../db');
+    initDatabase();
+
+    insertExchange(makeExchange({ id: 'ex1', timestamp: 1000, projectPath: '/proj-a', indexedAt: 2000 }));
+    insertExchange(makeExchange({ id: 'ex2', timestamp: 2000, projectPath: '/proj-a', indexedAt: 2500 }));
+    insertExchange(makeExchange({ id: 'ex3', timestamp: 3000, projectPath: '/proj-b', indexedAt: 3000 }));
+
+    const stats = getStats();
+
+    expect(stats.exchangeCount).toBe(3);
+    expect(stats.oldestExchange).toBe(1000);
+    expect(stats.newestExchange).toBe(3000);
+    expect(stats.lastIndexedAt).toBe(3000);
+    expect(stats.projectCounts).toHaveLength(2);
+    expect(stats.projectCounts.find(p => p.project === '/proj-a')?.count).toBe(2);
+    expect(stats.projectCounts.find(p => p.project === '/proj-b')?.count).toBe(1);
+  });
+});
+
+describe('pruneToCapacity', () => {
+  it('should return 0 when database is under capacity', async () => {
+    const { initDatabase, insertExchange, pruneToCapacity } = await import('../db');
+    initDatabase();
+
+    insertExchange(makeExchange({ id: 'ex1' }));
+    insertExchange(makeExchange({ id: 'ex2' }));
+
+    // Set capacity to a very large value
+    const deletedCount = pruneToCapacity(1024 * 1024 * 1024);
+    expect(deletedCount).toBe(0);
+  });
+
+  it('should delete oldest exchanges when over capacity', async () => {
+    const { initDatabase, insertExchange, pruneToCapacity } = await import('../db');
+    const db = initDatabase();
+
+    // Insert 50 exchanges with substantial text to make the DB measurably large
+    const longText = 'This is a long message that will take up space in the database. '.repeat(100);
+    for (let i = 1; i <= 50; i++) {
+      insertExchange(makeExchange({
+        id: `ex${i}`,
+        timestamp: i * 1000,
+        userMessage: `Message ${i}: ${longText}`,
+        assistantMessage: `Response ${i}: ${longText}`,
+      }));
+    }
+
+    // Get the actual DB file size
+    const statsBefore = fs.statSync(dbPath);
+    const actualSize = statsBefore.size;
+
+    // Set capacity to a small value (30% of actual size) to trigger significant pruning
+    const smallCapacity = Math.floor(actualSize * 0.3);
+    const deletedCount = pruneToCapacity(smallCapacity);
+
+    expect(deletedCount).toBeGreaterThan(0);
+
+    // Verify oldest exchanges are gone
+    const remaining = db.prepare('SELECT id FROM exchanges ORDER BY timestamp').all() as Array<{ id: string }>;
+    expect(remaining.length).toBeLessThan(50);
+
+    // Verify that the newest exchange is still there
+    const newest = remaining[remaining.length - 1];
+    expect(newest.id).toBe('ex50');
+
+    // Verify DB file size has decreased (or stayed the same in worst case)
+    // Note: VACUUM may not always reduce file size if pages are reused
+    const statsAfter = fs.statSync(dbPath);
+    expect(statsAfter.size).toBeLessThanOrEqual(actualSize);
+  });
+});

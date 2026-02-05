@@ -213,3 +213,214 @@ describe('search', () => {
     expect(filters?.beforeTimestamp).toBe(expectedBefore.getTime())
   })
 })
+
+describe('searchMultipleConcepts', () => {
+  it('returns empty for empty concepts array', async () => {
+    const { searchMultipleConcepts } = await import('../search')
+    const { generateEmbedding } = await import('../embeddings')
+
+    const results = await searchMultipleConcepts([])
+
+    // Verify returns empty array
+    expect(results).toEqual([])
+
+    // Verify generateEmbedding was not called
+    expect(generateEmbedding).not.toHaveBeenCalled()
+  })
+
+  it('delegates to search() for single concept', async () => {
+    const { searchMultipleConcepts } = await import('../search')
+    const { generateEmbedding } = await import('../embeddings')
+    const { vectorSearch } = await import('../db')
+
+    // Reset mocks
+    vi.mocked(generateEmbedding).mockResolvedValue(new Float32Array(384).fill(0.5))
+
+    // Mock vectorSearch to return 2 results
+    const mockResults = [makeSearchResult(), makeSearchResult()]
+    vi.mocked(vectorSearch).mockReturnValue(mockResults)
+
+    const results = await searchMultipleConcepts(['concept1'])
+
+    // Verify generateEmbedding was called once (delegated to search())
+    expect(generateEmbedding).toHaveBeenCalledTimes(1)
+
+    // Verify results are returned
+    expect(results).toHaveLength(2)
+  })
+
+  it('intersects results across multiple concepts', async () => {
+    const { searchMultipleConcepts } = await import('../search')
+    const { generateEmbedding } = await import('../embeddings')
+    const { vectorSearch } = await import('../db')
+
+    // Reset mocks
+    vi.mocked(generateEmbedding).mockResolvedValue(new Float32Array(384).fill(0.5))
+
+    // Create 3 exchanges
+    const ex1 = makeSearchResult({ id: 'ex1', score: 0.9 })
+    const ex2 = makeSearchResult({ id: 'ex2', score: 0.8 })
+    const ex3 = makeSearchResult({ id: 'ex3', score: 0.6 })
+
+    // Mock vectorSearch to return different subsets per call
+    // First call (concept A): returns ex1 (score 0.9), ex2 (score 0.8)
+    // Second call (concept B): returns ex2 (score 0.7), ex3 (score 0.6)
+    vi.mocked(vectorSearch)
+      .mockReturnValueOnce([ex1, ex2])
+      .mockReturnValueOnce([
+        makeSearchResult({ id: 'ex2', score: 0.7 }),
+        ex3,
+      ])
+
+    const results = await searchMultipleConcepts(['conceptA', 'conceptB'])
+
+    // Only ex2 appears in both, so result should contain only ex2
+    expect(results).toHaveLength(1)
+    expect(results[0].exchange.id).toBe('ex2')
+
+    // Score should be normalized: (0.8 + 0.7) / 2 = 0.75
+    expect(results[0].score).toBe(0.75)
+  })
+
+  it('returns empty when no exchanges match all concepts', async () => {
+    const { searchMultipleConcepts } = await import('../search')
+    const { generateEmbedding } = await import('../embeddings')
+    const { vectorSearch } = await import('../db')
+
+    // Reset mocks
+    vi.mocked(generateEmbedding).mockResolvedValue(new Float32Array(384).fill(0.5))
+
+    // Mock vectorSearch to return non-overlapping id sets
+    const ex1 = makeSearchResult({ id: 'ex1' })
+    const ex2 = makeSearchResult({ id: 'ex2' })
+
+    vi.mocked(vectorSearch)
+      .mockReturnValueOnce([ex1])
+      .mockReturnValueOnce([ex2])
+
+    const results = await searchMultipleConcepts(['conceptA', 'conceptB'])
+
+    // No overlap, so empty array
+    expect(results).toEqual([])
+  })
+})
+
+describe('formatResultsAsMarkdown', () => {
+  it('returns "No results found." for empty array', async () => {
+    const { formatResultsAsMarkdown } = await import('../search')
+
+    const output = formatResultsAsMarkdown([])
+
+    expect(output).toBe('No results found.')
+  })
+
+  it('formats single result with all fields', async () => {
+    const { formatResultsAsMarkdown } = await import('../search')
+
+    const result = makeSearchResult({
+      timestamp: new Date('2025-01-15T10:30:00Z').getTime(),
+      projectPath: '/test/my-project',
+      toolNames: ['Read', 'Write', 'Bash'],
+      userMessage: 'What is the capital of France?',
+      assistantMessage: 'The capital of France is Paris.',
+      score: 0.92,
+    })
+
+    const output = formatResultsAsMarkdown([result])
+
+    // Verify output contains expected sections
+    expect(output).toContain('### Exchange')
+    expect(output).toContain('2025-01-15') // Date in YYYY-MM-DD format
+    expect(output).toContain('0.92') // Score formatted to 2 decimal places
+    expect(output).toContain('**Project:** /test/my-project')
+    expect(output).toContain('**User:**')
+    expect(output).toContain('What is the capital of France?')
+    expect(output).toContain('**Assistant:**')
+    expect(output).toContain('The capital of France is Paris.')
+    expect(output).toContain('Tools: Read, Write, Bash')
+    expect(output).toContain('---') // Separator
+  })
+
+  it('truncates long messages', async () => {
+    const { formatResultsAsMarkdown } = await import('../search')
+
+    const longMessage = 'a'.repeat(250)
+    const result = makeSearchResult({
+      userMessage: longMessage,
+    })
+
+    const output = formatResultsAsMarkdown([result])
+
+    // Verify truncation marker
+    expect(output).toContain('...')
+    // User message is truncated to 200 chars
+    expect(output).not.toContain('a'.repeat(250))
+  })
+})
+
+describe('formatResultsAsJson', () => {
+  it('returns empty array JSON for empty results', async () => {
+    const { formatResultsAsJson } = await import('../search')
+
+    const output = formatResultsAsJson([])
+
+    expect(JSON.parse(output)).toEqual([])
+  })
+
+  it('includes correct fields in JSON output', async () => {
+    const { formatResultsAsJson } = await import('../search')
+
+    const result = makeSearchResult({
+      id: 'test-id-123',
+      timestamp: 1705320000000,
+      projectPath: '/test/project',
+      toolNames: ['Read', 'Write'],
+      userMessage: 'User message',
+      assistantMessage: 'Assistant message',
+      score: 0.88,
+    })
+
+    const output = formatResultsAsJson([result])
+    const parsed = JSON.parse(output)
+
+    // Verify correct fields
+    expect(parsed).toHaveLength(1)
+    expect(parsed[0]).toHaveProperty('id', 'test-id-123')
+    expect(parsed[0]).toHaveProperty('score', 0.88)
+    expect(parsed[0]).toHaveProperty('timestamp', 1705320000000)
+    expect(parsed[0]).toHaveProperty('project', '/test/project')
+    expect(parsed[0]).toHaveProperty('toolNames')
+    expect(parsed[0]).toHaveProperty('userMessage', 'User message')
+    expect(parsed[0]).toHaveProperty('assistantMessage', 'Assistant message')
+
+    // Verify it does NOT contain these fields
+    expect(parsed[0]).not.toHaveProperty('embedding')
+    expect(parsed[0]).not.toHaveProperty('sourceFile')
+    expect(parsed[0]).not.toHaveProperty('lineStart')
+    expect(parsed[0]).not.toHaveProperty('lineEnd')
+    expect(parsed[0]).not.toHaveProperty('indexedAt')
+    expect(parsed[0]).not.toHaveProperty('gitBranch')
+    expect(parsed[0]).not.toHaveProperty('sessionId')
+  })
+})
+
+describe('getMemoryStats', () => {
+  it('merges config and db stats', async () => {
+    const { getMemoryStats } = await import('../search')
+
+    const stats = getMemoryStats()
+
+    // Verify config values
+    expect(stats.enabled).toBe(true)
+    expect(stats.storageCapMb).toBe(1024)
+
+    // Verify db values (from mocked getStats)
+    expect(stats.exchangeCount).toBe(10)
+    expect(stats.databaseSizeMb).toBe(1.5)
+    expect(stats.oldestExchange).toBe(1000)
+    expect(stats.newestExchange).toBe(3000)
+    expect(stats.lastIndexedAt).toBe(3000)
+    expect(stats.projectCounts).toEqual([{ project: '/proj', count: 10 }])
+    expect(stats.importCompleted).toBe(true)
+  })
+})
