@@ -32,7 +32,12 @@ jobs:
         run: npm test
 
       - name: Run TypeScript tests
+        if: matrix.os != 'ubuntu-latest' || matrix.node-version != 20
         run: npm run test:memory
+
+      - name: Run TypeScript tests with coverage
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == 20
+        run: npm run test:coverage
 
       - name: Build TypeScript
         run: npm run build

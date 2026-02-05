@@ -45,6 +45,7 @@
     "build:watch": "tsc --watch",
     "test": "bash test/run.sh",
     "test:memory": "vitest run src/memory",
+    "test:coverage": "vitest run src/memory --coverage",
     "memory:server": "tsx src/memory/mcp-server.ts",
     "memory:index": "tsx src/memory/mcp-server.ts --index",
     "prepublishOnly": "npm run build",
@@ -73,6 +74,7 @@
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^25.2.0",
+    "@vitest/coverage-v8": "^4.0.18",
     "bats": "^1.13.0",
     "bats-assert": "^2.2.4",
     "bats-support": "^0.3.0",

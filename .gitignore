@@ -18,6 +18,9 @@ node_modules/
 dist/memory/__tests__/
 dist/**/*.map
 
+# Test coverage
+coverage/
+
 # Shipyard dev state (committed selectively, not wholesale)
 .shipyard/
 
