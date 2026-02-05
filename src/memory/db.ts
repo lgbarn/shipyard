@@ -572,7 +572,8 @@ export async function backupDatabase(
  */
 export async function createTimestampedBackup(): Promise<string> {
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-  const backupDir = CONFIG_DIR;
+  const backupDir = path.join(CONFIG_DIR, 'backups');
+  fs.mkdirSync(backupDir, { recursive: true });
   const backupPath = path.join(backupDir, `memory.backup.${timestamp}.db`);
 
   logger.info('Creating database backup', { destination: backupPath });
@@ -584,7 +585,7 @@ export async function createTimestampedBackup(): Promise<string> {
   });
 
   // Rotate: keep only the 5 most recent backups
-  const allFiles = fs.readdirSync(backupDir);
+  const allFiles = await fs.promises.readdir(backupDir);
   const backups = allFiles
     .filter(f => f.startsWith('memory.backup.') && f.endsWith('.db'))
     .sort()
@@ -592,7 +593,7 @@ export async function createTimestampedBackup(): Promise<string> {
 
   for (const old of backups.slice(5)) {
     const oldPath = path.join(backupDir, old);
-    fs.unlinkSync(oldPath);
+    await fs.promises.unlink(oldPath);
     logger.info('Rotated old backup', { deleted: oldPath });
   }
 
