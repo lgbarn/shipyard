@@ -498,3 +498,96 @@ describe('Scenario 8: migration application', () => {
     expect(appliedFinal.length).toBe(2)
   })
 })
+
+describe('Scenario 9: MCP handler integration', () => {
+  it('repair handler produces markdown report', async () => {
+    // Initialize database and insert an exchange with a stale source file
+    const { initDatabase, insertExchange } = await import('../db')
+    const { runRepair, formatRepairReport } = await import('../repair')
+    initDatabase()
+
+    insertExchange(makeExchange({
+      id: 'mcp-repair-1',
+      sourceFile: '/nonexistent/stale/path.jsonl',
+      userMessage: 'MCP repair test with enough content for storage',
+      assistantMessage: 'MCP repair response with enough content'
+    }))
+
+    // Call underlying functions that handleRepair uses
+    const report = await runRepair(true)
+    const markdown = formatRepairReport(report)
+
+    // Verify markdown output
+    expect(typeof markdown).toBe('string')
+    expect(markdown.length).toBeGreaterThan(50)
+    expect(markdown.toLowerCase()).toMatch(/repair/i)
+    expect(markdown).toMatch(/structural integrity/i)
+  })
+
+  it('export handler produces markdown report', async () => {
+    // Initialize database and insert 2 exchanges
+    const { initDatabase, insertExchange, upsertSession } = await import('../db')
+    const { runExport, formatExportReport } = await import('../export')
+    initDatabase()
+
+    const sessionId = 'mcp-export-session'
+    const projectPath = '/test/mcp-export'
+
+    insertExchange(makeExchange({
+      id: 'mcp-export-1',
+      sessionId,
+      projectPath,
+      timestamp: 1000,
+      userMessage: 'First MCP export test with enough content for indexing',
+      assistantMessage: 'First MCP export response with enough content'
+    }))
+
+    insertExchange(makeExchange({
+      id: 'mcp-export-2',
+      sessionId,
+      projectPath,
+      timestamp: 2000,
+      userMessage: 'Second MCP export test with enough content for indexing',
+      assistantMessage: 'Second MCP export response with enough content'
+    }))
+
+    // Upsert session
+    upsertSession(sessionId, projectPath, 1000)
+    upsertSession(sessionId, projectPath, 2000)
+
+    // Call underlying functions that handleExport uses
+    const exportPath = path.join(tmpDir, 'exports', 'mcp-handler-test.json')
+    const result = await runExport(exportPath)
+    const markdown = formatExportReport(result)
+
+    // Verify markdown output
+    expect(typeof markdown).toBe('string')
+    expect(markdown.length).toBeGreaterThan(20)
+    expect(markdown).toContain('2') // exchange count appears somewhere
+  })
+
+  it('migrate handler reports migration status', async () => {
+    // Initialize database
+    const { initDatabase, getDatabase } = await import('../db')
+    const { readMigrationFiles, getAppliedMigrations } = await import('../migrate')
+    initDatabase()
+
+    const db = getDatabase()
+
+    // Call underlying functions that handleMigrate uses
+    const available = readMigrationFiles()
+    const applied = getAppliedMigrations(db)
+
+    // Replicate handleMigrate logic to compute pending migrations
+    const appliedVersions = new Set(applied.map(a => a.version))
+    const pending = available.filter(m => !appliedVersions.has(m.version))
+
+    // Verify migration status data
+    expect(available.length).toBeGreaterThanOrEqual(1)
+    expect(applied.length).toBeGreaterThanOrEqual(1)
+    expect(applied[0].filename).toBe('001_initial_schema.sql')
+    expect(pending.length).toBe(0) // all migrations already applied by initDatabase
+    expect(typeof applied[0].applied_at).toBe('number')
+    expect(applied[0].applied_at).toBeGreaterThan(0)
+  })
+})
