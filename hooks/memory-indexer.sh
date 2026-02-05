@@ -69,6 +69,24 @@ acquire_lock() {
     return 0
 }
 
+# Locate the memory MCP server script across known install locations.
+# Echoes the path on success, returns 1 if not found.
+find_mcp_script() {
+    local location
+    for location in \
+        "${CLAUDE_PLUGIN_ROOT:-}/dist/memory/mcp-server.js" \
+        "${CLAUDE_PLUGIN_ROOT:-}/src/memory/mcp-server.ts" \
+        "$(npm root -g 2>/dev/null)/@lgbarn/shipyard/dist/memory/mcp-server.js" \
+        "$(dirname "$0")/../dist/memory/mcp-server.js" \
+    ; do
+        if [[ -f "${location}" ]]; then
+            echo "${location}"
+            return 0
+        fi
+    done
+    return 1
+}
+
 # Main indexing function
 run_index() {
     log "Starting incremental index"
