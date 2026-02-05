@@ -11,6 +11,23 @@
 
 set -euo pipefail
 
+# Sanitize lesson content to prevent prompt injection
+# Strips XML/HTML tags, code blocks, prompt directives, and caps length
+sanitize_lesson() {
+    local raw="$1"
+    # 1. Strip XML/HTML tags
+    raw=$(echo "$raw" | sed 's/<[^>]*>//g')
+    # 2. Remove code blocks (lines between triple-backtick fences, inclusive)
+    raw=$(echo "$raw" | awk '/```/{skip=!skip; next} !skip{print}')
+    # 3. Filter prompt directive patterns (case-insensitive)
+    raw=$(echo "$raw" | grep -viE '^\s*(SYSTEM:|ASSISTANT:|USER:|IGNORE|NEW.INSTRUCTION|IMPORTANT:|CRITICAL:)' || true)
+    # 4. Cap at 500 characters
+    if [ "${#raw}" -gt 500 ]; then
+        raw="${raw:0:497}..."
+    fi
+    printf '%s' "$raw"
+}
+
 # Check for jq dependency
 if ! command -v jq >/dev/null 2>&1; then
     echo '{"error":"Missing dependency: jq is required but not found in PATH","exitCode":3}' >&2
@@ -173,6 +190,7 @@ if [ -d ".shipyard" ] && [ -f ".shipyard/STATE.md" ]; then
                 while IFS=: read -r line_num _; do
                     # Extract header + ~7 lines of lesson content (8 lines total per lesson)
                     chunk=$(sed -n "${line_num},$((line_num + 8))p" ".shipyard/LESSONS.md" 2>/dev/null || echo "")
+                    chunk=$(sanitize_lesson "$chunk")
                     lesson_snippet="${lesson_snippet}${chunk}\n"
                 done <<< "$last_five"
                 if [ -n "$lesson_snippet" ]; then

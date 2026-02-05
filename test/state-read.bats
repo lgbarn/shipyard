@@ -209,3 +209,65 @@ EOF
 
     refute_output --partial "Recent Lessons"
 }
+
+@test "state-read: execution tier limits lessons to most recent 5 when more exist" {
+    setup_shipyard_with_state
+    mkdir -p .shipyard/phases/1
+
+    cat > .shipyard/LESSONS.md <<'EOF'
+# Shipyard Lessons Learned
+
+## [2026-01-01] Lesson 1: Oldest Entry
+Should not appear in output
+
+---
+
+## [2026-01-02] Lesson 2: Second Oldest
+Should not appear in output
+
+---
+
+## [2026-01-03] Lesson 3: Third
+Should appear in output
+
+---
+
+## [2026-01-04] Lesson 4: Fourth
+Should appear in output
+
+---
+
+## [2026-01-05] Lesson 5: Fifth
+Should appear in output
+
+---
+
+## [2026-01-06] Lesson 6: Sixth
+Should appear in output
+
+---
+
+## [2026-01-07] Lesson 7: Most Recent
+Should appear in output
+
+---
+EOF
+
+    run bash "$STATE_READ"
+    assert_success
+    assert_valid_json
+
+    # Should contain section header
+    assert_output --partial "Recent Lessons"
+
+    # Should contain last 5 lessons (3 through 7)
+    assert_output --partial "Lesson 3"
+    assert_output --partial "Lesson 4"
+    assert_output --partial "Lesson 5"
+    assert_output --partial "Lesson 6"
+    assert_output --partial "Lesson 7"
+
+    # Should NOT contain first 2 lessons
+    refute_output --partial "Lesson 1: Oldest"
+    refute_output --partial "Lesson 2: Second"
+}
