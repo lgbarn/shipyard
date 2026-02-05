@@ -448,3 +448,53 @@ describe('Scenario 7: repair fix resolves issues', () => {
     expect(referentialCheck?.status).toBe('ok')
   })
 })
+
+describe('Scenario 8: migration application', () => {
+  it('should apply incremental migrations and track them correctly', async () => {
+    // Initialize database with standard migrations
+    const { initDatabase, getDatabase } = await import('../db')
+    const { getAppliedMigrations, runMigrations } = await import('../migrate')
+    initDatabase()
+
+    // Check initial migrations applied by initDatabase
+    const db = getDatabase()
+    const appliedBefore = getAppliedMigrations(db)
+    expect(appliedBefore.length).toBeGreaterThanOrEqual(1)
+    expect(appliedBefore[0].filename).toBe('001_initial_schema.sql')
+
+    // Create a custom migrations directory for testing incremental migrations
+    const testMigrationsDir = path.join(tmpDir, 'test-migrations')
+    fs.mkdirSync(testMigrationsDir, { recursive: true })
+
+    // Copy the real 001 migration
+    const realMigrationsDir = path.join(__dirname, '..', 'migrations')
+    fs.copyFileSync(
+      path.join(realMigrationsDir, '001_initial_schema.sql'),
+      path.join(testMigrationsDir, '001_initial_schema.sql')
+    )
+
+    // Create test-only 002 migration
+    fs.writeFileSync(
+      path.join(testMigrationsDir, '002_add_test_column.sql'),
+      'ALTER TABLE exchanges ADD COLUMN test_flag INTEGER DEFAULT 0;'
+    )
+
+    // Run migrations with custom directory
+    runMigrations(db, testMigrationsDir)
+
+    // Verify 002 migration was applied
+    const appliedAfter = getAppliedMigrations(db)
+    expect(appliedAfter.length).toBe(2)
+    expect(appliedAfter[1].filename).toBe('002_add_test_column.sql')
+    expect(appliedAfter[1].version).toBe(2)
+
+    // Verify the column was actually added
+    const testQuery = db.prepare('SELECT test_flag FROM exchanges LIMIT 1')
+    expect(() => testQuery.get()).not.toThrow()
+
+    // Verify idempotency: re-running migrations should not apply 002 again
+    runMigrations(db, testMigrationsDir)
+    const appliedFinal = getAppliedMigrations(db)
+    expect(appliedFinal.length).toBe(2)
+  })
+})
