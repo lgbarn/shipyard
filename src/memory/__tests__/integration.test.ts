@@ -62,7 +62,6 @@ afterEach(async () => {
  * Factory function to create a complete Exchange object with sensible defaults
  * Used in scenarios 3+ for direct database inserts
  */
-// @ts-expect-error - defined for use in later scenarios
 function makeExchange(overrides?: Partial<Exchange>): Exchange {
   return {
     id: 'test-exchange-1',
@@ -193,5 +192,85 @@ describe('Scenario 2: index and text search', () => {
     expect(results.length).toBeGreaterThan(0)
     const firstResult = results[0]
     expect(firstResult.exchange.assistantMessage.toLowerCase()).toContain('borrow')
+  })
+})
+
+describe('Scenario 3: index and vector search', () => {
+  it('should index conversations and return results from vector search with scores', async () => {
+    // Create conversation with distinctive content
+    createConversationFile('ml-project', [
+      {
+        user: 'What are machine learning neural networks exactly?',
+        assistant: 'Machine learning neural networks are computational models inspired by biological neural networks. They consist of interconnected nodes (neurons) organized in layers that process information.',
+        sessionId: 'ml-session'
+      }
+    ])
+
+    // Initialize and import
+    const { initDatabase } = await import('../db')
+    const { runImport } = await import('../indexer')
+    initDatabase()
+    await runImport(true)
+
+    // Perform vector search with mocked embedding (matches the mock exactly)
+    const { vectorSearch } = await import('../db')
+    const results = vectorSearch(new Float32Array(384).fill(0.5), 10)
+
+    // Verify results
+    expect(results.length).toBeGreaterThan(0)
+
+    // Verify each result has a score
+    for (const result of results) {
+      expect(typeof result.score).toBe('number')
+      expect(result.score).toBeGreaterThanOrEqual(0)
+      expect(result.score).toBeLessThanOrEqual(1)
+    }
+
+    // Verify results are sorted by score descending
+    for (let i = 0; i < results.length - 1; i++) {
+      expect(results[i].score).toBeGreaterThanOrEqual(results[i + 1].score)
+    }
+  })
+})
+
+describe('Scenario 4: prune oldest exchanges', () => {
+  it('should prune oldest exchanges when capacity is exceeded', async () => {
+    // Initialize database
+    const { initDatabase, insertExchange, pruneToCapacity, getDatabase } = await import('../db')
+    initDatabase()
+
+    // Insert 5 exchanges with sequential timestamps
+    const exchanges = [
+      makeExchange({ id: 'ex-1', timestamp: 1000, userMessage: 'First user message with enough content', assistantMessage: 'First assistant response' }),
+      makeExchange({ id: 'ex-2', timestamp: 2000, userMessage: 'Second user message with enough content', assistantMessage: 'Second assistant response' }),
+      makeExchange({ id: 'ex-3', timestamp: 3000, userMessage: 'Third user message with enough content', assistantMessage: 'Third assistant response' }),
+      makeExchange({ id: 'ex-4', timestamp: 4000, userMessage: 'Fourth user message with enough content', assistantMessage: 'Fourth assistant response' }),
+      makeExchange({ id: 'ex-5', timestamp: 5000, userMessage: 'Fifth user message with enough content', assistantMessage: 'Fifth assistant response' }),
+    ]
+
+    for (const ex of exchanges) {
+      insertExchange(ex)
+    }
+
+    // Get current db file size
+    const db = getDatabase()
+    const initialCount = db.prepare('SELECT COUNT(*) as count FROM exchanges').get() as { count: number }
+    expect(initialCount.count).toBe(5)
+
+    // Call pruneToCapacity with 1 byte (forces pruning)
+    const prunedCount = pruneToCapacity(1)
+
+    // Verify some exchanges were pruned
+    expect(prunedCount).toBeGreaterThan(0)
+
+    // Verify count decreased
+    const finalCount = db.prepare('SELECT COUNT(*) as count FROM exchanges').get() as { count: number }
+    expect(finalCount.count).toBeLessThan(5)
+
+    // If any rows remain, verify oldest timestamp is greater than 1000
+    if (finalCount.count > 0) {
+      const oldestRow = db.prepare('SELECT MIN(timestamp) as oldest FROM exchanges').get() as { oldest: number }
+      expect(oldestRow.oldest).toBeGreaterThan(1000)
+    }
   })
 })
