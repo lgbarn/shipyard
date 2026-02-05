@@ -81,4 +81,19 @@ export interface RepairReport {
     databaseSizeBefore?: number;
     databaseSizeAfter?: number;
 }
+export interface ExportMetadata {
+    version: string;
+    schema_version: number;
+    exported_at: string;
+    database_path: string;
+    exchange_count: number;
+    session_count: number;
+}
+export interface ExportResult {
+    outputPath: string;
+    fileSizeBytes: number;
+    exchangeCount: number;
+    sessionCount: number;
+    exportedAt: number;
+}
 //# sourceMappingURL=types.d.ts.map
