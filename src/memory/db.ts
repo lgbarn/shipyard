@@ -8,6 +8,7 @@ import * as path from 'path';
 import { DATABASE_PATH, CONFIG_DIR, ensureConfigDir } from './config';
 import type { Exchange, MemoryStats, SearchResult } from './types';
 import { logger } from './logger';
+import { runMigrations } from './migrate';
 
 // Import sqlite-vec for loading the extension
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -51,62 +52,19 @@ export function initDatabase(): Database.Database {
     vecEnabled = false;
   }
 
-  // Create schema
-  const schemaPath = path.join(__dirname, 'schema.sql');
-  if (fs.existsSync(schemaPath)) {
-    const schema = fs.readFileSync(schemaPath, 'utf-8');
-    db.exec(schema);
-  } else {
-    // Inline schema for bundled distribution
-    createSchemaInline(db);
-  }
+  // Bootstrap schema_migrations table (must exist before migration runner)
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS schema_migrations (
+      version INTEGER PRIMARY KEY,
+      filename TEXT NOT NULL UNIQUE,
+      applied_at INTEGER NOT NULL
+    );
+  `);
+
+  // Run sequential migrations
+  runMigrations(db);
 
   return db;
-}
-
-function createSchemaInline(database: Database.Database): void {
-  database.exec(`
-    CREATE TABLE IF NOT EXISTS exchanges (
-      id TEXT PRIMARY KEY,
-      session_id TEXT NOT NULL,
-      project_path TEXT,
-      user_message TEXT NOT NULL,
-      assistant_message TEXT NOT NULL,
-      tool_names TEXT,
-      timestamp INTEGER NOT NULL,
-      git_branch TEXT,
-      source_file TEXT,
-      line_start INTEGER,
-      line_end INTEGER,
-      embedding BLOB,
-      indexed_at INTEGER NOT NULL
-    );
-
-    CREATE VIRTUAL TABLE IF NOT EXISTS vec_exchanges USING vec0(
-      id TEXT PRIMARY KEY,
-      embedding FLOAT[384]
-    );
-
-    CREATE TABLE IF NOT EXISTS sessions (
-      id TEXT PRIMARY KEY,
-      project_path TEXT,
-      started_at INTEGER NOT NULL,
-      exchange_count INTEGER DEFAULT 0
-    );
-
-    CREATE TABLE IF NOT EXISTS import_state (
-      key TEXT PRIMARY KEY,
-      value TEXT NOT NULL
-    );
-
-    CREATE INDEX IF NOT EXISTS idx_exchanges_timestamp ON exchanges(timestamp DESC);
-    CREATE INDEX IF NOT EXISTS idx_exchanges_session ON exchanges(session_id);
-    CREATE INDEX IF NOT EXISTS idx_exchanges_project ON exchanges(project_path);
-    CREATE INDEX IF NOT EXISTS idx_exchanges_git_branch ON exchanges(git_branch);
-
-    INSERT OR IGNORE INTO import_state (key, value) VALUES ('schema_version', '1');
-    INSERT OR IGNORE INTO import_state (key, value) VALUES ('import_completed', 'false');
-  `);
 }
 
 /**
