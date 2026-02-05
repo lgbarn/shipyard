@@ -6,6 +6,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [2.7.0] - 2026-02-04
+
+### Added
+- Database backup via SQLite `.backup()` API with WAL checkpoint for consistency
+- `memory_backup` MCP tool for manual database backup
+- `memory_health` MCP tool returning DB connectivity, vector search status, embedding model status, and overall health
+- `--backup` CLI flag for `mcp-server.ts`
+- Automatic database backup after indexing in `memory-indexer.sh` (fault-tolerant)
+- Backup rotation: keeps only the 5 most recent backups
+- `test:coverage` npm script and CI coverage via `@vitest/coverage-v8`
+- 8 new tests (3 BATS + 6 Vitest health check, -1 overlap = 8 net new)
+
+### Security
+- Prompt injection mitigation: `sanitize_lesson()` strips XML/HTML tags, HTML entities, code blocks, and prompt directives from lesson content before injection into agent context
+- Word-boundary directive filtering prevents mid-line injection bypass
+- Backup files set to `0600` permissions matching source database
+
+### Fixed
+- 500-character cap on individual lesson content prevents oversized context injection
+- 5-lesson maximum enforced with boundary test coverage
+
 ## [2.6.1] - 2026-02-04
 
 ### Fixed
