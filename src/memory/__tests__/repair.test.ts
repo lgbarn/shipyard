@@ -6,7 +6,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-import type { Exchange } from '../types';
+import type { Exchange, RepairReport } from '../types';
 
 let tmpDir: string;
 let dbPath: string;
@@ -346,5 +346,56 @@ describe('runRepair - vec extension unavailable', () => {
     expect(missingCheck).toBeDefined();
     expect(missingCheck!.status).toBe('skipped');
     expect(missingCheck!.details).toContain('Vector extension not loaded');
+  });
+});
+
+describe('formatRepairReport', () => {
+  it('produces valid markdown with check table and size section', async () => {
+    const { formatRepairReport } = await import('../repair');
+
+    const report: RepairReport = {
+      checks: [
+        { name: 'Structural integrity', status: 'ok', details: 'Database structure is valid' },
+        { name: 'Orphaned vector entries', status: 'fixed', details: 'Deleted 3 orphaned vector(s)', count: 3 },
+        { name: 'Database optimization', status: 'fixed', details: 'VACUUM completed', count: 1024 },
+      ],
+      dryRun: false,
+      totalIssues: 3,
+      timestamp: Date.now(),
+      databaseSizeBefore: 102400,
+      databaseSizeAfter: 98304,
+    };
+
+    const markdown = formatRepairReport(report);
+
+    expect(markdown).toContain('# Repair Report');
+    expect(markdown).toContain('Fix');
+    expect(markdown).not.toContain('Dry run');
+    expect(markdown).toContain('Structural integrity');
+    expect(markdown).toContain('ok');
+    expect(markdown).toContain('Orphaned vector entries');
+    expect(markdown).toContain('fixed');
+    expect(markdown).toContain('3');
+    expect(markdown).toContain('Database Size');
+  });
+
+  it('produces markdown for dry run report without size section when sizes undefined', async () => {
+    const { formatRepairReport } = await import('../repair');
+
+    const report: RepairReport = {
+      checks: [
+        { name: 'Structural integrity', status: 'ok', details: 'Database structure is valid' },
+      ],
+      dryRun: true,
+      totalIssues: 0,
+      timestamp: Date.now(),
+    };
+
+    const markdown = formatRepairReport(report);
+
+    expect(markdown).toContain('# Repair Report');
+    expect(markdown).toContain('Dry run');
+    expect(markdown).not.toContain('Fix');
+    expect(markdown).not.toContain('Database Size');
   });
 });
