@@ -175,3 +175,134 @@ describe('getImportState / setImportState', () => {
     expect(value).toBe('val2');
   });
 });
+
+describe('textSearch', () => {
+  it('should return exactly 1 result when searching for a unique term', async () => {
+    const { initDatabase, insertExchange, textSearch } = await import('../db');
+    initDatabase();
+
+    insertExchange(makeExchange({ id: 'ex1', userMessage: 'alpha query test' }));
+    insertExchange(makeExchange({ id: 'ex2', userMessage: 'beta query test' }));
+    insertExchange(makeExchange({ id: 'ex3', userMessage: 'gamma unrelated' }));
+
+    const results = textSearch('alpha');
+    expect(results).toHaveLength(1);
+    expect(results[0].exchange.id).toBe('ex1');
+    expect(results[0].score).toBe(0.5);
+  });
+
+  it('should filter by timestamp range', async () => {
+    const { initDatabase, insertExchange, textSearch } = await import('../db');
+    initDatabase();
+
+    insertExchange(makeExchange({ id: 'ex1', timestamp: 1000, userMessage: 'query test' }));
+    insertExchange(makeExchange({ id: 'ex2', timestamp: 2000, userMessage: 'query test' }));
+    insertExchange(makeExchange({ id: 'ex3', timestamp: 3000, userMessage: 'query test' }));
+
+    const results = textSearch('query', 10, { afterTimestamp: 1500, beforeTimestamp: 2500 });
+    expect(results).toHaveLength(1);
+    expect(results[0].exchange.id).toBe('ex2');
+  });
+
+  it('should filter by projectPath', async () => {
+    const { initDatabase, insertExchange, textSearch } = await import('../db');
+    initDatabase();
+
+    insertExchange(makeExchange({ id: 'ex1', projectPath: '/project-a', userMessage: 'query test' }));
+    insertExchange(makeExchange({ id: 'ex2', projectPath: '/project-b', userMessage: 'query test' }));
+    insertExchange(makeExchange({ id: 'ex3', projectPath: '/project-a', userMessage: 'query test' }));
+
+    const results = textSearch('query', 10, { projectPath: '/project-a' });
+    expect(results).toHaveLength(2);
+    expect(results.map(r => r.exchange.id).sort()).toEqual(['ex1', 'ex3']);
+  });
+});
+
+describe('vectorSearch', () => {
+  it.skipIf(!process.env.CI)('should return results sorted by score descending when vec is enabled', async () => {
+    const { initDatabase, insertExchange, vectorSearch, isVecEnabled } = await import('../db');
+    initDatabase();
+
+    if (!isVecEnabled()) {
+      return;
+    }
+
+    // Insert 5 exchanges with different embeddings
+    insertExchange(makeExchange({ id: 'ex1', embedding: new Float32Array(384).fill(0.1) }));
+    insertExchange(makeExchange({ id: 'ex2', embedding: new Float32Array(384).fill(0.2) }));
+    insertExchange(makeExchange({ id: 'ex3', embedding: new Float32Array(384).fill(0.3) }));
+    insertExchange(makeExchange({ id: 'ex4', embedding: new Float32Array(384).fill(0.4) }));
+    insertExchange(makeExchange({ id: 'ex5', embedding: new Float32Array(384).fill(0.5) }));
+
+    const queryEmbedding = new Float32Array(384).fill(0.5);
+    const results = vectorSearch(queryEmbedding, 3);
+
+    expect(results.length).toBeGreaterThan(0);
+    expect(results.length).toBeLessThanOrEqual(3);
+    // Closest match should rank first
+    expect(results[0].exchange.id).toBe('ex5');
+    // Results should be sorted by score descending
+    for (let i = 1; i < results.length; i++) {
+      expect(results[i - 1].score).toBeGreaterThanOrEqual(results[i].score);
+    }
+  });
+
+  it.skipIf(!process.env.CI)('should filter by projectPath when vec is enabled', async () => {
+    const { initDatabase, insertExchange, vectorSearch, isVecEnabled } = await import('../db');
+    initDatabase();
+
+    if (!isVecEnabled()) {
+      return;
+    }
+
+    insertExchange(makeExchange({ id: 'ex1', projectPath: '/proj-a', embedding: new Float32Array(384).fill(0.1) }));
+    insertExchange(makeExchange({ id: 'ex2', projectPath: '/proj-b', embedding: new Float32Array(384).fill(0.2) }));
+    insertExchange(makeExchange({ id: 'ex3', projectPath: '/proj-a', embedding: new Float32Array(384).fill(0.3) }));
+
+    const queryEmbedding = new Float32Array(384).fill(0.2);
+    const results = vectorSearch(queryEmbedding, 10, { projectPath: '/proj-a' });
+
+    expect(results.length).toBeGreaterThan(0);
+    expect(results.every(r => r.exchange.projectPath === '/proj-a')).toBe(true);
+  });
+});
+
+describe('deleteExchangesBySession', () => {
+  it('should delete all exchanges in a session and return the count', async () => {
+    const { initDatabase, insertExchange, deleteExchangesBySession, getDatabase } = await import('../db');
+    initDatabase();
+
+    insertExchange(makeExchange({ id: 'ex1', sessionId: 'A' }));
+    insertExchange(makeExchange({ id: 'ex2', sessionId: 'A' }));
+    insertExchange(makeExchange({ id: 'ex3', sessionId: 'B' }));
+
+    const deletedCount = deleteExchangesBySession('A');
+    expect(deletedCount).toBe(2);
+
+    const db = getDatabase();
+    const remaining = db.prepare('SELECT * FROM exchanges WHERE session_id = ?').all('A');
+    expect(remaining).toHaveLength(0);
+
+    const sessionB = db.prepare('SELECT * FROM exchanges WHERE session_id = ?').all('B');
+    expect(sessionB).toHaveLength(1);
+  });
+});
+
+describe('deleteExchangesByDateRange', () => {
+  it('should delete exchanges within the date range and return the count', async () => {
+    const { initDatabase, insertExchange, deleteExchangesByDateRange, getDatabase } = await import('../db');
+    initDatabase();
+
+    insertExchange(makeExchange({ id: 'ex1', timestamp: 1000 }));
+    insertExchange(makeExchange({ id: 'ex2', timestamp: 2000 }));
+    insertExchange(makeExchange({ id: 'ex3', timestamp: 3000 }));
+
+    const deletedCount = deleteExchangesByDateRange(1500, 2500);
+    expect(deletedCount).toBe(1);
+
+    const db = getDatabase();
+    const remaining = db.prepare('SELECT id FROM exchanges ORDER BY timestamp').all() as Array<{ id: string }>;
+    expect(remaining).toHaveLength(2);
+    expect(remaining.map(r => r.id)).toEqual(['ex1', 'ex3']);
+  });
+});
