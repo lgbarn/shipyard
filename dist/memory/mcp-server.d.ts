@@ -53,6 +53,8 @@ export declare const TOOLS: ({
             };
             session_id?: undefined;
             force?: undefined;
+            dry_run?: undefined;
+            output_path?: undefined;
         };
         required: never[];
     };
@@ -79,6 +81,8 @@ export declare const TOOLS: ({
             project?: undefined;
             format?: undefined;
             force?: undefined;
+            dry_run?: undefined;
+            output_path?: undefined;
         };
         required: never[];
     };
@@ -96,6 +100,8 @@ export declare const TOOLS: ({
             format?: undefined;
             session_id?: undefined;
             force?: undefined;
+            dry_run?: undefined;
+            output_path?: undefined;
         };
         required: never[];
     };
@@ -117,6 +123,53 @@ export declare const TOOLS: ({
             project?: undefined;
             format?: undefined;
             session_id?: undefined;
+            dry_run?: undefined;
+            output_path?: undefined;
+        };
+        required: never[];
+    };
+} | {
+    name: string;
+    description: string;
+    inputSchema: {
+        type: string;
+        properties: {
+            dry_run: {
+                type: string;
+                default: boolean;
+                description: string;
+            };
+            query?: undefined;
+            limit?: undefined;
+            after?: undefined;
+            before?: undefined;
+            project?: undefined;
+            format?: undefined;
+            session_id?: undefined;
+            force?: undefined;
+            output_path?: undefined;
+        };
+        required: never[];
+    };
+} | {
+    name: string;
+    description: string;
+    inputSchema: {
+        type: string;
+        properties: {
+            output_path: {
+                type: string;
+                description: string;
+            };
+            query?: undefined;
+            limit?: undefined;
+            after?: undefined;
+            before?: undefined;
+            project?: undefined;
+            format?: undefined;
+            session_id?: undefined;
+            force?: undefined;
+            dry_run?: undefined;
         };
         required: never[];
     };

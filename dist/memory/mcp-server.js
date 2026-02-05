@@ -52,6 +52,9 @@ const config_1 = require("./config");
 const embeddings_1 = require("./embeddings");
 const logger_1 = require("./logger");
 const fs = __importStar(require("fs"));
+const repair_1 = require("./repair");
+const export_1 = require("./export");
+const migrate_1 = require("./migrate");
 const SERVER_NAME = 'shipyard-memory';
 const SERVER_VERSION = '1.0.0';
 // Input schemas
@@ -75,6 +78,13 @@ const ForgetInputSchema = zod_1.z.object({
 const ImportInputSchema = zod_1.z.object({
     force: zod_1.z.boolean().optional(),
 });
+const RepairInputSchema = zod_1.z.object({
+    dry_run: zod_1.z.boolean().optional(),
+});
+const ExportInputSchema = zod_1.z.object({
+    output_path: zod_1.z.string().optional(),
+});
+const MigrateInputSchema = zod_1.z.object({});
 // Tool definitions
 exports.TOOLS = [
     {
@@ -152,6 +162,37 @@ exports.TOOLS = [
     {
         name: 'memory_health',
         description: 'Check MCP server health and configuration status.',
+        inputSchema: {
+            type: 'object',
+            properties: {},
+            required: [],
+        },
+    },
+    {
+        name: 'memory_repair',
+        description: 'Run database repair checks and optionally fix issues. Detects corruption, orphaned data, missing embeddings, and index problems.',
+        inputSchema: {
+            type: 'object',
+            properties: {
+                dry_run: { type: 'boolean', default: true, description: 'If true, only report issues without fixing them' },
+            },
+            required: [],
+        },
+    },
+    {
+        name: 'memory_export',
+        description: 'Export all sessions and exchanges to a JSON file for data portability.',
+        inputSchema: {
+            type: 'object',
+            properties: {
+                output_path: { type: 'string', description: 'Optional custom output path for the export file' },
+            },
+            required: [],
+        },
+    },
+    {
+        name: 'memory_migrate',
+        description: 'Check migration status and show pending migrations.',
         inputSchema: {
             type: 'object',
             properties: {},
@@ -347,6 +388,61 @@ function handleHealth() {
     ].join('\n');
 }
 /**
+ * Handle memory_repair tool call
+ */
+async function handleRepair(input) {
+    const parsed = RepairInputSchema.parse(input);
+    const report = await (0, repair_1.runRepair)(parsed.dry_run ?? true);
+    return (0, repair_1.formatRepairReport)(report);
+}
+/**
+ * Handle memory_export tool call
+ */
+async function handleExport(input) {
+    const parsed = ExportInputSchema.parse(input);
+    const result = await (0, export_1.runExport)(parsed.output_path);
+    return (0, export_1.formatExportReport)(result);
+}
+/**
+ * Handle memory_migrate tool call
+ */
+function handleMigrate() {
+    MigrateInputSchema.parse({});
+    const db = (0, db_1.getDatabase)();
+    const available = (0, migrate_1.readMigrationFiles)();
+    const applied = (0, migrate_1.getAppliedMigrations)(db);
+    const appliedVersions = new Set(applied.map(m => m.version));
+    const pending = available.filter(m => !appliedVersions.has(m.version));
+    const lines = [
+        '## Migration Status',
+        '',
+        `**Total migrations:** ${available.length}`,
+        `**Applied:** ${applied.length}`,
+        `**Pending:** ${pending.length}`,
+        '',
+    ];
+    if (applied.length > 0) {
+        lines.push('### Applied Migrations');
+        lines.push('');
+        for (const m of applied) {
+            const appliedDate = new Date(m.applied_at).toISOString();
+            lines.push(`- ${m.filename} (applied: ${appliedDate})`);
+        }
+        lines.push('');
+    }
+    if (pending.length > 0) {
+        lines.push('### Pending Migrations');
+        lines.push('');
+        for (const m of pending) {
+            lines.push(`- ${m.filename}`);
+        }
+    }
+    else {
+        lines.push('**Status:** All migrations up to date');
+    }
+    return lines.join('\n');
+}
+/**
  * Create and start the MCP server
  */
 async function startServer() {
@@ -395,6 +491,15 @@ async function startServer() {
                     break;
                 case 'memory_health':
                     result = handleHealth();
+                    break;
+                case 'memory_repair':
+                    result = await handleRepair(args);
+                    break;
+                case 'memory_export':
+                    result = await handleExport(args);
+                    break;
+                case 'memory_migrate':
+                    result = handleMigrate();
                     break;
                 default:
                     throw new Error(`Unknown tool: ${name}`);
