@@ -38,6 +38,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.TOOLS = void 0;
 exports.handleHealth = handleHealth;
 exports.startServer = startServer;
 const index_js_1 = require("@modelcontextprotocol/sdk/server/index.js");
@@ -51,6 +52,8 @@ const config_1 = require("./config");
 const embeddings_1 = require("./embeddings");
 const logger_1 = require("./logger");
 const fs = __importStar(require("fs"));
+const SERVER_NAME = 'shipyard-memory';
+const SERVER_VERSION = '1.0.0';
 // Input schemas
 const SearchInputSchema = zod_1.z.union([
     zod_1.z.string(), // Simple query string
@@ -73,7 +76,7 @@ const ImportInputSchema = zod_1.z.object({
     force: zod_1.z.boolean().optional(),
 });
 // Tool definitions
-const TOOLS = [
+exports.TOOLS = [
     {
         name: 'memory_search',
         description: 'Search past conversations for relevant context. Returns semantically similar exchanges from previous sessions.',
@@ -266,12 +269,19 @@ async function handleIndex() {
  */
 async function handleBackup() {
     const backupPath = await (0, db_1.createTimestampedBackup)();
-    const stats = fs.statSync(backupPath);
+    let sizeInfo = '';
+    try {
+        const stats = fs.statSync(backupPath);
+        sizeInfo = `**Size:** ${(stats.size / 1024 / 1024).toFixed(2)} MB`;
+    }
+    catch {
+        sizeInfo = '**Size:** unknown (file stat failed)';
+    }
     return [
         '## Backup Created',
         '',
         `**Path:** ${backupPath}`,
-        `**Size:** ${(stats.size / 1024 / 1024).toFixed(2)} MB`,
+        sizeInfo,
         '',
         'The database has been backed up successfully. Up to 5 backups are retained.',
     ].join('\n');
@@ -318,7 +328,7 @@ function handleHealth() {
         '## MCP Server Health',
         '',
         `**Status:** ${status}`,
-        `**Version:** shipyard-memory@1.0.0`,
+        `**Version:** ${SERVER_NAME}@${SERVER_VERSION}`,
         '',
         '### Database',
         `- Connected: ${dbConnected ? 'Yes' : 'No'}`,
@@ -348,8 +358,8 @@ async function startServer() {
     // Initialize database
     (0, db_1.initDatabase)();
     const server = new index_js_1.Server({
-        name: 'shipyard-memory',
-        version: '1.0.0',
+        name: SERVER_NAME,
+        version: SERVER_VERSION,
     }, {
         capabilities: {
             tools: {},
@@ -357,7 +367,7 @@ async function startServer() {
     });
     // Handle list tools
     server.setRequestHandler(types_js_1.ListToolsRequestSchema, async () => ({
-        tools: TOOLS,
+        tools: exports.TOOLS,
     }));
     // Handle tool calls
     server.setRequestHandler(types_js_1.CallToolRequestSchema, async (request) => {

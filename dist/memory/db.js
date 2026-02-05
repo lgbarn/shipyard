@@ -60,6 +60,7 @@ const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
 const config_1 = require("./config");
 const logger_1 = require("./logger");
+const migrate_1 = require("./migrate");
 // Import sqlite-vec for loading the extension
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const sqliteVec = require('sqlite-vec');
@@ -96,61 +97,17 @@ function initDatabase() {
     catch {
         vecEnabled = false;
     }
-    // Create schema
-    const schemaPath = path.join(__dirname, 'schema.sql');
-    if (fs.existsSync(schemaPath)) {
-        const schema = fs.readFileSync(schemaPath, 'utf-8');
-        db.exec(schema);
-    }
-    else {
-        // Inline schema for bundled distribution
-        createSchemaInline(db);
-    }
-    return db;
-}
-function createSchemaInline(database) {
-    database.exec(`
-    CREATE TABLE IF NOT EXISTS exchanges (
-      id TEXT PRIMARY KEY,
-      session_id TEXT NOT NULL,
-      project_path TEXT,
-      user_message TEXT NOT NULL,
-      assistant_message TEXT NOT NULL,
-      tool_names TEXT,
-      timestamp INTEGER NOT NULL,
-      git_branch TEXT,
-      source_file TEXT,
-      line_start INTEGER,
-      line_end INTEGER,
-      embedding BLOB,
-      indexed_at INTEGER NOT NULL
+    // Bootstrap schema_migrations table (must exist before migration runner)
+    db.exec(`
+    CREATE TABLE IF NOT EXISTS schema_migrations (
+      version INTEGER PRIMARY KEY,
+      filename TEXT NOT NULL UNIQUE,
+      applied_at INTEGER NOT NULL
     );
-
-    CREATE VIRTUAL TABLE IF NOT EXISTS vec_exchanges USING vec0(
-      id TEXT PRIMARY KEY,
-      embedding FLOAT[384]
-    );
-
-    CREATE TABLE IF NOT EXISTS sessions (
-      id TEXT PRIMARY KEY,
-      project_path TEXT,
-      started_at INTEGER NOT NULL,
-      exchange_count INTEGER DEFAULT 0
-    );
-
-    CREATE TABLE IF NOT EXISTS import_state (
-      key TEXT PRIMARY KEY,
-      value TEXT NOT NULL
-    );
-
-    CREATE INDEX IF NOT EXISTS idx_exchanges_timestamp ON exchanges(timestamp DESC);
-    CREATE INDEX IF NOT EXISTS idx_exchanges_session ON exchanges(session_id);
-    CREATE INDEX IF NOT EXISTS idx_exchanges_project ON exchanges(project_path);
-    CREATE INDEX IF NOT EXISTS idx_exchanges_git_branch ON exchanges(git_branch);
-
-    INSERT OR IGNORE INTO import_state (key, value) VALUES ('schema_version', '1');
-    INSERT OR IGNORE INTO import_state (key, value) VALUES ('import_completed', 'false');
   `);
+    // Run sequential migrations
+    (0, migrate_1.runMigrations)(db);
+    return db;
 }
 /**
  * Get database instance
@@ -511,7 +468,8 @@ async function backupDatabase(destinationPath, onProgress) {
  */
 async function createTimestampedBackup() {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const backupDir = config_1.CONFIG_DIR;
+    const backupDir = path.join(config_1.CONFIG_DIR, 'backups');
+    fs.mkdirSync(backupDir, { recursive: true });
     const backupPath = path.join(backupDir, `memory.backup.${timestamp}.db`);
     logger_1.logger.info('Creating database backup', { destination: backupPath });
     await backupDatabase(backupPath, (totalPages, remainingPages) => {
@@ -520,14 +478,14 @@ async function createTimestampedBackup() {
         }
     });
     // Rotate: keep only the 5 most recent backups
-    const allFiles = fs.readdirSync(backupDir);
+    const allFiles = await fs.promises.readdir(backupDir);
     const backups = allFiles
         .filter(f => f.startsWith('memory.backup.') && f.endsWith('.db'))
         .sort()
         .reverse();
     for (const old of backups.slice(5)) {
         const oldPath = path.join(backupDir, old);
-        fs.unlinkSync(oldPath);
+        await fs.promises.unlink(oldPath);
         logger_1.logger.info('Rotated old backup', { deleted: oldPath });
     }
     return backupPath;
