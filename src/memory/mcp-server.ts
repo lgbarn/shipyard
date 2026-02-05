@@ -19,6 +19,9 @@ import { isModelLoaded } from './embeddings';
 import { logger } from './logger';
 import * as fs from 'fs';
 
+const SERVER_NAME = 'shipyard-memory';
+const SERVER_VERSION = '1.0.0';
+
 // Input schemas
 const SearchInputSchema = z.union([
   z.string(), // Simple query string
@@ -314,7 +317,7 @@ export function handleHealth(): string {
     '## MCP Server Health',
     '',
     `**Status:** ${status}`,
-    `**Version:** shipyard-memory@1.0.0`,
+    `**Version:** ${SERVER_NAME}@${SERVER_VERSION}`,
     '',
     '### Database',
     `- Connected: ${dbConnected ? 'Yes' : 'No'}`,
@@ -348,8 +351,8 @@ export async function startServer(): Promise<void> {
 
   const server = new Server(
     {
-      name: 'shipyard-memory',
-      version: '1.0.0',
+      name: SERVER_NAME,
+      version: SERVER_VERSION,
     },
     {
       capabilities: {
