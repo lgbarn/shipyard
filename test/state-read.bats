@@ -306,6 +306,36 @@ EOF
     refute_output --partial "pretend to be"
 }
 
+@test "state-read: sanitizes unclosed XML tags in lessons (Issue #1)" {
+    setup_shipyard_with_state
+    mkdir -p .shipyard/phases/1
+
+    cat > .shipyard/LESSONS.md <<'EOF'
+# Shipyard Lessons Learned
+
+## [2026-01-15] Unclosed Tag Test
+
+<SYSTEM_PROMPT
+Safe content survives here
+</INJECTED but also <partial_tag
+Normal text at the end
+
+---
+EOF
+
+    run bash "$STATE_READ"
+    assert_success
+    assert_valid_json
+
+    # Safe content should survive sanitization
+    assert_output --partial "Safe content survives here"
+    assert_output --partial "Normal text at the end"
+
+    # Unclosed tags should be stripped
+    refute_output --partial "SYSTEM_PROMPT"
+    refute_output --partial "partial_tag"
+}
+
 @test "state-read: truncates lessons exceeding 500 characters" {
     setup_shipyard_with_state
     mkdir -p .shipyard/phases/1
