@@ -351,3 +351,100 @@ describe('Scenario 5: export roundtrip', () => {
     }
   })
 })
+
+describe('Scenario 6: repair dry run detects issues', () => {
+  it('should detect stale source references without fixing them', async () => {
+    // Initialize database
+    const { initDatabase, insertExchange } = await import('../db')
+    const { runRepair } = await import('../repair')
+    initDatabase()
+
+    // Insert 2 exchanges with nonexistent source files (stale references)
+    insertExchange(makeExchange({
+      id: 'repair-1',
+      sourceFile: '/nonexistent/path/conversation.jsonl',
+      userMessage: 'First repair test with enough content for storage',
+      assistantMessage: 'First repair response with enough content'
+    }))
+
+    insertExchange(makeExchange({
+      id: 'repair-2',
+      sourceFile: '/also/nonexistent/file.jsonl',
+      userMessage: 'Second repair test with enough content for storage',
+      assistantMessage: 'Second repair response with enough content'
+    }))
+
+    // Run repair in dry run mode
+    const report = await runRepair(true)
+
+    // Verify dry run flag is set
+    expect(report.dryRun).toBe(true)
+
+    // Verify total issues detected
+    expect(report.totalIssues).toBeGreaterThan(0)
+
+    // Find the stale references check
+    const staleCheck = report.checks.find(c => c.name.toLowerCase().includes('stale'))
+    expect(staleCheck).toBeDefined()
+    expect(staleCheck?.status).toBe('warning')
+    expect(staleCheck?.count).toBe(2)
+
+    // Verify index rebuild and optimization are skipped in dry run mode
+    const indexCheck = report.checks.find(c => c.name.toLowerCase().includes('index rebuild'))
+    const optimizeCheck = report.checks.find(c => c.name.toLowerCase().includes('optimization'))
+    expect(indexCheck?.status).toBe('skipped')
+    expect(optimizeCheck?.status).toBe('skipped')
+  })
+})
+
+describe('Scenario 7: repair fix resolves issues', () => {
+  it('should run index rebuild and optimization in fix mode', async () => {
+    // Initialize database
+    const { initDatabase, insertExchange } = await import('../db')
+    const { runRepair } = await import('../repair')
+    initDatabase()
+
+    // Insert 2 exchanges with stale source files (same pattern as scenario 6)
+    insertExchange(makeExchange({
+      id: 'fix-1',
+      sourceFile: '/nonexistent/fix/path1.jsonl',
+      userMessage: 'First fix test with enough content for storage',
+      assistantMessage: 'First fix response with enough content'
+    }))
+
+    insertExchange(makeExchange({
+      id: 'fix-2',
+      sourceFile: '/nonexistent/fix/path2.jsonl',
+      userMessage: 'Second fix test with enough content for storage',
+      assistantMessage: 'Second fix response with enough content'
+    }))
+
+    // Run repair in fix mode
+    const fixReport = await runRepair(false)
+
+    // Verify fix mode flag
+    expect(fixReport.dryRun).toBe(false)
+
+    // Verify database size fields are present
+    expect(typeof fixReport.databaseSizeBefore).toBe('number')
+    expect(fixReport.databaseSizeBefore).toBeGreaterThan(0)
+    expect(typeof fixReport.databaseSizeAfter).toBe('number')
+    expect(fixReport.databaseSizeAfter).toBeGreaterThan(0)
+
+    // Verify index rebuild and optimization checks have run (status is 'ok' or 'fixed', not 'skipped')
+    const indexCheck = fixReport.checks.find(c => c.name.toLowerCase().includes('index rebuild'))
+    const optimizeCheck = fixReport.checks.find(c => c.name.toLowerCase().includes('optimization'))
+    expect(indexCheck?.status).not.toBe('skipped')
+    expect(optimizeCheck?.status).not.toBe('skipped')
+
+    // Run a dry run to confirm structural and referential integrity are clean
+    const verifyReport = await runRepair(true)
+
+    // Stale references are warnings (not auto-fixed), so they may still appear
+    // The key assertion is that structural and referential integrity are clean
+    const structuralCheck = verifyReport.checks.find(c => c.name.toLowerCase().includes('structural integrity'))
+    const referentialCheck = verifyReport.checks.find(c => c.name.toLowerCase().includes('referential integrity'))
+    expect(structuralCheck?.status).toBe('ok')
+    expect(referentialCheck?.status).toBe('ok')
+  })
+})
