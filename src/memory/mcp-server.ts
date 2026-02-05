@@ -12,7 +12,7 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
 import { search, searchMultipleConcepts, getMemoryStats, formatResultsAsMarkdown, formatResultsAsJson } from './search';
-import { deleteExchangesBySession, deleteExchangesByDateRange, initDatabase, getDatabase, isVecEnabled } from './db';
+import { deleteExchangesBySession, deleteExchangesByDateRange, initDatabase, getDatabase, isVecEnabled, createTimestampedBackup } from './db';
 import { runImport, runIncrementalIndex } from './indexer';
 import { isMemoryEnabled, DATABASE_PATH } from './config';
 import { isModelLoaded } from './embeddings';
@@ -103,6 +103,15 @@ const TOOLS = [
   {
     name: 'memory_index',
     description: 'Run incremental indexing of new conversation files.',
+    inputSchema: {
+      type: 'object',
+      properties: {},
+      required: [],
+    },
+  },
+  {
+    name: 'memory_backup',
+    description: 'Create a backup of the memory database.',
     inputSchema: {
       type: 'object',
       properties: {},
@@ -240,6 +249,23 @@ async function handleIndex(): Promise<string> {
     `**Files Processed:** ${progress.processedFiles} / ${progress.totalFiles}`,
     `**Exchanges Indexed:** ${progress.indexedExchanges}`,
     `**Errors:** ${progress.errors}`,
+  ].join('\n');
+}
+
+/**
+ * Handle memory_backup tool call
+ */
+async function handleBackup(): Promise<string> {
+  const backupPath = await createTimestampedBackup();
+  const stats = fs.statSync(backupPath);
+
+  return [
+    '## Backup Created',
+    '',
+    `**Path:** ${backupPath}`,
+    `**Size:** ${(stats.size / 1024 / 1024).toFixed(2)} MB`,
+    '',
+    'The database has been backed up successfully. Up to 5 backups are retained.',
   ].join('\n');
 }
 

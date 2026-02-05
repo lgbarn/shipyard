@@ -53,6 +53,8 @@ exports.getStats = getStats;
 exports.setImportState = setImportState;
 exports.getImportState = getImportState;
 exports.pruneToCapacity = pruneToCapacity;
+exports.backupDatabase = backupDatabase;
+exports.createTimestampedBackup = createTimestampedBackup;
 const better_sqlite3_1 = __importDefault(require("better-sqlite3"));
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
@@ -483,5 +485,49 @@ function pruneToCapacity(capBytes) {
     // Vacuum to reclaim space
     database.exec('VACUUM');
     return result.changes;
+}
+/**
+ * Backup database to a specified file path.
+ * Performs a WAL checkpoint before backup to ensure all recent writes are captured.
+ */
+async function backupDatabase(destinationPath, onProgress) {
+    const database = getDatabase();
+    // Checkpoint WAL to ensure backup includes all recent writes
+    database.pragma('wal_checkpoint(TRUNCATE)');
+    await database.backup(destinationPath, {
+        progress: ({ totalPages, remainingPages }) => {
+            if (onProgress) {
+                onProgress(totalPages, remainingPages);
+            }
+            return 100; // Pages per backup step cycle
+        },
+    });
+}
+/**
+ * Create a timestamped backup and rotate old backups (keep last 5).
+ * Returns the path to the created backup file.
+ */
+async function createTimestampedBackup() {
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const backupDir = config_1.CONFIG_DIR;
+    const backupPath = path.join(backupDir, `memory.backup.${timestamp}.db`);
+    logger_1.logger.info('Creating database backup', { destination: backupPath });
+    await backupDatabase(backupPath, (totalPages, remainingPages) => {
+        if (remainingPages === 0) {
+            logger_1.logger.info('Backup complete', { totalPages });
+        }
+    });
+    // Rotate: keep only the 5 most recent backups
+    const allFiles = fs.readdirSync(backupDir);
+    const backups = allFiles
+        .filter(f => f.startsWith('memory.backup.') && f.endsWith('.db'))
+        .sort()
+        .reverse();
+    for (const old of backups.slice(5)) {
+        const oldPath = path.join(backupDir, old);
+        fs.unlinkSync(oldPath);
+        logger_1.logger.info('Rotated old backup', { deleted: oldPath });
+    }
+    return backupPath;
 }
 //# sourceMappingURL=db.js.map

@@ -67,4 +67,14 @@ export declare function getImportState(key: string): string | null;
  * Prune old exchanges to stay within storage cap
  */
 export declare function pruneToCapacity(capBytes: number): number;
+/**
+ * Backup database to a specified file path.
+ * Performs a WAL checkpoint before backup to ensure all recent writes are captured.
+ */
+export declare function backupDatabase(destinationPath: string, onProgress?: (totalPages: number, remainingPages: number) => void): Promise<void>;
+/**
+ * Create a timestamped backup and rotate old backups (keep last 5).
+ * Returns the path to the created backup file.
+ */
+export declare function createTimestampedBackup(): Promise<string>;
 //# sourceMappingURL=db.d.ts.map

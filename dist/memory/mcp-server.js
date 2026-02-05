@@ -4,7 +4,41 @@
  *
  * Exposes memory search and management tools via the Model Context Protocol.
  */
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.handleHealth = handleHealth;
 exports.startServer = startServer;
 const index_js_1 = require("@modelcontextprotocol/sdk/server/index.js");
 const stdio_js_1 = require("@modelcontextprotocol/sdk/server/stdio.js");
@@ -14,7 +48,9 @@ const search_1 = require("./search");
 const db_1 = require("./db");
 const indexer_1 = require("./indexer");
 const config_1 = require("./config");
+const embeddings_1 = require("./embeddings");
 const logger_1 = require("./logger");
+const fs = __importStar(require("fs"));
 // Input schemas
 const SearchInputSchema = zod_1.z.union([
     zod_1.z.string(), // Simple query string
@@ -95,6 +131,15 @@ const TOOLS = [
     {
         name: 'memory_index',
         description: 'Run incremental indexing of new conversation files.',
+        inputSchema: {
+            type: 'object',
+            properties: {},
+            required: [],
+        },
+    },
+    {
+        name: 'memory_health',
+        description: 'Check MCP server health and configuration status.',
         inputSchema: {
             type: 'object',
             properties: {},
@@ -208,6 +253,66 @@ async function handleIndex() {
     ].join('\n');
 }
 /**
+ * Handle memory_health tool call
+ */
+function handleHealth() {
+    // Test DB connectivity
+    let dbConnected = false;
+    let exchangeCount = 0;
+    let dbSizeMb = 0;
+    try {
+        const database = (0, db_1.getDatabase)();
+        database.prepare('SELECT 1').get();
+        dbConnected = true;
+        // Get basic stats
+        const countRow = database.prepare('SELECT COUNT(*) as count FROM exchanges').get();
+        exchangeCount = countRow.count;
+        if (fs.existsSync(config_1.DATABASE_PATH)) {
+            const stats = fs.statSync(config_1.DATABASE_PATH);
+            dbSizeMb = stats.size / (1024 * 1024);
+        }
+    }
+    catch {
+        dbConnected = false;
+    }
+    // Check vector extension
+    const vecEnabled = (0, db_1.isVecEnabled)();
+    // Check embedding model
+    const modelLoaded = (0, embeddings_1.isModelLoaded)();
+    // Determine overall status
+    let status;
+    if (dbConnected && vecEnabled) {
+        status = 'healthy';
+    }
+    else if (dbConnected) {
+        status = 'degraded';
+    }
+    else {
+        status = 'unhealthy';
+    }
+    return [
+        '## MCP Server Health',
+        '',
+        `**Status:** ${status}`,
+        `**Version:** shipyard-memory@1.0.0`,
+        '',
+        '### Database',
+        `- Connected: ${dbConnected ? 'Yes' : 'No'}`,
+        `- Path: ${config_1.DATABASE_PATH}`,
+        `- Size: ${dbSizeMb.toFixed(2)} MB`,
+        `- Exchanges: ${exchangeCount}`,
+        '',
+        '### Vector Search',
+        `- Enabled: ${vecEnabled ? 'Yes' : 'No'}`,
+        `- Extension: sqlite-vec`,
+        '',
+        '### Embeddings',
+        `- Model Loaded: ${modelLoaded ? 'Yes' : 'No'}`,
+        `- Model: Xenova/all-MiniLM-L6-v2`,
+        `- Dimension: 384`,
+    ].join('\n');
+}
+/**
  * Create and start the MCP server
  */
 async function startServer() {
@@ -250,6 +355,9 @@ async function startServer() {
                     break;
                 case 'memory_index':
                     result = await handleIndex();
+                    break;
+                case 'memory_health':
+                    result = handleHealth();
                     break;
                 default:
                     throw new Error(`Unknown tool: ${name}`);
