@@ -260,13 +260,20 @@ async function handleIndex(): Promise<string> {
  */
 async function handleBackup(): Promise<string> {
   const backupPath = await createTimestampedBackup();
-  const stats = fs.statSync(backupPath);
+
+  let sizeInfo = '';
+  try {
+    const stats = fs.statSync(backupPath);
+    sizeInfo = `**Size:** ${(stats.size / 1024 / 1024).toFixed(2)} MB`;
+  } catch {
+    sizeInfo = '**Size:** unknown (file stat failed)';
+  }
 
   return [
     '## Backup Created',
     '',
     `**Path:** ${backupPath}`,
-    `**Size:** ${(stats.size / 1024 / 1024).toFixed(2)} MB`,
+    sizeInfo,
     '',
     'The database has been backed up successfully. Up to 5 backups are retained.',
   ].join('\n');
