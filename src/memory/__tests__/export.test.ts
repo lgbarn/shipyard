@@ -6,7 +6,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import * as fs from 'fs'
 import * as os from 'os'
 import * as path from 'path'
-import type { Exchange } from '../types'
+import type { Exchange, ExportResult } from '../types'
 
 let tmpDir: string
 let dbPath: string
@@ -270,5 +270,162 @@ describe('runExport - exchange field handling', () => {
     // Verify null values are preserved
     expect(parsed.exchanges[0].project_path).toBeNull()
     expect(parsed.exchanges[0].git_branch).toBeNull()
+  })
+})
+
+describe('runExport - file permissions and path', () => {
+  it('output file has 0o600 permissions', async () => {
+    const { initDatabase } = await import('../db')
+    initDatabase()
+
+    const { runExport } = await import('../export')
+    const exportPath = path.join(tmpDir, 'perm-test.json')
+    await runExport(exportPath)
+
+    const stats = fs.statSync(exportPath)
+    expect(stats.mode & 0o777).toBe(0o600) // Success criterion 7
+  })
+
+  it('default path is CONFIG_DIR/exports/memory-export-{timestamp}.json', async () => {
+    const { initDatabase } = await import('../db')
+    initDatabase()
+
+    const { runExport } = await import('../export')
+    const result = await runExport() // No outputPath argument
+
+    // Verify path structure
+    expect(result.outputPath).toContain(tmpDir) // CONFIG_DIR is mocked to tmpDir
+    expect(result.outputPath).toContain('exports') // Subdirectory
+    expect(result.outputPath).toContain('memory-export-') // Prefix
+    expect(result.outputPath.endsWith('.json')).toBe(true) // Extension
+    expect(path.basename(result.outputPath)).toMatch(/^memory-export-\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}-\d{3}Z\.json$/) // Success criterion 8
+
+    // Verify file actually exists
+    expect(fs.existsSync(result.outputPath)).toBe(true)
+  })
+
+  it('custom output path creates file at specified location', async () => {
+    const { initDatabase, insertExchange } = await import('../db')
+    initDatabase()
+
+    // Insert 1 exchange
+    insertExchange(makeExchange({ id: 'ex1' }))
+
+    const { runExport } = await import('../export')
+    const customPath = path.join(tmpDir, 'custom', 'my-export.json')
+    fs.mkdirSync(path.join(tmpDir, 'custom'), { recursive: true })
+
+    const result = await runExport(customPath)
+
+    expect(result.outputPath).toBe(customPath)
+    expect(fs.existsSync(customPath)).toBe(true)
+
+    // Parse and verify it's valid JSON with correct data
+    const content = fs.readFileSync(customPath, 'utf-8')
+    const parsed = JSON.parse(content)
+    expect(parsed.metadata.exchange_count).toBe(1)
+  })
+})
+
+describe('runExport - session export', () => {
+  it('sessions exported with all fields as-is', async () => {
+    const { initDatabase } = await import('../db')
+    initDatabase()
+
+    // Seed 2 sessions directly
+    await seedSession('sess-1', '/project/alpha', 1000, 5)
+    await seedSession('sess-2', null, 2000, 3)
+
+    const { runExport } = await import('../export')
+    const exportPath = path.join(tmpDir, 'sessions-test.json')
+    await runExport(exportPath)
+
+    const content = fs.readFileSync(exportPath, 'utf-8')
+    const parsed = JSON.parse(content)
+
+    expect(parsed.sessions).toHaveLength(2)
+
+    // Find and verify sess-1
+    const s1 = parsed.sessions.find((s: Record<string, unknown>) => s.id === 'sess-1')
+    expect(s1).toBeDefined()
+    expect(s1.project_path).toBe('/project/alpha')
+    expect(s1.started_at).toBe(1000)
+    expect(s1.exchange_count).toBe(5)
+
+    // Find and verify sess-2 (with null project_path)
+    const s2 = parsed.sessions.find((s: Record<string, unknown>) => s.id === 'sess-2')
+    expect(s2).toBeDefined()
+    expect(s2.project_path).toBeNull()
+    expect(s2.started_at).toBe(2000)
+    expect(s2.exchange_count).toBe(3)
+  })
+})
+
+describe('formatExportReport', () => {
+  it('produces valid markdown with export summary', async () => {
+    const { formatExportReport } = await import('../export')
+
+    // Construct an ExportResult manually
+    const result: ExportResult = {
+      outputPath: '/home/user/.config/shipyard/exports/memory-export-2026-02-04.json',
+      fileSizeBytes: 51200,
+      exchangeCount: 150,
+      sessionCount: 12,
+      exportedAt: Date.now(),
+    }
+
+    const markdown = formatExportReport(result)
+
+    // Verify markdown structure
+    expect(markdown).toContain('# Export Report')
+    expect(markdown).toContain('memory-export-2026-02-04.json')
+    expect(markdown).toContain('150')
+    expect(markdown).toContain('12')
+    expect(markdown).toContain('KB') // File size formatted
+    expect(markdown).toContain('Sessions')
+    expect(markdown).toContain('Exchanges')
+  })
+
+  it('produces markdown for zero-count export', async () => {
+    const { formatExportReport } = await import('../export')
+
+    // Construct ExportResult with zero counts
+    const result: ExportResult = {
+      outputPath: '/tmp/empty-export.json',
+      fileSizeBytes: 256,
+      exchangeCount: 0,
+      sessionCount: 0,
+      exportedAt: Date.now(),
+    }
+
+    const markdown = formatExportReport(result)
+
+    // Verify markdown contains zero values
+    expect(markdown).toContain('0')
+    expect(markdown.length).toBeGreaterThan(0)
+  })
+})
+
+describe('runExport - ExportResult fields', () => {
+  it('ExportResult contains all expected fields with correct values', async () => {
+    const { initDatabase, insertExchange } = await import('../db')
+    initDatabase()
+
+    // Insert 2 exchanges with different session IDs
+    insertExchange(makeExchange({ id: 'ex1', sessionId: 'sess-1' }))
+    insertExchange(makeExchange({ id: 'ex2', sessionId: 'sess-2' }))
+    await seedSession('sess-1', '/test/project', 1000, 1)
+    await seedSession('sess-2', '/test/project', 2000, 1)
+
+    const { runExport } = await import('../export')
+    const result = await runExport(path.join(tmpDir, 'result-test.json'))
+
+    // Verify all ExportResult fields
+    expect(result.outputPath).toContain('result-test.json')
+    expect(result.fileSizeBytes).toBeGreaterThan(0)
+    expect(result.exchangeCount).toBe(2)
+    expect(result.sessionCount).toBe(2)
+    expect(result.exportedAt).toBeGreaterThan(0)
+    expect(result.exportedAt).toBeLessThanOrEqual(Date.now())
   })
 })
