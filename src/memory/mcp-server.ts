@@ -12,10 +12,12 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
 import { search, searchMultipleConcepts, getMemoryStats, formatResultsAsMarkdown, formatResultsAsJson } from './search';
-import { deleteExchangesBySession, deleteExchangesByDateRange, initDatabase } from './db';
+import { deleteExchangesBySession, deleteExchangesByDateRange, initDatabase, getDatabase, isVecEnabled } from './db';
 import { runImport, runIncrementalIndex } from './indexer';
-import { isMemoryEnabled } from './config';
+import { isMemoryEnabled, DATABASE_PATH } from './config';
+import { isModelLoaded } from './embeddings';
 import { logger } from './logger';
+import * as fs from 'fs';
 
 // Input schemas
 const SearchInputSchema = z.union([
@@ -101,6 +103,15 @@ const TOOLS = [
   {
     name: 'memory_index',
     description: 'Run incremental indexing of new conversation files.',
+    inputSchema: {
+      type: 'object',
+      properties: {},
+      required: [],
+    },
+  },
+  {
+    name: 'memory_health',
+    description: 'Check MCP server health and configuration status.',
     inputSchema: {
       type: 'object',
       properties: {},
@@ -233,6 +244,70 @@ async function handleIndex(): Promise<string> {
 }
 
 /**
+ * Handle memory_health tool call
+ */
+export function handleHealth(): string {
+  // Test DB connectivity
+  let dbConnected = false;
+  let exchangeCount = 0;
+  let dbSizeMb = 0;
+  try {
+    const database = getDatabase();
+    database.prepare('SELECT 1').get();
+    dbConnected = true;
+
+    // Get basic stats
+    const countRow = database.prepare('SELECT COUNT(*) as count FROM exchanges').get() as { count: number };
+    exchangeCount = countRow.count;
+
+    if (fs.existsSync(DATABASE_PATH)) {
+      const stats = fs.statSync(DATABASE_PATH);
+      dbSizeMb = stats.size / (1024 * 1024);
+    }
+  } catch {
+    dbConnected = false;
+  }
+
+  // Check vector extension
+  const vecEnabled = isVecEnabled();
+
+  // Check embedding model
+  const modelLoaded = isModelLoaded();
+
+  // Determine overall status
+  let status: string;
+  if (dbConnected && vecEnabled) {
+    status = 'healthy';
+  } else if (dbConnected) {
+    status = 'degraded';
+  } else {
+    status = 'unhealthy';
+  }
+
+  return [
+    '## MCP Server Health',
+    '',
+    `**Status:** ${status}`,
+    `**Version:** shipyard-memory@1.0.0`,
+    '',
+    '### Database',
+    `- Connected: ${dbConnected ? 'Yes' : 'No'}`,
+    `- Path: ${DATABASE_PATH}`,
+    `- Size: ${dbSizeMb.toFixed(2)} MB`,
+    `- Exchanges: ${exchangeCount}`,
+    '',
+    '### Vector Search',
+    `- Enabled: ${vecEnabled ? 'Yes' : 'No'}`,
+    `- Extension: sqlite-vec`,
+    '',
+    '### Embeddings',
+    `- Model Loaded: ${modelLoaded ? 'Yes' : 'No'}`,
+    `- Model: Xenova/all-MiniLM-L6-v2`,
+    `- Dimension: 384`,
+  ].join('\n');
+}
+
+/**
  * Create and start the MCP server
  */
 export async function startServer(): Promise<void> {
@@ -284,6 +359,9 @@ export async function startServer(): Promise<void> {
           break;
         case 'memory_index':
           result = await handleIndex();
+          break;
+        case 'memory_health':
+          result = handleHealth();
           break;
         default:
           throw new Error(`Unknown tool: ${name}`);
