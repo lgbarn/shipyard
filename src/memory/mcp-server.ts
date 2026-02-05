@@ -386,6 +386,9 @@ export async function startServer(): Promise<void> {
         case 'memory_index':
           result = await handleIndex();
           break;
+        case 'memory_backup':
+          result = await handleBackup();
+          break;
         case 'memory_health':
           result = handleHealth();
           break;
@@ -426,6 +429,18 @@ if (require.main === module) {
       })
       .catch((error) => {
         logger.error('Indexing failed', { error: String(error) });
+        process.exit(1);
+      });
+  } else if (args.includes('--backup')) {
+    // Run backup and exit
+    initDatabase();
+    createTimestampedBackup()
+      .then((backupPath) => {
+        logger.info('Backup created', { path: backupPath });
+        process.exit(0);
+      })
+      .catch((error) => {
+        logger.error('Backup failed', { error: String(error) });
         process.exit(1);
       });
   } else {
