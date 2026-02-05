@@ -183,3 +183,168 @@ describe('runRepair - structural integrity failure', () => {
     expect(report.checks.length).toBe(7);
   });
 });
+
+describe('runRepair - orphaned vector entries', () => {
+  it.skipIf(!process.env.CI)('dry run reports orphaned vec_exchanges entries without deleting them', async () => {
+    const { initDatabase, getDatabase, isVecEnabled, insertExchange } = await import('../db');
+    initDatabase();
+
+    if (!isVecEnabled()) return;
+
+    // Insert a normal exchange with embedding
+    insertExchange(makeExchange({ id: 'ex1', embedding: new Float32Array(384).fill(0.1) }));
+
+    // Seed an orphaned vector entry directly
+    const db = getDatabase();
+    db.prepare('INSERT INTO vec_exchanges (id, embedding) VALUES (?, ?)')
+      .run('orphan-1', Buffer.from(new Float32Array(384).fill(0.2).buffer));
+
+    const { runRepair } = await import('../repair');
+    const report = await runRepair(true);
+
+    const orphanCheck = report.checks.find(c => c.name === 'Orphaned vector entries');
+    expect(orphanCheck).toBeDefined();
+    expect(orphanCheck!.status).toBe('warning');
+    expect(orphanCheck!.count).toBe(1);
+
+    // Verify orphan still exists (dry run doesn't delete)
+    const orphan = db.prepare('SELECT id FROM vec_exchanges WHERE id = ?').get('orphan-1');
+    expect(orphan).toBeDefined();
+  });
+
+  it.skipIf(!process.env.CI)('fix mode deletes orphaned vec_exchanges entries and reports count', async () => {
+    const { initDatabase, getDatabase, isVecEnabled, insertExchange } = await import('../db');
+    initDatabase();
+
+    if (!isVecEnabled()) return;
+
+    // Insert a normal exchange with embedding
+    insertExchange(makeExchange({ id: 'ex1', embedding: new Float32Array(384).fill(0.1) }));
+
+    // Seed an orphaned vector entry
+    const db = getDatabase();
+    db.prepare('INSERT INTO vec_exchanges (id, embedding) VALUES (?, ?)')
+      .run('orphan-1', Buffer.from(new Float32Array(384).fill(0.2).buffer));
+
+    const { runRepair } = await import('../repair');
+    const report = await runRepair(false);
+
+    const orphanCheck = report.checks.find(c => c.name === 'Orphaned vector entries');
+    expect(orphanCheck).toBeDefined();
+    expect(orphanCheck!.status).toBe('fixed');
+    expect(orphanCheck!.count).toBe(1);
+
+    // Verify orphan is gone
+    const orphan = db.prepare('SELECT id FROM vec_exchanges WHERE id = ?').get('orphan-1');
+    expect(orphan).toBeUndefined();
+
+    // Verify normal vec entry still exists
+    const normal = db.prepare('SELECT id FROM vec_exchanges WHERE id = ?').get('ex1');
+    expect(normal).toBeDefined();
+  });
+
+  it.skipIf(!process.env.CI)('reports ok when no orphaned vectors exist', async () => {
+    const { initDatabase, isVecEnabled, insertExchange } = await import('../db');
+    initDatabase();
+
+    if (!isVecEnabled()) return;
+
+    // Insert exchange with embedding (creates matched entries in both tables)
+    insertExchange(makeExchange({ id: 'ex1', embedding: new Float32Array(384).fill(0.1) }));
+
+    const { runRepair } = await import('../repair');
+    const report = await runRepair(true);
+
+    const orphanCheck = report.checks.find(c => c.name === 'Orphaned vector entries');
+    expect(orphanCheck).toBeDefined();
+    expect(orphanCheck!.status).toBe('ok');
+    expect(orphanCheck!.count).toBe(0);
+  });
+});
+
+describe('runRepair - missing embeddings', () => {
+  it.skipIf(!process.env.CI)('dry run reports count of exchanges missing embeddings', async () => {
+    const { initDatabase, getDatabase, isVecEnabled, insertExchange } = await import('../db');
+    initDatabase();
+
+    if (!isVecEnabled()) return;
+
+    // Insert exchange without embedding
+    insertExchange(makeExchange({ id: 'no-emb-1' }));
+
+    // Explicitly null out embedding
+    const db = getDatabase();
+    db.prepare('UPDATE exchanges SET embedding = NULL WHERE id = ?').run('no-emb-1');
+
+    // Insert a second exchange WITH embedding for contrast
+    insertExchange(makeExchange({ id: 'ex2', embedding: new Float32Array(384).fill(0.1) }));
+
+    const { runRepair } = await import('../repair');
+    const report = await runRepair(true);
+
+    const missingCheck = report.checks.find(c => c.name === 'Missing embeddings');
+    expect(missingCheck).toBeDefined();
+    expect(missingCheck!.status).toBe('warning');
+    expect(missingCheck!.count).toBe(1);
+  });
+
+  it.skipIf(!process.env.CI)('fix mode regenerates missing embeddings using mocked generateExchangeEmbedding', async () => {
+    const { initDatabase, getDatabase, isVecEnabled, insertExchange } = await import('../db');
+    initDatabase();
+
+    if (!isVecEnabled()) return;
+
+    // Insert exchange without embedding
+    insertExchange(makeExchange({ id: 'no-emb-1' }));
+
+    // Explicitly null out embedding
+    const db = getDatabase();
+    db.prepare('UPDATE exchanges SET embedding = NULL WHERE id = ?').run('no-emb-1');
+
+    // Insert a second exchange WITH embedding for contrast
+    insertExchange(makeExchange({ id: 'ex2', embedding: new Float32Array(384).fill(0.1) }));
+
+    const { runRepair } = await import('../repair');
+    const report = await runRepair(false);
+
+    const missingCheck = report.checks.find(c => c.name === 'Missing embeddings');
+    expect(missingCheck).toBeDefined();
+    expect(missingCheck!.status).toBe('fixed');
+    expect(missingCheck!.count).toBe(1);
+
+    // Verify the exchange now has an embedding
+    const row = db.prepare('SELECT embedding FROM exchanges WHERE id = ?').get('no-emb-1') as { embedding: Buffer | null };
+    expect(row.embedding).not.toBeNull();
+
+    // Verify generateExchangeEmbedding was called
+    const { generateExchangeEmbedding } = await import('../embeddings');
+    expect(generateExchangeEmbedding).toHaveBeenCalled();
+
+    // Verify vec_exchanges entry was created for the regenerated exchange
+    const vecEntry = db.prepare('SELECT id FROM vec_exchanges WHERE id = ?').get('no-emb-1');
+    expect(vecEntry).toBeDefined();
+  });
+});
+
+describe('runRepair - vec extension unavailable', () => {
+  it('skips orphaned vectors and missing embeddings checks when vec is disabled', async () => {
+    const { initDatabase, isVecEnabled } = await import('../db');
+    initDatabase();
+
+    // Only run this test when vec is NOT enabled (local dev without sqlite-vec)
+    if (isVecEnabled()) return;
+
+    const { runRepair } = await import('../repair');
+    const report = await runRepair(true);
+
+    const orphanCheck = report.checks.find(c => c.name === 'Orphaned vector entries');
+    expect(orphanCheck).toBeDefined();
+    expect(orphanCheck!.status).toBe('skipped');
+    expect(orphanCheck!.details).toContain('Vector extension not loaded');
+
+    const missingCheck = report.checks.find(c => c.name === 'Missing embeddings');
+    expect(missingCheck).toBeDefined();
+    expect(missingCheck!.status).toBe('skipped');
+    expect(missingCheck!.details).toContain('Vector extension not loaded');
+  });
+});
