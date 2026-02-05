@@ -15,12 +15,12 @@ set -euo pipefail
 # Strips XML/HTML tags, code blocks, prompt directives, and caps length
 sanitize_lesson() {
     local raw="$1"
-    # 1. Strip XML/HTML tags
-    raw=$(echo "$raw" | sed 's/<[^>]*>//g')
+    # 1. Strip XML/HTML tags and HTML-encoded tag entities
+    raw=$(echo "$raw" | sed 's/<[^>]*>//g; s/&lt;/ /g; s/&gt;/ /g; s/&#60;/ /g; s/&#62;/ /g')
     # 2. Remove code blocks (lines between triple-backtick fences, inclusive)
     raw=$(echo "$raw" | awk '/```/{skip=!skip; next} !skip{print}')
-    # 3. Filter prompt directive patterns (case-insensitive)
-    raw=$(echo "$raw" | grep -viE '^\s*(SYSTEM:|ASSISTANT:|USER:|IGNORE|NEW.INSTRUCTION|IMPORTANT:|CRITICAL:)' || true)
+    # 3. Filter lines containing prompt directive patterns (case-insensitive)
+    raw=$(echo "$raw" | grep -viE '\b(SYSTEM|ASSISTANT|USER|IMPORTANT|CRITICAL)\s*:|\bIGNORE\b|\bNEW.INSTRUCTION\b' || true)
     # 4. Cap at 500 characters
     if [ "${#raw}" -gt 500 ]; then
         raw="${raw:0:497}..."
