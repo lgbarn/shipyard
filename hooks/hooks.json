@@ -8,6 +8,12 @@
           {
             "type": "command",
             "command": "${CLAUDE_PLUGIN_ROOT}/scripts/state-read.sh"
+          },
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/marketplace-sync.sh",
+            "timeout": 10,
+            "async": true
           }
         ]
       }
