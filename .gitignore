@@ -21,8 +21,9 @@ dist/**/*.map
 # Test coverage
 coverage/
 
-# Shipyard dev state (committed selectively, not wholesale)
+# Shipyard dev state (local only)
 .shipyard/
+.shipyard.archived/
 
 # Secrets
 .env
