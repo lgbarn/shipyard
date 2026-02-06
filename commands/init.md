@@ -110,7 +110,7 @@ Also ask about quality gates:
 
 Also ask about model and context preferences:
 8. **Model routing:** "Which model routing strategy should Shipyard use for its agents?"
-   - **Default routing** (recommended): Haiku for validation/checks, Sonnet for building/planning, Opus for architecture/debugging
+   - **Default routing** (recommended): Haiku for validation/memory, Sonnet for building/review/planning/auditing/simplification/documentation/mapping, Opus for architecture/debugging
    - **All Sonnet:** Use Sonnet for everything
    - **All Opus:** Use Opus for everything
 9. **Context loading:** "How much context should Shipyard load at session start?"

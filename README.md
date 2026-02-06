@@ -114,6 +114,9 @@ Shipyard dispatches specialized agents for different phases of work:
 | **simplifier** | Cross-task duplication and complexity analysis | `/shipyard:build` |
 | **documenter** | Documentation generation & updates | `/shipyard:build`, `/shipyard:ship` |
 | **verifier** | Post-execution verification (including IaC) | `/shipyard:plan`, `/shipyard:build`, `/shipyard:ship` |
+| **search-memory** | Memory search & synthesis across sessions | `/shipyard:memory-search`, `memory` skill |
+
+See [`docs/AGENT-GUIDE.md`](docs/AGENT-GUIDE.md) for detailed agent documentation including model assignments, restrictions, tool access, and relationships.
 
 ## How It Works
 

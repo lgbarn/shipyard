@@ -55,12 +55,16 @@ Read `model_routing` from `.shipyard/config.json` and map agent roles to model k
 | Reviewer | `model_routing.review` | sonnet |
 | Verifier | `model_routing.validation` | haiku |
 | Auditor | `model_routing.security_audit` | sonnet |
-| Simplifier | `model_routing.review` | sonnet |
-| Documenter | `model_routing.review` | sonnet |
+| Simplifier | `model_routing.simplification` | sonnet |
+| Documenter | `model_routing.documentation` | sonnet |
 | Researcher | `model_routing.planning` | sonnet |
 | Architect | `model_routing.architecture` | opus |
+| Mapper | `model_routing.mapping` | sonnet |
+| Search-Memory | `model_routing.memory` | haiku |
 
-Pass the resolved model name as the `model` parameter in the Task tool call.
+The `debugging` config key is reserved for future use. The `shipyard-debugging` skill runs within the current session context (not as a subagent) and uses the session's model. This key is included in the config structure for forward compatibility.
+
+Pass the resolved model name as the `model` parameter in the Task tool call. Model names (`opus`, `sonnet`, `haiku`) resolve to the latest available version at dispatch time. Currently: Opus 4.6, Sonnet 4.5, Haiku 4.5.
 </instructions>
 
 <rules>
@@ -76,7 +80,24 @@ Dispatching a Builder → use "opus" (user override)
 Dispatching a Reviewer → use "haiku" (user override)
 Dispatching a Verifier → use "haiku" (default — no override specified)
 Dispatching an Architect → use "opus" (default — no override specified)
+Dispatching a Simplifier → use "sonnet" (default — no override for `simplification`)
 </example>
+
+### Model Selection Guidance
+
+When customizing model routing, consider these tradeoffs:
+
+| Config Key | Upgrade to Opus When... | Downgrade to Haiku When... |
+|---|---|---|
+| `review` | Critical security-sensitive code; complex architectural changes | Lightweight changes; formatting-only PRs |
+| `security_audit` | **Production codebases handling PII, financial data, or complex auth systems** | Internal tools; early prototyping |
+| `building` | Complex algorithmic work; unfamiliar domains | Mechanical tasks; boilerplate generation |
+| `validation` | Complex integration verification; production readiness checks | Simple pass/fail criteria |
+| `simplification` | Large phases with many tasks; AI-heavy generation | Small phases; single-plan phases |
+| `documentation` | Public API documentation; user-facing guides | Internal documentation; changelog entries |
+| `planning` | Novel domain research; critical technology decisions | Well-understood technology choices |
+| `mapping` | Large legacy codebases; acquisition due diligence | Small projects; familiar stacks |
+| `memory` | Complex multi-project synthesis | Simple keyword lookups |
 
 **Full config.json structure** (used during `/shipyard:init`):
 ```json
@@ -96,11 +117,15 @@ Dispatching an Architect → use "opus" (default — no override specified)
     "architecture": "opus",
     "debugging": "opus",
     "review": "sonnet",
-    "security_audit": "sonnet"
+    "security_audit": "sonnet",
+    "simplification": "sonnet",
+    "documentation": "sonnet",
+    "mapping": "sonnet",
+    "memory": "haiku"
   },
   "context_tier": "auto",
   "created_at": "<timestamp>",
-  "version": "1.2"
+  "version": "1.3"
 }
 ```
 
@@ -299,6 +324,25 @@ Passing all 7 codebase docs + all phase summaries from phases 1-6 + full ROADMAP
 ```
 Agents perform better with focused, relevant context than with everything available.
 </example>
+
+### Turn Limits
+
+Pass `max_turns` when dispatching agents via the Task tool to prevent runaway execution. These are recommended values based on each agent's typical scope:
+
+| Agent | Recommended max_turns | Rationale |
+|---|---|---|
+| Builder | 30 | Executes up to 3 tasks with TDD cycles; each task may need ~10 turns |
+| Reviewer | 15 | Reviews a single plan's diff; scope is bounded |
+| Verifier | 15 | Runs verification commands and checks criteria |
+| Auditor | 15 | Analyzes phase diff against security checklist |
+| Simplifier | 10 | Read-only analysis of phase changes |
+| Documenter | 20 | May generate multiple documentation files |
+| Researcher | 15 | Web search + codebase analysis |
+| Architect | 15 | Plan decomposition bounded by 3-task-max rule |
+| Mapper | 20 | Deep codebase analysis of one focus area |
+| Search-Memory | 5 | Single search + synthesis |
+
+Commands that dispatch agents should include the `max_turns` parameter in the Task tool call alongside `subagent_type` and `model`.
 
 ---
 

@@ -61,7 +61,7 @@ Call the memory MCP server's `memory_search` tool with:
 
 If results are returned:
 
-1. Dispatch a Haiku subagent to summarize the results:
+1. Dispatch a subagent to summarize the results (follow **Model Routing Protocol** — resolve model from `model_routing.memory`, default: haiku):
    - Extract key insights relevant to the query
    - Note any patterns or recurring solutions
    - Highlight the most relevant exchange(s)

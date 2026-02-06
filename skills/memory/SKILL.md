@@ -17,13 +17,14 @@ description: Use when user asks 'how should I...' or 'what's the best approach..
 
 Announce: "Dispatching search agent to find [topic]."
 
-Then use the Task tool with `subagent_type: "search-memory"`:
+Then use the Task tool with `subagent_type: "search-memory"`. Follow **Model Routing Protocol** to resolve the model from `model_routing.memory` (default: haiku):
 
 ```
 Task tool:
   description: "Search past conversations for [topic]"
   prompt: "Search for [specific query]. Focus on [decisions, patterns, gotchas, code examples]."
   subagent_type: "search-memory"
+  model: <resolved from model_routing.memory>
 ```
 
 The agent will:

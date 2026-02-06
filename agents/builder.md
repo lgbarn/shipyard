@@ -2,7 +2,7 @@
 name: builder
 description: |
   Use this agent when executing plans, implementing features, building tasks from a PLAN.md, or running TDD implementation cycles. This is the primary implementation agent. Examples: <example>Context: A plan has been created and is ready for execution. user: "Build the authentication phase" assistant: "I'll dispatch the builder agent to execute the plan tasks sequentially, following TDD protocol where specified and creating atomic commits for each task." <commentary>The builder agent executes structured plans, following the task protocol strictly including TDD, verification, and atomic commits.</commentary></example> <example>Context: The /shipyard:quick command needs to execute a simplified plan. user: "Quick add a health check endpoint" assistant: "I'll dispatch the builder agent to implement the planned tasks for this quick feature." <commentary>The builder agent handles both full plans from /shipyard:build and simplified plans from /shipyard:quick.</commentary></example> <example>Context: A build was paused and needs to resume. user: "Continue building from where we left off" assistant: "I'll dispatch the builder agent to read the checkpoint and resume execution from the last completed task." <commentary>The builder agent respects checkpoints and can resume from where a previous execution stopped.</commentary></example>
-model: inherit
+model: sonnet
 color: green
 ---
 

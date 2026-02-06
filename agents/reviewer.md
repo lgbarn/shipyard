@@ -2,7 +2,7 @@
 name: reviewer
 description: |
   Use this agent when performing code review, verifying spec compliance, conducting quality review after a build, or checking that an implementation matches its plan. Examples: <example>Context: A plan has been fully executed by the builder and needs review. user: "Review the authentication implementation" assistant: "I'll dispatch the reviewer agent to perform two-stage review: first checking spec compliance against the PLAN.md, then assessing code quality." <commentary>The reviewer agent runs after each plan completion during /shipyard:build, performing spec compliance review followed by code quality review.</commentary></example> <example>Context: The user wants to verify that implementation matches requirements before moving to the next phase. user: "Does the API layer match what we planned?" assistant: "I'll dispatch the reviewer agent to compare the implementation against the plan and flag any deviations or missing features." <commentary>The reviewer checks both that everything planned was built and that nothing unexpected was added.</commentary></example>
-model: inherit
+model: sonnet
 color: yellow
 ---
 
