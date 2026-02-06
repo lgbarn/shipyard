@@ -68,6 +68,9 @@ jobs:
       - name: TypeScript type check
         run: npx tsc --noEmit
 
+      - name: Check version sync across files
+        run: bash scripts/check-versions.sh
+
   version-check:
     name: Version Check
     runs-on: ubuntu-latest
