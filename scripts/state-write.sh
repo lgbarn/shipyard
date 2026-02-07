@@ -28,6 +28,37 @@ fi
 STATE_FILE=".shipyard/STATE.json"
 HISTORY_FILE=".shipyard/HISTORY.md"
 
+# --- Teams-aware locking (only when teams enabled) ---
+LOCK_DIR=""
+_release_lock() {
+    if [ -n "$LOCK_DIR" ] && [ -d "$LOCK_DIR" ]; then
+        rmdir "$LOCK_DIR" 2>/dev/null || true
+    fi
+}
+
+if [ "${SHIPYARD_TEAMS_ENABLED:-}" = "true" ]; then
+    # Compute per-project lock path using hash of .shipyard absolute path
+    SHIPYARD_DIR_HASH=$(cd .shipyard && pwd | cksum | cut -d' ' -f1)
+    LOCK_DIR="/tmp/shipyard-state-${SHIPYARD_DIR_HASH}.lock"
+
+    # Acquire lock with retry (mkdir is atomic on all POSIX systems)
+    MAX_RETRIES="${SHIPYARD_LOCK_MAX_RETRIES:-30}"
+    RETRY_DELAY="${SHIPYARD_LOCK_RETRY_DELAY:-0.1}"
+    acquired=false
+    for (( i=0; i<MAX_RETRIES; i++ )); do
+        if mkdir "$LOCK_DIR" 2>/dev/null; then
+            acquired=true
+            break
+        fi
+        sleep "$RETRY_DELAY"
+    done
+
+    if [ "$acquired" != "true" ]; then
+        echo "Error: Could not acquire state lock after ${MAX_RETRIES} retries" >&2
+        exit 2
+    fi
+fi
+
 # Cleanup stack for safe multi-call trap handling
 _CLEANUP_FILES=()
 _cleanup_stack() {
@@ -37,7 +68,7 @@ _cleanup_stack() {
         done
     fi
 }
-trap '_cleanup_stack' EXIT INT TERM
+trap '_cleanup_stack; _release_lock' EXIT INT TERM
 
 # Atomic write: write to temp file, validate, then mv (POSIX-atomic replacement)
 atomic_write() {

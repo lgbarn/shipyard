@@ -141,3 +141,92 @@ load test_helper
     assert_failure
     assert_output --partial "not valid JSON"
 }
+
+# --- Teams-aware locking tests ---
+
+@test "state-write: skips locking when SHIPYARD_TEAMS_ENABLED is unset" {
+    setup_shipyard_dir
+    unset SHIPYARD_TEAMS_ENABLED 2>/dev/null || true
+    bash "$STATE_WRITE" --phase 1 --position "solo write" --status ready
+
+    # Compute what the lock path would be and verify it does NOT exist
+    local dir_hash
+    dir_hash=$(cd .shipyard && pwd | cksum | cut -d' ' -f1)
+    [ ! -d "/tmp/shipyard-state-${dir_hash}.lock" ]
+}
+
+@test "state-write: acquires mkdir lock when SHIPYARD_TEAMS_ENABLED=true" {
+    setup_shipyard_dir
+
+    # Compute the expected lock path
+    local dir_hash lock_dir
+    dir_hash=$(cd .shipyard && pwd | cksum | cut -d' ' -f1)
+    lock_dir="/tmp/shipyard-state-${dir_hash}.lock"
+
+    # Pre-create the lock to simulate contention
+    mkdir -p "$lock_dir"
+
+    # Start state-write in background — it should retry while lock exists
+    export SHIPYARD_TEAMS_ENABLED=true
+    bash "$STATE_WRITE" --phase 1 --position "team write" --status ready &
+    local writer_pid=$!
+
+    # Give it a moment to start retrying
+    sleep 0.3
+
+    # Release the lock
+    rmdir "$lock_dir"
+
+    # Writer should complete successfully
+    wait "$writer_pid"
+    local exit_code=$?
+    [ "$exit_code" -eq 0 ]
+
+    # State should be written correctly
+    assert_valid_state_json
+    assert_json_field "status" "ready"
+
+    unset SHIPYARD_TEAMS_ENABLED
+}
+
+@test "state-write: cleans up lock on exit" {
+    setup_shipyard_dir
+    export SHIPYARD_TEAMS_ENABLED=true
+
+    bash "$STATE_WRITE" --phase 1 --position "cleanup test" --status ready
+
+    # Compute the lock path and verify it was cleaned up
+    local dir_hash lock_dir
+    dir_hash=$(cd .shipyard && pwd | cksum | cut -d' ' -f1)
+    lock_dir="/tmp/shipyard-state-${dir_hash}.lock"
+    [ ! -d "$lock_dir" ]
+
+    unset SHIPYARD_TEAMS_ENABLED
+}
+
+@test "state-write: fails when lock cannot be acquired" {
+    setup_shipyard_dir
+
+    # Compute the expected lock path
+    local dir_hash lock_dir
+    dir_hash=$(cd .shipyard && pwd | cksum | cut -d' ' -f1)
+    lock_dir="/tmp/shipyard-state-${dir_hash}.lock"
+
+    # Hold the lock for the entire test duration
+    mkdir -p "$lock_dir"
+
+    # Run state-write with a very small retry count to speed up the test
+    # Override MAX_RETRIES via env var — the script should fail with exit 2
+    export SHIPYARD_TEAMS_ENABLED=true
+    export SHIPYARD_LOCK_MAX_RETRIES=2
+    export SHIPYARD_LOCK_RETRY_DELAY=0.05
+    run bash "$STATE_WRITE" --phase 1 --position "blocked" --status ready
+    assert_failure
+    assert_equal "$status" 2
+    assert_output --partial "Could not acquire state lock"
+
+    # Clean up the lock
+    rmdir "$lock_dir" 2>/dev/null || true
+
+    unset SHIPYARD_TEAMS_ENABLED SHIPYARD_LOCK_MAX_RETRIES SHIPYARD_LOCK_RETRY_DELAY
+}
