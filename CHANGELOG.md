@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [2.11.0] - 2026-02-07
+
 ### Changed
 - Migrated project state from `STATE.md` (Markdown) to `STATE.json` (JSON) + `HISTORY.md` (append-only audit trail)
 - Schema version bumped from 2.0 (string) to 3 (integer)
