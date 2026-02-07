@@ -91,7 +91,7 @@ The import runs in the background and does not block work. Use `/shipyard:memory
 
 During `/shipyard:ship`, the lessons-learned phase:
 
-1. Calculates the milestone's date range from STATE.md history
+1. Calculates the milestone's date range from HISTORY.md
 2. Searches memory for exchanges in that timeframe for the current project
 3. Haiku analyzes results to identify:
    - Debugging struggles and their resolutions
