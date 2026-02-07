@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Changed
+- Migrated project state from `STATE.md` (Markdown) to `STATE.json` (JSON) + `HISTORY.md` (append-only audit trail)
+- Schema version bumped from 2.0 (string) to 3 (integer)
+- `state-read.sh` reads STATE.json via single `jq` call (10x faster than grep/sed parsing)
+- `state-write.sh` produces STATE.json and appends to HISTORY.md
+- Auto-migration: projects with STATE.md are automatically migrated on first read
+- All documentation, protocols, and command references updated to reflect STATE.json
+
 ## [2.10.0] - 2026-02-06
 
 ### Added

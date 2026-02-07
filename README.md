@@ -164,7 +164,8 @@ Shipyard uses a dual state system:
 .shipyard/
 ├── PROJECT.md          # Vision, decisions, constraints
 ├── ROADMAP.md          # Phase structure with success criteria
-├── STATE.md            # Current position, session memory
+├── STATE.json          # Current position, machine state (JSON)
+├── HISTORY.md          # Append-only audit trail
 ├── config.json         # Workflow preferences
 ├── codebase/           # Brownfield analysis (default; or docs/codebase/ if configured)
 ├── phases/
@@ -215,7 +216,7 @@ shipyard/
 │   └── hooks.json         # SessionStart hook for state injection
 ├── scripts/
 │   ├── state-read.sh      # Adaptive context loading on session start
-│   ├── state-write.sh     # Updates .shipyard/STATE.md
+│   ├── state-write.sh     # Updates .shipyard/STATE.json
 │   └── checkpoint.sh      # Git tag checkpoint management
 ├── skills/                # Auto-activating skill definitions
 │   ├── code-simplification/
