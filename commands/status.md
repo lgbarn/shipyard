@@ -21,7 +21,7 @@ Check if `.shipyard/` directory exists.
 
 ## Step 2: Read State Files
 
-Follow **State Loading Protocol** (read STATE.md, ROADMAP.md, PROJECT.md, config.json, and recent SUMMARY/VERIFICATION files to establish session context; see `docs/PROTOCOLS.md`).
+Follow **State Loading Protocol** (read STATE.json, HISTORY.md, ROADMAP.md, PROJECT.md, config.json, and recent SUMMARY/VERIFICATION files to establish session context; see `docs/PROTOCOLS.md`).
 
 </prerequisites>
 
@@ -54,7 +54,7 @@ Overall: {X}/{Y} phases complete
 
 ### Current Position
 
-From STATE.md:
+From STATE.json:
 - What phase and step we're on
 - What was last completed
 - When it was last updated
@@ -68,7 +68,7 @@ From the most recent SUMMARY.md files:
 
 ### Blockers & Issues
 
-From STATE.md and REVIEW.md files:
+From STATE.json, HISTORY.md, and REVIEW.md files:
 - Any unresolved critical issues
 - Any blocked tasks
 - Any gaps identified

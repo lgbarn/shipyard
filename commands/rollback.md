@@ -90,7 +90,7 @@ git commit -m "shipyard: rollback to <checkpoint-tag>"
 
 ## Step 7: Update State
 
-Add a history entry to `.shipyard/STATE.md`:
+Add a history entry to `.shipyard/HISTORY.md`:
 
 ```
 - [<timestamp>] Rolled back to <checkpoint-tag> (<scope>)

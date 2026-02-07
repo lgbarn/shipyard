@@ -36,7 +36,7 @@ If no subcommand is provided, default to `list`.
 ### Step C1: Determine Branch Name
 
 - Use `<name>` as provided, or derive from phase context:
-  - If `.shipyard/STATE.md` exists and has a current phase, suggest: `phase-{N}-{name}`
+  - If `.shipyard/STATE.json` exists and has a current phase, suggest: `phase-{N}-{name}`
 - Verify the branch doesn't already exist: `git branch --list <name>`
 - If it exists, inform the user and ask for an alternative name.
 

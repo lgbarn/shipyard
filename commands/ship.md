@@ -168,7 +168,7 @@ Check if Memory is enabled via `~/.config/shipyard/config.json`:
 
 **If memory is enabled:**
 
-1. Calculate the milestone's date range from `.shipyard/STATE.md` history entries
+1. Calculate the milestone's date range from `.shipyard/HISTORY.md` entries
 2. Use `/shipyard:memory-search` (or call the memory MCP server) to search for exchanges matching:
    - Date range of the current milestone
    - Current project path
@@ -288,17 +288,17 @@ If the milestone is complete (not just a phase):
 1. Create `.shipyard/archive/{milestone-name}/` directory
 2. Move all phase directories into the archive
 3. Move ROADMAP.md, PROJECT.md, MILESTONE-REPORT.md to archive
-4. Keep STATE.md and config.json in `.shipyard/` (reset state for next milestone)
+4. Keep STATE.json, HISTORY.md, and config.json in `.shipyard/` (reset state for next milestone)
 
 ## Step 8: Update Tasks & State
 
 Follow **Native Task Scaffolding Protocol** (create/update native tasks for progress tracking via TaskCreate/TaskUpdate; see `docs/PROTOCOLS.md`) -- mark all relevant native tasks as `completed`.
 
-Follow **State Update Protocol** (update `.shipyard/STATE.md` with current phase, position, status, and append to history; see `docs/PROTOCOLS.md`) -- set:
-- **Current Phase:** N/A (or next milestone)
-- **Current Position:** Milestone shipped
+Follow **State Update Protocol** (update `.shipyard/STATE.json` and `.shipyard/HISTORY.md` via state-write.sh; see `docs/PROTOCOLS.md`) -- set:
+- **Phase:** N/A (or next milestone)
+- **Position:** Milestone shipped
 - **Status:** shipped
-- **History:** append `[{timestamp}] Milestone shipped via {method}`
+- **Message:** `Milestone shipped via {method}`
 
 ## Step 9: Commit Archive
 

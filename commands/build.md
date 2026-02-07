@@ -15,7 +15,7 @@ You are executing the Shipyard build workflow. Follow these steps precisely.
 - If a phase number is provided, use it.
 - If `--plan N` is provided, execute only that specific plan (format: W.P).
 - If `--light` is provided, skip post-phase auditor and simplifier (Steps 5a and 5b). Use this during early iteration — the full pipeline runs at ship time regardless.
-- If no phase number, read `.shipyard/STATE.md` for the current phase.
+- If no phase number, read `.shipyard/STATE.json` for the current phase.
 - Read `.shipyard/config.json` for gate preferences (`security_audit`, `simplification_review`, `iac_validation`, `documentation_generation`).
 - Follow **Worktree Protocol** (detect if running in a git worktree; if so, use worktree root for paths and record the branch name; see `docs/PROTOCOLS.md`) -- detect worktree, record working directory and branch.
 - Follow **Model Routing Protocol** (select the correct model for each agent role using `model_routing` from config; see `docs/PROTOCOLS.md`) -- read `model_routing` from config for agent model selection.
@@ -24,7 +24,7 @@ You are executing the Shipyard build workflow. Follow these steps precisely.
 
 1. Verify `.shipyard/` exists. If not, tell the user to run `/shipyard:init` first.
 2. Read `.shipyard/ROADMAP.md` and locate the target phase.
-3. Read `.shipyard/STATE.md` for current context.
+3. Read `.shipyard/STATE.json` for current context.
 4. Load all plan files from `.shipyard/phases/{N}/plans/`.
 5. Check which plans have already been completed (have SUMMARY.md files in `.shipyard/phases/{N}/results/`).
 6. If all plans are complete, inform the user and suggest `/shipyard:ship` or next phase.
@@ -35,9 +35,9 @@ You are executing the Shipyard build workflow. Follow these steps precisely.
 
 ## Step 3: Update State
 
-Follow **State Update Protocol** (update `.shipyard/STATE.md` with current phase, position, status, and append to history; see `docs/PROTOCOLS.md`) -- set:
-- **Current Phase:** {N}
-- **Current Position:** Building phase {N}
+Follow **State Update Protocol** (update `.shipyard/STATE.json` and `.shipyard/HISTORY.md` via state-write.sh; see `docs/PROTOCOLS.md`) -- set:
+- **Phase:** {N}
+- **Position:** Building phase {N}
 - **Status:** building
 
 ## Step 3a: Create Checkpoint
@@ -246,8 +246,8 @@ Produce `.shipyard/phases/{N}/results/DOCUMENTATION-{N}.md`.
 Update `.shipyard/ROADMAP.md`:
 - Mark the phase status (complete, complete_with_gaps, needs_attention)
 
-Follow **State Update Protocol** (update `.shipyard/STATE.md` with current phase, position, status, and append to history; see `docs/PROTOCOLS.md`) -- set:
-- **Current Position:** Phase {N} build complete
+Follow **State Update Protocol** (update `.shipyard/STATE.json` and `.shipyard/HISTORY.md` via state-write.sh; see `docs/PROTOCOLS.md`) -- set:
+- **Position:** Phase {N} build complete
 - **Status:** {result}
 
 </execution>

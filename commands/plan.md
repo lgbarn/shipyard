@@ -16,13 +16,13 @@ You are executing the Shipyard planning workflow. Follow these steps precisely.
 - If `--skip-research` is provided, skip the research step.
 - If `--no-discuss` is provided, skip the discussion capture step.
 - If `--gaps` is provided, this is a gap-filling re-plan (see note at bottom).
-- If no phase number is provided, read `.shipyard/STATE.md` to determine the current phase.
+- If no phase number is provided, read `.shipyard/STATE.json` to determine the current phase.
 
 ## Step 2: Validate State
 
 1. Verify `.shipyard/` exists. If not, tell the user to run `/shipyard:init` first.
 2. Read `.shipyard/ROADMAP.md` and locate the target phase.
-3. Read `.shipyard/STATE.md` for current context.
+3. Read `.shipyard/STATE.json` for current context.
 4. If this phase already has plans and is not a `--gaps` run, ask the user if they want to re-plan (existing plans will be archived).
 
 ## Step 2a: Load Model Routing
@@ -51,9 +51,9 @@ This ensures downstream agents (researcher, architect, builder) work from shared
 
 Follow **Native Task Scaffolding Protocol** (create/update native tasks for progress tracking via TaskCreate/TaskUpdate; see `docs/PROTOCOLS.md`) -- update the native task for this phase to `in_progress`.
 
-Follow **State Update Protocol** (update `.shipyard/STATE.md` with current phase, position, status, and append to history; see `docs/PROTOCOLS.md`) -- set:
-- **Current Phase:** {N}
-- **Current Position:** Planning phase {N}
+Follow **State Update Protocol** (update `.shipyard/STATE.json` and `.shipyard/HISTORY.md` via state-write.sh; see `docs/PROTOCOLS.md`) -- set:
+- **Phase:** {N}
+- **Position:** Planning phase {N}
 - **Status:** planning
 
 ## Step 4: Research (unless --skip-research)
@@ -139,8 +139,8 @@ Follow **Native Task Scaffolding Protocol** (create/update native tasks for prog
 
 ## Step 8: Update State
 
-Follow **State Update Protocol** (update `.shipyard/STATE.md` with current phase, position, status, and append to history; see `docs/PROTOCOLS.md`) -- set:
-- **Current Position:** Phase {N} planned, ready for build
+Follow **State Update Protocol** (update `.shipyard/STATE.json` and `.shipyard/HISTORY.md` via state-write.sh; see `docs/PROTOCOLS.md`) -- set:
+- **Position:** Phase {N} planned, ready for build
 - **Status:** planned
 
 </execution>

@@ -21,7 +21,7 @@ Check if `.shipyard/` directory exists.
 
 ## Step 2: Read Last Position
 
-Follow **State Loading Protocol** (read STATE.md, ROADMAP.md, PROJECT.md, config.json, and recent SUMMARY/VERIFICATION files to establish session context; see `docs/PROTOCOLS.md`) -- read STATE.md for current phase, position, status, and history.
+Follow **State Loading Protocol** (read STATE.json, HISTORY.md, ROADMAP.md, PROJECT.md, config.json, and recent SUMMARY/VERIFICATION files to establish session context; see `docs/PROTOCOLS.md`) -- read STATE.json for current phase, position, status, and HISTORY.md for history.
 
 </prerequisites>
 
@@ -41,7 +41,7 @@ Scan the current phase directory `.shipyard/phases/{N}/` for signs of incomplete
 - REVIEW.md shows `CRITICAL_ISSUES` without a subsequent fix
 
 **Shipping was interrupted if:**
-- VERIFICATION.md exists but STATE.md doesn't show "shipped"
+- VERIFICATION.md exists but STATE.json doesn't show "shipped"
 
 Document what was in progress and what remains.
 
@@ -61,7 +61,7 @@ Synthesize this into a brief context restoration message:
 
 **Project:** {name}
 **Current Phase:** {N} - {title}
-**Last Action:** {description from STATE.md history}
+**Last Action:** {description from HISTORY.md}
 **Incomplete Work:**
 - {list of what was in progress}
 

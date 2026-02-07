@@ -169,11 +169,11 @@ Follow **Native Task Scaffolding Protocol** (create native tasks for each phase/
 
 ## Step 9: Initialize State
 
-Follow **State Update Protocol** (update `.shipyard/STATE.md` with current phase, position, status, and append to history; see `docs/PROTOCOLS.md`) -- create `.shipyard/STATE.md` with:
-- **Current Phase:** 1
-- **Current Position:** Initialization complete, ready for planning
+Follow **State Update Protocol** (update `.shipyard/STATE.json` and `.shipyard/HISTORY.md` via state-write.sh; see `docs/PROTOCOLS.md`) -- create `.shipyard/STATE.json` and `.shipyard/HISTORY.md` with:
+- **Phase:** 1
+- **Position:** Initialization complete, ready for planning
 - **Status:** ready
-- **History:** `[{timestamp}] Project initialized`
+- **Message:** `Project initialized`
 
 </execution>
 

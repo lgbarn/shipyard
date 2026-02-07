@@ -14,9 +14,9 @@ You are executing the Shipyard quick task workflow. This is for small, self-cont
 
 Check if `.shipyard/` exists.
 
-- **If it exists:** Read STATE.md for context. Proceed normally.
+- **If it exists:** Read STATE.json for context. Proceed normally.
 - **If it does not exist:** Create a minimal `.shipyard/` setup:
-  - Create `.shipyard/STATE.md` with minimal content
+  - Create `.shipyard/STATE.json` and `.shipyard/HISTORY.md` with minimal content
   - Create `.shipyard/quick/` directory
   - This is acceptable for quick tasks -- no full init required.
 
@@ -96,7 +96,7 @@ The builder should:
 
 ## Step 7: Update State
 
-Follow **State Update Protocol** (update `.shipyard/STATE.md` with current phase, position, status, and append to history; see `docs/PROTOCOLS.md`) -- append to history: `[{timestamp}] Quick task {NNN}: {title} ({status})`
+Follow **State Update Protocol** (update `.shipyard/STATE.json` and `.shipyard/HISTORY.md` via state-write.sh; see `docs/PROTOCOLS.md`) -- append to history: `Quick task {NNN}: {title} ({status})`
 
 ## Step 8: Commit
 

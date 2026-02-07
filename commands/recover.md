@@ -24,7 +24,7 @@ Check if `.shipyard/` directory exists.
 
 ## Step 2: Diagnose State
 
-Follow **State Loading Protocol** (read STATE.md, ROADMAP.md, PROJECT.md, config.json, and recent SUMMARY/VERIFICATION files to establish session context; see `docs/PROTOCOLS.md`) -- read STATE.md, ROADMAP.md, config.json, and recent artifacts. Then check for inconsistencies:
+Follow **State Loading Protocol** (read STATE.json, HISTORY.md, ROADMAP.md, PROJECT.md, config.json, and recent SUMMARY/VERIFICATION files to establish session context; see `docs/PROTOCOLS.md`) -- read STATE.json, HISTORY.md, ROADMAP.md, config.json, and recent artifacts. Then check for inconsistencies:
 
 ### Check for these inconsistencies:
 
@@ -34,8 +34,8 @@ Follow **State Loading Protocol** (read STATE.md, ROADMAP.md, PROJECT.md, config
 | Status says "building" and some SUMMARY.md exist but not all | Build was interrupted mid-phase |
 | Status says "planning" but no PLAN.md files exist | Planning was interrupted before architect completed |
 | REVIEW.md shows CRITICAL_ISSUES with no subsequent fix commits | Review issues were never addressed |
-| STATE.md is missing or empty | State file was corrupted or deleted |
-| STATE.md references a phase that doesn't exist in ROADMAP.md | State and roadmap are out of sync |
+| STATE.json is missing or empty | State file was corrupted or deleted |
+| STATE.json references a phase that doesn't exist in ROADMAP.md | State and roadmap are out of sync |
 | SUMMARY.md shows "partial" or "failed" status | Task execution failed |
 
 ## Step 3: List Available Checkpoints
@@ -50,7 +50,7 @@ Display a clear diagnosis:
 Recovery Diagnosis
 ══════════════════
 
-State: {description of what STATE.md says}
+State: {description of what STATE.json says}
 Actual: {description of what artifacts exist}
 Problem: {what is inconsistent}
 Last checkpoint: {most recent checkpoint tag, or "none"}
@@ -77,27 +77,24 @@ Based on the diagnosis, present these options (in order of preference):
 **Best when:** State is corrupted or inconsistent, but a recent checkpoint exists.
 
 ### Option 3: Reset state file
-> "Rebuild STATE.md from existing artifacts. This examines what plans, summaries, and reviews exist and reconstructs the state to match reality."
+> "Rebuild STATE.json from existing artifacts. This examines what plans, summaries, and reviews exist and reconstructs the state to match reality."
 
-**Best when:** STATE.md is corrupted or out of sync, but the actual artifacts (.shipyard/ plans, summaries) are intact.
+**Best when:** STATE.json is corrupted or out of sync, but the actual artifacts (.shipyard/ plans, summaries) are intact.
 
 If the user selects this option:
 1. Scan `.shipyard/phases/` for the latest phase with artifacts
 2. Check which plans have SUMMARY.md (completed) vs not (incomplete)
-3. Rebuild STATE.md to reflect actual progress:
-   ```markdown
-   # Shipyard State
-
-   **Last Updated:** <timestamp>
-   **Current Phase:** {highest phase with artifacts}
-   **Current Position:** {derived from artifacts}
-   **Status:** {derived: "planned" if plans exist but no summaries, "building" if some summaries, "complete" if all summaries}
-
-   ## History
-
-   - [<timestamp>] State recovered from artifacts
+3. Rebuild STATE.json to reflect actual progress:
+   ```json
+   {
+     "last_updated": "<timestamp>",
+     "phase": "{highest phase with artifacts}",
+     "position": "{derived from artifacts}",
+     "status": "{derived: \"planned\" if plans exist but no summaries, \"building\" if some summaries, \"complete\" if all summaries}"
+   }
    ```
-4. Commit: `shipyard: recover state from artifacts`
+4. Create HISTORY.md with recovery entry: `- [<timestamp>] State recovered from artifacts`
+5. Commit: `shipyard: recover state from artifacts`
 
 ### Option 4: Full reset
 > "Archive current state and start fresh. This moves `.shipyard/` to `.shipyard.archived-<timestamp>/` and allows `/shipyard:init` to run again."
