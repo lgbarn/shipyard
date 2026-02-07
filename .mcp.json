@@ -1,6 +1,8 @@
 {
-  "shipyard-memory": {
-    "command": "node",
-    "args": ["${CLAUDE_PLUGIN_ROOT}/dist/memory/mcp-server.js"]
+  "mcpServers": {
+    "shipyard-memory": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/dist/memory/mcp-server.js"]
+    }
   }
 }
