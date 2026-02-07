@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [2.11.2] - 2026-02-07
+
+### Fixed
+- Added default fallback for `CLAUDE_PLUGIN_ROOT` in `.mcp.json` to suppress `/doctor` warning for local development
+
+## [2.11.1] - 2026-02-07
+
+### Fixed
+- Added required `mcpServers` wrapper key to `.mcp.json` so Claude Code can discover the shipyard-memory MCP server
+
 ## [2.11.0] - 2026-02-07
 
 ### Changed
