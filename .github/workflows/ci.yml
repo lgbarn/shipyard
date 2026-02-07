@@ -102,7 +102,7 @@ jobs:
           echo "Created tag ${TAG}"
 
           # Extract changelog section for this version
-          NOTES=$(awk "/^## \[${VERSION}\]/,/^## \[/" CHANGELOG.md | head -n -1)
+          NOTES=$(awk "/^## \[${VERSION}\]/{found=1; next} /^## \[/{if(found) exit} found" CHANGELOG.md)
 
           if [ -z "${NOTES}" ]; then
             NOTES="Release ${TAG}"
