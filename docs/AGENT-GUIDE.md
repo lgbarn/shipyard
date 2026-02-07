@@ -19,7 +19,6 @@ For model routing configuration, see the [Model Routing Protocol](PROTOCOLS.md#m
 | **documenter** | sonnet | `documentation` | build, ship, document | No (advisory) | Read + write docs |
 | **researcher** | sonnet | `planning` | plan, research | No | Read + web search/fetch |
 | **mapper** | sonnet | `mapping` | init, map | No | Read-only |
-| **search-memory** | haiku | `memory` | memory-search, memory skill | No | MCP memory_search only |
 
 All model assignments are configurable via `model_routing` in `.shipyard/config.json`. See [Model Selection Guidance](PROTOCOLS.md#model-selection-guidance) for when to upgrade or downgrade.
 
@@ -193,21 +192,6 @@ graph LR
   - Each document must be independently useful
 - **Parallel dispatch:** Init runs 4 mapper instances concurrently, each with a different focus area.
 
-### search-memory
-
-- **Model:** haiku (configurable via `model_routing.memory`)
-- **Dispatched by:** `/shipyard:memory-search`, `memory` skill
-- **Recommended max_turns:** 5
-- **Inputs:** Search query (string or array of concepts)
-- **Outputs:** Synthesized summary (200-1000 words) + source list
-- **Tool access:** `mcp__plugin_shipyard_shipyard-memory__memory_search` only
-- **Restrictions:**
-  - Must synthesize, not dump raw results
-  - Must include ALL sources with metadata (project, date, score, status)
-  - Must not exceed 1000 words in summary
-  - Supports date filtering (`after`, `before`) and project filtering
-- **Why haiku:** Fast retrieval and summarization. Memory search is a bounded, mechanical task.
-
 ---
 
 ## Agent Communication
@@ -225,7 +209,6 @@ Agents **do not communicate directly** with each other. All information exchange
 | Auditor | AUDIT.md | Orchestrator |
 | Simplifier | SIMPLIFICATION.md | Orchestrator |
 | Documenter | DOCUMENTATION.md, docs/ | Orchestrator |
-| Search-Memory | Synthesis text | Orchestrator |
 
 The **orchestrator** (the main Claude session) manages all agent dispatch and reads all artifacts. Each agent dispatch gets fresh context — no agent has memory of previous dispatches.
 
@@ -245,4 +228,3 @@ The **orchestrator** (the main Claude session) manages all agent dispatch and re
 - **researcher** — informs architect but doesn't gate planning
 - **architect** — produces plans for user approval
 - **mapper** — produces documentation for reference
-- **search-memory** — returns synthesis for orchestrator use

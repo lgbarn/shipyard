@@ -66,7 +66,6 @@ Read `model_routing` from `.shipyard/config.json` and map agent roles to model k
 | Researcher | `model_routing.planning` | sonnet |
 | Architect | `model_routing.architecture` | opus |
 | Mapper | `model_routing.mapping` | sonnet |
-| Search-Memory | `model_routing.memory` | haiku |
 
 The `debugging` config key is reserved for future use. The `shipyard-debugging` skill runs within the current session context (not as a subagent) and uses the session's model. This key is included in the config structure for forward compatibility.
 
@@ -103,7 +102,6 @@ When customizing model routing, consider these tradeoffs:
 | `documentation` | Public API documentation; user-facing guides | Internal documentation; changelog entries |
 | `planning` | Novel domain research; critical technology decisions | Well-understood technology choices |
 | `mapping` | Large legacy codebases; acquisition due diligence | Small projects; familiar stacks |
-| `memory` | Complex multi-project synthesis | Simple keyword lookups |
 
 **Full config.json structure** (used during `/shipyard:init`):
 ```json
@@ -126,8 +124,7 @@ When customizing model routing, consider these tradeoffs:
     "security_audit": "sonnet",
     "simplification": "sonnet",
     "documentation": "sonnet",
-    "mapping": "sonnet",
-    "memory": "haiku"
+    "mapping": "sonnet"
   },
   "context_tier": "auto",
   "created_at": "<timestamp>",
@@ -347,7 +344,6 @@ Pass `max_turns` when dispatching agents via the Task tool to prevent runaway ex
 | Researcher | 15 | Web search + codebase analysis |
 | Architect | 15 | Plan decomposition bounded by 3-task-max rule |
 | Mapper | 20 | Deep codebase analysis of one focus area |
-| Search-Memory | 5 | Single search + synthesis |
 
 Commands that dispatch agents should include the `max_turns` parameter in the Task tool call alongside `subagent_type` and `model`.
 

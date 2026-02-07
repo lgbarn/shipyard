@@ -30,7 +30,6 @@ Quick reference for choosing the right tool for your situation.
 | Understand a codebase | `/shipyard:map` |
 | Map architecture patterns | `/shipyard:map architecture` |
 | Find technical debt | `/shipyard:map concerns` |
-| Search past conversations | `/shipyard:memory-search "how we handled auth"` |
 
 ### Document and Verify
 | Situation | Command |
@@ -73,7 +72,7 @@ Shipyard routes each agent to an appropriate model tier:
 |------|--------|------|----------|
 | **Opus** | architect | Highest | Complex decomposition, architecture decisions |
 | **Sonnet** | builder, reviewer, auditor, simplifier, documenter, researcher, mapper | Medium | Implementation, review, analysis |
-| **Haiku** | verifier, search-memory | Lowest | Validation, memory search |
+| **Haiku** | verifier | Lowest | Validation, mechanical checks |
 
 **Override defaults** in `.shipyard/config.json`:
 ```json
@@ -130,7 +129,6 @@ Upgrade `security_audit` to opus for production systems with PII or financial da
 ## Tips
 
 - **Agents start fresh every time** — they have no memory of previous dispatches. Context is passed explicitly.
-- **Use `/shipyard:memory-search` for cross-session context** — "How did we handle rate limiting last month?"
 - **`/shipyard:quick` is underrated** — use it for small tasks instead of manual coding. You still get TDD, review, and atomic commits.
 - **Review before audit** — fix functional bugs before running security analysis.
 - **On-demand commands work anywhere** — they don't require `/shipyard:init`. Use them on any git repo.

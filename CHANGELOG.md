@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Removed
+- **Memory system**: MCP server, SQLite database, embeddings engine, background indexer, and all TypeScript source/dist files
+- **5 memory commands**: `/shipyard:memory-search`, `/shipyard:memory-status`, `/shipyard:memory-forget`, `/shipyard:memory-enable`/`memory-disable`, `/shipyard:memory-import`
+- **Memory skill**: `shipyard:memory` auto-activating skill
+- **search-memory agent**: Dedicated memory search and synthesis agent
+- **TypeScript tooling**: `tsc`, `vitest`, `tsx`, and all TS dev dependencies — project is now pure bash
+- **MCP configuration**: `.mcp.json` removed (no MCP server to configure)
+- **PostToolUse hook**: `memory-indexer.sh` background indexing hook removed from `hooks.json`
+- Memory enrichment step from lessons-learned skill and `/shipyard:ship` workflow
+- Memory opt-in prompt from `/shipyard:init` workflow
+- `model_routing.memory` config key from protocols and documentation
+
 ## [2.11.2] - 2026-02-07
 
 ### Fixed

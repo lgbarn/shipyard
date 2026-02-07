@@ -69,11 +69,6 @@ Once installed, navigate to any project directory and run:
 | `/shipyard:recover` | Diagnose and recover from interrupted state |
 | `/shipyard:move-docs` | Move codebase analysis docs between `.shipyard/codebase/` and `docs/codebase/` |
 | `/shipyard:worktree [create\|list\|switch\|remove] [name]` | Manage git worktrees for isolated feature development |
-| `/shipyard:memory-search <query>` | Search past conversations for relevant context |
-| `/shipyard:memory-forget` | Delete current session from memory |
-| `/shipyard:memory-status` | Show memory storage statistics |
-| `/shipyard:memory-enable` / `memory-disable` | Toggle memory on or off |
-| `/shipyard:memory-import` | Import existing conversation history |
 | `/shipyard:review [target]` | On-demand code review — current changes, diff range, or files |
 | `/shipyard:audit [scope]` | On-demand security audit — OWASP, secrets, dependencies, IaC |
 | `/shipyard:simplify [scope]` | On-demand simplification — duplication, dead code, complexity |
@@ -84,7 +79,7 @@ Once installed, navigate to any project directory and run:
 
 ## Skills (Auto-Activating)
 
-Shipyard includes 17 skills that activate automatically based on context:
+Shipyard includes 16 skills that activate automatically based on context:
 
 | Skill | When It Activates |
 |-------|-------------------|
@@ -104,7 +99,6 @@ Shipyard includes 17 skills that activate automatically based on context:
 | `shipyard-testing` | Writing effective, maintainable tests |
 | `shipyard-writing-skills` | Creating new skills |
 | `lessons-learned` | After phase completion, before shipping, reflecting on work |
-| `memory` | When needing past context from previous sessions or solving problems you've encountered before |
 
 ## Agents
 
@@ -121,7 +115,6 @@ Shipyard dispatches specialized agents for different phases of work:
 | **simplifier** | Cross-task duplication and complexity analysis | `/shipyard:build`, `/shipyard:simplify` |
 | **documenter** | Documentation generation & updates | `/shipyard:build`, `/shipyard:ship`, `/shipyard:document` |
 | **verifier** | Post-execution verification (including IaC) | `/shipyard:plan`, `/shipyard:build`, `/shipyard:ship`, `/shipyard:verify` |
-| **search-memory** | Memory search & synthesis across sessions | `/shipyard:memory-search`, `memory` skill |
 
 See [`docs/AGENT-GUIDE.md`](docs/AGENT-GUIDE.md) for detailed agent documentation including model assignments, restrictions, tool access, and relationships.
 
@@ -299,7 +292,6 @@ See `docs/PROTOCOLS.md` for model routing configuration and the full config.json
 | Multi-model routing | ✅ (7 categories) | ✅ (profiles) | ❌ |
 | Adaptive context loading | ✅ (4 tiers) | ✅ (5 tiers, fork) | ✅ (<2k bootstrap) |
 | Session resume / state persistence | ✅ | ✅ | ❌ |
-| Episodic memory | ✅ (built-in) | ❌ | ✅ (plugin) |
 | **Git & Recovery** | | | |
 | Git worktree management | ✅ (command + agent context) | ❌ | ✅ (skill) |
 | Rollback / checkpoints | ✅ | ✅ (fork) | ❌ |
@@ -317,8 +309,8 @@ See `docs/PROTOCOLS.md` for model routing configuration and the full config.json
 | Install via CLI | ✅ (`lgbarn/shipyard`) | ✅ (`npx get-shit-done-cc`) | ✅ (marketplace) |
 | Multi-runtime | ❌ (Claude Code) | ✅ (Claude + OpenCode + Gemini) | ❌ (Claude Code) |
 | **Scale** | | | |
-| Commands | 17 | 20+ | 3 |
-| Skills | 17 | 0 | 15+ |
+| Commands | 19 | 20+ | 3 |
+| Skills | 16 | 0 | 15+ |
 | Named agents | 9 | implicit | implicit |
 
 ## Acknowledgments
