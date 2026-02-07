@@ -8,6 +8,7 @@ PROJECT_ROOT="$(cd "$(dirname "${BATS_TEST_FILENAME}")/.." && pwd)"
 STATE_READ="${PROJECT_ROOT}/scripts/state-read.sh"
 STATE_WRITE="${PROJECT_ROOT}/scripts/state-write.sh"
 CHECKPOINT="${PROJECT_ROOT}/scripts/checkpoint.sh"
+TEAM_DETECT="${PROJECT_ROOT}/scripts/team-detect.sh"
 
 # Load bats helper libraries
 load "${PROJECT_ROOT}/node_modules/bats-support/load"
