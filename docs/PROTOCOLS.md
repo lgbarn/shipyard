@@ -13,29 +13,35 @@ Load project state files to establish context for the current session. This is t
 <instructions>
 Read the following files (skip any that don't exist):
 
-1. `.shipyard/STATE.md` — current phase, position, status, and history
-2. `.shipyard/ROADMAP.md` — phases, scope, and progress markers
-3. `.shipyard/PROJECT.md` — project overview, goals, requirements, constraints
-4. `.shipyard/config.json` — workflow preferences, model routing, gate settings
-5. Recent `SUMMARY.md` files from `.shipyard/phases/` — decisions and results from completed work
-6. Any `VERIFICATION.md` files from `.shipyard/phases/` — phase-level verification outcomes
+1. `.shipyard/STATE.json` — current phase, position, status (machine state)
+2. `.shipyard/HISTORY.md` — append-only audit trail (formerly embedded in STATE.md)
+3. `.shipyard/ROADMAP.md` — phases, scope, and progress markers
+4. `.shipyard/PROJECT.md` — project overview, goals, requirements, constraints
+5. `.shipyard/config.json` — workflow preferences, model routing, gate settings
+6. Recent `SUMMARY.md` files from `.shipyard/phases/` — decisions and results from completed work
+7. Any `VERIFICATION.md` files from `.shipyard/phases/` — phase-level verification outcomes
 
-Use STATE.md to determine the current phase and what was last completed. Use ROADMAP.md to understand the full scope and phase ordering. Use PROJECT.md for requirements context and success criteria.
+Use STATE.json to determine the current phase and what was last completed. Use ROADMAP.md to understand the full scope and phase ordering. Use PROJECT.md for requirements context and success criteria.
+
+**Auto-migration:** If STATE.json is missing but STATE.md exists, state-read.sh migrates automatically.
 </instructions>
 
 <rules>
 - Never fail if a file is missing — skip it and proceed with available context
-- STATE.md is the single source of truth for current position
-- If STATE.md and ROADMAP.md disagree on phase status, trust STATE.md (it's updated more frequently)
+- STATE.json is the single source of truth for current position
+- If STATE.json and ROADMAP.md disagree on phase status, trust STATE.json (it's updated more frequently)
 - Load SUMMARY.md files only for the current and immediately preceding phase (avoid stale context)
+- HISTORY.md contains the append-only audit trail (formerly embedded in STATE.md)
 </rules>
 
 <example description="Correct state loading order and usage">
-1. Read STATE.md → "Current Phase: 3, Status: building, Position: Plan 2.1 in progress"
-2. Read ROADMAP.md → Phase 3 has 3 plans across 2 waves
-3. Read config.json → model_routing, gate settings
-4. Read .shipyard/phases/3/wave-1/plan-1/SUMMARY.md → Wave 1 complete
-5. Conclusion: Resume building at Plan 2.1 in Phase 3
+1. Read STATE.json → `jq -r '.phase' .shipyard/STATE.json` → "3"
+2. Read STATE.json → `jq -r '.status' .shipyard/STATE.json` → "building"
+3. Read STATE.json → `jq -r '.position' .shipyard/STATE.json` → "Plan 2.1 in progress"
+4. Read ROADMAP.md → Phase 3 has 3 plans across 2 waves
+5. Read config.json → model_routing, gate settings
+6. Read .shipyard/phases/3/wave-1/plan-1/SUMMARY.md → Wave 1 complete
+7. Conclusion: Resume building at Plan 2.1 in Phase 3
 </example>
 
 ---
@@ -284,7 +290,8 @@ Define the standard context bundle to pass when dispatching any agent via the Ta
 - Worktree status (via Worktree Protocol above)
 
 **Conditional context (pass if exists and is relevant to the agent's task):**
-- `.shipyard/STATE.md` — Current state and history
+- `.shipyard/STATE.json` — Current state (machine state)
+- `.shipyard/HISTORY.md` — Audit trail for execution tier agents
 - Codebase docs (via Codebase Docs Protocol above)
 - Previous phase/plan results (`SUMMARY.md`, `RESEARCH.md` files)
 - `.shipyard/ISSUES.md` — Open issues
@@ -349,20 +356,24 @@ Commands that dispatch agents should include the `max_turns` parameter in the Ta
 ## State Update Protocol
 
 <purpose>
-Keep `.shipyard/STATE.md` current after every workflow step. STATE.md is the single source of truth for project progress — stale state causes incorrect resume behavior and confuses subsequent commands.
+Keep `.shipyard/STATE.json` current after every workflow step. STATE.json is the single source of truth for project progress — stale state causes incorrect resume behavior and confuses subsequent commands.
 </purpose>
 
 <instructions>
-After each workflow step, update these fields in STATE.md:
+After each workflow step, update STATE.json via the state-write.sh script:
+
+```bash
+bash scripts/state-write.sh --phase {N} --position "{description}" --status {status} --message "{history entry}"
+```
 
 **Required fields:**
-- `**Last Updated:** {current date, YYYY-MM-DD}`
-- `**Current Phase:** {phase number, or "N/A" if between milestones}`
-- `**Current Position:** {human-readable description of where work stands}`
-- `**Status:** {one of the canonical status values below}`
+- `phase` — Phase number, or "N/A" if between milestones
+- `position` — Human-readable description of where work stands
+- `status` — One of the canonical status values below
+- `message` — History entry describing what action was just completed
 
-**Append to History section:**
-- `- [{YYYY-MM-DD}] {What action was just completed}`
+**History handling:**
+History entries are automatically appended to `.shipyard/HISTORY.md` by state-write.sh. Do not manually edit HISTORY.md.
 </instructions>
 
 **Canonical status values:**
@@ -375,29 +386,41 @@ After each workflow step, update these fields in STATE.md:
 | `shipped` | Delivery complete |
 
 <rules>
-- Always commit STATE.md updates along with related artifacts in the same commit
+- Always commit STATE.json and HISTORY.md updates along with related artifacts in the same commit
 - History entries are append-only — never remove or edit previous entries
-- Current Position should be specific enough to enable resume (e.g., "Plan 2.1 building, wave 1 complete" not just "building")
+- Position should be specific enough to enable resume (e.g., "Plan 2.1 building, wave 1 complete" not just "building")
 - Status transitions follow the order: ready → planning → planned → building → (back to planning for next phase, or shipped)
+- Always use state-write.sh to update state — do not manually edit STATE.json or HISTORY.md
 </rules>
 
 <example description="State update after completing Phase 3 planning">
-Before:
-```markdown
-**Last Updated:** 2026-02-03
-**Current Phase:** 3
-**Current Position:** Discussion capture complete
-**Status:** planning
+Before STATE.json:
+```json
+{
+  "last_updated": "2026-02-03",
+  "phase": "3",
+  "position": "Discussion capture complete",
+  "status": "planning"
+}
 ```
 
-After:
-```markdown
-**Last Updated:** 2026-02-04
-**Current Phase:** 3
-**Current Position:** Phase planned (3 plans, 2 waves)
-**Status:** planned
+After running:
+```bash
+bash scripts/state-write.sh --phase 3 --position "Phase planned (3 plans, 2 waves)" --status planned --message "Phase 3 planned (3 plans, 2 waves)"
+```
 
-## History
+STATE.json now contains:
+```json
+{
+  "last_updated": "2026-02-04",
+  "phase": "3",
+  "position": "Phase planned (3 plans, 2 waves)",
+  "status": "planned"
+}
+```
+
+HISTORY.md now contains:
+```markdown
 - [2026-02-04] Phase 3 planned (3 plans, 2 waves)
 - [2026-02-03] Phase 3 discussion captured (4 decisions)
 - [2026-02-03] Phase 2 build complete (all 5 plans passed, verified, audited)
@@ -409,7 +432,7 @@ After:
 ## Native Task Scaffolding Protocol
 
 <purpose>
-Map Shipyard workflow stages to native Claude Code tasks (TaskCreate/TaskUpdate) so the user sees real-time progress tracking in their terminal. This provides visibility without requiring users to check STATE.md manually.
+Map Shipyard workflow stages to native Claude Code tasks (TaskCreate/TaskUpdate) so the user sees real-time progress tracking in their terminal. This provides visibility without requiring users to check STATE.json manually.
 </purpose>
 
 <instructions>
