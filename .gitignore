@@ -24,6 +24,7 @@ coverage/
 # Shipyard dev state (local only)
 .shipyard/
 .shipyard.archived/
+.shipyard.bak.*/
 
 # Secrets
 .env
