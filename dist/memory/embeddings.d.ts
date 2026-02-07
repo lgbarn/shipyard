@@ -3,13 +3,6 @@
  *
  * Uses Transformers.js for local embedding generation (no external API calls).
  */
-/** @internal Used by withTimeout wrapper — Plan 1.3 will connect call sites */
-export declare const EMBEDDING_TIMEOUT_MS = 30000;
-/**
- * Race a promise against a timeout. Cleans up the timer on completion.
- */
-/** @internal Plan 1.3 will connect call sites in generateEmbedding/generateEmbeddings */
-export declare function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T>;
 /**
  * Format an exchange for embedding
  */
