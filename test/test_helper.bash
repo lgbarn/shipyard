@@ -65,3 +65,33 @@ setup_git_repo() {
     git add README.md
     git commit -q -m "initial commit"
 }
+
+# Create .shipyard with STATE.json fixture
+setup_shipyard_with_json_state() {
+    setup_shipyard_dir
+    cat > .shipyard/STATE.json <<'JSONEOF'
+{"schema":3,"phase":1,"position":"Testing","status":"building","updated_at":"2026-01-01T00:00:00Z","blocker":null}
+JSONEOF
+    cat > .shipyard/HISTORY.md <<'HISTEOF'
+- [2026-01-01T00:00:00Z] Phase 1: Testing (building)
+HISTEOF
+}
+
+# Assert that STATE.json exists and has required fields
+assert_valid_state_json() {
+    [ -f .shipyard/STATE.json ] || { echo "STATE.json does not exist" >&2; return 1; }
+    jq -e '.schema and .phase and .status' .shipyard/STATE.json > /dev/null 2>&1 || {
+        echo "STATE.json missing required fields or invalid JSON" >&2; return 1;
+    }
+}
+
+# Extract a field from STATE.json and assert its value
+assert_json_field() {
+    local field="$1" expected="$2"
+    local actual
+    actual=$(jq -r ".$field" .shipyard/STATE.json)
+    if [ "$actual" != "$expected" ]; then
+        echo "Expected .$field='$expected', got '$actual'" >&2
+        return 1
+    fi
+}
