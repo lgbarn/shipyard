@@ -10,8 +10,7 @@ import { pipeline, type FeatureExtractionPipeline } from '@xenova/transformers';
 const MODEL_NAME = 'Xenova/all-MiniLM-L6-v2';
 const EMBEDDING_DIM = 384;
 const MAX_TEXT_LENGTH = 2000; // Truncate to respect 512 token limit
-/** @internal Used by withTimeout wrapper — Plan 1.3 will connect call sites */
-export const EMBEDDING_TIMEOUT_MS = 30_000;
+const EMBEDDING_TIMEOUT_MS = 30_000;
 
 let extractor: FeatureExtractionPipeline | null = null;
 let initPromise: Promise<FeatureExtractionPipeline> | null = null;
@@ -49,8 +48,7 @@ function truncateText(text: string): string {
 /**
  * Race a promise against a timeout. Cleans up the timer on completion.
  */
-/** @internal Plan 1.3 will connect call sites in generateEmbedding/generateEmbeddings */
-export function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
+function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
   let timer: NodeJS.Timeout;
   const timeoutPromise = new Promise<never>((_, reject) => {
     timer = setTimeout(() => reject(new Error(message)), ms);
