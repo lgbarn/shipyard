@@ -118,6 +118,69 @@ Shipyard dispatches specialized agents for different phases of work:
 
 See [`docs/AGENT-GUIDE.md`](docs/AGENT-GUIDE.md) for detailed agent documentation including model assignments, restrictions, tool access, and relationships.
 
+## Why Memory Was Removed
+
+Shipyard previously included a built-in episodic memory system — a TypeScript MCP server with SQLite, vector embeddings, and a background indexer that captured conversation context across sessions. This was a significant engineering investment (15 source files, 13 test files, 5 commands, a dedicated skill, and a specialized agent).
+
+We removed it entirely because **Anthropic's built-in memory in Claude is better in every way:**
+
+- **Automatic and invisible.** Claude's native memory captures context without any user configuration, commands, or opt-in. Shipyard's system required `/memory-enable`, manual imports, and background indexer hooks.
+- **Higher quality recall.** Anthropic's memory uses the model's own understanding of what matters, not keyword-based vector search. It remembers decisions, preferences, and patterns — not just text fragments.
+- **Zero maintenance.** No database migrations, no embedding model downloads, no disk space management, no `memory_repair` or `memory_export` workflows. It just works.
+- **Cross-tool context.** Claude's memory works across all interfaces (CLI, web, API), not just within a single plugin's MCP server.
+- **No performance overhead.** Shipyard's indexer ran on every tool use, added ~5s latency to session starts for database initialization, and consumed disk space for embeddings. Native memory has none of these costs.
+
+The removal also simplified Shipyard from a bash + TypeScript hybrid to a **pure bash project**, eliminating Node.js runtime dependencies (better-sqlite3, @xenova/transformers, @modelcontextprotocol/sdk), TypeScript compilation, Vitest test infrastructure, and the associated CI complexity.
+
+**For users:** If you previously used Shipyard's memory commands (`/memory-search`, `/memory-status`, etc.), you don't need to do anything. Claude remembers your projects, decisions, and patterns automatically. You can delete `~/.config/shipyard/` to clean up old memory databases.
+
+## Agent Teams Support
+
+Shipyard now supports [Claude Code Agent Teams](https://docs.anthropic.com/en/docs/claude-code) — an experimental feature where multiple independent Claude Code instances collaborate on the same project by sharing a task list and mailbox.
+
+### How It Works
+
+Shipyard's standard execution model uses **subagents** (the Task tool) to dispatch builders, reviewers, and other agents. Each subagent runs within the lead agent's session, sharing its working directory but with a fresh context window. This is efficient for coordinated work where the lead needs to collect results and make decisions.
+
+**Agent Teams** introduces a different model: independent Claude Code instances (teammates) that each have their own full session, context window, and tool access. They coordinate through a shared task list and mailbox rather than through a parent-child relationship.
+
+Shipyard detects the teams environment automatically — **no configuration needed:**
+
+| Environment Variable | Set By | Meaning |
+|---------------------|--------|---------|
+| `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` | You (opt-in) | Enables the teams feature in Claude Code |
+| `CLAUDE_CODE_TEAM_NAME` | Claude Code (automatic) | Identifies this instance as a teammate |
+
+When teams are detected, Shipyard adapts its behavior:
+
+| Behavior | Solo Mode (default) | Teammate Mode |
+|----------|-------------------|---------------|
+| Task execution | Dispatches builder subagents | Executes tasks directly (you ARE the builder) |
+| Quality gates | Lead dispatches auditor/simplifier | Lead handles quality gates; teammates skip |
+| State updates | Writes STATE.json directly | Reports via task metadata (lead writes state) |
+| State file locking | No locking needed | mkdir-based locking prevents concurrent writes |
+| Verification | Standard pipeline | Runs locally, reports via task metadata |
+| Stopping work | No gates | `TeammateIdle` hook verifies tests pass first |
+| Completing tasks | No gates | `TaskCompleted` hook verifies evidence exists |
+
+### Enabling Agent Teams
+
+1. **Enable the experimental feature** in your Claude Code configuration:
+   ```bash
+   export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1
+   ```
+
+2. **Use Claude Code normally.** When Claude Code spawns teammates, Shipyard automatically detects the team environment and adapts.
+
+3. **Solo users are completely unaffected.** If you don't set the environment variable, Shipyard behaves exactly as before — no locking, no hooks, no behavioral changes.
+
+### When to Use Teams vs Subagents
+
+- **Use subagents** (Shipyard's default) when tasks are tightly coordinated, results need to flow back to a lead agent, or when you want the standard build pipeline (builder → reviewer → auditor).
+- **Use teams** when tasks are truly independent, each takes significant time, and you want full isolation between workers to prevent context cross-contamination.
+
+Teams and subagents are complementary. A lead agent in a team can still dispatch subagents for tightly-coupled subtasks within its assigned work.
+
 ## How It Works
 
 ### The Lifecycle
@@ -206,10 +269,13 @@ shipyard/
 ├── docs/
 │   └── PROTOCOLS.md       # Model routing and config.json reference
 ├── hooks/
-│   └── hooks.json         # SessionStart hook for state injection
+│   ├── hooks.json         # Hook registry (SessionStart, TeammateIdle, TaskCompleted)
+│   ├── teammate-idle.sh   # TeammateIdle quality gate (teams only)
+│   └── task-completed.sh  # TaskCompleted quality gate (teams only)
 ├── scripts/
 │   ├── state-read.sh      # Adaptive context loading on session start
-│   ├── state-write.sh     # Updates .shipyard/STATE.json
+│   ├── state-write.sh     # Updates .shipyard/STATE.json (teams-aware locking)
+│   ├── team-detect.sh     # Detects Claude Code Agent Teams environment
 │   └── checkpoint.sh      # Git tag checkpoint management
 ├── skills/                # Auto-activating skill definitions
 │   ├── code-simplification/
@@ -232,10 +298,12 @@ shipyard/
 │   ├── run.sh             # Test runner
 │   ├── test_helper.bash   # Shared fixtures
 │   ├── state-read.bats
-│   ├── state-write.bats
+│   ├── state-write.bats   # Includes teams-aware locking tests
 │   ├── checkpoint.bats
 │   ├── integration.bats
-│   └── e2e-smoke.bats
+│   ├── e2e-smoke.bats
+│   ├── team-detect.bats   # Team detection tests
+│   └── team-hooks.bats    # TeammateIdle and TaskCompleted tests
 ├── CHANGELOG.md
 ├── CONTRIBUTING.md
 ├── LICENSE
