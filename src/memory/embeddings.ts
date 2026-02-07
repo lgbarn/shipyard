@@ -10,6 +10,8 @@ import { pipeline, type FeatureExtractionPipeline } from '@xenova/transformers';
 const MODEL_NAME = 'Xenova/all-MiniLM-L6-v2';
 const EMBEDDING_DIM = 384;
 const MAX_TEXT_LENGTH = 2000; // Truncate to respect 512 token limit
+/** @internal Used by withTimeout wrapper — Plan 1.3 will connect call sites */
+export const EMBEDDING_TIMEOUT_MS = 30_000;
 
 let extractor: FeatureExtractionPipeline | null = null;
 let initPromise: Promise<FeatureExtractionPipeline> | null = null;
@@ -45,6 +47,19 @@ function truncateText(text: string): string {
 }
 
 /**
+ * Race a promise against a timeout. Cleans up the timer on completion.
+ */
+/** @internal Plan 1.3 will connect call sites in generateEmbedding/generateEmbeddings */
+export function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
+  let timer: NodeJS.Timeout;
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error(message)), ms);
+    timer.unref?.();
+  });
+  return Promise.race([promise, timeoutPromise]).finally(() => clearTimeout(timer!));
+}
+
+/**
  * Format an exchange for embedding
  */
 export function formatExchangeForEmbedding(
@@ -68,10 +83,11 @@ export async function generateEmbedding(text: string): Promise<Float32Array> {
   const model = await initModel();
 
   const truncated = truncateText(text);
-  const output = await model(truncated, {
-    pooling: 'mean',
-    normalize: true,
-  });
+  const output = await withTimeout(
+    model(truncated, { pooling: 'mean', normalize: true }),
+    EMBEDDING_TIMEOUT_MS,
+    'Embedding generation timed out after 30s'
+  );
 
   // Extract the embedding array
   const data = output.data as Float32Array;
@@ -107,10 +123,11 @@ export async function generateEmbeddings(texts: string[]): Promise<Float32Array[
 
   // Process one at a time to avoid memory issues
   for (const text of truncated) {
-    const output = await model(text, {
-      pooling: 'mean',
-      normalize: true,
-    });
+    const output = await withTimeout(
+      model(text, { pooling: 'mean', normalize: true }),
+      EMBEDDING_TIMEOUT_MS,
+      'Embedding generation timed out after 30s'
+    );
     results.push(output.data as Float32Array);
   }
 

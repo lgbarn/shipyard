@@ -64,6 +64,16 @@ export declare function setImportState(key: string, value: string): void;
  */
 export declare function getImportState(key: string): string | null;
 /**
+ * Validate an array of IDs before building dynamic SQL placeholders.
+ * @internal Exported for testing only
+ */
+export declare function validateIds(ids: string[], maxLength?: number): boolean;
+/**
+ * Safely parse tool_names JSON string to a string[] array.
+ * Returns empty array for null/undefined/empty/malformed input.
+ */
+export declare function safeParseToolNames(raw: string | null | undefined, exchangeId?: string): string[];
+/**
  * Prune old exchanges to stay within storage cap
  */
 export declare function pruneToCapacity(capBytes: number): number;

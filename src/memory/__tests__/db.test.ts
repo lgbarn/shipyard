@@ -395,3 +395,120 @@ describe('pruneToCapacity', () => {
     expect(statsAfter.size).toBeLessThanOrEqual(actualSize);
   });
 });
+
+describe('validateIds', () => {
+  it('should return true for a valid array of 1-3 string IDs', async () => {
+    const { validateIds } = await import('../db');
+    expect(validateIds(['id-1', 'id-2', 'id-3'])).toBe(true);
+  });
+
+  it('should return false for an empty array', async () => {
+    const { validateIds } = await import('../db');
+    expect(validateIds([])).toBe(false);
+  });
+
+  it('should return false when maxLength is exceeded', async () => {
+    const { validateIds } = await import('../db');
+    expect(validateIds(['id-1', 'id-2', 'id-3'], 2)).toBe(false);
+  });
+
+  it('should return false when default maxLength (10000) is exceeded', async () => {
+    const { validateIds } = await import('../db');
+    const ids = Array.from({ length: 10001 }, (_, i) => `id-${i}`);
+    expect(validateIds(ids)).toBe(false);
+  });
+
+  it('should return false when array contains a non-string element', async () => {
+    const { validateIds } = await import('../db');
+    // Cast to bypass TypeScript type checking
+    expect(validateIds(['id-1', 42 as unknown as string, 'id-3'])).toBe(false);
+  });
+
+  it('should return false when array contains an empty string', async () => {
+    const { validateIds } = await import('../db');
+    expect(validateIds(['id-1', '', 'id-3'])).toBe(false);
+  });
+
+  it('should return false when array contains a string longer than 256 chars', async () => {
+    const { validateIds } = await import('../db');
+    const longId = 'x'.repeat(257);
+    expect(validateIds(['id-1', longId, 'id-3'])).toBe(false);
+  });
+});
+
+describe('safeParseToolNames', () => {
+  it('should return [] for null input', async () => {
+    const { safeParseToolNames } = await import('../db');
+    expect(safeParseToolNames(null)).toEqual([]);
+  });
+
+  it('should return [] for undefined input', async () => {
+    const { safeParseToolNames } = await import('../db');
+    expect(safeParseToolNames(undefined)).toEqual([]);
+  });
+
+  it('should return [] for empty string input', async () => {
+    const { safeParseToolNames } = await import('../db');
+    expect(safeParseToolNames('')).toEqual([]);
+  });
+
+  it('should return parsed array for valid JSON array', async () => {
+    const { safeParseToolNames } = await import('../db');
+    expect(safeParseToolNames('["Read","Write"]')).toEqual(['Read', 'Write']);
+  });
+
+  it('should return [] and warn for valid JSON non-array string', async () => {
+    const { safeParseToolNames } = await import('../db');
+    const { logger } = await import('../logger');
+    const result = safeParseToolNames('"just a string"', 'ex-1');
+    expect(result).toEqual([]);
+    expect(logger.warn).toHaveBeenCalledWith(
+      'tool_names is not an array, using empty array',
+      expect.objectContaining({ exchangeId: 'ex-1', type: 'string' })
+    );
+  });
+
+  it('should return [] and warn for valid JSON object', async () => {
+    const { safeParseToolNames } = await import('../db');
+    const { logger } = await import('../logger');
+    const result = safeParseToolNames('{}', 'ex-2');
+    expect(result).toEqual([]);
+    expect(logger.warn).toHaveBeenCalledWith(
+      'tool_names is not an array, using empty array',
+      expect.objectContaining({ exchangeId: 'ex-2', type: 'object' })
+    );
+  });
+
+  it('should return [] and warn for valid JSON number', async () => {
+    const { safeParseToolNames } = await import('../db');
+    const { logger } = await import('../logger');
+    const result = safeParseToolNames('42', 'ex-3');
+    expect(result).toEqual([]);
+    expect(logger.warn).toHaveBeenCalledWith(
+      'tool_names is not an array, using empty array',
+      expect.objectContaining({ exchangeId: 'ex-3', type: 'number' })
+    );
+  });
+
+  it('should return [] and warn for invalid JSON', async () => {
+    const { safeParseToolNames } = await import('../db');
+    const { logger } = await import('../logger');
+    const result = safeParseToolNames('{broken', 'ex-4');
+    expect(result).toEqual([]);
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Malformed tool_names JSON, using empty array',
+      expect.objectContaining({ exchangeId: 'ex-4', raw: '{broken' })
+    );
+  });
+
+  it('should filter non-string elements and warn', async () => {
+    const { safeParseToolNames } = await import('../db');
+    const { logger } = await import('../logger');
+    const result = safeParseToolNames('[1, true, "valid"]', 'ex-5');
+    expect(result).toEqual(['valid']);
+    expect(logger.warn).toHaveBeenCalledWith(
+      'tool_names contains non-string elements, filtering',
+      expect.objectContaining({ exchangeId: 'ex-5', original: 3, filtered: 1 })
+    );
+  });
+});

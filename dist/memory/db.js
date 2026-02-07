@@ -52,6 +52,8 @@ exports.textSearch = textSearch;
 exports.getStats = getStats;
 exports.setImportState = setImportState;
 exports.getImportState = getImportState;
+exports.validateIds = validateIds;
+exports.safeParseToolNames = safeParseToolNames;
 exports.pruneToCapacity = pruneToCapacity;
 exports.backupDatabase = backupDatabase;
 exports.createTimestampedBackup = createTimestampedBackup;
@@ -234,9 +236,7 @@ function vectorSearch(embedding, limit = 10, filters) {
         const ids = knnResults.map(r => r.id);
         const distanceMap = new Map(knnResults.map(r => [r.id, r.distance]));
         // Validate IDs before building dynamic placeholders
-        if (ids.length === 0 || ids.length > 10000)
-            return [];
-        if (!ids.every(id => typeof id === 'string' && id.length > 0 && id.length <= 256))
+        if (!validateIds(ids))
             return [];
         // Build filter conditions for the exchanges query
         const conditions = [`id IN (${ids.map(() => '?').join(',')})`];
@@ -368,6 +368,46 @@ function getImportState(key) {
     return row?.value ?? null;
 }
 /**
+ * Validate an array of IDs before building dynamic SQL placeholders.
+ * @internal Exported for testing only
+ */
+function validateIds(ids, maxLength = 10000) {
+    if (ids.length === 0 || ids.length > maxLength)
+        return false;
+    if (!ids.every((id) => typeof id === 'string' && id.length > 0 && id.length <= 256))
+        return false;
+    return true;
+}
+/**
+ * Safely parse tool_names JSON string to a string[] array.
+ * Returns empty array for null/undefined/empty/malformed input.
+ */
+function safeParseToolNames(raw, exchangeId) {
+    if (!raw)
+        return [];
+    let parsed;
+    try {
+        parsed = JSON.parse(raw);
+    }
+    catch {
+        logger_1.logger.warn('Malformed tool_names JSON, using empty array', { exchangeId, raw });
+        return [];
+    }
+    if (!Array.isArray(parsed)) {
+        logger_1.logger.warn('tool_names is not an array, using empty array', { exchangeId, type: typeof parsed });
+        return [];
+    }
+    const valid = parsed.filter((v) => typeof v === 'string');
+    if (valid.length !== parsed.length) {
+        logger_1.logger.warn('tool_names contains non-string elements, filtering', {
+            exchangeId,
+            original: parsed.length,
+            filtered: valid.length,
+        });
+    }
+    return valid;
+}
+/**
  * Convert database row to Exchange object
  */
 function rowToExchange(row) {
@@ -377,7 +417,7 @@ function rowToExchange(row) {
         projectPath: row.project_path,
         userMessage: row.user_message,
         assistantMessage: row.assistant_message,
-        toolNames: JSON.parse(row.tool_names || '[]'),
+        toolNames: safeParseToolNames(row.tool_names, row.id),
         timestamp: row.timestamp,
         gitBranch: row.git_branch,
         sourceFile: row.source_file,
@@ -415,9 +455,7 @@ function pruneToCapacity(capBytes) {
     }
     const ids = oldestRows.map((r) => r.id);
     // Validate IDs before building dynamic placeholders
-    if (ids.length === 0)
-        return 0;
-    if (!ids.every(id => typeof id === 'string' && id.length > 0 && id.length <= 256))
+    if (!validateIds(ids, Infinity))
         return 0;
     const placeholders = ids.map(() => '?').join(',');
     // Delete from vector table

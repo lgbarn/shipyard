@@ -239,8 +239,7 @@ export function vectorSearch(
     const distanceMap = new Map(knnResults.map(r => [r.id, r.distance]));
 
     // Validate IDs before building dynamic placeholders
-    if (ids.length === 0 || ids.length > 10000) return [];
-    if (!ids.every(id => typeof id === 'string' && id.length > 0 && id.length <= 256)) return [];
+    if (!validateIds(ids)) return [];
 
     // Build filter conditions for the exchanges query
     const conditions: string[] = [`id IN (${ids.map(() => '?').join(',')})`];
@@ -409,6 +408,44 @@ export function getImportState(key: string): string | null {
 }
 
 /**
+ * Validate an array of IDs before building dynamic SQL placeholders.
+ * @internal Exported for testing only
+ */
+export function validateIds(ids: string[], maxLength: number = 10000): boolean {
+  if (ids.length === 0 || ids.length > maxLength) return false;
+  if (!ids.every((id) => typeof id === 'string' && id.length > 0 && id.length <= 256)) return false;
+  return true;
+}
+
+/**
+ * Safely parse tool_names JSON string to a string[] array.
+ * Returns empty array for null/undefined/empty/malformed input.
+ */
+export function safeParseToolNames(raw: string | null | undefined, exchangeId?: string): string[] {
+  if (!raw) return [];
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    logger.warn('Malformed tool_names JSON, using empty array', { exchangeId, raw });
+    return [];
+  }
+  if (!Array.isArray(parsed)) {
+    logger.warn('tool_names is not an array, using empty array', { exchangeId, type: typeof parsed });
+    return [];
+  }
+  const valid = parsed.filter((v): v is string => typeof v === 'string');
+  if (valid.length !== parsed.length) {
+    logger.warn('tool_names contains non-string elements, filtering', {
+      exchangeId,
+      original: parsed.length,
+      filtered: valid.length,
+    });
+  }
+  return valid;
+}
+
+/**
  * Convert database row to Exchange object
  */
 function rowToExchange(row: Record<string, unknown>): Exchange {
@@ -418,7 +455,7 @@ function rowToExchange(row: Record<string, unknown>): Exchange {
     projectPath: row.project_path as string | null,
     userMessage: row.user_message as string,
     assistantMessage: row.assistant_message as string,
-    toolNames: JSON.parse((row.tool_names as string) || '[]'),
+    toolNames: safeParseToolNames(row.tool_names as string, row.id as string),
     timestamp: row.timestamp as number,
     gitBranch: row.git_branch as string | null,
     sourceFile: row.source_file as string,
@@ -466,8 +503,7 @@ export function pruneToCapacity(capBytes: number): number {
   const ids = oldestRows.map((r) => r.id);
 
   // Validate IDs before building dynamic placeholders
-  if (ids.length === 0) return 0;
-  if (!ids.every(id => typeof id === 'string' && id.length > 0 && id.length <= 256)) return 0;
+  if (!validateIds(ids, Infinity)) return 0;
 
   const placeholders = ids.map(() => '?').join(',');
 

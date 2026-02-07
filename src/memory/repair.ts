@@ -7,7 +7,7 @@
 
 import type Database from 'better-sqlite3'
 import * as fs from 'fs'
-import { getDatabase, isVecEnabled } from './db'
+import { getDatabase, isVecEnabled, safeParseToolNames } from './db'
 import { DATABASE_PATH } from './config'
 import { generateExchangeEmbedding } from './embeddings'
 import { logger } from './logger'
@@ -356,7 +356,7 @@ async function checkMissingEmbeddings(db: Database.Database, dryRun: boolean): P
     let regenerated = 0
     for (const row of missingRows) {
       try {
-        const toolNames = JSON.parse(row.tool_names || '[]')
+        const toolNames = safeParseToolNames(row.tool_names, row.id)
         const embedding = await generateExchangeEmbedding(
           row.user_message,
           row.assistant_message,

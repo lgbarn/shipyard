@@ -72,27 +72,46 @@ async function runExport(outputPath) {
         }
         outputPath = resolved;
     }
-    // Gather metadata
-    const metadata = gatherMetadata(db);
     // Open write stream
     const stream = fs.createWriteStream(outputPath, { encoding: 'utf-8' });
-    // Write opening JSON structure and metadata
-    stream.write('{\n  "metadata": ');
-    stream.write(JSON.stringify(metadata, null, 2).split('\n').join('\n  '));
-    stream.write(',\n  "sessions": [\n');
-    // Stream sessions
-    const sessionCount = streamSessions(db, stream);
-    // Write transition to exchanges array
-    stream.write('\n  ],\n  "exchanges": [\n');
-    // Stream exchanges
-    const exchangeCount = streamExchanges(db, stream);
-    // Write closing JSON structure
-    stream.write('\n  ]\n}\n');
+    // Wrap all synchronous DB reads and stream writes in a single transaction
+    // for snapshot consistency between metadata counts and actual data
+    const { sessionCount, exchangeCount } = db.transaction(() => {
+        // Gather metadata
+        const metadata = gatherMetadata(db);
+        // Write opening JSON structure and metadata
+        stream.write('{\n  "metadata": ');
+        stream.write(JSON.stringify(metadata, null, 2).split('\n').join('\n  '));
+        stream.write(',\n  "sessions": [\n');
+        // Stream sessions
+        const sc = streamSessions(db, stream);
+        // Write transition to exchanges array
+        stream.write('\n  ],\n  "exchanges": [\n');
+        // Stream exchanges
+        const ec = streamExchanges(db, stream);
+        // Write closing JSON structure
+        stream.write('\n  ]\n}\n');
+        return { sessionCount: sc, exchangeCount: ec };
+    })();
     stream.end();
     // Await stream finish
     await new Promise((resolve, reject) => {
         stream.on('finish', resolve);
-        stream.on('error', reject);
+        stream.on('error', (err) => {
+            // Clean up partial file on write stream error
+            try {
+                if (fs.existsSync(outputPath)) {
+                    fs.unlinkSync(outputPath);
+                }
+            }
+            catch (cleanupErr) {
+                logger_1.logger.warn('Failed to clean up partial export file', {
+                    outputPath,
+                    error: String(cleanupErr),
+                });
+            }
+            reject(err);
+        });
     });
     // Set restrictive permissions
     fs.chmodSync(outputPath, 0o600);
@@ -172,7 +191,7 @@ function streamExchanges(db, stream) {
         const typedRow = row;
         const exportRow = {
             ...typedRow,
-            tool_names: JSON.parse(typedRow.tool_names || '[]'),
+            tool_names: (0, db_1.safeParseToolNames)(typedRow.tool_names, typedRow.id),
         };
         stream.write('    ' + JSON.stringify(exportRow));
         first = false;

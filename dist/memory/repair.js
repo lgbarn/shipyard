@@ -350,7 +350,7 @@ async function checkMissingEmbeddings(db, dryRun) {
         let regenerated = 0;
         for (const row of missingRows) {
             try {
-                const toolNames = JSON.parse(row.tool_names || '[]');
+                const toolNames = (0, db_1.safeParseToolNames)(row.tool_names, row.id);
                 const embedding = await (0, embeddings_1.generateExchangeEmbedding)(row.user_message, row.assistant_message, toolNames);
                 db.exec('BEGIN IMMEDIATE');
                 db.prepare('UPDATE exchanges SET embedding = ? WHERE id = ?')

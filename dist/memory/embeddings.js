@@ -5,6 +5,8 @@
  * Uses Transformers.js for local embedding generation (no external API calls).
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.EMBEDDING_TIMEOUT_MS = void 0;
+exports.withTimeout = withTimeout;
 exports.formatExchangeForEmbedding = formatExchangeForEmbedding;
 exports.generateEmbedding = generateEmbedding;
 exports.generateExchangeEmbedding = generateExchangeEmbedding;
@@ -16,6 +18,8 @@ const transformers_1 = require("@xenova/transformers");
 const MODEL_NAME = 'Xenova/all-MiniLM-L6-v2';
 const EMBEDDING_DIM = 384;
 const MAX_TEXT_LENGTH = 2000; // Truncate to respect 512 token limit
+/** @internal Used by withTimeout wrapper — Plan 1.3 will connect call sites */
+exports.EMBEDDING_TIMEOUT_MS = 30_000;
 let extractor = null;
 let initPromise = null;
 /**
@@ -44,6 +48,18 @@ function truncateText(text) {
     return text.slice(0, MAX_TEXT_LENGTH);
 }
 /**
+ * Race a promise against a timeout. Cleans up the timer on completion.
+ */
+/** @internal Plan 1.3 will connect call sites in generateEmbedding/generateEmbeddings */
+function withTimeout(promise, ms, message) {
+    let timer;
+    const timeoutPromise = new Promise((_, reject) => {
+        timer = setTimeout(() => reject(new Error(message)), ms);
+        timer.unref?.();
+    });
+    return Promise.race([promise, timeoutPromise]).finally(() => clearTimeout(timer));
+}
+/**
  * Format an exchange for embedding
  */
 function formatExchangeForEmbedding(userMessage, assistantMessage, toolNames) {
@@ -59,10 +75,7 @@ function formatExchangeForEmbedding(userMessage, assistantMessage, toolNames) {
 async function generateEmbedding(text) {
     const model = await initModel();
     const truncated = truncateText(text);
-    const output = await model(truncated, {
-        pooling: 'mean',
-        normalize: true,
-    });
+    const output = await withTimeout(model(truncated, { pooling: 'mean', normalize: true }), exports.EMBEDDING_TIMEOUT_MS, 'Embedding generation timed out after 30s');
     // Extract the embedding array
     const data = output.data;
     // Ensure correct dimensions
@@ -87,10 +100,7 @@ async function generateEmbeddings(texts) {
     const results = [];
     // Process one at a time to avoid memory issues
     for (const text of truncated) {
-        const output = await model(text, {
-            pooling: 'mean',
-            normalize: true,
-        });
+        const output = await withTimeout(model(text, { pooling: 'mean', normalize: true }), exports.EMBEDDING_TIMEOUT_MS, 'Embedding generation timed out after 30s');
         results.push(output.data);
     }
     return results;

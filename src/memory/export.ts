@@ -8,7 +8,7 @@
 import type Database from 'better-sqlite3'
 import * as fs from 'fs'
 import * as path from 'path'
-import { getDatabase } from './db'
+import { getDatabase, safeParseToolNames } from './db'
 import { CONFIG_DIR, DATABASE_PATH, ensureConfigDir } from './config'
 import { logger } from './logger'
 import type { ExportMetadata, ExportResult } from './types'
@@ -153,20 +153,6 @@ function streamSessions(db: Database.Database, stream: fs.WriteStream): number {
   }
 
   return count
-}
-
-/**
- * Safely parse tool_names JSON string to array.
- * Returns empty array if raw is falsy or contains malformed JSON.
- */
-function safeParseToolNames(raw: string | null, exchangeId: string): unknown[] {
-  if (!raw) return []
-  try {
-    return JSON.parse(raw)
-  } catch {
-    logger.warn('Malformed tool_names JSON, using empty array', { exchangeId, raw })
-    return []
-  }
 }
 
 /**
