@@ -131,6 +131,7 @@ These triggers are **deterministic**. When a trigger condition matches, you MUST
 | Creating or editing a skill file | `shipyard:shipyard-writing-skills` |
 | Branch management, delivery, worktrees | `shipyard:git-workflow` |
 | Starting feature work on a new phase | `shipyard:git-workflow` |
+| `SHIPYARD_IS_TEAMMATE=true` in env | `shipyard:shipyard-executing-plans`, `shipyard:shipyard-verification` — follow teammate mode sections |
 
 ### Content Pattern Triggers
 | Pattern in output or conversation | Skill |

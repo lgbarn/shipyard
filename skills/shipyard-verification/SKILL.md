@@ -63,6 +63,16 @@ Skip any step = lying, not verifying
 | Agent completed | VCS diff shows changes | Agent reports "success" |
 | Requirements met | Line-by-line checklist | Tests passing |
 
+### Teammate Mode
+
+When `SHIPYARD_IS_TEAMMATE=true`:
+
+- **Run verification locally** and report results via task metadata (not STATE.json updates)
+- **Do not update STATE.json** — only the lead agent writes project state
+- **TaskCompleted hook enforces evidence** — the hook checks for verification artifacts before allowing task completion
+
+In solo mode, this section has no effect.
+
 </instructions>
 
 <rules>

@@ -187,6 +187,17 @@ After quality gates pass:
 - **REQUIRED SUB-SKILL:** Use shipyard:git-workflow
 - Follow that skill to verify tests, present options, execute choice
 
+### Teammate Mode
+
+When `SHIPYARD_IS_TEAMMATE=true` (detected automatically via Claude Code Agent Teams):
+
+- **Execute tasks directly** instead of dispatching builder subagents (you ARE the builder)
+- **Skip quality gate dispatch** (auditor, simplifier) — the lead agent handles these
+- **Write results to task metadata** instead of STATE.json — the lead reads task list for progress
+- **Respect TeammateIdle hook** — ensure tests pass before stopping work
+
+In solo mode (`SHIPYARD_IS_TEAMMATE=false`), this section has no effect — standard subagent dispatch applies.
+
 </instructions>
 
 <examples>

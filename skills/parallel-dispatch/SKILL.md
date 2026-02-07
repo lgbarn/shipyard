@@ -24,6 +24,18 @@ description: Use when facing 2+ independent tasks that can be worked on without 
 - Agents would interfere with each other (editing same files, using same resources)
 - Exploratory debugging where you don't know what's broken yet
 
+### Teams vs Subagents
+
+When Claude Code Agent Teams is enabled (`SHIPYARD_TEAMS_ENABLED=true`):
+
+- **Teammates** are independent Claude Code instances with their own context windows. They share a task list and mailbox but NOT your conversation history.
+- **Subagents** (Task tool) are spawned within your session. They share your working directory but have fresh context.
+
+**Use teammates when:** Tasks are truly independent, each takes significant time (>5 min), and isolation prevents cross-contamination.
+**Use subagents when:** Tasks need results fed back into your current context, or when coordination is tight (same files, dependent changes).
+
+When teams are NOT enabled, this section has no effect — use subagents as normal.
+
 </activation>
 
 ## Overview
