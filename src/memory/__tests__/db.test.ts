@@ -219,6 +219,7 @@ describe('textSearch', () => {
 });
 
 describe('vectorSearch', () => {
+  // Requires sqlite-vec (native extension) — skipped locally, runs in CI matrix (ubuntu/macos × node 20/22)
   it.skipIf(!process.env.CI)('should return results sorted by score descending when vec is enabled', async () => {
     const { initDatabase, insertExchange, vectorSearch, isVecEnabled } = await import('../db');
     initDatabase();
@@ -247,6 +248,7 @@ describe('vectorSearch', () => {
     }
   });
 
+  // Requires sqlite-vec (native extension) — skipped locally, runs in CI matrix (ubuntu/macos × node 20/22)
   it.skipIf(!process.env.CI)('should filter by projectPath when vec is enabled', async () => {
     const { initDatabase, insertExchange, vectorSearch, isVecEnabled } = await import('../db');
     initDatabase();

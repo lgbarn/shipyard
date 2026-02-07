@@ -185,6 +185,7 @@ describe('runRepair - structural integrity failure', () => {
 });
 
 describe('runRepair - orphaned vector entries', () => {
+  // Requires sqlite-vec (native extension) — skipped locally, runs in CI matrix (ubuntu/macos × node 20/22)
   it.skipIf(!process.env.CI)('dry run reports orphaned vec_exchanges entries without deleting them', async () => {
     const { initDatabase, getDatabase, isVecEnabled, insertExchange } = await import('../db');
     initDatabase();
@@ -212,6 +213,7 @@ describe('runRepair - orphaned vector entries', () => {
     expect(orphan).toBeDefined();
   });
 
+  // Requires sqlite-vec (native extension) — skipped locally, runs in CI matrix (ubuntu/macos × node 20/22)
   it.skipIf(!process.env.CI)('fix mode deletes orphaned vec_exchanges entries and reports count', async () => {
     const { initDatabase, getDatabase, isVecEnabled, insertExchange } = await import('../db');
     initDatabase();
@@ -243,6 +245,7 @@ describe('runRepair - orphaned vector entries', () => {
     expect(normal).toBeDefined();
   });
 
+  // Requires sqlite-vec (native extension) — skipped locally, runs in CI matrix (ubuntu/macos × node 20/22)
   it.skipIf(!process.env.CI)('reports ok when no orphaned vectors exist', async () => {
     const { initDatabase, isVecEnabled, insertExchange } = await import('../db');
     initDatabase();
@@ -263,6 +266,7 @@ describe('runRepair - orphaned vector entries', () => {
 });
 
 describe('runRepair - missing embeddings', () => {
+  // Requires sqlite-vec (native extension) — skipped locally, runs in CI matrix (ubuntu/macos × node 20/22)
   it.skipIf(!process.env.CI)('dry run reports count of exchanges missing embeddings', async () => {
     const { initDatabase, getDatabase, isVecEnabled, insertExchange } = await import('../db');
     initDatabase();
@@ -288,6 +292,7 @@ describe('runRepair - missing embeddings', () => {
     expect(missingCheck!.count).toBe(1);
   });
 
+  // Requires sqlite-vec (native extension) — skipped locally, runs in CI matrix (ubuntu/macos × node 20/22)
   it.skipIf(!process.env.CI)('fix mode regenerates missing embeddings using mocked generateExchangeEmbedding', async () => {
     const { initDatabase, getDatabase, isVecEnabled, insertExchange } = await import('../db');
     initDatabase();
