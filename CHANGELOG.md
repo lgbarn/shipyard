@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [2.9.1] - 2026-02-06
+
+### Fixed
+- **Agent role boundary guardrails**: Added explicit "Role Boundary — STRICT" section to all 10 agents preventing them from exceeding their designated role (e.g., architect must not write code, reviewer must not fix issues, auditor must not apply patches). Each agent now has a clear list of prohibited actions and a statement that their deliverable is a report/plan, not implementation.
+
 ## [2.9.0] - 2026-02-06
 
 ### Added
