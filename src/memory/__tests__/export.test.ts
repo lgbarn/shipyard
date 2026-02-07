@@ -6,10 +6,21 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import * as fs from 'fs'
 import * as os from 'os'
 import * as path from 'path'
+import { PassThrough } from 'stream'
 import type { Exchange, ExportResult } from '../types'
 
 let tmpDir: string
 let dbPath: string
+
+// Mock fs module to allow createWriteStream to be overridden per-test
+// All other fs functions pass through to real implementations
+vi.mock('fs', async () => {
+  const actual = await vi.importActual<typeof fs>('fs')
+  return {
+    ...actual,
+    createWriteStream: vi.fn((...args: Parameters<typeof fs.createWriteStream>) => actual.createWriteStream(...args)),
+  }
+})
 
 // Mock config to use temp directory
 vi.mock('../config', async () => {
@@ -536,5 +547,49 @@ describe('runExport - transaction consistency', () => {
     expect(parsed.metadata.session_count).toBe(parsed.sessions.length)
     expect(parsed.metadata.exchange_count).toBe(3)
     expect(parsed.metadata.session_count).toBe(2)
+  })
+})
+
+describe('runExport - stream error cleanup', () => {
+  it('cleans up partial file when write stream emits error', async () => {
+    const { initDatabase } = await import('../db')
+    initDatabase()
+
+    const { runExport } = await import('../export')
+    const exportsDir = path.join(tmpDir, 'exports')
+    fs.mkdirSync(exportsDir, { recursive: true })
+    const exportPath = path.join(exportsDir, 'error-cleanup-test.json')
+
+    // Create a fake writable stream that accepts writes but emits error on end
+    const fakeStream = new PassThrough()
+    const streamError = new Error('Simulated disk full error')
+
+    // Override createWriteStream to return our fake stream for this test
+    const mockedCreateWriteStream = vi.mocked(fs.createWriteStream)
+    mockedCreateWriteStream.mockImplementationOnce((() => {
+      // Create the partial file so the cleanup handler has something to unlink
+      fs.writeFileSync(exportPath, 'partial')
+      return fakeStream
+    }) as unknown as typeof fs.createWriteStream)
+
+    // Spy on unlinkSync to verify cleanup was called
+    const unlinkSpy = vi.spyOn(fs, 'unlinkSync')
+
+    // Override end() to emit error after a tick (simulating async write error)
+    const originalEnd = fakeStream.end.bind(fakeStream)
+    fakeStream.end = ((...args: Parameters<PassThrough['end']>) => {
+      process.nextTick(() => {
+        fakeStream.emit('error', streamError)
+      })
+      return originalEnd(...args)
+    }) as typeof fakeStream.end
+
+    // Export should reject with the stream error
+    await expect(runExport(exportPath)).rejects.toThrow('Simulated disk full error')
+
+    // Verify unlinkSync was called with the export path
+    expect(unlinkSpy).toHaveBeenCalledWith(exportPath)
+
+    unlinkSpy.mockRestore()
   })
 })

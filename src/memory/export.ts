@@ -75,7 +75,20 @@ export async function runExport(outputPath?: string): Promise<ExportResult> {
   // Await stream finish
   await new Promise<void>((resolve, reject) => {
     stream.on('finish', resolve)
-    stream.on('error', reject)
+    stream.on('error', (err) => {
+      // Clean up partial file on write stream error
+      try {
+        if (fs.existsSync(outputPath!)) {
+          fs.unlinkSync(outputPath!)
+        }
+      } catch (cleanupErr) {
+        logger.warn('Failed to clean up partial export file', {
+          outputPath,
+          error: String(cleanupErr),
+        })
+      }
+      reject(err)
+    })
   })
 
   // Set restrictive permissions
