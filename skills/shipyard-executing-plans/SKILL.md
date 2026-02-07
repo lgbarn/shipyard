@@ -101,7 +101,15 @@ digraph process {
     "Mark task complete" -> "More tasks remain?";
     "More tasks remain?" -> "Dispatch builder agent" [label="yes"];
     "More tasks remain?" -> "Dispatch final reviewer for entire implementation" [label="no"];
-    "Dispatch final reviewer for entire implementation" -> "Use shipyard:git-workflow to complete";
+    "Dispatch final reviewer for entire implementation" -> "Dispatch auditor for security review";
+    "Dispatch auditor for security review" -> "Critical security findings?" [shape=diamond];
+    "Critical security findings?" -> "Builder fixes security issues" [label="yes"];
+    "Builder fixes security issues" -> "Dispatch auditor for security review" [label="re-audit"];
+    "Critical security findings?" -> "Dispatch simplifier for complexity review" [label="no / user defers"];
+    "Dispatch simplifier for complexity review" -> "High priority simplifications?" [shape=diamond];
+    "High priority simplifications?" -> "Builder implements simplifications" [label="user chooses fix"];
+    "Builder implements simplifications" -> "Dispatch simplifier for complexity review" [label="re-check"];
+    "High priority simplifications?" -> "Use shipyard:git-workflow to complete" [label="no / user defers"];
 }
 ```
 
@@ -141,9 +149,40 @@ Based on feedback:
 
 **IMPORTANT:** Always complete spec compliance before code quality. Wrong order wastes time reviewing quality of code that doesn't meet spec.
 
-### Step 3: Complete Development
+### Step 3: Post-Completion Quality Gates
 
-After all tasks complete and verified:
+After the final reviewer approves the entire implementation, run these quality gates:
+
+#### Security Audit
+
+Dispatch an **auditor agent** (subagent_type: "shipyard:auditor") with:
+- Git diff of all files changed during plan execution
+- All task summaries and context
+- Dependency manifests if any dependencies were added/changed
+- Working directory, current branch, and worktree status
+- Follow **Model Routing Protocol** — resolve model from `model_routing.security_audit` (default: sonnet)
+
+**If CRITICAL findings exist:**
+1. Display the critical findings to the user
+2. User decides: **fix now** (dispatch builder with audit feedback) / **defer** (append to ISSUES.md) / **acknowledge and proceed**
+3. If fixing, re-run audit after fixes
+
+#### Simplification Review
+
+After the audit, dispatch a **simplifier agent** (subagent_type: "shipyard:simplifier") with:
+- Git diff of all files changed during plan execution
+- All task summaries
+- Working directory, current branch, and worktree status
+- Follow **Model Routing Protocol** — resolve model from `model_routing.simplification` (default: sonnet)
+
+**Present findings with options:**
+1. **Implement simplifications** — dispatch builder with simplification plan
+2. **Defer** — append to ISSUES.md for future cleanup
+3. **Dismiss** — acknowledge and proceed
+
+### Step 4: Complete Development
+
+After quality gates pass:
 - Announce: "I'm using the git-workflow skill to complete this work."
 - **REQUIRED SUB-SKILL:** Use shipyard:git-workflow
 - Follow that skill to verify tests, present options, execute choice

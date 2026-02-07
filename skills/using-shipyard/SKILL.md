@@ -91,6 +91,13 @@ Shipyard also provides these commands:
 | `/shipyard:rollback` | Revert to a previous checkpoint |
 | `/shipyard:recover` | Diagnose and recover from interrupted state |
 | `/shipyard:worktree` | Manage git worktrees for isolated feature development |
+| `/shipyard:review [target]` | On-demand code review (current changes, diff range, or files) |
+| `/shipyard:audit [scope]` | On-demand security audit (OWASP, secrets, dependencies) |
+| `/shipyard:simplify [scope]` | On-demand simplification review (duplication, complexity, bloat) |
+| `/shipyard:document [scope]` | On-demand documentation generation |
+| `/shipyard:research <topic>` | On-demand domain/technology research |
+| `/shipyard:verify [criteria]` | On-demand verification (tests, criteria, phase completion) |
+| `/shipyard:map [focus]` | On-demand codebase analysis (technology/architecture/quality/concerns) |
 
 <activation>
 

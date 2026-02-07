@@ -12,13 +12,13 @@ For model routing configuration, see the [Model Routing Protocol](PROTOCOLS.md#m
 |-------|--------------|------------|---------------|-----------|-------------|
 | **architect** | opus | `architecture` | init, plan, quick | No | Read-only + write plans |
 | **builder** | sonnet | `building` | build, quick | Yes (blocks review) | Full (read, write, bash, git) |
-| **reviewer** | sonnet | `review` | build | Yes (blocks progress) | Read-only |
-| **verifier** | haiku | `validation` | plan, build, ship | Yes (gates shipping) | Read + bash (test commands) |
-| **auditor** | sonnet | `security_audit` | build, ship | Yes (critical findings block) | Read-only |
-| **simplifier** | sonnet | `simplification` | build | No (advisory) | Read-only |
-| **documenter** | sonnet | `documentation` | build, ship | No (advisory) | Read + write docs |
-| **researcher** | sonnet | `planning` | plan | No | Read + web search/fetch |
-| **mapper** | sonnet | `mapping` | init | No | Read-only |
+| **reviewer** | sonnet | `review` | build, review | Yes (blocks progress) | Read-only |
+| **verifier** | haiku | `validation` | plan, build, ship, verify | Yes (gates shipping) | Read + bash (test commands) |
+| **auditor** | sonnet | `security_audit` | build, ship, audit | Yes (critical findings block) | Read-only |
+| **simplifier** | sonnet | `simplification` | build, simplify | No (advisory) | Read-only |
+| **documenter** | sonnet | `documentation` | build, ship, document | No (advisory) | Read + write docs |
+| **researcher** | sonnet | `planning` | plan, research | No | Read + web search/fetch |
+| **mapper** | sonnet | `mapping` | init, map | No | Read-only |
 | **search-memory** | haiku | `memory` | memory-search, memory skill | No | MCP memory_search only |
 
 All model assignments are configurable via `model_routing` in `.shipyard/config.json`. See [Model Selection Guidance](PROTOCOLS.md#model-selection-guidance) for when to upgrade or downgrade.
@@ -91,7 +91,7 @@ graph LR
 ### reviewer
 
 - **Model:** sonnet (configurable via `model_routing.review`)
-- **Dispatched by:** `/shipyard:build` (after each plan completes)
+- **Dispatched by:** `/shipyard:build` (after each plan completes), `/shipyard:review` (on-demand)
 - **Recommended max_turns:** 15
 - **Inputs:** PLAN.md (spec), SUMMARY.md (what was done), git diff (actual changes), CONTEXT-{N}.md
 - **Outputs:** REVIEW-{W}.{P}.md
@@ -107,7 +107,7 @@ graph LR
 ### verifier
 
 - **Model:** haiku (configurable via `model_routing.validation`)
-- **Dispatched by:** `/shipyard:plan` (plan quality), `/shipyard:build` (phase completion), `/shipyard:ship` (final validation)
+- **Dispatched by:** `/shipyard:plan` (plan quality), `/shipyard:build` (phase completion), `/shipyard:ship` (final validation), `/shipyard:verify` (on-demand)
 - **Recommended max_turns:** 15
 - **Inputs:** ROADMAP.md (success criteria), PLAN.md files (must_haves), test outputs
 - **Outputs:** VERIFICATION.md
@@ -122,7 +122,7 @@ graph LR
 ### auditor
 
 - **Model:** sonnet (configurable via `model_routing.security_audit`)
-- **Dispatched by:** `/shipyard:build` (after verification), `/shipyard:ship` (mandatory, ignores config)
+- **Dispatched by:** `/shipyard:build` (after verification), `/shipyard:ship` (mandatory, ignores config), `/shipyard:audit` (on-demand)
 - **Recommended max_turns:** 15
 - **Inputs:** Git diff of all phase changes, PROJECT.md, CONVENTIONS.md, dependency manifests
 - **Outputs:** AUDIT-{N}.md
@@ -137,7 +137,7 @@ graph LR
 ### simplifier
 
 - **Model:** sonnet (configurable via `model_routing.simplification`)
-- **Dispatched by:** `/shipyard:build` (after auditor, unless `--light`)
+- **Dispatched by:** `/shipyard:build` (after auditor, unless `--light`), `/shipyard:simplify` (on-demand)
 - **Recommended max_turns:** 10
 - **Inputs:** Git diff of all phase changes, SUMMARY.md files, PROJECT.md
 - **Outputs:** SIMPLIFICATION-{N}.md
@@ -152,7 +152,7 @@ graph LR
 ### documenter
 
 - **Model:** sonnet (configurable via `model_routing.documentation`)
-- **Dispatched by:** `/shipyard:build` (after simplifier, unless `--light`), `/shipyard:ship` (comprehensive)
+- **Dispatched by:** `/shipyard:build` (after simplifier, unless `--light`), `/shipyard:ship` (comprehensive), `/shipyard:document` (on-demand)
 - **Recommended max_turns:** 20
 - **Inputs:** Git diff, SUMMARY.md files, PROJECT.md, CONVENTIONS.md, existing docs/
 - **Outputs:** DOCUMENTATION-{N}.md (phase), docs/ directory (ship)
@@ -166,7 +166,7 @@ graph LR
 ### researcher
 
 - **Model:** sonnet (configurable via `model_routing.planning`)
-- **Dispatched by:** `/shipyard:plan` (before architect, unless `--skip-research`)
+- **Dispatched by:** `/shipyard:plan` (before architect, unless `--skip-research`), `/shipyard:research` (on-demand)
 - **Recommended max_turns:** 15
 - **Inputs:** STACK.md, ARCHITECTURE.md, ROADMAP.md, codebase (via Grep/Read)
 - **Outputs:** RESEARCH.md
@@ -181,7 +181,7 @@ graph LR
 ### mapper
 
 - **Model:** sonnet (configurable via `model_routing.mapping`)
-- **Dispatched by:** `/shipyard:init` (brownfield projects — 4 parallel instances)
+- **Dispatched by:** `/shipyard:init` (brownfield projects — 4 parallel instances), `/shipyard:map` (on-demand, supports all 4 focus areas in parallel)
 - **Recommended max_turns:** 20
 - **Inputs:** Entire codebase (read-only)
 - **Outputs:** One of: STACK.md + INTEGRATIONS.md, ARCHITECTURE.md + STRUCTURE.md, CONVENTIONS.md + TESTING.md, or CONCERNS.md

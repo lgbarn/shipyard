@@ -74,6 +74,13 @@ Once installed, navigate to any project directory and run:
 | `/shipyard:memory-status` | Show memory storage statistics |
 | `/shipyard:memory-enable` / `memory-disable` | Toggle memory on or off |
 | `/shipyard:memory-import` | Import existing conversation history |
+| `/shipyard:review [target]` | On-demand code review — current changes, diff range, or files |
+| `/shipyard:audit [scope]` | On-demand security audit — OWASP, secrets, dependencies, IaC |
+| `/shipyard:simplify [scope]` | On-demand simplification — duplication, dead code, complexity |
+| `/shipyard:document [scope]` | On-demand documentation generation for changes or modules |
+| `/shipyard:research <topic>` | On-demand domain/technology research and comparison |
+| `/shipyard:verify [criteria]` | On-demand verification — run tests or check acceptance criteria |
+| `/shipyard:map [focus]` | On-demand codebase analysis — technology, architecture, quality, concerns |
 
 ## Skills (Auto-Activating)
 
@@ -105,15 +112,15 @@ Shipyard dispatches specialized agents for different phases of work:
 
 | Agent | Role | Dispatched By |
 |-------|------|---------------|
-| **mapper** | Brownfield codebase analysis (4 parallel instances) | `/shipyard:init` |
-| **researcher** | Domain/technology research | `/shipyard:plan` |
+| **mapper** | Brownfield codebase analysis (4 parallel instances) | `/shipyard:init`, `/shipyard:map` |
+| **researcher** | Domain/technology research | `/shipyard:plan`, `/shipyard:research` |
 | **architect** | Roadmap + plan decomposition | `/shipyard:init`, `/shipyard:plan`, `/shipyard:quick` |
 | **builder** | Task execution with TDD, IaC validation, atomic commits | `/shipyard:build`, `/shipyard:quick` |
-| **reviewer** | Two-stage code review (spec + quality) | `/shipyard:build` |
-| **auditor** | Comprehensive security & compliance analysis | `/shipyard:build`, `/shipyard:ship` |
-| **simplifier** | Cross-task duplication and complexity analysis | `/shipyard:build` |
-| **documenter** | Documentation generation & updates | `/shipyard:build`, `/shipyard:ship` |
-| **verifier** | Post-execution verification (including IaC) | `/shipyard:plan`, `/shipyard:build`, `/shipyard:ship` |
+| **reviewer** | Two-stage code review (spec + quality) | `/shipyard:build`, `/shipyard:review` |
+| **auditor** | Comprehensive security & compliance analysis | `/shipyard:build`, `/shipyard:ship`, `/shipyard:audit` |
+| **simplifier** | Cross-task duplication and complexity analysis | `/shipyard:build`, `/shipyard:simplify` |
+| **documenter** | Documentation generation & updates | `/shipyard:build`, `/shipyard:ship`, `/shipyard:document` |
+| **verifier** | Post-execution verification (including IaC) | `/shipyard:plan`, `/shipyard:build`, `/shipyard:ship`, `/shipyard:verify` |
 | **search-memory** | Memory search & synthesis across sessions | `/shipyard:memory-search`, `memory` skill |
 
 See [`docs/AGENT-GUIDE.md`](docs/AGENT-GUIDE.md) for detailed agent documentation including model assignments, restrictions, tool access, and relationships.

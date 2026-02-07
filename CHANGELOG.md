@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [2.10.0] - 2026-02-06
+
+### Added
+- **7 on-demand agent commands**: `/shipyard:review`, `/shipyard:audit`, `/shipyard:simplify`, `/shipyard:document`, `/shipyard:research`, `/shipyard:verify`, `/shipyard:map` — dispatch any agent directly without the full lifecycle pipeline. All commands work outside shipyard projects.
+- **Quickstart guide**: New `docs/QUICKSTART.md` — intent-to-command decision tree, lifecycle vs on-demand comparison, model routing reference, and common workflows
+- **Quality gates in executing-plans skill**: Post-completion security audit (auditor agent) and simplification review (simplifier agent) now run after the final reviewer, matching the guarantees provided by `/shipyard:build`
+
+### Changed
+- Updated README, AGENT-GUIDE.md, and using-shipyard skill with all 7 new commands and updated agent dispatch sources
+- Executing-plans skill flow diagram now includes auditor → simplifier nodes between final reviewer and git-workflow
+
 ## [2.9.1] - 2026-02-06
 
 ### Fixed
