@@ -95,3 +95,15 @@ assert_json_field() {
         return 1
     fi
 }
+
+# Create .shipyard with a corrupt (malformed) STATE.json
+setup_shipyard_corrupt_json_state() {
+    setup_shipyard_dir
+    echo "not valid json{" > .shipyard/STATE.json
+}
+
+# Create .shipyard with STATE.json missing required fields
+setup_shipyard_empty_json_state() {
+    setup_shipyard_dir
+    echo '{}' > .shipyard/STATE.json
+}
