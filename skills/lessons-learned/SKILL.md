@@ -19,7 +19,7 @@ description: Use when capturing discoveries after phase completion, before shipp
 
 ## Overview
 
-The lessons-learned system captures discoveries, patterns, and pitfalls found during implementation and feeds them back into project memory. Lessons are stored in `.shipyard/LESSONS.md` and optionally surfaced in `CLAUDE.md` so future agents benefit from past experience.
+The lessons-learned system captures discoveries, patterns, and pitfalls found during implementation and feeds them back into the project. Lessons are stored in `.shipyard/LESSONS.md` and optionally surfaced in `CLAUDE.md` so future agents benefit from past experience.
 
 <instructions>
 
@@ -70,10 +70,6 @@ Before presenting prompts, extract candidate lessons from completed build summar
 4. Present extracted items as pre-populated suggestions the user can accept, edit, or discard.
 
 This reduces friction and ensures discoveries documented during building are not lost.
-
-## Memory Enrichment
-
-If `shipyard:memory` is available, search memory for the milestone's date range to extract debugging struggles, rejected approaches, and key decisions. Add memory-derived insights to candidates (marked separately from summary-derived).
 
 ## CLAUDE.md Integration
 

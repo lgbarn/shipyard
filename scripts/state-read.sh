@@ -124,7 +124,7 @@ $(printf '%b' "$skill_list")
 
 **Triggers:** File patterns (*.tf, Dockerfile, *.test.*), task markers (tdd="true"), state conditions (claiming done, errors), and content patterns (security, refactor) activate skills automatically. If even 1% chance a skill applies, invoke it.
 
-**Commands:** /init, /plan, /build, /status, /resume, /quick, /ship, /issues, /rollback, /recover, /move-docs, /worktree, /memory-search, /memory-status, /memory-forget, /memory-enable, /memory-disable, /memory-import
+**Commands:** /init, /plan, /build, /status, /resume, /quick, /ship, /issues, /rollback, /recover, /move-docs, /worktree
 SKILLEOF
 
 # Build state context

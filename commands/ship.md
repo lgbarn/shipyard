@@ -162,35 +162,7 @@ Read all SUMMARY.md files in the shipping scope:
 
 Extract content from "Issues Encountered" and "Decisions Made" sections as candidate lessons.
 
-### Step 4a-ii: Enrich with Memory (if enabled)
-
-Check if Memory is enabled via `~/.config/shipyard/config.json`:
-
-**If memory is enabled:**
-
-1. Calculate the milestone's date range from `.shipyard/HISTORY.md` entries
-2. Use `/shipyard:memory-search` (or call the memory MCP server) to search for exchanges matching:
-   - Date range of the current milestone
-   - Current project path
-   - Query: "debugging struggles, rejected approaches, decisions, issues resolved"
-3. Dispatch a **Haiku subagent** to analyze memory results and extract:
-   - Debugging struggles and their resolutions
-   - Approaches that were tried and rejected (with reasons)
-   - Key decisions made during implementation
-   - Patterns that worked well or poorly
-4. Add memory-derived insights to the candidate lessons, clearly marked:
-   ```
-   **From build summaries:**
-   - {summary-derived lesson}
-
-   **From conversation memory:**
-   - {memory-derived insight about debugging X}
-   - {memory-derived insight about decision Y}
-   ```
-
-**If memory is disabled:** Skip memory enrichment and continue with build summary lessons only.
-
-### Step 4a-iii: Present to User
+### Step 4a-ii: Present to User
 
 Use AskUserQuestion to present:
 
@@ -198,8 +170,8 @@ Use AskUserQuestion to present:
 >
 > These will be saved to `.shipyard/LESSONS.md` and optionally to your project's `CLAUDE.md`.
 >
-> Based on the build summaries{and memory if enabled}, here are some candidate lessons:
-> {Pre-populated from SUMMARY.md extracts and memory insights, or "No candidates found" if empty}
+> Based on the build summaries, here are some candidate lessons:
+> {Pre-populated from SUMMARY.md extracts, or "No candidates found" if empty}
 >
 > **What went well?**
 > **What surprised you or what did you learn?**
@@ -208,7 +180,7 @@ Use AskUserQuestion to present:
 >
 > Edit, add to, or approve the above. Type "skip" to skip lesson capture.
 
-### Step 4a-iv: Persist Lessons
+### Step 4a-iii: Persist Lessons
 
 If user does not type "skip":
 

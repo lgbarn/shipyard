@@ -110,36 +110,13 @@ Also ask about quality gates:
 
 Also ask about model and context preferences:
 8. **Model routing:** "Which model routing strategy should Shipyard use for its agents?"
-   - **Default routing** (recommended): Haiku for validation/memory, Sonnet for building/review/planning/auditing/simplification/documentation/mapping, Opus for architecture/debugging
+   - **Default routing** (recommended): Haiku for validation, Sonnet for building/review/planning/auditing/simplification/documentation/mapping, Opus for architecture/debugging
    - **All Sonnet:** Use Sonnet for everything
    - **All Opus:** Use Opus for everything
 9. **Context loading:** "How much context should Shipyard load at session start?"
    - **Auto** (recommended): Loads based on current state
    - **Minimal:** Always load minimal context
    - **Full:** Always load everything
-
-Also ask about memory (cross-session recall):
-10. **Memory:** Present this question using AskUserQuestion:
-
-> **Enable Memory?**
->
-> This lets Claude recall past conversations across all your projects.
-> When you're stuck on a problem, Claude can search previous sessions
-> to find how you solved similar issues before.
->
-> Conversations are stored locally on your machine in `~/.config/shipyard/memory.db`.
-> You can disable this anytime with `/shipyard:memory-disable`.
->
-> 1. **Yes, enable Memory** (Recommended) -- Index conversations for cross-session recall
-> 2. **No, skip Memory** -- Conversations are not indexed
-
-If user selects "Yes":
-- Update `~/.config/shipyard/config.json` with `"memory": true`
-- Trigger a one-time background import of existing conversation history from `~/.claude/projects/`
-- Display: "Memory enabled. Background import of existing conversations started."
-
-If user selects "No":
-- Note that memory can be enabled later with `/shipyard:memory-enable`
 
 Store preferences in `.shipyard/config.json`. Follow **Model Routing Protocol** (select the correct model for each agent role using `model_routing` from config; see `docs/PROTOCOLS.md`) for the full `config.json` structure, model routing keys, and defaults.
 
