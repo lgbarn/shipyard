@@ -363,17 +363,16 @@ Keep `.shipyard/STATE.json` current after every workflow step. STATE.json is the
 After each workflow step, update STATE.json via the state-write.sh script:
 
 ```bash
-bash scripts/state-write.sh --phase {N} --position "{description}" --status {status} --message "{history entry}"
+bash scripts/state-write.sh --phase {N} --position "{description}" --status {status}
 ```
 
 **Required fields:**
-- `phase` — Phase number, or "N/A" if between milestones
+- `phase` — Phase number (integer)
 - `position` — Human-readable description of where work stands
 - `status` — One of the canonical status values below
-- `message` — History entry describing what action was just completed
 
 **History handling:**
-History entries are automatically appended to `.shipyard/HISTORY.md` by state-write.sh. Do not manually edit HISTORY.md.
+History entries are automatically appended to `.shipyard/HISTORY.md` by state-write.sh based on the phase, position, and status values. Do not manually edit HISTORY.md.
 </instructions>
 
 **Canonical status values:**
@@ -406,7 +405,7 @@ Before STATE.json:
 
 After running:
 ```bash
-bash scripts/state-write.sh --phase 3 --position "Phase planned (3 plans, 2 waves)" --status planned --message "Phase 3 planned (3 plans, 2 waves)"
+bash scripts/state-write.sh --phase 3 --position "Phase planned (3 plans, 2 waves)" --status planned
 ```
 
 STATE.json now contains:
