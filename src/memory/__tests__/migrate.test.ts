@@ -43,6 +43,7 @@ beforeEach(async () => {
 afterEach(async () => {
   const { closeDatabase } = await import('../db');
   closeDatabase();
+  vi.restoreAllMocks();
   fs.rmSync(tmpDir, { recursive: true, force: true });
 });
 
