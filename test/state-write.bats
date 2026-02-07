@@ -27,38 +27,36 @@ load test_helper
 
 # --- Positive tests: structured writes ---
 
-@test "state-write: structured write creates valid STATE.md" {
+@test "state-write: structured write creates valid STATE.json" {
     setup_shipyard_dir
     run bash "$STATE_WRITE" --phase 2 --position "Building plan 1" --status in_progress
     assert_success
-    assert_output --partial "STATE.md updated"
+    assert_output --partial "STATE.json updated"
 
-    run cat .shipyard/STATE.md
-    assert_output --partial "**Current Phase:** 2"
-    assert_output --partial "**Status:** in_progress"
-    assert_output --partial "**Current Position:** Building plan 1"
+    assert_valid_state_json
+    assert_json_field "schema" "3"
+    assert_json_field "phase" "2"
+    assert_json_field "status" "in_progress"
+    assert_json_field "position" "Building plan 1"
 }
 
-@test "state-write: raw write replaces STATE.md content" {
+@test "state-write: raw write replaces STATE.json content" {
     setup_shipyard_dir
-    run bash "$STATE_WRITE" --raw "# Custom State"
+    run bash "$STATE_WRITE" --raw '{"schema":3,"phase":1,"position":"Custom","status":"ready","updated_at":"2026-01-01T00:00:00Z","blocker":null}'
     assert_success
     assert_output --partial "raw write"
 
-    run cat .shipyard/STATE.md
-    assert_output --partial "Custom State"
+    assert_valid_state_json
+    assert_json_field "position" "Custom"
 }
 
 @test "state-write: history preserved across writes" {
     setup_shipyard_dir
-
-    # First write
     bash "$STATE_WRITE" --phase 1 --position "First" --status planning
-    # Second write
     bash "$STATE_WRITE" --phase 2 --position "Second" --status building
 
-    run cat .shipyard/STATE.md
-    assert_output --partial "## History"
+    [ -f .shipyard/HISTORY.md ]
+    run cat .shipyard/HISTORY.md
     assert_output --partial "Phase 1"
     assert_output --partial "Phase 2"
 }
@@ -72,18 +70,16 @@ load test_helper
 
 # --- Phase 3: atomic writes, schema version, exit codes ---
 
-@test "state-write: structured write includes Schema 2.0" {
+@test "state-write: structured write includes schema 3" {
     setup_shipyard_dir
     run bash "$STATE_WRITE" --phase 1 --position "test" --status ready
     assert_success
-    run cat .shipyard/STATE.md
-    assert_output --partial "**Schema:** 2.0"
+    assert_json_field "schema" "3"
 }
 
 @test "state-write: atomic write leaves no temp files" {
     setup_shipyard_dir
     bash "$STATE_WRITE" --phase 1 --position "test" --status ready
-    # No .tmp files should remain
     run find .shipyard -name "*.tmp.*"
     assert_output ""
 }
@@ -105,22 +101,25 @@ load test_helper
     run bash "$STATE_WRITE" --recover
     assert_success
 
-    run cat .shipyard/STATE.md
-    assert_output --partial "**Current Phase:** 2"
-    assert_output --partial "**Status:** planned"
-    assert_output --partial "**Schema:** 2.0"
+    assert_valid_state_json
+    assert_json_field "schema" "3"
+    assert_json_field "phase" "2"
+    assert_json_field "status" "planned"
+    assert_output --partial "recovered"
+
+    [ -f .shipyard/HISTORY.md ]
+    run cat .shipyard/HISTORY.md
     assert_output --partial "recovered"
 }
 
 @test "state-write: --recover with no phases defaults to phase 1" {
     setup_shipyard_dir
-
     run bash "$STATE_WRITE" --recover
     assert_success
 
-    run cat .shipyard/STATE.md
-    assert_output --partial "**Current Phase:** 1"
-    assert_output --partial "**Status:** ready"
+    assert_valid_state_json
+    assert_json_field "phase" "1"
+    assert_json_field "status" "ready"
 }
 
 @test "state-write: --recover detects completed phase from summary" {
@@ -131,7 +130,14 @@ load test_helper
     run bash "$STATE_WRITE" --recover
     assert_success
 
-    run cat .shipyard/STATE.md
-    assert_output --partial "**Current Phase:** 3"
-    assert_output --partial "**Status:** complete"
+    assert_valid_state_json
+    assert_json_field "phase" "3"
+    assert_json_field "status" "complete"
+}
+
+@test "state-write: --raw rejects invalid JSON" {
+    setup_shipyard_dir
+    run bash "$STATE_WRITE" --raw "not valid json"
+    assert_failure
+    assert_output --partial "not valid JSON"
 }
