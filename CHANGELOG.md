@@ -4,7 +4,22 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
-## [Unreleased]
+## [3.0.0] - 2026-02-07
+
+### Added
+- **Agent Teams support**: Automatic detection of Claude Code Agent Teams via `CLAUDE_CODE_TEAM_NAME` and `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` environment variables
+- **Team detection utility**: `scripts/team-detect.sh` exports `SHIPYARD_IS_TEAMMATE`, `SHIPYARD_TEAMS_ENABLED`, `SHIPYARD_TEAM_NAME`
+- **TeammateIdle hook**: Quality gate that verifies version check + test pass before allowing teammate to stop (`hooks/teammate-idle.sh`)
+- **TaskCompleted hook**: Quality gate that verifies evidence artifacts exist before allowing task completion (`hooks/task-completed.sh`)
+- **State file locking**: mkdir-based atomic locking in `state-write.sh` when teams mode is enabled (prevents concurrent write corruption)
+- **Teammate mode sections**: 4 skills adapted for teams awareness (`shipyard-executing-plans`, `shipyard-verification`, `parallel-dispatch`, `using-shipyard`)
+- 18 new BATS tests for team detection, hooks, and state locking (85 total)
+
+### Changed
+- **Pure bash project**: All TypeScript tooling removed — no `tsc`, `vitest`, `tsx`, or Node.js build steps
+- **CI simplified**: Removed Node.js version matrix, TypeScript type checking, and memory test steps from GitHub Actions
+- **Pre-commit hook simplified**: Now runs only `bash scripts/check-versions.sh && npm test` (no build or memory test steps)
+- Solo users see zero behavioral change — all teams features are gated on environment variables
 
 ### Removed
 - **Memory system**: MCP server, SQLite database, embeddings engine, background indexer, and all TypeScript source/dist files
