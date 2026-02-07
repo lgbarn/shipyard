@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Shipyard state writer
-# Updates .shipyard/STATE.md with current position and status
+# Updates .shipyard/STATE.json with current position and status
+# Appends to .shipyard/HISTORY.md
 #
 # Usage:
 #   state-write.sh --phase <N> --position <description> [--status <status>] [--blocker <description>]
@@ -8,12 +9,12 @@
 #
 # Examples:
 #   state-write.sh --phase 2 --position "Building plan 1 of 3" --status in_progress
-#   state-write.sh --raw "$(cat updated-state.md)"
+#   state-write.sh --raw '{"schema":3,"phase":1,"position":"Custom","status":"ready","updated_at":"2026-01-01T00:00:00Z","blocker":null}'
 
 # Exit Codes:
-#   0 - Success (STATE.md written or recovered)
-#   1 - User error (invalid --phase, invalid --status, missing required args)
-#   2 - State corruption (post-write validation failed, generated STATE.md is empty/malformed)
+#   0 - Success (STATE.json written or recovered)
+#   1 - User error (invalid --phase, invalid --status, --raw not valid JSON, missing required args)
+#   2 - State corruption (post-write validation failed, generated state file is empty/invalid JSON)
 #   3 - Missing dependency (.shipyard/ directory missing, mktemp failed)
 
 set -euo pipefail
@@ -24,14 +25,17 @@ if [ ! -d ".shipyard" ]; then
     exit 3
 fi
 
-STATE_FILE=".shipyard/STATE.md"
+STATE_FILE=".shipyard/STATE.json"
+HISTORY_FILE=".shipyard/HISTORY.md"
 
 # Cleanup stack for safe multi-call trap handling
 _CLEANUP_FILES=()
 _cleanup_stack() {
-    for f in "${_CLEANUP_FILES[@]}"; do
-        rm -f "$f"
-    done
+    if [ ${#_CLEANUP_FILES[@]} -gt 0 ]; then
+        for f in "${_CLEANUP_FILES[@]}"; do
+            rm -f "$f"
+        done
+    fi
 }
 trap '_cleanup_stack' EXIT INT TERM
 
@@ -52,9 +56,18 @@ atomic_write() {
 
     # Post-write validation: must be non-empty
     if [ ! -s "$tmpfile" ]; then
-        echo "Error: Generated STATE.md is empty" >&2
+        echo "Error: Generated state file is empty" >&2
         rm -f "$tmpfile"
         exit 2
+    fi
+
+    # For JSON targets, validate structure
+    if [[ "$target" == *.json ]]; then
+        if ! jq -e '.schema' "$tmpfile" > /dev/null 2>&1; then
+            echo "Error: Generated JSON is invalid" >&2
+            rm -f "$tmpfile"
+            exit 2
+        fi
     fi
 
     # Atomic move (same filesystem guarantees atomicity)
@@ -65,6 +78,12 @@ atomic_write() {
     }
     # Remove from cleanup stack since file was successfully moved
     _CLEANUP_FILES=("${_CLEANUP_FILES[@]/$tmpfile/}")
+}
+
+# Append to history file
+append_history() {
+    local entry="$1"
+    printf '%s\n' "- [${TIMESTAMP}] ${entry}" >> "$HISTORY_FILE"
 }
 
 # Parse arguments
@@ -126,9 +145,9 @@ if [ -n "$STATUS" ]; then
     esac
 fi
 
-# Recovery mode: rebuild STATE.md from .shipyard/ artifacts
+# Recovery mode: rebuild STATE.json from .shipyard/ artifacts
 if [ "$RECOVER" = true ]; then
-    echo "Recovering STATE.md from .shipyard/ artifacts..." >&2
+    echo "Recovering STATE.json from .shipyard/ artifacts..." >&2
 
     # Find latest phase number from phases/ directories
     latest_phase=""
@@ -168,70 +187,51 @@ if [ "$RECOVER" = true ]; then
         done < <(git tag -l "shipyard-checkpoint-*" 2>/dev/null | sort)
     fi
 
-    # Generate recovered STATE.md
+    # Generate recovered STATE.json
     TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-    NEW_CONTENT=$(printf '%s\n' "# Shipyard State" "" \
-        "**Schema:** 2.0" \
-        "**Last Updated:** ${TIMESTAMP}" \
-        "**Current Phase:** ${latest_phase}" \
-        "**Current Position:** ${recovered_position}" \
-        "**Status:** ${recovered_status}" \
-        "" "## History" "" \
-        "- [${TIMESTAMP}] State recovered from .shipyard/ artifacts" \
-        "${recovered_history}")
-
+    NEW_CONTENT=$(jq -n \
+        --argjson schema 3 \
+        --argjson phase "$latest_phase" \
+        --arg position "$recovered_position" \
+        --arg status "$recovered_status" \
+        --arg updated_at "$TIMESTAMP" \
+        '{schema: $schema, phase: $phase, position: $position, status: $status, updated_at: $updated_at, blocker: null}')
     atomic_write "$NEW_CONTENT" "$STATE_FILE"
-    echo "STATE.md recovered: Phase=${latest_phase} Status=${recovered_status}" >&2
+
+    # Write history
+    append_history "State recovered from .shipyard/ artifacts"
+    if [ -n "$recovered_history" ]; then
+        printf '%s' "$recovered_history" >> "$HISTORY_FILE"
+    fi
+
+    echo "STATE.json recovered: Phase=${latest_phase} Status=${recovered_status}" >&2
     exit 0
 fi
 
 # If raw content provided, write directly
 if [ -n "$RAW_CONTENT" ]; then
+    if ! echo "$RAW_CONTENT" | jq -e '.schema and .phase and .status' > /dev/null 2>&1; then
+        echo "Error: --raw content is not valid JSON or missing required fields (schema, phase, status)" >&2
+        exit 1
+    fi
     atomic_write "$RAW_CONTENT" "$STATE_FILE"
-    echo "STATE.md updated (raw write) at ${TIMESTAMP}"
+    echo "STATE.json updated (raw write) at ${TIMESTAMP}"
     exit 0
-fi
-
-# Otherwise, build or update STATE.md
-if [ -f "$STATE_FILE" ]; then
-    EXISTING=$(cat "$STATE_FILE")
-else
-    EXISTING=""
 fi
 
 # If we have structured updates, apply them
 if [ -n "$PHASE" ] || [ -n "$POSITION" ] || [ -n "$STATUS" ]; then
-    NEW_CONTENT=$({
-        printf '%s\n' "# Shipyard State" ""
-        printf '%s\n' "**Schema:** 2.0"
-        printf '%s\n' "**Last Updated:** ${TIMESTAMP}" ""
-
-        if [ -n "$PHASE" ]; then
-            printf '%s\n' "**Current Phase:** ${PHASE}"
-        fi
-        if [ -n "$POSITION" ]; then
-            printf '%s\n' "**Current Position:** ${POSITION}"
-        fi
-        if [ -n "$STATUS" ]; then
-            printf '%s\n' "**Status:** ${STATUS}"
-        fi
-        if [ -n "$BLOCKER" ]; then
-            printf '%s\n' "" "## Blockers" "" "- ${BLOCKER}"
-        fi
-
-        # Preserve history section if it exists
-        if echo "$EXISTING" | grep -q "## History"; then
-            printf '%s\n' ""
-            echo "$EXISTING" | sed -n '/## History/,$p'
-        else
-            printf '%s\n' "" "## History" ""
-        fi
-
-        # Append current action to history
-        printf '%s\n' "- [${TIMESTAMP}] Phase ${PHASE:-?}: ${POSITION:-updated} (${STATUS:-unknown})"
-    })
+    NEW_CONTENT=$(jq -n \
+        --argjson schema 3 \
+        --argjson phase "${PHASE:-0}" \
+        --arg position "${POSITION:-}" \
+        --arg status "${STATUS:-unknown}" \
+        --arg updated_at "$TIMESTAMP" \
+        --arg blocker "${BLOCKER:-}" \
+        '{schema: $schema, phase: $phase, position: $position, status: $status, updated_at: $updated_at, blocker: (if $blocker == "" then null else $blocker end)}')
     atomic_write "$NEW_CONTENT" "$STATE_FILE"
-    echo "STATE.md updated at ${TIMESTAMP}: Phase=${PHASE:-?} Position=${POSITION:-?} Status=${STATUS:-?}"
+    append_history "Phase ${PHASE:-?}: ${POSITION:-updated} (${STATUS:-unknown})"
+    echo "STATE.json updated at ${TIMESTAMP}: Phase=${PHASE:-?} Position=${POSITION:-?} Status=${STATUS:-?}"
 else
     echo "Error: No updates provided. Use --phase, --position, --status, or --raw." >&2
     exit 1
