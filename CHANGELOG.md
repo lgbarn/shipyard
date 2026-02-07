@@ -6,6 +6,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [2.9.0] - 2026-02-06
+
+### Added
+- **Agent Reference Guide**: New `docs/AGENT-GUIDE.md` — comprehensive reference for all 10 agents with model assignments, dispatch patterns, tool access, restrictions, and pipeline lifecycle diagram
+- **Independent model routing**: Split shared `review` config key into `review`, `simplification`, and `documentation` for independent model control per agent
+- **Mapper and search-memory routing**: Added `model_routing.mapping` and `model_routing.memory` config keys (previously missing from routing table)
+- **Turn limits**: Recommended `max_turns` for all 10 agents documented in PROTOCOLS.md
+- **Model selection guidance**: Upgrade/downgrade recommendations per config key in PROTOCOLS.md
+- **Marketplace sync hook**: `scripts/marketplace-sync.sh` — async SessionStart hook that fetches marketplace clone once per hour
+- **Auto-release pipeline**: CI now creates git tags and GitHub releases automatically on successful main push (no separate release workflow needed)
+
+### Changed
+- Builder and reviewer agent model changed from `inherit` to `sonnet` (matches PROTOCOLS.md defaults)
+- Model routing config.json example updated to v1.3 with all 11 keys (10 agents + `debugging` reserved)
+- `commands/init.md` model routing description updated to reflect all categories
+- `commands/memory-search.md` no longer hardcodes "Haiku" — references Model Routing Protocol
+- `skills/memory/SKILL.md` updated with model routing configurability note
+- README agents table now includes search-memory and links to AGENT-GUIDE.md
+- `scripts/check-versions.sh` now checks `plugin.json` version sync
+- CI lint job runs version sync check on every push (not just PRs)
+
+### Security
+- Removed `.shipyard/` and `.shipyard.archived/` from git tracking (sensitive project state)
+- Added `.shipyard.archived/` to `.gitignore`
+
 ## [2.8.0] - 2026-02-05
 
 ### Added
