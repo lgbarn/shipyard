@@ -9,16 +9,15 @@ load test_helper
     bash "$STATE_WRITE" --phase 3 --position "Integration testing" --status in_progress
 
     # Verify write succeeded
-    [ -f .shipyard/STATE.md ]
+    [ -f .shipyard/STATE.json ]
 
     # Read state back via state-read.sh
     run bash "$STATE_READ"
     assert_success
 
     # Verify the JSON output contains what we wrote
-    assert_output --partial "Phase"
-    assert_output --partial "3"
-    assert_output --partial "in_progress"
+    assert_output --partial "Phase: 3"
+    assert_output --partial "Status: in_progress"
 
     # Verify it is valid JSON
     echo "$output" | jq -e '.hookSpecificOutput.additionalContext' >/dev/null
@@ -53,21 +52,20 @@ load test_helper
     bash "$STATE_WRITE" --phase 1 --position "Step two" --status building
     bash "$STATE_WRITE" --phase 1 --position "Step three" --status complete
 
-    # All three history entries should be present
-    run cat .shipyard/STATE.md
+    # All three history entries should be present in HISTORY.md
+    run cat .shipyard/HISTORY.md
     assert_output --partial "Step one"
     assert_output --partial "Step two"
     assert_output --partial "Step three"
-    assert_output --partial "## History"
 }
 
-@test "integration: corrupt STATE.md detected then recovered via --recover" {
+@test "integration: corrupt state detected then recovered via --recover" {
     setup_shipyard_dir
     mkdir -p .shipyard/phases/2/plans
     echo "# Plan 2.1" > .shipyard/phases/2/plans/PLAN-2.1.md
 
-    # Write a corrupt STATE.md (missing required fields)
-    echo "# Broken State File" > .shipyard/STATE.md
+    # Write a corrupt STATE.json (malformed JSON)
+    echo "not json{" > .shipyard/STATE.json
 
     # Read should detect corruption (exit 2)
     run bash "$STATE_READ"
@@ -84,28 +82,25 @@ load test_helper
     assert_success
     echo "$output" | jq -e '.hookSpecificOutput' >/dev/null
 
-    # Verify recovered state references the correct phase
-    run cat .shipyard/STATE.md
-    assert_output --partial "**Current Phase:** 2"
-    assert_output --partial "**Schema:** 2.0"
+    # Verify recovered STATE.json has correct phase
+    assert_json_field "phase" "2"
+    assert_json_field "schema" "3"
 }
 
-@test "integration: schema version 2.0 survives write-read cycle" {
+@test "integration: schema version 3 survives write-read cycle" {
     setup_shipyard_dir
     mkdir -p .shipyard/phases
 
     # Write with structured args
     bash "$STATE_WRITE" --phase 1 --position "Schema test" --status planning
 
-    # Verify schema in file
-    run cat .shipyard/STATE.md
-    assert_output --partial "**Schema:** 2.0"
+    # Verify schema in STATE.json
+    assert_json_field "schema" "3"
 
     # Read and verify JSON output includes the schema in context
     run bash "$STATE_READ"
     assert_success
-    assert_output --partial "Schema"
-    assert_output --partial "2.0"
+    assert_output --partial "Schema: 3"
 }
 
 @test "integration: write-recover-checkpoint round-trip" {
@@ -121,9 +116,8 @@ load test_helper
     assert_success
 
     # Verify recovered state is correct
-    run cat .shipyard/STATE.md
-    assert_output --partial "**Current Phase:** 3"
-    assert_output --partial "**Status:** complete"
+    assert_json_field "phase" "3"
+    assert_json_field "status" "complete"
 
     # Create post-recovery checkpoint
     git add -A && git commit -q -m "recovered state" || true
@@ -135,4 +129,27 @@ load test_helper
     run git tag -l "shipyard-checkpoint-*"
     assert_output --partial "pre-recovery"
     assert_output --partial "post-recovery"
+}
+
+@test "integration: auto-migration from STATE.md to STATE.json on read" {
+    setup_shipyard_with_state
+    mkdir -p .shipyard/phases
+
+    # Only STATE.md exists
+    [ -f .shipyard/STATE.md ]
+    [ ! -f .shipyard/STATE.json ]
+
+    # Read triggers migration
+    run bash "$STATE_READ"
+    assert_success
+
+    # Both files now exist
+    [ -f .shipyard/STATE.md ]
+    [ -f .shipyard/STATE.json ]
+    [ -f .shipyard/HISTORY.md ]
+
+    assert_valid_state_json
+    assert_json_field "schema" "3"
+    assert_json_field "phase" "1"
+    assert_json_field "status" "building"
 }

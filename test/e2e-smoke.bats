@@ -14,13 +14,11 @@ setup() {
     run bash "$STATE_WRITE" --phase 1 --position "Smoke test" --status planning
     assert_success
 
-    # Verify STATE.md contents
-    run cat .shipyard/STATE.md
-    assert_output --partial "Schema"
-    assert_output --partial "2.0"
-    assert_output --partial "Phase"
-    assert_output --partial "1"
-    assert_output --partial "planning"
+    # Verify STATE.json contents
+    assert_valid_state_json
+    assert_json_field "schema" "3"
+    assert_json_field "phase" "1"
+    assert_json_field "status" "planning"
 
     # Read state back
     run bash "$STATE_READ"
@@ -34,7 +32,7 @@ setup() {
 @test "e2e: checkpoint create and prune lifecycle" {
     cd "$BATS_TEST_TMPDIR"
 
-    # State-read needs STATE.md to exist
+    # State-read needs STATE.json to exist
     bash "$STATE_WRITE" --phase 1 --position "Pre-checkpoint" --status in_progress
 
     # Create a checkpoint
@@ -67,19 +65,17 @@ setup() {
     mkdir -p .shipyard/phases/2/plans
     echo "# Plan 2.1 -- smoke test artifact" > .shipyard/phases/2/plans/PLAN-1.1.md
 
-    # Remove any existing STATE.md
-    rm -f .shipyard/STATE.md
+    # Remove any existing state files
+    rm -f .shipyard/STATE.json .shipyard/STATE.md
 
     # Recover state from artifacts
     run bash "$STATE_WRITE" --recover
     assert_success
 
-    # Verify recovered STATE.md
-    run cat .shipyard/STATE.md
-    assert_output --partial "Phase"
-    assert_output --partial "2"
-    assert_output --partial "Schema"
-    assert_output --partial "2.0"
+    # Verify recovered STATE.json
+    assert_valid_state_json
+    assert_json_field "phase" "2"
+    assert_json_field "schema" "3"
 
     # Read recovered state and verify valid JSON
     run bash "$STATE_READ"
