@@ -41,28 +41,35 @@ export async function runExport(outputPath?: string): Promise<ExportResult> {
     outputPath = resolved
   }
 
-  // Gather metadata
-  const metadata = gatherMetadata(db)
-
   // Open write stream
   const stream = fs.createWriteStream(outputPath, { encoding: 'utf-8' })
 
-  // Write opening JSON structure and metadata
-  stream.write('{\n  "metadata": ')
-  stream.write(JSON.stringify(metadata, null, 2).split('\n').join('\n  '))
-  stream.write(',\n  "sessions": [\n')
+  // Wrap all synchronous DB reads and stream writes in a single transaction
+  // for snapshot consistency between metadata counts and actual data
+  const { sessionCount, exchangeCount } = db.transaction(() => {
+    // Gather metadata
+    const metadata = gatherMetadata(db)
 
-  // Stream sessions
-  const sessionCount = streamSessions(db, stream)
+    // Write opening JSON structure and metadata
+    stream.write('{\n  "metadata": ')
+    stream.write(JSON.stringify(metadata, null, 2).split('\n').join('\n  '))
+    stream.write(',\n  "sessions": [\n')
 
-  // Write transition to exchanges array
-  stream.write('\n  ],\n  "exchanges": [\n')
+    // Stream sessions
+    const sc = streamSessions(db, stream)
 
-  // Stream exchanges
-  const exchangeCount = streamExchanges(db, stream)
+    // Write transition to exchanges array
+    stream.write('\n  ],\n  "exchanges": [\n')
 
-  // Write closing JSON structure
-  stream.write('\n  ]\n}\n')
+    // Stream exchanges
+    const ec = streamExchanges(db, stream)
+
+    // Write closing JSON structure
+    stream.write('\n  ]\n}\n')
+
+    return { sessionCount: sc, exchangeCount: ec }
+  })()
+
   stream.end()
 
   // Await stream finish
@@ -136,6 +143,20 @@ function streamSessions(db: Database.Database, stream: fs.WriteStream): number {
 }
 
 /**
+ * Safely parse tool_names JSON string to array.
+ * Returns empty array if raw is falsy or contains malformed JSON.
+ */
+function safeParseToolNames(raw: string | null, exchangeId: string): unknown[] {
+  if (!raw) return []
+  try {
+    return JSON.parse(raw)
+  } catch {
+    logger.warn('Malformed tool_names JSON, using empty array', { exchangeId, raw })
+    return []
+  }
+}
+
+/**
  * Stream all exchanges to the output file.
  * Excludes the embedding field (derived data, not portable).
  * Parses tool_names from JSON string to array for cleaner export.
@@ -158,7 +179,7 @@ function streamExchanges(db: Database.Database, stream: fs.WriteStream): number 
     const typedRow = row as Record<string, unknown>
     const exportRow = {
       ...typedRow,
-      tool_names: JSON.parse((typedRow.tool_names as string) || '[]'),
+      tool_names: safeParseToolNames(typedRow.tool_names as string, typedRow.id as string),
     }
     stream.write('    ' + JSON.stringify(exportRow))
     first = false

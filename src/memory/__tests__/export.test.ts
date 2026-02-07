@@ -241,6 +241,41 @@ describe('runExport - exchange field handling', () => {
     expect(typeof parsed.exchanges[0].tool_names).not.toBe('string')
   })
 
+  it('handles malformed tool_names JSON gracefully', async () => {
+    const { initDatabase, getDatabase } = await import('../db')
+    const { logger } = await import('../logger')
+    initDatabase()
+
+    // Insert exchange with malformed tool_names directly via SQL
+    const db = getDatabase()
+    db.prepare(`
+      INSERT INTO exchanges (id, session_id, project_path, user_message, assistant_message,
+        tool_names, timestamp, git_branch, source_file, line_start, line_end, indexed_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run('malformed-ex', 'sess-1', '/test/project', 'user msg', 'assistant msg',
+      '{invalid json', 1000, 'main', '/test/session.jsonl', 1, 10, 2000)
+
+    const { runExport } = await import('../export')
+    const exportsDir = path.join(tmpDir, 'exports')
+    fs.mkdirSync(exportsDir, { recursive: true })
+    const exportPath = path.join(exportsDir, 'malformed-tool-names-test.json')
+    const result = await runExport(exportPath)
+
+    // Export should complete successfully
+    expect(result.exchangeCount).toBe(1)
+
+    // Parse and verify tool_names becomes empty array
+    const content = fs.readFileSync(exportPath, 'utf-8')
+    const parsed = JSON.parse(content)
+    expect(parsed.exchanges[0].tool_names).toEqual([])
+
+    // Verify logger.warn was called with malformed JSON details
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Malformed tool_names JSON, using empty array',
+      expect.objectContaining({ exchangeId: 'malformed-ex', raw: '{invalid json' })
+    )
+  })
+
   it('handles special characters in messages without breaking JSON', async () => {
     const { initDatabase, insertExchange } = await import('../db')
     initDatabase()
@@ -471,5 +506,35 @@ describe('runExport - ExportResult fields', () => {
     expect(result.sessionCount).toBe(2)
     expect(result.exportedAt).toBeGreaterThan(0)
     expect(result.exportedAt).toBeLessThanOrEqual(Date.now())
+  })
+})
+
+describe('runExport - transaction consistency', () => {
+  it('metadata counts match actual array lengths in exported JSON', async () => {
+    const { initDatabase, insertExchange } = await import('../db')
+    initDatabase()
+
+    // Insert 3 exchanges across 2 sessions
+    insertExchange(makeExchange({ id: 'ex1', sessionId: 'sess-1' }))
+    insertExchange(makeExchange({ id: 'ex2', sessionId: 'sess-1' }))
+    insertExchange(makeExchange({ id: 'ex3', sessionId: 'sess-2' }))
+    await seedSession('sess-1', '/test/project', 1000, 2)
+    await seedSession('sess-2', '/test/project', 2000, 1)
+
+    const { runExport } = await import('../export')
+    const exportsDir = path.join(tmpDir, 'exports')
+    fs.mkdirSync(exportsDir, { recursive: true })
+    const exportPath = path.join(exportsDir, 'txn-consistency-test.json')
+    await runExport(exportPath)
+
+    // Parse and verify consistency
+    const content = fs.readFileSync(exportPath, 'utf-8')
+    const parsed = JSON.parse(content)
+
+    // Metadata counts must match actual array lengths (transaction ensures snapshot consistency)
+    expect(parsed.metadata.exchange_count).toBe(parsed.exchanges.length)
+    expect(parsed.metadata.session_count).toBe(parsed.sessions.length)
+    expect(parsed.metadata.exchange_count).toBe(3)
+    expect(parsed.metadata.session_count).toBe(2)
   })
 })
