@@ -30,6 +30,21 @@ const SECRET_PATTERNS = [
         name: 'GitHub Refresh Token',
         pattern: /ghr_[a-zA-Z0-9]{36}/g,
     },
+    // Specific API key patterns MUST appear before the Generic API Key pattern.
+    // The generic pattern matches any key in API_KEY=value format and will consume
+    // specific keys (Anthropic, OpenAI, Azure) before they get a chance to match.
+    {
+        name: 'Anthropic API Key',
+        pattern: /sk-ant-api03-[a-zA-Z0-9_-]{90,}/g,
+    },
+    {
+        name: 'OpenAI API Key',
+        pattern: /sk-proj-[a-zA-Z0-9_-]{40,}/g,
+    },
+    {
+        name: 'Azure Connection String',
+        pattern: /DefaultEndpointsProtocol=https?;AccountName=[^;]+;AccountKey=[^;]+;EndpointSuffix=[^\s"']*/gi,
+    },
     {
         name: 'Generic API Key',
         pattern: /[aA][pP][iI][-_]?[kK][eE][yY]\s*[=:]\s*['"]?[a-zA-Z0-9_-]{20,}['"]?/g,
@@ -69,18 +84,6 @@ const SECRET_PATTERNS = [
     {
         name: 'JWT Token',
         pattern: /eyJ[a-zA-Z0-9_-]*\.eyJ[a-zA-Z0-9_-]*\.[a-zA-Z0-9_-]*/g,
-    },
-    {
-        name: 'Anthropic API Key',
-        pattern: /sk-ant-api03-[a-zA-Z0-9_-]{90,}/g,
-    },
-    {
-        name: 'OpenAI API Key',
-        pattern: /sk-proj-[a-zA-Z0-9_-]{40,}/g,
-    },
-    {
-        name: 'Azure Connection String',
-        pattern: /DefaultEndpointsProtocol=https?;AccountName=[^;]+;AccountKey=[^;]+;EndpointSuffix=[^\s"']*/gi,
     },
 ];
 /**

@@ -183,6 +183,34 @@ MIIEvQIBADANBgkqhkiG9w0BAQEFAASC...
     });
   });
 
+  describe('pattern ordering', () => {
+    it('should identify Anthropic key in API_KEY= format as Anthropic, not generic', () => {
+      const text = 'API_KEY=sk-ant-api03-' + 'a'.repeat(95);
+      const result = scrubSecrets(text);
+      expect(result.redactedTypes).toContain('Anthropic API Key');
+      expect(result.redactedTypes).not.toContain('Generic API Key');
+    });
+
+    it('should identify OpenAI key in API_KEY= format as OpenAI, not generic', () => {
+      const text = 'API_KEY=sk-proj-' + 'A1b2C3d4E5f6G7h8'.repeat(3);
+      const result = scrubSecrets(text);
+      expect(result.redactedTypes).toContain('OpenAI API Key');
+      expect(result.redactedTypes).not.toContain('Generic API Key');
+    });
+
+    it('should identify Azure connection string in api_key: format as Azure', () => {
+      const text = 'api_key: DefaultEndpointsProtocol=https;AccountName=myacct;AccountKey=abc123key==;EndpointSuffix=core.windows.net';
+      const result = scrubSecrets(text);
+      expect(result.redactedTypes).toContain('Azure Connection String');
+    });
+
+    it('should still match non-specific keys as Generic API Key', () => {
+      const text = 'API_KEY=abcdefghij1234567890abcd';
+      const result = scrubSecrets(text);
+      expect(result.redactedTypes).toContain('Generic API Key');
+    });
+  });
+
   describe('safe text', () => {
     it('should not modify text without secrets', () => {
       const text = 'This is normal text about AWS services and GitHub repositories';
