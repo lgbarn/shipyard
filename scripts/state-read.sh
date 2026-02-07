@@ -153,8 +153,8 @@ if [ -d ".shipyard" ]; then
             exit 2
         fi
 
-        # Extract fields in one jq call
-        read -r schema phase status position blocker < <(
+        # Extract fields in one jq call (IFS=tab because position/blocker may contain spaces)
+        IFS=$'\t' read -r schema phase status position blocker < <(
             jq -r '[.schema, .phase, .status, (.position // ""), (.blocker // "")] | @tsv' .shipyard/STATE.json
         )
 
