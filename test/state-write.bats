@@ -151,8 +151,8 @@ load test_helper
 
     # Compute what the lock path would be and verify it does NOT exist
     local dir_hash
-    dir_hash=$(cd .shipyard && pwd | cksum | cut -d' ' -f1)
-    [ ! -d "/tmp/shipyard-state-${dir_hash}.lock" ]
+    dir_hash=$(cd .shipyard && pwd | (sha256sum 2>/dev/null || md5sum 2>/dev/null || cksum) | cut -d' ' -f1 | cut -c1-12)
+    [ ! -d "${TMPDIR:-/tmp}/shipyard-state-${dir_hash}.lock" ]
 }
 
 @test "state-write: acquires mkdir lock when SHIPYARD_TEAMS_ENABLED=true" {
@@ -160,8 +160,8 @@ load test_helper
 
     # Compute the expected lock path
     local dir_hash lock_dir
-    dir_hash=$(cd .shipyard && pwd | cksum | cut -d' ' -f1)
-    lock_dir="/tmp/shipyard-state-${dir_hash}.lock"
+    dir_hash=$(cd .shipyard && pwd | (sha256sum 2>/dev/null || md5sum 2>/dev/null || cksum) | cut -d' ' -f1 | cut -c1-12)
+    lock_dir="${TMPDIR:-/tmp}/shipyard-state-${dir_hash}.lock"
 
     # Pre-create the lock to simulate contention
     mkdir -p "$lock_dir"
@@ -197,8 +197,8 @@ load test_helper
 
     # Compute the lock path and verify it was cleaned up
     local dir_hash lock_dir
-    dir_hash=$(cd .shipyard && pwd | cksum | cut -d' ' -f1)
-    lock_dir="/tmp/shipyard-state-${dir_hash}.lock"
+    dir_hash=$(cd .shipyard && pwd | (sha256sum 2>/dev/null || md5sum 2>/dev/null || cksum) | cut -d' ' -f1 | cut -c1-12)
+    lock_dir="${TMPDIR:-/tmp}/shipyard-state-${dir_hash}.lock"
     [ ! -d "$lock_dir" ]
 
     unset SHIPYARD_TEAMS_ENABLED
@@ -209,8 +209,8 @@ load test_helper
 
     # Compute the expected lock path
     local dir_hash lock_dir
-    dir_hash=$(cd .shipyard && pwd | cksum | cut -d' ' -f1)
-    lock_dir="/tmp/shipyard-state-${dir_hash}.lock"
+    dir_hash=$(cd .shipyard && pwd | (sha256sum 2>/dev/null || md5sum 2>/dev/null || cksum) | cut -d' ' -f1 | cut -c1-12)
+    lock_dir="${TMPDIR:-/tmp}/shipyard-state-${dir_hash}.lock"
 
     # Hold the lock for the entire test duration
     mkdir -p "$lock_dir"

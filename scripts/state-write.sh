@@ -38,8 +38,8 @@ _release_lock() {
 
 if [ "${SHIPYARD_TEAMS_ENABLED:-}" = "true" ]; then
     # Compute per-project lock path using hash of .shipyard absolute path
-    SHIPYARD_DIR_HASH=$(cd .shipyard && pwd | cksum | cut -d' ' -f1)
-    LOCK_DIR="/tmp/shipyard-state-${SHIPYARD_DIR_HASH}.lock"
+    SHIPYARD_DIR_HASH=$(cd .shipyard && pwd | (sha256sum 2>/dev/null || md5sum 2>/dev/null || cksum) | cut -d' ' -f1 | cut -c1-12)
+    LOCK_DIR="${TMPDIR:-/tmp}/shipyard-state-${SHIPYARD_DIR_HASH}.lock"
 
     # Acquire lock with retry (mkdir is atomic on all POSIX systems)
     MAX_RETRIES="${SHIPYARD_LOCK_MAX_RETRIES:-30}"
