@@ -23,6 +23,7 @@ log() { echo "[$(date -u +"%Y-%m-%dT%H:%M:%SZ")] $*" >> "${SYNC_LOG}"; }
 # Throttle: skip if synced recently
 if [[ -f "${SYNC_TIMESTAMP}" ]]; then
     last=$(cat "${SYNC_TIMESTAMP}" 2>/dev/null || echo "0")
+    [[ "$last" =~ ^[0-9]+$ ]] || last=0
     now=$(date +%s)
     if (( now - last < SYNC_COOLDOWN )); then
         exit 0

@@ -4,6 +4,10 @@ load test_helper
 TEAMMATE_IDLE="${PROJECT_ROOT}/hooks/teammate-idle.sh"
 TASK_COMPLETED="${PROJECT_ROOT}/hooks/task-completed.sh"
 
+teardown() {
+    unset SHIPYARD_IS_TEAMMATE SHIPYARD_TEAMS_ENABLED SHIPYARD_TEAM_NAME CLAUDE_CODE_TEAM_NAME CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS 2>/dev/null || true
+}
+
 # --- Helper: create a mock npm that returns a given exit code ---
 setup_mock_npm() {
     local exit_code="${1:-0}"

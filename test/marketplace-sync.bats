@@ -59,7 +59,7 @@ setup_marketplace_repo() {
 
 # --- Non-numeric timestamp ---
 
-@test "marketplace-sync: errors on non-numeric timestamp due to arithmetic failure" {
+@test "marketplace-sync: handles non-numeric timestamp gracefully" {
     local config_dir="${HOME}/.config/shipyard"
     mkdir -p "$config_dir"
     echo "not-a-number" > "${config_dir}/marketplace-sync.last"
@@ -67,10 +67,9 @@ setup_marketplace_repo() {
     # Create marketplace dir so we get past the early exit
     mkdir -p "${HOME}/.claude/plugins/marketplaces/shipyard/.git"
 
-    # Script uses set -euo pipefail; non-numeric value in (( now - last ))
-    # causes an arithmetic error → exit 1
+    # Non-numeric timestamp is reset to 0, so sync proceeds (exits 0)
     run bash "$MARKETPLACE_SYNC"
-    assert_failure
+    assert_success
 }
 
 # --- Successful sync updates timestamp ---

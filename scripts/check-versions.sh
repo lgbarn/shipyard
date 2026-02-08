@@ -6,6 +6,11 @@
 
 set -euo pipefail
 
+if ! command -v jq >/dev/null 2>&1; then
+    echo "Error: jq is required but not installed" >&2
+    exit 1
+fi
+
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 

@@ -17,15 +17,17 @@ fi
 
 # Gate 1: Version check
 if [ -f "${SCRIPT_DIR}/scripts/check-versions.sh" ]; then
-    if ! bash "${SCRIPT_DIR}/scripts/check-versions.sh" 2>/dev/null; then
+    if ! _output=$(bash "${SCRIPT_DIR}/scripts/check-versions.sh" 2>&1); then
         echo "BLOCKED: Version check failed. Fix version mismatches before stopping." >&2
+        echo "$_output" | tail -5 >&2
         exit 2
     fi
 fi
 
 # Gate 2: Tests must pass
-if ! npm test --prefix "${SCRIPT_DIR}" 2>/dev/null; then
+if ! _output=$(npm test --prefix "${SCRIPT_DIR}" 2>&1); then
     echo "BLOCKED: Tests are failing. Fix test failures before stopping." >&2
+    echo "$_output" | tail -10 >&2
     exit 2
 fi
 

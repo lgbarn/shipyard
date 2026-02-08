@@ -20,6 +20,12 @@
 
 set -euo pipefail
 
+# Reject symlinked .shipyard directory (security: prevent writes outside project)
+if [ -L ".shipyard" ]; then
+    echo "Error: .shipyard is a symlink, which is not allowed" >&2
+    exit 3
+fi
+
 # Ensure .shipyard directory exists
 if [ ! -d ".shipyard" ]; then
     echo "Error: .shipyard/ directory does not exist. Run /shipyard:init first." >&2
@@ -46,6 +52,9 @@ if [ "${SHIPYARD_TEAMS_ENABLED:-}" = "true" ]; then
     # Acquire lock with retry (mkdir is atomic on all POSIX systems)
     MAX_RETRIES="${SHIPYARD_LOCK_MAX_RETRIES:-30}"
     RETRY_DELAY="${SHIPYARD_LOCK_RETRY_DELAY:-0.1}"
+    # Validate lock parameters (prevent DoS via extreme env var values)
+    [[ "$MAX_RETRIES" =~ ^[0-9]+$ ]] && [ "$MAX_RETRIES" -ge 1 ] && [ "$MAX_RETRIES" -le 300 ] || MAX_RETRIES=30
+    [[ "$RETRY_DELAY" =~ ^[0-9]*\.?[0-9]+$ ]] || RETRY_DELAY=0.1
     acquired=false
     for (( i=0; i<MAX_RETRIES; i++ )); do
         if mkdir "$LOCK_DIR" 2>/dev/null; then

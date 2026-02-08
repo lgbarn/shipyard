@@ -1,6 +1,12 @@
 #!/usr/bin/env bats
 load test_helper
 
+teardown() {
+    unset SHIPYARD_TEAMS_ENABLED SHIPYARD_LOCK_MAX_RETRIES SHIPYARD_LOCK_RETRY_DELAY 2>/dev/null || true
+    # Kill any lingering background state-write processes
+    jobs -p 2>/dev/null | xargs kill 2>/dev/null || true
+}
+
 # --- Negative tests: validation ---
 
 @test "state-write: --phase rejects non-integer" {
@@ -185,8 +191,6 @@ load test_helper
     # State should be written correctly
     assert_valid_state_json
     assert_json_field "status" "ready"
-
-    unset SHIPYARD_TEAMS_ENABLED
 }
 
 @test "state-write: cleans up lock on exit" {
@@ -200,8 +204,6 @@ load test_helper
     dir_hash=$(cd .shipyard && pwd | (sha256sum 2>/dev/null || md5sum 2>/dev/null || cksum) | cut -d' ' -f1 | cut -c1-12)
     lock_dir="${TMPDIR:-/tmp}/shipyard-state-${dir_hash}.lock"
     [ ! -d "$lock_dir" ]
-
-    unset SHIPYARD_TEAMS_ENABLED
 }
 
 @test "state-write: fails when lock cannot be acquired" {
@@ -227,6 +229,4 @@ load test_helper
 
     # Clean up the lock
     rmdir "$lock_dir" 2>/dev/null || true
-
-    unset SHIPYARD_TEAMS_ENABLED SHIPYARD_LOCK_MAX_RETRIES SHIPYARD_LOCK_RETRY_DELAY
 }

@@ -20,7 +20,7 @@ sanitize_lesson() {
     # 2. Remove code blocks (lines between triple-backtick fences, inclusive)
     raw=$(printf '%s\n' "$raw" | awk '/```/{skip=!skip; next} !skip{print}')
     # 3. Filter lines containing prompt directive patterns (case-insensitive)
-    raw=$(printf '%s\n' "$raw" | grep -viE '\b(SYSTEM|ASSISTANT|USER|IMPORTANT|CRITICAL)\s*:|\bIGNORE\b|\bNEW.INSTRUCTION\b' || true)
+    raw=$(printf '%s\n' "$raw" | grep -viE '^\s*(SYSTEM|ASSISTANT|USER)\s*:|\bSYSTEM\s+PROMPT\b|\bIGNORE\s+(ALL\s+)?(PREVIOUS|ABOVE)\b|\bNEW\s+INSTRUCTION\b' || true)
     # 4. Cap at 500 characters
     if [ "${#raw}" -gt 500 ]; then
         raw="${raw:0:497}..."
@@ -130,6 +130,16 @@ SKILLEOF
 # Build state context
 state_context=""
 suggestion=""
+
+# Reject symlinked .shipyard directory (security: prevent writes outside project)
+if [ -L ".shipyard" ]; then
+    jq -n '{
+        error: ".shipyard is a symlink, which is not allowed",
+        details: "Remove the symlink and run /shipyard:init to create a real directory",
+        recovery: "rm .shipyard && mkdir .shipyard"
+    }'
+    exit 3
+fi
 
 if [ -d ".shipyard" ]; then
     if [ -f ".shipyard/STATE.json" ]; then
@@ -283,6 +293,10 @@ if [ -d ".shipyard" ]; then
             if [ -f ".shipyard/config.json" ]; then
                 codebase_docs_path=$(jq -r '.codebase_docs_path // ".shipyard/codebase"' ".shipyard/config.json" 2>/dev/null || echo ".shipyard/codebase")
             fi
+            # Validate: reject absolute paths and directory traversals
+            case "$codebase_docs_path" in
+                /*|*../*) codebase_docs_path=".shipyard/codebase" ;;
+            esac
 
             if [ -d "$codebase_docs_path" ]; then
                 codebase_context=""
