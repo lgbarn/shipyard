@@ -71,6 +71,8 @@ Flag these patterns in ANY file (code, config, IaC, docs, tests):
 
 </instructions>
 
+<rules>
+
 ## Finding Severity
 
 | Severity | Definition | Action |
@@ -78,6 +80,15 @@ Flag these patterns in ANY file (code, config, IaC, docs, tests):
 | **Security-Critical** | Exploitable vulnerability or data exposure | Must fix before merge |
 | **Security-Important** | Increases attack surface | Should fix |
 | **Security-Advisory** | Best practice not followed | Note for improvement |
+
+## Non-Negotiables
+
+- Always run the OWASP Top 10 checklist for every code change -- no exceptions
+- Flag secrets in ANY file type (code, config, IaC, docs, tests, comments)
+- Never skip dependency audit when dependencies are added or updated
+- Security-Critical findings must be fixed before merge -- no deferral
+
+</rules>
 
 <examples>
 
