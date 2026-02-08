@@ -16,6 +16,7 @@
 #   1 - User error (invalid --phase, invalid --status, --raw not valid JSON, missing required args)
 #   2 - State corruption (post-write validation failed, generated state file is empty/invalid JSON)
 #   3 - Missing dependency (.shipyard/ directory missing, mktemp failed)
+#   4 - Lock timeout (could not acquire state lock after max retries)
 
 set -euo pipefail
 
@@ -32,6 +33,7 @@ HISTORY_FILE=".shipyard/HISTORY.md"
 LOCK_DIR=""
 _release_lock() {
     if [ -n "$LOCK_DIR" ] && [ -d "$LOCK_DIR" ]; then
+        rm -f "$LOCK_DIR/pid"
         rmdir "$LOCK_DIR" 2>/dev/null || true
     fi
 }
@@ -47,15 +49,30 @@ if [ "${SHIPYARD_TEAMS_ENABLED:-}" = "true" ]; then
     acquired=false
     for (( i=0; i<MAX_RETRIES; i++ )); do
         if mkdir "$LOCK_DIR" 2>/dev/null; then
+            echo $$ > "$LOCK_DIR/pid"
             acquired=true
             break
+        fi
+        # Check for stale lock (owning process died)
+        if [ -f "$LOCK_DIR/pid" ]; then
+            old_pid=$(cat "$LOCK_DIR/pid" 2>/dev/null || echo "")
+            if [ -n "$old_pid" ] && ! kill -0 "$old_pid" 2>/dev/null; then
+                # Stale lock — owning process is dead
+                rm -f "$LOCK_DIR/pid"
+                rmdir "$LOCK_DIR" 2>/dev/null || true
+                if mkdir "$LOCK_DIR" 2>/dev/null; then
+                    echo $$ > "$LOCK_DIR/pid"
+                    acquired=true
+                    break
+                fi
+            fi
         fi
         sleep "$RETRY_DELAY"
     done
 
     if [ "$acquired" != "true" ]; then
         echo "Error: Could not acquire state lock after ${MAX_RETRIES} retries" >&2
-        exit 2
+        exit 4
     fi
 fi
 

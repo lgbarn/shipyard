@@ -154,9 +154,15 @@ if [ -d ".shipyard" ]; then
         fi
 
         # Extract fields in one jq call (IFS=tab because position/blocker may contain spaces)
-        IFS=$'\t' read -r schema phase status position blocker < <(
-            jq -r '[.schema, .phase, .status, (.position // ""), (.blocker // "")] | @tsv' .shipyard/STATE.json
-        )
+        _tsv=$(jq -r '[.schema, .phase, .status, (.position // ""), (.blocker // "")] | @tsv' .shipyard/STATE.json 2>/dev/null) || {
+            jq -n '{
+                error: "Failed to extract fields from STATE.json",
+                details: "JSON may be structurally valid but contains incompatible field types",
+                recovery: "Run: bash scripts/state-write.sh --recover"
+            }'
+            exit 2
+        }
+        IFS=$'\t' read -r schema phase status position blocker <<< "$_tsv"
 
         # Validate phase is a pure integer
         if [ -n "$phase" ] && ! [[ "$phase" =~ ^[0-9]+$ ]]; then

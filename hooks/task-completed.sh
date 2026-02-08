@@ -18,7 +18,10 @@ fi
 # Check for evidence: phase results or verification artifacts in .shipyard
 if [ -d ".shipyard/phases" ]; then
     # Look for any results files (summaries, reviews, audit reports)
-    evidence_count=$(find .shipyard/phases/ -name "SUMMARY-*.md" -o -name "REVIEW-*.md" -o -name "AUDIT-*.md" | wc -l | tr -d ' ')
+    # TODO: Evidence check is cumulative across all phases, not task-specific.
+    # Claude Code's TaskCompleted hook API doesn't provide task context.
+    # Once the API supports it, filter to current task's phase only.
+    evidence_count=$(find .shipyard/phases/ \( -name "SUMMARY-*.md" -o -name "REVIEW-*.md" -o -name "AUDIT-*.md" \) | wc -l | tr -d ' ')
     if [ "${evidence_count}" -gt 0 ]; then
         exit 0
     fi

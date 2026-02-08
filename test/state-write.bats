@@ -216,13 +216,13 @@ load test_helper
     mkdir -p "$lock_dir"
 
     # Run state-write with a very small retry count to speed up the test
-    # Override MAX_RETRIES via env var — the script should fail with exit 2
+    # Override MAX_RETRIES via env var — the script should fail with exit 4 (lock timeout)
     export SHIPYARD_TEAMS_ENABLED=true
     export SHIPYARD_LOCK_MAX_RETRIES=2
     export SHIPYARD_LOCK_RETRY_DELAY=0.05
     run bash "$STATE_WRITE" --phase 1 --position "blocked" --status ready
     assert_failure
-    assert_equal "$status" 2
+    assert_equal "$status" 4
     assert_output --partial "Could not acquire state lock"
 
     # Clean up the lock
