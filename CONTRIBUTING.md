@@ -11,7 +11,7 @@ System dependencies for development:
 - **bash** >= 4.0
 - **jq** >= 1.6
 - **git** >= 2.20
-- **node** >= 16 (for `npm test`)
+- **node** >= 18 (for npm/bats test runner only)
 
 ## Adding Commands
 
@@ -58,7 +58,7 @@ Skills are auto-activating capabilities that trigger based on context.
 
 3. Follow the consistent header block order: frontmatter, blank line, TOKEN BUDGET comment, blank line, `# Title`, blank line, Overview/Triggers.
 4. Use kebab-case for the directory and skill name.
-5. Update the hardcoded skill list in `scripts/state-read.sh` (see [Issue #16](https://github.com/lgbarn/shipyard/issues/16)).
+5. Skills are auto-discovered from `skills/*/SKILL.md` — no manual registration needed.
 6. Add the skill to the Skills table in `README.md`.
 
 ## Adding Agents
@@ -100,7 +100,7 @@ bash test/run.sh
 Before submitting a pull request:
 
 1. **All tests pass**: Run `npm test` and confirm zero failures.
-2. **ShellCheck passes**: Run `shellcheck --severity=warning scripts/*.sh` with no errors.
+2. **ShellCheck passes**: Run `shellcheck --severity=warning scripts/*.sh hooks/*.sh test/run.sh` with no errors.
 3. **No duplicated content**: Ensure documentation is not repeated across files.
 4. **Conventional commits**: Use the format `type(scope): description`. See `docs/PROTOCOLS.md` for the full commit convention.
 

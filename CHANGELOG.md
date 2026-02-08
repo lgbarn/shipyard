@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [3.0.1] - 2026-02-08
+
+### Fixed
+- Improved Windows compatibility for state locking (mkdir-based lock uses portable path handling)
+- Skip ShellCheck BATS tests when shellcheck is not installed on the system
+- Added missing `<rules>` wrapper to security-audit skill and created anthropic-best-practices reference document
+
 ## [3.0.0] - 2026-02-07
 
 ### Added

@@ -53,6 +53,8 @@ Once installed, navigate to any project directory and run:
 /shipyard:ship
 ```
 
+For the full command reference and common workflows, see [docs/QUICKSTART.md](docs/QUICKSTART.md).
+
 ## Commands
 
 | Command | Purpose |
@@ -267,7 +269,10 @@ shipyard/
 │   ├── recover.md         # /shipyard:recover
 │   └── worktree.md        # /shipyard:worktree
 ├── docs/
-│   └── PROTOCOLS.md       # Model routing and config.json reference
+│   ├── AGENT-GUIDE.md        # Detailed agent documentation
+│   ├── AGENT-TEAMS-GUIDE.md  # Agent teams usage guide
+│   ├── PROTOCOLS.md          # Model routing and config.json reference
+│   └── QUICKSTART.md         # Command reference and common workflows
 ├── hooks/
 │   ├── hooks.json         # Hook registry (SessionStart, TeammateIdle, TaskCompleted)
 │   ├── teammate-idle.sh   # TeammateIdle quality gate (teams only)
@@ -331,7 +336,7 @@ See `docs/PROTOCOLS.md` for model routing configuration and the full config.json
 
 ## Feature Comparison
 
-| Capability | Shipyard v2.2.0 | GSD v1.10.1 | Superpowers v3.6.2 |
+| Capability | Shipyard v3.0 | GSD v1.10.1 | Superpowers v3.6.2 |
 |-----------|:---:|:---:|:---:|
 | **Project Lifecycle** | | | |
 | Init / requirements gathering | ✅ | ✅ | ✅ |

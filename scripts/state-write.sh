@@ -241,7 +241,7 @@ fi
 
 # If raw content provided, write directly
 if [ -n "$RAW_CONTENT" ]; then
-    if ! echo "$RAW_CONTENT" | jq -e '.schema and .phase and .status' > /dev/null 2>&1; then
+    if ! echo "$RAW_CONTENT" | jq -e 'has("schema") and has("phase") and has("status")' > /dev/null 2>&1; then
         echo "Error: --raw content is not valid JSON or missing required fields (schema, phase, status)" >&2
         exit 1
     fi

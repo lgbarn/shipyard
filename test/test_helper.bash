@@ -81,7 +81,7 @@ HISTEOF
 # Assert that STATE.json exists and has required fields
 assert_valid_state_json() {
     [ -f .shipyard/STATE.json ] || { echo "STATE.json does not exist" >&2; return 1; }
-    jq -e '.schema and .phase and .status' .shipyard/STATE.json > /dev/null 2>&1 || {
+    jq -e 'has("schema") and has("phase") and has("status")' .shipyard/STATE.json > /dev/null 2>&1 || {
         echo "STATE.json missing required fields or invalid JSON" >&2; return 1;
     }
 }

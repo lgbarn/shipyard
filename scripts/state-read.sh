@@ -143,7 +143,7 @@ if [ -d ".shipyard" ]; then
 
     if [ -f ".shipyard/STATE.json" ]; then
         # Validate JSON structure
-        if ! jq -e '.schema and .phase and .status' .shipyard/STATE.json > /dev/null 2>&1; then
+        if ! jq -e 'has("schema") and has("phase") and has("status")' .shipyard/STATE.json > /dev/null 2>&1; then
             jq -n '{
                 error: "STATE.json is corrupt or incomplete",
                 details: "Malformed JSON or missing required fields (schema, phase, status)",
