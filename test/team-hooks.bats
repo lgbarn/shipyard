@@ -44,6 +44,7 @@ MOCKEOF
 }
 
 @test "teammate-idle: ShellCheck clean" {
+    command -v shellcheck &>/dev/null || skip "shellcheck not installed"
     run shellcheck --severity=warning "$TEAMMATE_IDLE"
     assert_success
 }
@@ -77,6 +78,7 @@ MOCKEOF
 }
 
 @test "task-completed: ShellCheck clean" {
+    command -v shellcheck &>/dev/null || skip "shellcheck not installed"
     run shellcheck --severity=warning "$TASK_COMPLETED"
     assert_success
 }

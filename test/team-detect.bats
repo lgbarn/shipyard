@@ -55,6 +55,7 @@ load test_helper
 }
 
 @test "team-detect: ShellCheck clean" {
+    command -v shellcheck &>/dev/null || skip "shellcheck not installed"
     run shellcheck --severity=warning "$TEAM_DETECT"
     assert_success
 }
