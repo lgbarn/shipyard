@@ -50,10 +50,11 @@ setup_shipyard_corrupt_state() {
     # Missing required fields: Status, Current Phase
 }
 
-# Create .shipyard with an empty STATE.md
-setup_shipyard_empty_state() {
-    setup_shipyard_dir
-    : > .shipyard/STATE.md
+# Compute the lock directory path for the current .shipyard dir
+compute_lock_dir() {
+    local dir_hash
+    dir_hash=$(cd .shipyard && pwd | (sha256sum 2>/dev/null || md5sum 2>/dev/null || cksum) | cut -d' ' -f1 | cut -c1-12)
+    echo "${TMPDIR:-/tmp}/shipyard-state-${dir_hash}.lock"
 }
 
 # Initialize a real git repo in BATS_TEST_TMPDIR (for checkpoint tests)

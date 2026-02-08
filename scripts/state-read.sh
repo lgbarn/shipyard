@@ -295,7 +295,7 @@ if [ -d ".shipyard" ]; then
             fi
             # Validate: reject absolute paths and directory traversals
             case "$codebase_docs_path" in
-                /*|*../*) codebase_docs_path=".shipyard/codebase" ;;
+                /*|*..*) codebase_docs_path=".shipyard/codebase" ;;
             esac
 
             if [ -d "$codebase_docs_path" ]; then
