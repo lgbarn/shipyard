@@ -1,8 +1,10 @@
 # Shipyard
 
-Ship software systematically — from idea to production with discipline, parallel agents, and zero context rot.
+A Claude Code plugin for structured project execution. Plan work in phases, build with parallel agents and TDD, review with security audits and quality gates, and ship with confidence.
 
-Shipyard is a Claude Code plugin that combines structured project lifecycle management with rigorous development practices. It replaces ad-hoc workflows with a systematic pipeline: brainstorm requirements, plan in phases, execute with fresh subagents, review with two-stage gates, audit for security, audit for simplification, and ship with confidence.
+```
+IDEA → /init → /brainstorm → /plan → /build → /ship → SHIPPED
+```
 
 ## Prerequisites
 
@@ -37,17 +39,17 @@ claude /shipyard:status
 Once installed, navigate to any project directory and run:
 
 ```bash
-# Initialize a new project
+# Configure project preferences
 /shipyard:init
+
+# Explore requirements interactively
+/shipyard:brainstorm
 
 # Plan a phase
 /shipyard:plan 1
 
 # Build it
 /shipyard:build
-
-# Check progress
-/shipyard:status
 
 # Ship it
 /shipyard:ship
@@ -59,13 +61,15 @@ For the full command reference and common workflows, see [docs/QUICKSTART.md](do
 
 | Command | Purpose |
 |---------|---------|
-| `/shipyard:init` | Initialize project — gather requirements, analyze codebase, create roadmap |
-| `/shipyard:plan [phase] [--skip-research]` | Decompose a phase into executable plans with atomic tasks |
+| `/shipyard:init` | Configure project preferences and create `.shipyard/` directory |
+| `/shipyard:brainstorm` | Explore requirements through interactive dialogue |
+| `/shipyard:plan [phase] [--skip-research]` | Plan a phase of work (creates roadmap if needed) |
 | `/shipyard:build [phase] [--plan N] [--light]` | Execute plans with parallel builder agents and review gates |
 | `/shipyard:status` | Show progress dashboard and route to next action |
 | `/shipyard:resume` | Restore context from a previous session |
 | `/shipyard:quick [task]` | Execute a small task with full guarantees |
 | `/shipyard:ship [--phase \| --milestone \| --branch]` | Verify and deliver — merge, PR, or preserve |
+| `/shipyard:settings` | View or update workflow settings |
 | `/shipyard:issues [--add \| --resolve \| --list]` | View and manage deferred issues across sessions |
 | `/shipyard:rollback [checkpoint] [--list]` | Revert to a previous checkpoint |
 | `/shipyard:recover` | Diagnose and recover from interrupted state |
@@ -120,22 +124,6 @@ Shipyard dispatches specialized agents for different phases of work:
 
 See [`docs/AGENT-GUIDE.md`](docs/AGENT-GUIDE.md) for detailed agent documentation including model assignments, restrictions, tool access, and relationships.
 
-## Why Memory Was Removed
-
-Shipyard previously included a built-in episodic memory system — a TypeScript MCP server with SQLite, vector embeddings, and a background indexer that captured conversation context across sessions. This was a significant engineering investment (15 source files, 13 test files, 5 commands, a dedicated skill, and a specialized agent).
-
-We removed it entirely because **Anthropic's built-in memory in Claude is better in every way:**
-
-- **Automatic and invisible.** Claude's native memory captures context without any user configuration, commands, or opt-in. Shipyard's system required `/memory-enable`, manual imports, and background indexer hooks.
-- **Higher quality recall.** Anthropic's memory uses the model's own understanding of what matters, not keyword-based vector search. It remembers decisions, preferences, and patterns — not just text fragments.
-- **Zero maintenance.** No database migrations, no embedding model downloads, no disk space management, no `memory_repair` or `memory_export` workflows. It just works.
-- **Cross-tool context.** Claude's memory works across all interfaces (CLI, web, API), not just within a single plugin's MCP server.
-- **No performance overhead.** Shipyard's indexer ran on every tool use, added ~5s latency to session starts for database initialization, and consumed disk space for embeddings. Native memory has none of these costs.
-
-The removal also simplified Shipyard from a bash + TypeScript hybrid to a **pure bash project**, eliminating Node.js runtime dependencies (better-sqlite3, @xenova/transformers, @modelcontextprotocol/sdk), TypeScript compilation, Vitest test infrastructure, and the associated CI complexity.
-
-**For users:** If you previously used Shipyard's memory commands (`/memory-search`, `/memory-status`, etc.), you don't need to do anything. Claude remembers your projects, decisions, and patterns automatically. You can delete `~/.config/shipyard/` to clean up old memory databases.
-
 ## Agent Teams Support
 
 Shipyard now supports [Claude Code Agent Teams](https://docs.anthropic.com/en/docs/claude-code) — an experimental feature where multiple independent Claude Code instances collaborate on the same project by sharing a task list and mailbox.
@@ -188,10 +176,10 @@ Teams and subagents are complementary. A lead agent in a team can still dispatch
 ### The Lifecycle
 
 ```
-IDEA → /init (brainstorm + roadmap)
+IDEA → /init (configure preferences)
+     → /brainstorm (explore requirements)
      → /plan (research + decompose)
      → /build (parallel execute + review)
-     → /status (check progress)
      → repeat plan→build per phase
      → /ship (verify + deliver)
      → SHIPPED
@@ -256,21 +244,24 @@ shipyard/
 │   ├── simplifier.md      # Complexity and duplication analysis
 │   └── verifier.md        # Post-execution verification
 ├── commands/              # Slash command definitions
-│   ├── init.md            # /shipyard:init
-│   ├── plan.md            # /shipyard:plan
+│   ├── brainstorm.md      # /shipyard:brainstorm
 │   ├── build.md           # /shipyard:build
-│   ├── status.md          # /shipyard:status
-│   ├── resume.md          # /shipyard:resume
-│   ├── quick.md           # /shipyard:quick
-│   ├── ship.md            # /shipyard:ship
+│   ├── init.md            # /shipyard:init
 │   ├── issues.md          # /shipyard:issues
 │   ├── move-docs.md       # /shipyard:move-docs
-│   ├── rollback.md        # /shipyard:rollback
+│   ├── plan.md            # /shipyard:plan
+│   ├── quick.md           # /shipyard:quick
 │   ├── recover.md         # /shipyard:recover
+│   ├── resume.md          # /shipyard:resume
+│   ├── rollback.md        # /shipyard:rollback
+│   ├── settings.md        # /shipyard:settings
+│   ├── ship.md            # /shipyard:ship
+│   ├── status.md          # /shipyard:status
 │   └── worktree.md        # /shipyard:worktree
 ├── docs/
 │   ├── AGENT-GUIDE.md        # Detailed agent documentation
 │   ├── AGENT-TEAMS-GUIDE.md  # Agent teams usage guide
+│   ├── COMPARISON.md         # Feature comparison with other frameworks
 │   ├── PROTOCOLS.md          # Model routing and config.json reference
 │   └── QUICKSTART.md         # Command reference and common workflows
 ├── hooks/
@@ -334,57 +325,13 @@ When you run `/shipyard:init`, Shipyard creates a `.shipyard/config.json` in you
 
 See `docs/PROTOCOLS.md` for model routing configuration and the full config.json skeleton.
 
+## Memory
+
+Shipyard v3.0 removed its built-in episodic memory system in favor of Claude's native memory, which provides better recall, zero maintenance, and cross-tool context automatically. See [CHANGELOG.md](CHANGELOG.md) for details on this change.
+
 ## Feature Comparison
 
-| Capability | Shipyard v3.0 | GSD v1.10.1 | Superpowers v3.6.2 |
-|-----------|:---:|:---:|:---:|
-| **Project Lifecycle** | | | |
-| Init / requirements gathering | ✅ | ✅ | ✅ |
-| Phase-based roadmap | ✅ | ✅ | ❌ |
-| Research agents | ✅ (researcher + 4 mappers) | ✅ (4 parallel) | ❌ |
-| Discussion / decision capture | ❌ | ✅ | ❌ |
-| Structured planning (waves) | ✅ | ✅ | ✅ |
-| Max 3 tasks per plan | ✅ | ✅ | ❌ |
-| Quick task mode | ✅ | ✅ | ❌ |
-| Progress dashboard | ✅ | ✅ | ❌ |
-| Ship / deliver command | ✅ | ✅ | ❌ |
-| **Execution** | | | |
-| Fresh 200k context per agent | ✅ | ✅ | ✅ |
-| Parallel wave execution | ✅ | ✅ | ✅ |
-| TDD enforcement | ✅ (rigid skill) | ✅ (implicit) | ✅ (rigid skill) |
-| Atomic commits per task | ✅ | ✅ | ✅ |
-| IaC validation (Terraform, Ansible, Docker) | ✅ | ❌ | ❌ |
-| **Quality Gates** | | | |
-| Two-stage code review | ✅ (spec + quality) | ✅ (single-stage) | ✅ (spec + quality) |
-| Security audit (OWASP, secrets, deps) | ✅ (dedicated agent) | ❌ | ❌ |
-| Code simplification | ✅ (skill + agent) | ❌ | 🧪 (lab, experimental) |
-| Documentation generation | ✅ (dedicated agent) | ❌ | ❌ |
-| Phase verification | ✅ | ✅ | ❌ |
-| Configurable gate toggles | ✅ (`--light`, config.json) | ❌ | ❌ |
-| **Context & Models** | | | |
-| Multi-model routing | ✅ (7 categories) | ✅ (profiles) | ❌ |
-| Adaptive context loading | ✅ (4 tiers) | ✅ (5 tiers, fork) | ✅ (<2k bootstrap) |
-| Session resume / state persistence | ✅ | ✅ | ❌ |
-| **Git & Recovery** | | | |
-| Git worktree management | ✅ (command + agent context) | ❌ | ✅ (skill) |
-| Rollback / checkpoints | ✅ | ✅ (fork) | ❌ |
-| State recovery | ✅ | ✅ (fork) | ❌ |
-| Issue tracking (cross-session) | ✅ | ✅ (todos) | ❌ |
-| **Skills & Extensibility** | | | |
-| Auto-activating skills | ✅ (16 skills) | ❌ | ✅ (15+ skills) |
-| Deterministic skill triggers | ✅ (4 trigger types) | ❌ | ❌ (description-based) |
-| Systematic debugging | ✅ | ✅ | ✅ (4-phase + escalation) |
-| Verification before completion | ✅ | ✅ | ✅ |
-| Brainstorming / design | ✅ | ✅ (discuss phase) | ✅ |
-| Skill authoring guide | ✅ | ❌ | ✅ |
-| Plugin marketplace | ❌ | ❌ | ✅ (7 plugins) |
-| **Distribution** | | | |
-| Install via CLI | ✅ (`lgbarn/shipyard`) | ✅ (`npx get-shit-done-cc`) | ✅ (marketplace) |
-| Multi-runtime | ❌ (Claude Code) | ✅ (Claude + OpenCode + Gemini) | ❌ (Claude Code) |
-| **Scale** | | | |
-| Commands | 19 | 20+ | 3 |
-| Skills | 16 | 0 | 15+ |
-| Named agents | 9 | implicit | implicit |
+See [docs/COMPARISON.md](docs/COMPARISON.md) for a detailed comparison of Shipyard with other Claude Code project frameworks.
 
 ## Acknowledgments
 

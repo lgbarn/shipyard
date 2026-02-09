@@ -3,59 +3,58 @@ name: using-shipyard
 description: Use when starting any conversation - establishes how to find and use skills, requiring Skill tool invocation before ANY response including clarifying questions
 ---
 
-<!-- TOKEN BUDGET: 210 lines / ~630 tokens -->
+<!-- TOKEN BUDGET: 220 lines / ~660 tokens -->
 
 # Using Shipyard
 
-<rules>
+## What is Shipyard?
 
-**If you think there is even a 1% chance a skill might apply to what you are doing, you ABSOLUTELY MUST invoke the skill.**
+Shipyard is a structured project execution framework for Claude Code. It works as a plugin that helps you:
 
-IF A SKILL APPLIES TO YOUR TASK, YOU DO NOT HAVE A CHOICE. YOU MUST USE IT.
+- **Plan work in phases** — break large projects into manageable pieces with clear success criteria
+- **Build with parallel agents and TDD** — fresh 200k-token context per task, atomic commits, test-driven development
+- **Review code quality and security automatically** — two-stage code review, OWASP security audits, complexity analysis
+- **Ship with confidence** — verification gates, documentation generation, and delivery workflows
 
-This is not negotiable. This is not optional. You cannot rationalize your way out of this.
+Shipyard works as a Claude Code plugin. Install it once, then use slash commands in any project.
 
-</rules>
+## Getting Started
+
+New to Shipyard? Follow these steps:
+
+1. **`/shipyard:init`** — Set up your project preferences (interaction mode, git strategy, quality gates). Takes ~1 minute.
+2. **`/shipyard:brainstorm`** — Explore what you want to build through interactive dialogue. Captures a project definition.
+3. **`/shipyard:plan 1`** — Plan your first phase of work. Researches the codebase and decomposes into executable tasks.
+4. **`/shipyard:build`** — Execute the plan with parallel builder agents, review gates, and security audits.
+5. **`/shipyard:ship`** — Verify, audit, document, and deliver your completed work.
+
+For quick one-off tasks, skip the lifecycle and use `/shipyard:quick 'description'`.
+
+## I Want To...
+
+| Goal | Command |
+|------|---------|
+| Set up a new project | `/shipyard:init` |
+| Explore requirements | `/shipyard:brainstorm` |
+| Understand existing code | `/shipyard:map` |
+| Plan a phase | `/shipyard:plan` |
+| Build from a plan | `/shipyard:build` |
+| Quick one-off task | `/shipyard:quick "task"` |
+| Review my code | `/shipyard:review` |
+| Security check | `/shipyard:audit` |
+| Check progress | `/shipyard:status` |
+| Change settings | `/shipyard:settings` |
+| Ship completed work | `/shipyard:ship` |
 
 ## How to Access Skills
 
-**In Claude Code:** Use the `Skill` tool. When you invoke a skill, its content is loaded and presented to you -- follow it directly. Never use the Read tool on skill files.
+**In Claude Code:** Use the `Skill` tool. When you invoke a skill, its content is loaded and presented to you — follow it directly. Never use the Read tool on skill files.
 
 **In other environments:** Check your platform's documentation for how skills are loaded.
 
-<instructions>
-
-## The Core Rule
-
-**Invoke relevant or requested skills BEFORE any response or action.** Even a 1% chance a skill might apply means that you should invoke the skill to check. If an invoked skill turns out to be wrong for the situation, you don't need to use it.
-
-```dot
-digraph skill_flow {
-    "User message received" [shape=doublecircle];
-    "Might any skill apply?" [shape=diamond];
-    "Invoke Skill tool" [shape=box];
-    "Announce: 'Using [skill] to [purpose]'" [shape=box];
-    "Has checklist?" [shape=diamond];
-    "Create TodoWrite todo per item" [shape=box];
-    "Follow skill exactly" [shape=box];
-    "Respond (including clarifications)" [shape=doublecircle];
-
-    "User message received" -> "Might any skill apply?";
-    "Might any skill apply?" -> "Invoke Skill tool" [label="yes, even 1%"];
-    "Might any skill apply?" -> "Respond (including clarifications)" [label="definitely not"];
-    "Invoke Skill tool" -> "Announce: 'Using [skill] to [purpose]'";
-    "Announce: 'Using [skill] to [purpose]'" -> "Has checklist?";
-    "Has checklist?" -> "Create TodoWrite todo per item" [label="yes"];
-    "Has checklist?" -> "Follow skill exactly" [label="no"];
-    "Create TodoWrite todo per item" -> "Follow skill exactly";
-}
-```
-
-</instructions>
-
 ## Available Skills
 
-Shipyard provides these 14 skills:
+Shipyard provides 16 skills:
 
 | Skill | Purpose |
 |-------|---------|
@@ -73,37 +72,39 @@ Shipyard provides these 14 skills:
 | `shipyard:git-workflow` | Branch creation, commits, worktrees, and completion |
 | `shipyard:documentation` | After implementation, before shipping, when docs are incomplete |
 | `shipyard:shipyard-writing-skills` | Creating and testing new skills |
+| `shipyard:shipyard-testing` | Writing effective, maintainable tests |
+| `shipyard:lessons-learned` | Capturing discoveries and reusable patterns |
 
 ## Shipyard Commands
 
-Shipyard also provides these commands:
-
 | Command | Purpose |
 |---------|---------|
-| `/shipyard:init` | Initialize a project - gather requirements via brainstorming |
-| `/shipyard:plan` | Create a structured implementation plan |
+| `/shipyard:init` | Configure project preferences and create `.shipyard/` directory |
+| `/shipyard:brainstorm` | Explore requirements through interactive dialogue |
+| `/shipyard:plan` | Plan a phase of work (creates roadmap if needed) |
 | `/shipyard:build` | Execute a plan with builder and reviewer agents |
 | `/shipyard:status` | Check progress on current plan execution |
-| `/shipyard:resume` | Resume an interrupted build |
+| `/shipyard:resume` | Restore context from a previous session |
 | `/shipyard:quick` | Quick single-task execution without full planning |
-| `/shipyard:ship` | Finalize work - merge, PR, or preserve |
+| `/shipyard:ship` | Finalize work — merge, PR, or preserve |
+| `/shipyard:settings` | View or update workflow settings |
 | `/shipyard:issues` | View and manage deferred issues across sessions |
 | `/shipyard:rollback` | Revert to a previous checkpoint |
 | `/shipyard:recover` | Diagnose and recover from interrupted state |
 | `/shipyard:worktree` | Manage git worktrees for isolated feature development |
-| `/shipyard:review [target]` | On-demand code review (current changes, diff range, or files) |
-| `/shipyard:audit [scope]` | On-demand security audit (OWASP, secrets, dependencies) |
-| `/shipyard:simplify [scope]` | On-demand simplification review (duplication, complexity, bloat) |
-| `/shipyard:document [scope]` | On-demand documentation generation |
-| `/shipyard:research <topic>` | On-demand domain/technology research |
-| `/shipyard:verify [criteria]` | On-demand verification (tests, criteria, phase completion) |
-| `/shipyard:map [focus]` | On-demand codebase analysis (technology/architecture/quality/concerns) |
+| `/shipyard:review [target]` | On-demand code review — current changes, diff range, or files |
+| `/shipyard:audit [scope]` | On-demand security audit — OWASP, secrets, dependencies, IaC |
+| `/shipyard:simplify [scope]` | On-demand simplification — duplication, dead code, complexity |
+| `/shipyard:document [scope]` | On-demand documentation generation for changes or modules |
+| `/shipyard:research <topic>` | On-demand domain/technology research and comparison |
+| `/shipyard:verify [criteria]` | On-demand verification — run tests or check acceptance criteria |
+| `/shipyard:map [focus]` | On-demand codebase analysis — technology, architecture, quality, concerns |
 
 <activation>
 
-## Skill Activation Triggers
+## Skill Activation Protocol
 
-These triggers are **deterministic**. When a trigger condition matches, you MUST invoke the corresponding skill. Do not use judgment -- if the trigger fires, invoke.
+When a trigger condition matches, invoke the corresponding skill before responding.
 
 ### File Pattern Triggers
 | Pattern | Skill |
@@ -141,71 +142,34 @@ These triggers are **deterministic**. When a trigger condition matches, you MUST
 | Duplicate, complex, bloat, refactor | `shipyard:code-simplification` |
 | Document, README, API docs, changelog | `shipyard:documentation` |
 
-### Trigger Evaluation Protocol
-
-Before EVERY response, evaluate triggers in this order:
-1. **File patterns** -- check files being discussed, modified, or created
-2. **Task markers** -- check any loaded plans or task definitions
-3. **State conditions** -- check current workflow state and intent
-4. **Content patterns** -- check recent output and user messages
-
-If ANY trigger matches, invoke the skill BEFORE responding. Multiple triggers can fire simultaneously -- invoke all matching skills.
-
 </activation>
 
-<examples>
+<instructions>
 
-## Skill Invocation Examples
+## The Core Rule
 
-### Good: Skill invoked before responding
+Invoke relevant skills BEFORE any response or action. If there is a reasonable chance a skill applies, invoke it to check. If an invoked skill turns out to be wrong for the situation, you don't need to use it.
 
-```
-User: "I want to add a caching layer to the API."
+Before every response, evaluate triggers in this order:
+1. **File patterns** — check files being discussed, modified, or created
+2. **Task markers** — check any loaded plans or task definitions
+3. **State conditions** — check current workflow state and intent
+4. **Content patterns** — check recent output and user messages
 
-Agent thinking: This is feature design -> brainstorming skill applies.
-Agent action:  Invoke Skill("shipyard:shipyard-brainstorming")
-Agent response: "Using brainstorming to explore caching design.
-                Let me check the current project state first..."
-```
+If any trigger matches, invoke the skill before responding. Multiple triggers can fire simultaneously.
 
-### Bad: Responding without invoking the skill
-
-```
-User: "I want to add a caching layer to the API."
-
-Agent response: "Sure! I'll add Redis caching to your endpoints.
-                Let me start coding..."
-```
-
-Why it fails: Jumped straight to implementation without brainstorming. No requirements gathered, no alternatives explored, no design validated.
-
-### Good: Multiple triggers fire, all invoked
-
-```
-User: "The Dockerfile build is failing with a security error."
-
-Agent thinking: Dockerfile -> infrastructure-validation trigger.
-               Error/failure -> debugging trigger.
-               Security -> security-audit trigger.
-Agent action:  Invoke all three skills.
-```
-
-</examples>
+</instructions>
 
 ## Red Flags
 
-These thoughts mean STOP -- you're rationalizing:
+These thoughts indicate a missed skill invocation:
 
-| Thought | Reality |
-|---------|---------|
+| Thought | What to do |
+|---------|------------|
 | "This is just a simple question" | Questions are tasks. Check for skills. |
-| "I need more context first" | Skill check comes BEFORE clarifying questions. |
 | "Let me explore the codebase first" | Skills tell you HOW to explore. Check first. |
-| "This doesn't need a formal skill" | If a skill exists, use it. |
-| "I remember this skill" | Skills evolve. Read current version. |
-| "The skill is overkill" | Simple things become complex. Use it. |
+| "This doesn't need a formal skill" | If a skill exists for it, use it. |
 | "I'll just do this one thing first" | Check BEFORE doing anything. |
-| "I know what that means" | Knowing the concept != using the skill. Invoke it. |
 
 ## Skill Priority
 

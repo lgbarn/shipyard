@@ -1,13 +1,14 @@
 # Shipyard Quickstart
 
-Quick reference for choosing the right tool for your situation.
+Shipyard is a Claude Code plugin for structured project execution. It helps you plan, build, review, and ship software systematically — with parallel agents, TDD, security audits, and quality gates. If you're new to Shipyard, start here.
 
 ## I Want To...
 
 ### Start a New Project or Feature
 | Situation | Command |
 |-----------|---------|
-| New project from scratch | `/shipyard:init` |
+| Set up a new project | `/shipyard:init` |
+| Explore requirements interactively | `/shipyard:brainstorm` |
 | Plan a phase of work | `/shipyard:plan 1` |
 | Build from a plan | `/shipyard:build` |
 | Quick single task | `/shipyard:quick "add health check endpoint"` |
@@ -44,13 +45,15 @@ Quick reference for choosing the right tool for your situation.
 |-----------|---------|
 | Check progress | `/shipyard:status` |
 | Resume previous session | `/shipyard:resume` |
+| View or change settings | `/shipyard:settings` |
+| Set a single setting | `/shipyard:settings security_audit false` |
 | Rollback to checkpoint | `/shipyard:rollback` |
 | Recover from errors | `/shipyard:recover` |
 | View deferred issues | `/shipyard:issues` |
 
 ## Lifecycle vs On-Demand
 
-**Lifecycle commands** (`init` → `plan` → `build` → `ship`) run the full pipeline with multiple agents, review gates, security audits, and state tracking. Use these for structured multi-phase work.
+**Lifecycle commands** (`init` → `brainstorm` → `plan` → `build` → `ship`) run the full pipeline with multiple agents, review gates, security audits, and state tracking. Use these for structured multi-phase work.
 
 **On-demand commands** (`review`, `audit`, `simplify`, `document`, `research`, `verify`, `map`) dispatch a single agent for a focused task. Use these for quick analysis without the full pipeline.
 
@@ -91,7 +94,8 @@ Upgrade `security_audit` to opus for production systems with PII or financial da
 
 ### New Project
 ```
-/shipyard:init          → brainstorm requirements, create roadmap
+/shipyard:init          → configure project preferences
+/shipyard:brainstorm    → explore requirements, capture project definition
 /shipyard:plan 1        → decompose phase 1 into tasks
 /shipyard:build         → execute with agents + review gates
 /shipyard:ship          → verify, audit, document, deliver
