@@ -94,48 +94,100 @@ This is your unique value — individual reviewers see one task. You see the who
 Produce `AUDIT-{phase}.md` in the phase directory:
 
 ```markdown
-# Security Audit Report
-**Phase:** [phase name]
-**Date:** [timestamp]
-**Scope:** [number of files analyzed, lines changed]
+# Security Audit Report — Phase {N}
 
-## Summary
+## Executive Summary
+
 **Verdict:** PASS | FAIL
-**Critical findings:** [count]
-**Important findings:** [count]
-**Advisory findings:** [count]
+**Risk Level:** Critical | High | Medium | Low
 
-## Critical Findings
-### [Finding title]
-- **Location:** [file:line]
-- **Category:** [OWASP category / Secrets / IaC / Dependency]
-- **Description:** [what the issue is]
-- **Risk:** [what could happen if exploited]
-- **Remediation:** [specific fix]
-- **Reference:** [CWE-XXX / OWASP category]
+{2-3 plain-English sentences summarizing what was found and what matters most. Written for a non-security-expert. See guidance below.}
 
-## Important Findings
-### [Finding title]
-- **Location:** [file:line]
-- **Description:** [what the issue is]
-- **Remediation:** [specific fix]
+### What to Do
 
-## Advisory Findings
-- [finding with location and suggestion]
+| Priority | Finding | Location | Effort | Action |
+|----------|---------|----------|--------|--------|
+| 1 | {Finding title} | {file:line} | {Trivial/Small/Medium/Large} | {One-line fix description} |
+| 2 | {Finding title} | {file:line} | {Trivial/Small/Medium/Large} | {One-line fix description} |
+
+### Themes
+- {Pattern 1 — e.g., "Input validation is inconsistent across the API layer"}
+- {Pattern 2}
+
+## Detailed Findings
+
+### Critical
+
+**[C1] {Title}**
+- **Location:** {file:line}
+- **Description:** {What the vulnerability is}
+- **Impact:** {What could happen if exploited}
+- **Remediation:** {How to fix it}
+- **Evidence:** {Code snippet or configuration showing the issue}
+
+### Important
+
+**[I1] {Title}**
+- **Location:** {file:line}
+- **Description:** {What the issue is}
+- **Impact:** {What could happen}
+- **Remediation:** {How to fix it}
+- **Evidence:** {Code snippet or configuration showing the issue}
+
+### Advisory
+
+- {One-line description with location} — {brief remediation}
+- {One-line description with location} — {brief remediation}
+
+## Cross-Component Analysis
+
+{Patterns that span multiple files or components. Analyzes how components interact and identifies systemic issues that individual findings don't capture.}
+
+## Analysis Coverage
+
+| Area | Checked | Notes |
+|------|---------|-------|
+| Code Security (OWASP) | Yes/No/Partial | {brief note} |
+| Secrets & Credentials | Yes/No/Partial | {brief note} |
+| Dependencies | Yes/No/Partial | {brief note} |
+| Infrastructure as Code | Yes/No/N/A | {brief note} |
+| Docker/Container | Yes/No/N/A | {brief note} |
+| Configuration | Yes/No/Partial | {brief note} |
 
 ## Dependency Status
+
+{Table of dependencies with known vulnerabilities, if any}
+
 | Package | Version | Known CVEs | Status |
 |---------|---------|-----------|--------|
 | [name]  | [ver]   | [CVE list] | OK/WARN/FAIL |
 
-## IaC Status (if applicable)
+## IaC Findings
+
+{Infrastructure findings, if applicable}
+
 | Resource | Check | Status |
 |----------|-------|--------|
 | [resource] | [check name] | PASS/FAIL |
-
-## Cross-Task Observations
-- [observations about security coherence across tasks]
 ```
+
+### Risk Level Guidance
+
+Assign Risk Level in the Executive Summary using these thresholds:
+- **Critical:** Any exploitable vulnerability found (SQL injection, RCE, auth bypass, exposed secrets)
+- **High:** Important findings that combine to create significant risk (e.g., missing input validation + direct DB access)
+- **Medium:** Advisory findings only, no directly exploitable issues
+- **Low:** No findings, or informational notes only
+
+### Executive Summary Writing Guide
+
+The summary must be understandable by someone who is not a security expert. Lead with what matters most, explain why, and say what to do first.
+
+**BAD** (too technical, no prioritization):
+> "Found 3 critical, 5 important, 12 advisory findings. SQL injection in user endpoint. XSS in admin panel. Missing CSRF tokens. Outdated dependencies detected."
+
+**GOOD** (plain English, prioritized, actionable):
+> "Two API endpoints accept user input directly in SQL queries, creating injection vulnerabilities that could expose the entire user database. An API key committed to test fixtures should be rotated immediately. The remaining findings are low-risk code quality improvements. Fix the SQL injection first — it's the most dangerous and affects the most-used endpoints."
 
 </instructions>
 
@@ -163,20 +215,26 @@ Your deliverable is an **audit report** (AUDIT-{phase}.md). You analyze and repo
 
 <examples>
 
-### Good Finding: Specific with Standards Reference and Remediation
+### Good Critical Finding: Specific with Evidence and Remediation
 
 ```markdown
-### SQL injection in user search endpoint
+**[C1] SQL injection in user search endpoint**
 - **Location:** src/routes/users.py:87
-- **Category:** OWASP A03:2021 - Injection
 - **Description:** User-supplied `search_term` parameter is interpolated directly
   into a SQL query via f-string: `f"SELECT * FROM users WHERE name LIKE '%{search_term}%'"`.
   No parameterization or input sanitization is applied.
-- **Risk:** An attacker can exfiltrate the entire database, modify data, or escalate
-  privileges via crafted input such as `'; DROP TABLE users; --`.
+- **Impact:** An attacker can exfiltrate the entire database, modify data, or escalate
+  privileges via crafted input such as `'; DROP TABLE users; --`. (CWE-89, OWASP A03:2021)
 - **Remediation:** Replace f-string interpolation with parameterized query:
   `cursor.execute("SELECT * FROM users WHERE name LIKE %s", (f"%{search_term}%",))`
-- **Reference:** CWE-89 (SQL Injection)
+- **Evidence:** `f"SELECT * FROM users WHERE name LIKE '%{search_term}%'"`
+```
+
+### Good Advisory Finding: Bulleted and Concise
+
+```markdown
+- Missing rate limiting on `/api/login` (src/routes/auth.py:15) — add express-rate-limit middleware
+- Debug logging enabled in production config (config/prod.yml:8) — set `debug: false`
 ```
 
 ### Bad Finding: Vague with No Actionable Remediation
@@ -184,9 +242,8 @@ Your deliverable is an **audit report** (AUDIT-{phase}.md). You analyze and repo
 ```markdown
 ### Potential security issue
 - **Location:** src/routes/
-- **Category:** Security
 - **Description:** Some queries may not be safe.
-- **Risk:** Could be exploited.
+- **Impact:** Could be exploited.
 - **Remediation:** Review queries for safety.
 ```
 

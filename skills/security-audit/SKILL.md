@@ -94,15 +94,35 @@ Flag these patterns in ANY file (code, config, IaC, docs, tests):
 
 ## Finding Report Examples
 
-### Good Finding -- specific, evidenced, actionable
+### Good Critical/Important Finding -- specific, evidenced, actionable
 
 ```
-**Security-Critical: SQL Injection in user search endpoint**
+**[C1] SQL Injection in user search endpoint**
+- **Location:** src/routes/users.py:42
+- **Description:** User-supplied `q` parameter is interpolated directly into a SQL query
+  via f-string: `cursor.execute(f"SELECT * FROM users WHERE name = '{request.args['q']}'")`
+- **Impact:** Attacker can execute arbitrary SQL via the `q` query parameter, potentially
+  exfiltrating the entire user database or escalating privileges.
+- **Remediation:** Use parameterized query:
+  `cursor.execute("SELECT * FROM users WHERE name = %s", (request.args['q'],))`
+- **Evidence:** `cursor.execute(f"SELECT * FROM users WHERE name = '{request.args['q']}'")`
+```
 
-File: src/routes/users.py, line 42
-Code: `cursor.execute(f"SELECT * FROM users WHERE name = '{request.args['q']}'")`
-Risk: Attacker can execute arbitrary SQL via the `q` query parameter.
-Fix: Use parameterized query: `cursor.execute("SELECT * FROM users WHERE name = %s", (request.args['q'],))`
+### Good Advisory Finding -- bulleted, concise
+
+```
+- Missing rate limiting on `/api/login` (src/routes/auth.py:15) — add express-rate-limit middleware
+- Debug logging enabled in production config (config/prod.yml:8) — set `debug: false`
+```
+
+### Good Executive Summary -- plain English, prioritized
+
+```
+Two API endpoints accept user input directly in SQL queries, creating injection
+vulnerabilities that could expose the entire user database. An API key committed
+to test fixtures should be rotated immediately. The remaining findings are
+low-risk code quality improvements. Fix the SQL injection first — it's the most
+dangerous and affects the most-used endpoints.
 ```
 
 ### Bad Finding -- vague, no evidence, not actionable
