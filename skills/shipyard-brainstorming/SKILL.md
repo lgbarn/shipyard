@@ -1,6 +1,6 @@
 ---
 name: shipyard-brainstorming
-description: You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation. Also used during /shipyard:init for requirements gathering.
+description: You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation. Invoked by /shipyard:brainstorm for requirements gathering.
 ---
 
 <!-- TOKEN BUDGET: 130 lines / ~390 tokens -->
@@ -14,7 +14,7 @@ description: You MUST use this before any creative work - creating features, bui
 - User wants to build, create, or add something new
 - User says "let's build", "I want to add", "what if we..."
 - Design discussion or feature exploration is happening
-- During `/shipyard:init` for requirements gathering
+- During `/shipyard:brainstorm` for requirements gathering
 - Before any creative work: creating features, building components, adding functionality, modifying behavior
 
 </activation>
@@ -23,7 +23,7 @@ description: You MUST use this before any creative work - creating features, bui
 
 Help turn ideas into fully formed designs through natural collaborative dialogue. Understand the project context, ask questions one at a time, then present the design in small sections (200-300 words) with validation after each.
 
-**Shipyard integration:** This skill is the foundation of `/shipyard:init`. Brainstorming drives the requirements gathering phase before any plan is written.
+**Shipyard integration:** This skill is invoked by the `/shipyard:brainstorm` command for project requirements gathering. It can also be used standalone for any creative exploration or design work.
 
 <instructions>
 
@@ -63,7 +63,10 @@ I'd lean toward (A) because [reason]. Which feels right for your case?
 
 ## After the Design
 
-**Documentation:**
+**When invoked by `/shipyard:brainstorm` command:**
+- The command handles writing to `.shipyard/PROJECT.md` and committing — do not write the design document yourself.
+
+**When invoked standalone (not via the brainstorm command):**
 - Write the validated design to `docs/plans/YYYY-MM-DD-<topic>-design.md`
 - Use elements-of-style:writing-clearly-and-concisely skill if available
 - Commit the design document to git

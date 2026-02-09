@@ -469,7 +469,7 @@ Deploying untested skills = deploying untested code. It's a violation of quality
 
 ## Skill Creation Checklist (TDD Adapted)
 
-**Use TodoWrite to create todos for EACH item below.**
+**Use TaskCreate to create tasks for EACH item below.**
 
 **RED:** Create pressure scenarios (3+ for discipline skills) -- run WITHOUT skill -- document baseline rationalizations
 

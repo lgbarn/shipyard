@@ -1,5 +1,5 @@
 ---
-description: "Plan a phase by decomposing it into executable tasks"
+description: "Plan a phase of work (creates roadmap if needed)"
 disable-model-invocation: true
 argument-hint: "[phase-number] [--skip-research] [--no-discuss]"
 ---
@@ -17,6 +17,19 @@ You are executing the Shipyard planning workflow. Follow these steps precisely.
 - If `--no-discuss` is provided, skip the discussion capture step.
 - If `--gaps` is provided, this is a gap-filling re-plan (see note at bottom).
 - If no phase number is provided, read `.shipyard/STATE.json` to determine the current phase.
+
+## Step 1.5: Ensure ROADMAP.md Exists
+
+Check if `.shipyard/ROADMAP.md` exists.
+
+- **If it exists:** Proceed to Step 2.
+
+- **If `.shipyard/PROJECT.md` exists but no ROADMAP.md:** Tell the user a roadmap is needed before planning. Dispatch an **architect agent** (subagent_type: `"shipyard:architect"`) with the full PROJECT.md content to generate `.shipyard/ROADMAP.md`. Present the roadmap to the user for approval. Allow up to **3 revision cycles** where the user can request changes. After approval (or 3 rounds), finalize and proceed to Step 2.
+
+- **If neither PROJECT.md nor ROADMAP.md exists:** Use `AskUserQuestion` to ask: "No project definition or roadmap found. What would you like to do?"
+  - `Run brainstorming first (Recommended)` — Tell the user: "Run `/shipyard:brainstorm` to explore requirements and capture a project definition first." Then stop.
+  - `Create a minimal roadmap` — Ask the user for a brief description of what they want to build. Dispatch an **architect agent** (subagent_type: `"shipyard:architect"`) with that description to generate `.shipyard/ROADMAP.md`. Present for approval with up to **3 revision cycles**. After approval, proceed to Step 2.
+  - `Cancel` — Stop.
 
 ## Step 2: Validate State
 

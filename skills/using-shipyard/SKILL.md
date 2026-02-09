@@ -160,6 +160,8 @@ If any trigger matches, invoke the skill before responding. Multiple triggers ca
 
 </instructions>
 
+<rules>
+
 ## Red Flags
 
 These thoughts indicate a missed skill invocation:
@@ -182,3 +184,36 @@ When multiple skills could apply: **process skills first** (brainstorming, debug
 ## User Instructions
 
 Instructions say WHAT, not HOW. "Add X" or "Fix Y" doesn't mean skip workflows.
+
+</rules>
+
+<examples>
+
+## Good: Skill invoked before responding
+
+User: "Add a health check endpoint"
+
+Before responding, check triggers:
+- Task marker → this is implementation → check for `shipyard:shipyard-tdd` (writing code)
+- State condition → starting feature work → check for `shipyard:git-workflow` (branch management)
+
+Result: Invoke `shipyard:shipyard-tdd`, then proceed with implementation using TDD discipline.
+
+## Bad: Skipping skill invocation
+
+User: "Add a health check endpoint"
+
+Immediately start writing code without checking triggers. Miss TDD discipline, skip branch creation, no verification before claiming done.
+
+## Good: Multiple triggers fire
+
+User: "Fix the SQL injection bug in the auth module"
+
+Triggers matched:
+1. Content pattern → "bug" → invoke `shipyard:shipyard-debugging` (investigate root cause first)
+2. Content pattern → "SQL injection" → invoke `shipyard:security-audit` (check for related vulnerabilities)
+3. State condition → will claim "fixed" when done → invoke `shipyard:shipyard-verification` (verify before claiming)
+
+Result: Debug first, audit for related issues, verify the fix works.
+
+</examples>

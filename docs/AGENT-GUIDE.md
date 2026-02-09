@@ -29,8 +29,10 @@ All model assignments are configurable via `model_routing` in `.shipyard/config.
 ```mermaid
 graph LR
     subgraph init ["/shipyard:init"]
-        M[mapper ×4] --> B[brainstorming]
-        B --> A1[architect]
+        S[settings collection]
+    end
+    subgraph brainstorm ["/shipyard:brainstorm"]
+        BR[brainstorming] --> A0[architect]
     end
     subgraph plan ["/shipyard:plan"]
         R[researcher] --> A2[architect]
@@ -58,7 +60,7 @@ graph LR
 ### architect
 
 - **Model:** opus (configurable via `model_routing.architecture`)
-- **Dispatched by:** `/shipyard:init` (roadmap), `/shipyard:plan` (plans), `/shipyard:quick` (quick plans)
+- **Dispatched by:** `/shipyard:brainstorm` (roadmap), `/shipyard:plan` (roadmap + plans), `/shipyard:quick` (quick plans)
 - **Recommended max_turns:** 15
 - **Inputs:** PROJECT.md, ROADMAP.md, RESEARCH.md, CONTEXT-{N}.md, codebase docs
 - **Outputs:** ROADMAP.md (init), PLAN-{W}.{P}.md (plan)
@@ -180,7 +182,7 @@ graph LR
 ### mapper
 
 - **Model:** sonnet (configurable via `model_routing.mapping`)
-- **Dispatched by:** `/shipyard:init` (brownfield projects — 4 parallel instances), `/shipyard:map` (on-demand, supports all 4 focus areas in parallel)
+- **Dispatched by:** `/shipyard:map` (on-demand, supports all 4 focus areas in parallel)
 - **Recommended max_turns:** 20
 - **Inputs:** Entire codebase (read-only)
 - **Outputs:** One of: STACK.md + INTEGRATIONS.md, ARCHITECTURE.md + STRUCTURE.md, CONVENTIONS.md + TESTING.md, or CONCERNS.md

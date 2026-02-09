@@ -112,9 +112,9 @@ Shipyard dispatches specialized agents for different phases of work:
 
 | Agent | Role | Dispatched By |
 |-------|------|---------------|
-| **mapper** | Brownfield codebase analysis (4 parallel instances) | `/shipyard:init`, `/shipyard:map` |
+| **mapper** | Brownfield codebase analysis (4 parallel instances) | `/shipyard:map` |
 | **researcher** | Domain/technology research | `/shipyard:plan`, `/shipyard:research` |
-| **architect** | Roadmap + plan decomposition | `/shipyard:init`, `/shipyard:plan`, `/shipyard:quick` |
+| **architect** | Roadmap + plan decomposition | `/shipyard:brainstorm`, `/shipyard:plan`, `/shipyard:quick` |
 | **builder** | Task execution with TDD, IaC validation, atomic commits | `/shipyard:build`, `/shipyard:quick` |
 | **reviewer** | Two-stage code review (spec + quality) | `/shipyard:build`, `/shipyard:review` |
 | **auditor** | Comprehensive security & compliance analysis | `/shipyard:build`, `/shipyard:ship`, `/shipyard:audit` |

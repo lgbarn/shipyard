@@ -4,6 +4,28 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [3.1.0] - 2026-02-09
+
+### Added
+- **`/shipyard:brainstorm` command**: Standalone requirements exploration via Socratic dialogue, captures PROJECT.md, offers roadmap generation
+- **`/shipyard:settings` command**: View and update workflow settings interactively or directly (`/settings list`, `/settings key value`)
+- **Audit executive summary**: Security audit reports now lead with a plain-English executive summary, risk level, prioritized "What to Do" action table, and themes — before diving into detailed findings
+- **`docs/COMPARISON.md`**: Feature comparison table (moved from README for cleaner getting-started experience)
+
+### Changed
+- **`/shipyard:init` decomposed to settings-only**: No longer handles codebase mapping, brainstorming, or roadmap generation. Creates `.shipyard/`, collects preferences via 3 batches of AskUserQuestion, writes config.json + STATE.json, displays guided next-steps
+- **`/shipyard:plan` handles missing roadmaps**: New Step 1.5 creates ROADMAP.md if missing (dispatches architect from PROJECT.md, or offers brainstorming/minimal options)
+- **`using-shipyard` skill restructured**: Leads with "What is Shipyard?" orientation and "Getting Started" guide for new users; enforcement rules moved to end; added `<rules>` and `<examples>` XML tags
+- **Audit findings format**: Advisory findings use concise bullet format; Cross-Component Analysis elevated from bottom; Analysis Coverage checklist added; Risk Level thresholds defined (Critical/High/Medium/Low)
+- **README.md simplified**: Lifecycle diagram at top, plain-English intro, Quick Start updated for new workflow, "Why Memory Was Removed" trimmed, Feature Comparison moved to docs/
+- **QUICKSTART.md updated**: Added intro paragraph, brainstorm/settings commands, lifecycle flow reflects new init → brainstorm → plan → build → ship
+- **AGENT-GUIDE.md updated**: Pipeline mermaid diagram reflects init as settings-only with separate brainstorm subgraph; agent dispatch references updated
+
+### Fixed
+- Stale agent dispatch references in README.md and AGENT-GUIDE.md (init no longer dispatches mapper or architect)
+- `TodoWrite` references replaced with `TaskCreate` in using-shipyard, executing-plans, and writing-skills skills
+- `skills/shipyard-brainstorming/SKILL.md` output path clarified (command → PROJECT.md, standalone → docs/plans/)
+
 ## [3.0.1] - 2026-02-08
 
 ### Fixed
