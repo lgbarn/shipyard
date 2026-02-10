@@ -4,6 +4,36 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [3.2.0] - 2026-02-10
+
+### Added
+- **10 agent definition files** (`.claude/agents/`): shipyard-architect, shipyard-builder, shipyard-reviewer, shipyard-verifier, shipyard-auditor, shipyard-simplifier, shipyard-documenter, shipyard-researcher, shipyard-mapper, shipyard-debugger — each with tool restrictions, model defaults, and structured system prompts
+- **`/shipyard:help [topic]` command**: Progressive disclosure — shows quick-reference table by default, detailed help for a specific command/skill when given a topic argument
+- **`/shipyard:doctor` command**: Health-check diagnostic — verifies jq, git, skills discoverable, hooks registered, `.shipyard/` structure valid
+- **`/shipyard:cancel` command**: Graceful build interruption — creates checkpoint, sets status to "paused", reports what can be resumed
+- **`/shipyard:debug` command**: Dispatches the new debugger agent for root-cause analysis with 5 Whys protocol
+- **Alias commands**: `/shipyard:s` (status), `/shipyard:b` (build), `/shipyard:p` (plan), `/shipyard:q` (quick)
+- **Hook kill switch**: `SHIPYARD_DISABLE_HOOKS=true` disables all hooks; `SHIPYARD_SKIP_HOOKS=hook1,hook2` selectively skips named hooks
+- **PreToolUse hook** (`hooks/pre-tool-use.sh`): Protocol compliance nudges — model routing reminders for Task dispatch, checkpoint reminders during builds, state-write guidance
+- **SessionEnd hook** (`hooks/stop.sh`): Appends interruption note to HISTORY.md when session ends during active build
+- **Backup-on-write**: STATE.json.bak created before every write; state-read.sh falls back to .bak on corruption
+- **SHA-256 checksum verification**: Checksum written alongside STATE.json on write, verified on read
+- **Working notes** (`--note` flag): `state-write.sh --note "text"` appends timestamped entries to `.shipyard/NOTES.md`; auto-cleared on phase completion; loaded in execution context tier
+- **Human-readable state inspect**: `state-read.sh --human` outputs formatted text (phase, status, position, history, next action) for terminal debugging
+- **Natural language trigger phrases**: All 16 skills updated with conversational activation phrases (e.g., "build me", "fix this bug", "test first", "is this secure")
+- **Conflict resolution rules**: Priority table added to using-shipyard skill (debugging > TDD > verification > brainstorming)
+- **Adaptive model routing docs**: Context tier model adjustment documented in PROTOCOLS.md (light/standard/heavy)
+- **Agent composition patterns**: Named workflows documented in AGENT-GUIDE.md (Full Build, Quick Task, Investigation, Brownfield, Quality Audit)
+- **23 new BATS tests** (108 total): kill switch, selective skip, phase-specific evidence, backup/checksum, working notes, human inspect
+
+### Changed
+- **Phase-specific evidence gate**: `task-completed.sh` now scopes evidence check to current phase directory instead of cumulative across all phases
+- **Parallel BATS execution**: `test/run.sh` uses `--jobs` for concurrent test execution
+- **Test categorization**: All tests tagged `unit` or `integration` via BATS tags; added `test:fast` and `test:ci` npm scripts
+- **Session hook skill descriptions**: Truncation increased from 80 to 120 characters for better skill matching
+- **CI pipeline expanded**: ShellCheck now covers `test/test_helper.bash`; `npm audit --audit-level=high` added
+- **Standardized test teardown**: Default `teardown()` in `test_helper.bash` unsets `SHIPYARD_*` and `CLAUDE_CODE_*` env vars
+
 ## [3.1.1] - 2026-02-09
 
 ### Changed

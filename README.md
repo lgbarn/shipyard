@@ -82,6 +82,11 @@ For the full command reference and common workflows, see [docs/QUICKSTART.md](do
 | `/shipyard:research <topic>` | On-demand domain/technology research and comparison |
 | `/shipyard:verify [criteria]` | On-demand verification — run tests or check acceptance criteria |
 | `/shipyard:map [focus]` | On-demand codebase analysis — technology, architecture, quality, concerns |
+| `/shipyard:help [topic]` | Quick-reference table or detailed help for a specific command/skill |
+| `/shipyard:doctor` | Health-check diagnostic — jq, git, skills, hooks, `.shipyard/` structure |
+| `/shipyard:cancel` | Graceful build interruption — checkpoint, pause, resume later |
+| `/shipyard:debug [description]` | Root-cause analysis with 5 Whys protocol via debugger agent |
+| `/shipyard:s` / `b` / `p` / `q` | Aliases for status, build, plan, quick |
 
 ## Skills (Auto-Activating)
 
@@ -108,21 +113,22 @@ Shipyard includes 16 skills that Claude invokes automatically when trigger condi
 
 ## Agents
 
-Shipyard dispatches specialized agents for different phases of work:
+Shipyard dispatches 10 specialized agents for different phases of work:
 
-| Agent | Role | Dispatched By |
-|-------|------|---------------|
-| **mapper** | Brownfield codebase analysis (4 parallel instances) | `/shipyard:map` |
-| **researcher** | Domain/technology research | `/shipyard:plan`, `/shipyard:research` |
-| **architect** | Roadmap + plan decomposition | `/shipyard:brainstorm`, `/shipyard:plan`, `/shipyard:quick` |
-| **builder** | Task execution with TDD, IaC validation, atomic commits | `/shipyard:build`, `/shipyard:quick` |
-| **reviewer** | Two-stage code review (spec + quality) | `/shipyard:build`, `/shipyard:review` |
-| **auditor** | Comprehensive security & compliance analysis | `/shipyard:build`, `/shipyard:ship`, `/shipyard:audit` |
-| **simplifier** | Cross-task duplication and complexity analysis | `/shipyard:build`, `/shipyard:simplify` |
-| **documenter** | Documentation generation & updates | `/shipyard:build`, `/shipyard:ship`, `/shipyard:document` |
-| **verifier** | Post-execution verification (including IaC) | `/shipyard:plan`, `/shipyard:build`, `/shipyard:ship`, `/shipyard:verify` |
+| Agent | Role | Default Model | Dispatched By |
+|-------|------|---------------|---------------|
+| **mapper** | Brownfield codebase analysis (4 parallel instances) | sonnet | `/shipyard:map` |
+| **researcher** | Domain/technology research | sonnet | `/shipyard:plan`, `/shipyard:research` |
+| **architect** | Roadmap + plan decomposition | opus | `/shipyard:brainstorm`, `/shipyard:plan`, `/shipyard:quick` |
+| **builder** | Task execution with TDD, IaC validation, atomic commits | sonnet | `/shipyard:build`, `/shipyard:quick` |
+| **reviewer** | Two-stage code review (spec + quality) | sonnet | `/shipyard:build`, `/shipyard:review` |
+| **auditor** | Comprehensive security & compliance analysis | sonnet | `/shipyard:build`, `/shipyard:ship`, `/shipyard:audit` |
+| **simplifier** | Cross-task duplication and complexity analysis | sonnet | `/shipyard:build`, `/shipyard:simplify` |
+| **documenter** | Documentation generation & updates | sonnet | `/shipyard:build`, `/shipyard:ship`, `/shipyard:document` |
+| **verifier** | Post-execution verification (including IaC) | haiku | `/shipyard:plan`, `/shipyard:build`, `/shipyard:ship`, `/shipyard:verify` |
+| **debugger** | Root-cause analysis with 5 Whys protocol | sonnet | `/shipyard:debug` |
 
-See [`docs/AGENT-GUIDE.md`](docs/AGENT-GUIDE.md) for detailed agent documentation including model assignments, restrictions, tool access, and relationships.
+All agents have formal definition files in `.claude/agents/` with tool restrictions (e.g., reviewers can only read, builders can edit). See [`docs/AGENT-GUIDE.md`](docs/AGENT-GUIDE.md) for detailed documentation including model assignments, tool access, and composition patterns.
 
 ## Agent Teams Support
 
@@ -191,14 +197,14 @@ IDEA → /init (configure preferences)
 
 Shipyard uses a dual state system:
 
-- **File state** (`.shipyard/` directory): Cross-session persistence for project vision, roadmap, plans, and progress. Survives session restarts and can be committed to git.
+- **File state** (`.shipyard/` directory): Cross-session persistence for project vision, roadmap, plans, and progress. Survives session restarts and can be committed to git. Includes backup-on-write (`.bak`), SHA-256 checksums, and working notes (`NOTES.md`) for compaction resilience.
 - **Native tasks** (TaskCreate/TaskUpdate): In-session UI visibility showing real-time progress of phases and plans.
 
 ### Key Design Principles
 
 - **Fresh context per task**: Each builder agent runs in a clean 200k-token context, preventing quality degradation
 - **Two-stage review + security audit**: Spec compliance and code quality per task, comprehensive security audit per phase
-- **Configurable gates**: Security audit, simplification review, and IaC validation can be toggled in `config.json` or skipped with `--light`
+- **Configurable gates**: Security audit, simplification review, and IaC validation can be toggled in `config.json` or skipped with `--light`. Hook kill switch (`SHIPYARD_DISABLE_HOOKS`) available for debugging
 - **Code simplification**: Post-phase analysis catches AI-generated duplication and bloat across tasks
 - **Documentation generation**: Post-phase documentation keeps docs synchronized with code changes
 - **IaC support**: Terraform, Ansible, Docker validation workflows built into the builder and verifier
@@ -213,7 +219,10 @@ Shipyard uses a dual state system:
 ├── PROJECT.md          # Vision, decisions, constraints
 ├── ROADMAP.md          # Phase structure with success criteria
 ├── STATE.json          # Current position, machine state (JSON)
+├── STATE.json.bak      # Automatic backup (corruption fallback)
+├── STATE.json.sha256   # Checksum for integrity verification
 ├── HISTORY.md          # Append-only audit trail
+├── NOTES.md            # Working notes (compaction-resilient, auto-cleared per phase)
 ├── config.json         # Workflow preferences
 ├── codebase/           # Brownfield analysis (default; or docs/codebase/ if configured)
 ├── phases/
@@ -235,7 +244,7 @@ shipyard/
 ├── .claude-plugin/
 │   ├── marketplace.json   # Marketplace metadata (version, category)
 │   └── plugin.json        # Plugin definition (name, description)
-├── agents/                # Specialized subagent definitions
+├── agents/                # Subagent dispatch prompts (used by commands)
 │   ├── architect.md       # Roadmap and plan decomposition
 │   ├── auditor.md         # Security and compliance analysis
 │   ├── builder.md         # Task execution with TDD
@@ -247,20 +256,28 @@ shipyard/
 │   └── verifier.md        # Post-execution verification
 ├── commands/              # Slash command definitions
 │   ├── audit.md           # /shipyard:audit
+│   ├── b.md               # /shipyard:b (alias → build)
 │   ├── brainstorm.md      # /shipyard:brainstorm
 │   ├── build.md           # /shipyard:build
+│   ├── cancel.md          # /shipyard:cancel
+│   ├── debug.md           # /shipyard:debug
+│   ├── doctor.md          # /shipyard:doctor
 │   ├── document.md        # /shipyard:document
+│   ├── help.md            # /shipyard:help
 │   ├── init.md            # /shipyard:init
 │   ├── issues.md          # /shipyard:issues
 │   ├── map.md             # /shipyard:map
 │   ├── move-docs.md       # /shipyard:move-docs
+│   ├── p.md               # /shipyard:p (alias → plan)
 │   ├── plan.md            # /shipyard:plan
+│   ├── q.md               # /shipyard:q (alias → quick)
 │   ├── quick.md           # /shipyard:quick
 │   ├── recover.md         # /shipyard:recover
 │   ├── research.md        # /shipyard:research
 │   ├── resume.md          # /shipyard:resume
 │   ├── review.md          # /shipyard:review
 │   ├── rollback.md        # /shipyard:rollback
+│   ├── s.md               # /shipyard:s (alias → status)
 │   ├── settings.md        # /shipyard:settings
 │   ├── ship.md            # /shipyard:ship
 │   ├── simplify.md        # /shipyard:simplify
@@ -273,10 +290,24 @@ shipyard/
 │   ├── COMPARISON.md         # Feature comparison with other frameworks
 │   ├── PROTOCOLS.md          # Model routing and config.json reference
 │   └── QUICKSTART.md         # Command reference and common workflows
+├── .claude/
+│   └── agents/            # Agent definition files with tool restrictions
+│       ├── shipyard-architect.md
+│       ├── shipyard-auditor.md
+│       ├── shipyard-builder.md
+│       ├── shipyard-debugger.md
+│       ├── shipyard-documenter.md
+│       ├── shipyard-mapper.md
+│       ├── shipyard-researcher.md
+│       ├── shipyard-reviewer.md
+│       ├── shipyard-simplifier.md
+│       └── shipyard-verifier.md
 ├── hooks/
-│   ├── hooks.json         # Hook registry (SessionStart, TeammateIdle, TaskCompleted)
+│   ├── hooks.json         # Hook registry (SessionStart, TeammateIdle, TaskCompleted, PreToolUse, Stop)
 │   ├── teammate-idle.sh   # TeammateIdle quality gate (teams only)
-│   └── task-completed.sh  # TaskCompleted quality gate (teams only)
+│   ├── task-completed.sh  # TaskCompleted quality gate (phase-specific evidence)
+│   ├── pre-tool-use.sh    # PreToolUse protocol compliance nudges
+│   └── stop.sh            # SessionEnd build interruption tracking
 ├── scripts/
 │   ├── state-read.sh      # Adaptive context loading on session start
 │   ├── state-write.sh     # Updates .shipyard/STATE.json (teams-aware locking)
