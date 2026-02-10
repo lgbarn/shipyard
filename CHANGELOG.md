@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [3.1.1] - 2026-02-09
 
+### Changed
+- **using-shipyard skill**: Replaced terse one-line descriptions with concrete "what it actually does" summaries for all 16 skills and 21 commands. Reorganized commands into Lifecycle, Session Management, and On-Demand categories.
+
 ### Fixed
 - **Comprehensive documentation audit**: 24 files corrected across commands, skills, agents, and docs
 - README Plugin Structure tree: added 7 missing commands, 2 scripts, 2 tests, package-lock.json
