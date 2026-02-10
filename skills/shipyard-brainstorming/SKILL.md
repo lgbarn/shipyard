@@ -68,7 +68,7 @@ I'd lean toward (A) because [reason]. Which feels right for your case?
 
 **When invoked standalone (not via the brainstorm command):**
 - Write the validated design to `docs/plans/YYYY-MM-DD-<topic>-design.md`
-- Use elements-of-style:writing-clearly-and-concisely skill if available
+- Use elements-of-style:writing-clearly-and-concisely skill if available (an external skill, not included with Shipyard)
 - Commit the design document to git
 
 **Implementation (if continuing):**

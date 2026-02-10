@@ -36,7 +36,7 @@ Match specificity to task fragility:
 Two fields only: `name` and `description`.
 
 - `name`: Max 64 chars, lowercase/numbers/hyphens only, no XML tags, no reserved words ("anthropic", "claude")
-- `description`: Max 1024 chars, non-empty, no XML tags, third person, includes what AND when
+- `description`: Max 1024 chars, non-empty, no XML tags, third person, includes triggering conditions (when to use)
 
 ### Naming
 
@@ -47,7 +47,7 @@ Avoid: vague (`helper`, `utils`), generic (`documents`, `data`), reserved words.
 ### Description Writing
 
 - Third person (injected into system prompt)
-- Include both what it does AND when to use it
+- Focus on triggering conditions (when to use). Describe the problem domain, not the skill's workflow (see CSO section in SKILL.md for why)
 - Be specific with key terms for discovery
 
 **Good:** `Extract text and tables from PDF files, fill forms, merge documents. Use when working with PDF files or when the user mentions PDFs, forms, or document extraction.`

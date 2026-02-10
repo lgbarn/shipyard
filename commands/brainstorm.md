@@ -56,9 +56,11 @@ When the user is satisfied, capture all decisions into `.shipyard/PROJECT.md` wi
 
 ## Step 5: Offer Roadmap Creation
 
+Follow **Model Routing Protocol** (select the correct model for each agent role using `model_routing` from config; see `docs/PROTOCOLS.md`) -- read `model_routing` from config for architect model selection.
+
 Use `AskUserQuestion` to ask: "Would you like to generate a roadmap now?"
 
-- `Yes (Recommended)` — Dispatch an **architect agent** (subagent_type: `"shipyard:architect"`) with the full PROJECT.md content to generate `.shipyard/ROADMAP.md`. Present the roadmap to the user for approval. Allow up to **3 revision cycles** where the user can request changes. After approval (or 3 rounds), finalize.
+- `Yes (Recommended)` — Dispatch an **architect agent** (subagent_type: `"shipyard:architect"`) with context per **Agent Context Protocol** (pass PROJECT.md, config.json, working directory, branch, and worktree status to all agents; see `docs/PROTOCOLS.md`) including the full PROJECT.md content to generate `.shipyard/ROADMAP.md`. Present the roadmap to the user for approval. Allow up to **3 revision cycles** where the user can request changes. After approval (or 3 rounds), finalize.
 - `Not now` — Tell the user: "You can run `/shipyard:plan` later — it will offer to create a roadmap if one doesn't exist."
 
 ## Step 6: Commit & Update State

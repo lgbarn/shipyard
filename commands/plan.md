@@ -86,7 +86,7 @@ The researcher agent should:
 
 ## Step 5: Architecture & Plan Generation
 
-Dispatch an **architect agent** (subagent_type: "shipyard:architect") with context per **Agent Context Protocol**:
+Dispatch an **architect agent** (subagent_type: "shipyard:architect") with context per **Agent Context Protocol** (pass PROJECT.md, config.json, working directory, branch, and worktree status to all agents; see `docs/PROTOCOLS.md`):
 - Phase description from ROADMAP.md
 - Research findings (RESEARCH.md, if available)
 - `.shipyard/phases/{N}/CONTEXT-{N}.md` (if exists) -- user decisions to guide planning

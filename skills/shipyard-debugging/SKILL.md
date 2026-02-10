@@ -125,9 +125,7 @@ You MUST complete each phase before proceeding to the next.
 
    **WHEN error is deep in call stack:**
 
-   See `root-cause-tracing.md` in this directory for the complete backward tracing technique.
-
-   **Quick version:**
+   **Backward tracing technique:**
    - Where does bad value originate?
    - What called this with bad value?
    - Keep tracing up until you find the source
@@ -328,15 +326,7 @@ If systematic investigation reveals issue is truly environmental, timing-depende
 
 **But:** 95% of "no root cause" cases are incomplete investigation.
 
-## Supporting Techniques
-
-These techniques are part of systematic debugging and available in this directory:
-
-- **`root-cause-tracing.md`** - Trace bugs backward through call stack to find original trigger
-- **`defense-in-depth.md`** - Add validation at multiple layers after finding root cause
-- **`condition-based-waiting.md`** - Replace arbitrary timeouts with condition polling
-
-**Related skills:**
+## Related Skills
 - **shipyard:shipyard-tdd** - For creating failing test case (Phase 4, Step 1)
 - **shipyard:shipyard-verification** - Verify fix worked before claiming success
 

@@ -147,6 +147,6 @@ Why it fails: A code change, not a reusable insight.
 
 ## Integration
 
-**Referenced by:** `commands/ship.md` Step 3a for post-phase lesson capture.
+**Referenced by:** `commands/ship.md` Step 7 for post-phase lesson capture.
 
 **Pairs with:** `shipyard:shipyard-verification` for validating lesson quality before persisting.

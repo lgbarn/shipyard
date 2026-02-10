@@ -160,7 +160,7 @@ Dispatch an **auditor agent** (subagent_type: "shipyard:auditor") with:
 - All task summaries and context
 - Dependency manifests if any dependencies were added/changed
 - Working directory, current branch, and worktree status
-- Follow **Model Routing Protocol** — resolve model from `model_routing.security_audit` (default: sonnet)
+- Follow **Model Routing Protocol** — resolve model from `model_routing.security_audit` (default: sonnet). See `docs/PROTOCOLS.md` for details.
 
 **If CRITICAL findings exist:**
 1. Display the critical findings to the user
@@ -173,7 +173,7 @@ After the audit, dispatch a **simplifier agent** (subagent_type: "shipyard:simpl
 - Git diff of all files changed during plan execution
 - All task summaries
 - Working directory, current branch, and worktree status
-- Follow **Model Routing Protocol** — resolve model from `model_routing.simplification` (default: sonnet)
+- Follow **Model Routing Protocol** — resolve model from `model_routing.simplification` (default: sonnet). See `docs/PROTOCOLS.md` for details.
 
 **Present findings with options:**
 1. **Implement simplifications** — dispatch builder with simplification plan

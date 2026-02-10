@@ -186,7 +186,7 @@ Validate the key and value:
 | `simplification_review` | `true`, `false` |
 | `iac_validation` | `auto`, `true`, `false` |
 | `documentation_generation` | `true`, `false` |
-| `context_tier` | `auto`, `minimal`, `full` |
+| `context_tier` | `auto`, `minimal`, `planning`, `execution`, `brownfield`, `full` |
 | `codebase_docs_path` | `.shipyard/codebase`, `docs/codebase` |
 | `model_routing.validation` | `haiku`, `sonnet`, `opus` |
 | `model_routing.building` | `haiku`, `sonnet`, `opus` |
@@ -210,7 +210,16 @@ Proceed to Step 8.
 
 <output>
 
-## Step 8: Confirm Changes
+## Step 8: Commit & Confirm Changes
+
+Commit the updated config:
+
+```bash
+git add .shipyard/config.json
+git commit -m "shipyard: update settings"
+```
+
+Append a HISTORY.md entry: `- [<timestamp>] Settings updated: {list of changed keys}`
 
 Display a summary of what changed:
 
@@ -220,6 +229,6 @@ Updated .shipyard/config.json:
   ...
 ```
 
-If no changes were made (all "Keep current"), display: `No settings changed.`
+If no changes were made (all "Keep current"), display: `No settings changed.` (skip commit and history entry)
 
 </output>

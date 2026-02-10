@@ -134,6 +134,8 @@ When customizing model routing, consider these tradeoffs:
 
 **Defaults:** `security_audit: true`, `simplification_review: true`, `iac_validation: "auto"`, `documentation_generation: true`, `codebase_docs_path: ".shipyard/codebase"`. Context tier defaults to `"auto"`.
 
+**Config version:** The `version` field tracks the config schema version (currently `"1.3"`). This is set by `/shipyard:init` and used internally to detect when config format changes require migration. Users should not modify this field.
+
 ---
 
 ## Checkpoint Protocol

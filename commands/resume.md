@@ -75,7 +75,7 @@ Follow **Native Task Scaffolding Protocol** (create/update native tasks for prog
 
 ## Step 6: Display Status Overview
 
-Run the same display logic as `/shipyard:status` (Step 4 from status.md):
+Run the same display logic as `/shipyard:status` (Display Dashboard step from status.md):
 - Show the progress visualization
 - Show current position
 - Show recent activity

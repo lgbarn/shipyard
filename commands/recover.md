@@ -60,7 +60,7 @@ Recommended action: {see options below}
 
 </execution>
 
-<error-handling>
+<output>
 
 ## Step 5: Present Recovery Options
 
@@ -104,4 +104,4 @@ If the user selects this option:
 **Require explicit confirmation:**
 > "This will archive all Shipyard state. Type 'RESET' to confirm."
 
-</error-handling>
+</output>

@@ -28,8 +28,8 @@ How Shipyard compares to other Claude Code project frameworks.
 | Phase verification | ✅ | ✅ | ❌ |
 | Configurable gate toggles | ✅ (`--light`, config.json) | ❌ | ❌ |
 | **Context & Models** | | | |
-| Multi-model routing | ✅ (7 categories) | ✅ (profiles) | ❌ |
-| Adaptive context loading | ✅ (4 tiers) | ✅ (5 tiers, fork) | ✅ (<2k bootstrap) |
+| Multi-model routing | ✅ (9 categories) | ✅ (profiles) | ❌ |
+| Adaptive context loading | ✅ (5 tiers, plus auto) | ✅ (5 tiers, fork) | ✅ (<2k bootstrap) |
 | Session resume / state persistence | ✅ | ✅ | ❌ |
 | **Git & Recovery** | | | |
 | Git worktree management | ✅ (command + agent context) | ❌ | ✅ (skill) |

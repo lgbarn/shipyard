@@ -57,9 +57,7 @@ Ask the user:
 
 Before any rollback, create a safety checkpoint:
 
-```bash
-${CLAUDE_PLUGIN_ROOT}/scripts/checkpoint.sh "pre-rollback"
-```
+Follow **Checkpoint Protocol** (create a named git tag for rollback safety at key pipeline stages; see `docs/PROTOCOLS.md`) -- create `pre-rollback` checkpoint.
 
 This ensures the current state can be recovered if the rollback was a mistake.
 

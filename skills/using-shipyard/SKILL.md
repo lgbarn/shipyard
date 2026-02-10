@@ -37,14 +37,20 @@ For quick one-off tasks, skip the lifecycle and use `/shipyard:quick 'descriptio
 | Set up a new project | `/shipyard:init` |
 | Explore requirements | `/shipyard:brainstorm` |
 | Understand existing code | `/shipyard:map` |
-| Plan a phase | `/shipyard:plan` |
-| Build from a plan | `/shipyard:build` |
+| Plan a phase | `/shipyard:plan [phase] [--skip-research]` |
+| Build from a plan | `/shipyard:build [phase] [--plan N] [--light]` |
 | Quick one-off task | `/shipyard:quick "task"` |
 | Review my code | `/shipyard:review` |
 | Security check | `/shipyard:audit` |
+| Research technology options | `/shipyard:research "topic"` |
+| Find duplication/complexity | `/shipyard:simplify [scope]` |
+| Generate documentation | `/shipyard:document [scope]` |
+| Run tests and verify | `/shipyard:verify [criteria]` |
 | Check progress | `/shipyard:status` |
 | Change settings | `/shipyard:settings` |
-| Ship completed work | `/shipyard:ship` |
+| Rollback to checkpoint | `/shipyard:rollback` |
+| Recover from errors | `/shipyard:recover` |
+| Ship completed work | `/shipyard:ship [--phase \| --milestone \| --branch]` |
 
 ## How to Access Skills
 
@@ -81,12 +87,13 @@ Shipyard provides 16 skills:
 |---------|---------|
 | `/shipyard:init` | Configure project preferences and create `.shipyard/` directory |
 | `/shipyard:brainstorm` | Explore requirements through interactive dialogue |
-| `/shipyard:plan` | Plan a phase of work (creates roadmap if needed) |
-| `/shipyard:build` | Execute a plan with builder and reviewer agents |
-| `/shipyard:status` | Check progress on current plan execution |
+| `/shipyard:plan [phase] [--skip-research]` | Plan a phase of work (creates roadmap if needed) |
+| `/shipyard:build [phase] [--plan N] [--light]` | Execute plans with builder agents, review gates, and security audits |
+| `/shipyard:status` | Show progress dashboard and route to next action |
 | `/shipyard:resume` | Restore context from a previous session |
 | `/shipyard:quick` | Quick single-task execution without full planning |
-| `/shipyard:ship` | Finalize work — merge, PR, or preserve |
+| `/shipyard:ship [--phase \| --milestone \| --branch]` | Verify and deliver — merge, PR, or preserve |
+| `/shipyard:move-docs` | Move codebase analysis docs between `.shipyard/codebase/` and `docs/codebase/` |
 | `/shipyard:settings` | View or update workflow settings |
 | `/shipyard:issues` | View and manage deferred issues across sessions |
 | `/shipyard:rollback` | Revert to a previous checkpoint |

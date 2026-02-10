@@ -130,20 +130,9 @@ npm test / cargo test / pytest / go test ./...
 - **If tests pass:** Report ready.
 - **If tests fail:** Report failures, ask whether to proceed or investigate.
 
-<output>
-
 ### Step C7: Report
 
-```
-Worktree created:
-  Branch: <name>
-  Path: <full-path>
-  Tests: <N> passing, 0 failures
-
-Ready to develop. Run `/shipyard:build` or `/shipyard:quick` from the worktree.
-```
-
-</output>
+Display the worktree creation summary (see Output section below).
 
 ---
 
@@ -163,18 +152,9 @@ For each worktree:
 - Check if the branch has unpushed commits: `git log origin/<branch>..HEAD --oneline 2>/dev/null`
 - Mark the current worktree with `(current)`
 
-<output>
-
 ### Step L3: Display
 
-```
-Worktrees:
-  * /path/to/main                  main        (current, shipyard state)
-    /path/to/.worktrees/feature-x  feature-x   (3 unpushed commits)
-    /path/to/.worktrees/phase-2    phase-2     (clean)
-```
-
-</output>
+Display the worktree list (see Output section below).
 
 ---
 
@@ -188,23 +168,11 @@ git worktree list | grep "<name>"
 
 If not found, show available worktrees and ask the user to pick one.
 
-<output>
-
 ### Step S2: Switch
 
-Report the worktree path and branch:
-
-```
-Worktree for <name>:
-  Path: <full-path>
-  Branch: <branch-name>
-
-Navigate to: cd <full-path>
-```
+Display the worktree path and branch (see Output section below).
 
 Note: Claude Code operates in the directory it was started in. The user will need to `cd` to the worktree path or start a new session from there.
-
-</output>
 
 ---
 
@@ -255,9 +223,47 @@ If the branch should also be deleted (user confirmed), optionally:
 git branch -d <branch-name>
 ```
 
+### Step R5: Report
+
+Display the removal summary (see Output section below).
+
+</execution>
+
 <output>
 
-### Step R5: Report
+## Output by Subcommand
+
+### create
+
+```
+Worktree created:
+  Branch: <name>
+  Path: <full-path>
+  Tests: <N> passing, 0 failures
+
+Ready to develop. Run `/shipyard:build` or `/shipyard:quick` from the worktree.
+```
+
+### list
+
+```
+Worktrees:
+  * /path/to/main                  main        (current, shipyard state)
+    /path/to/.worktrees/feature-x  feature-x   (3 unpushed commits)
+    /path/to/.worktrees/phase-2    phase-2     (clean)
+```
+
+### switch
+
+```
+Worktree for <name>:
+  Path: <full-path>
+  Branch: <branch-name>
+
+Navigate to: cd <full-path>
+```
+
+### remove
 
 ```
 Worktree removed:
@@ -266,5 +272,3 @@ Worktree removed:
 ```
 
 </output>
-
-</execution>

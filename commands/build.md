@@ -103,7 +103,7 @@ Wait for all builders in the wave to complete. Read their SUMMARY.md files.
 
 #### Step 4c: Review Gate
 
-For each completed plan, dispatch a **reviewer agent** (subagent_type: "shipyard:reviewer") with the same working directory context (path, branch, worktree status) and `.shipyard/phases/{N}/CONTEXT-{N}.md` (if exists) for user intent, performing a **two-stage review**:
+For each completed plan, dispatch a **reviewer agent** (subagent_type: "shipyard:reviewer") following the **Model Routing Protocol** (select the correct model for each agent role using `model_routing` from config; see `docs/PROTOCOLS.md`) with the same working directory context (path, branch, worktree status) and `.shipyard/phases/{N}/CONTEXT-{N}.md` (if exists) for user intent, performing a **two-stage review**:
 
 **Stage 1 -- Correctness Review:**
 - Read the plan and its SUMMARY.md
@@ -149,7 +149,7 @@ Follow **Native Task Scaffolding Protocol** (create/update native tasks for prog
 
 ## Step 5: Phase Verification
 
-Dispatch a **verifier agent** (subagent_type: "shipyard:verifier") with:
+Dispatch a **verifier agent** (subagent_type: "shipyard:verifier") following the **Model Routing Protocol** (select the correct model for each agent role using `model_routing` from config; see `docs/PROTOCOLS.md`) with:
 - All SUMMARY.md and REVIEW.md files for this phase
 - The phase description from ROADMAP.md
 - PROJECT.md requirements relevant to this phase

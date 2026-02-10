@@ -123,6 +123,6 @@ Files changed: {count}
 
 If failed, explain why and suggest options:
 - Retry with `/shipyard:quick {refined description}`
-- Escalate to full planning with `/shipyard:init`
+- Escalate to full planning with `/shipyard:plan`
 
 </output>

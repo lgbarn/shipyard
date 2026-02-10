@@ -17,7 +17,7 @@ Move brownfield codebase analysis documentation between `.shipyard/codebase/` an
 3. If `codebase_docs_path` is not set in config, infer from file existence:
    - If `.shipyard/codebase/` has docs: current = `.shipyard/codebase`
    - If `docs/codebase/` has docs: current = `docs/codebase`
-   - If neither has docs: display error and suggest `/shipyard:init` on a brownfield project. Stop.
+   - If neither has docs: display error and suggest `/shipyard:map` to generate codebase documentation first. Stop.
 4. If docs exist in **both** locations: display conflict error and ask the user to resolve manually. Stop.
 
 </prerequisites>

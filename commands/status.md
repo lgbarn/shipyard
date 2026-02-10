@@ -90,6 +90,7 @@ Based on the current state, suggest the most appropriate next action:
 | Phase complete with gaps | `/shipyard:plan {N} --gaps` -- Fill the gaps |
 | Phase fully complete, more remain | `/shipyard:plan {N+1}` -- Plan the next phase |
 | All phases complete | `/shipyard:ship` -- Finalize and deliver |
+| Milestone shipped (status: shipped) | `/shipyard:brainstorm` -- Define goals for the next milestone |
 | Critical issues found | Review issues, then `/shipyard:build {N} --plan W.P` to retry specific plans |
 | Quick task needed | `/shipyard:quick {description}` -- Execute outside the roadmap |
 

@@ -85,7 +85,7 @@ For the full command reference and common workflows, see [docs/QUICKSTART.md](do
 
 ## Skills (Auto-Activating)
 
-Shipyard includes 16 skills that activate automatically based on context:
+Shipyard includes 16 skills that Claude invokes automatically when trigger conditions match:
 
 | Skill | When It Activates |
 |-------|-------------------|
@@ -171,6 +171,8 @@ When teams are detected, Shipyard adapts its behavior:
 
 Teams and subagents are complementary. A lead agent in a team can still dispatch subagents for tightly-coupled subtasks within its assigned work.
 
+See [docs/AGENT-TEAMS-GUIDE.md](docs/AGENT-TEAMS-GUIDE.md) for the full Agent Teams usage guide.
+
 ## How It Works
 
 ### The Lifecycle
@@ -244,19 +246,26 @@ shipyard/
 │   ├── simplifier.md      # Complexity and duplication analysis
 │   └── verifier.md        # Post-execution verification
 ├── commands/              # Slash command definitions
+│   ├── audit.md           # /shipyard:audit
 │   ├── brainstorm.md      # /shipyard:brainstorm
 │   ├── build.md           # /shipyard:build
+│   ├── document.md        # /shipyard:document
 │   ├── init.md            # /shipyard:init
 │   ├── issues.md          # /shipyard:issues
+│   ├── map.md             # /shipyard:map
 │   ├── move-docs.md       # /shipyard:move-docs
 │   ├── plan.md            # /shipyard:plan
 │   ├── quick.md           # /shipyard:quick
 │   ├── recover.md         # /shipyard:recover
+│   ├── research.md        # /shipyard:research
 │   ├── resume.md          # /shipyard:resume
+│   ├── review.md          # /shipyard:review
 │   ├── rollback.md        # /shipyard:rollback
 │   ├── settings.md        # /shipyard:settings
 │   ├── ship.md            # /shipyard:ship
+│   ├── simplify.md        # /shipyard:simplify
 │   ├── status.md          # /shipyard:status
+│   ├── verify.md          # /shipyard:verify
 │   └── worktree.md        # /shipyard:worktree
 ├── docs/
 │   ├── AGENT-GUIDE.md        # Detailed agent documentation
@@ -272,7 +281,9 @@ shipyard/
 │   ├── state-read.sh      # Adaptive context loading on session start
 │   ├── state-write.sh     # Updates .shipyard/STATE.json (teams-aware locking)
 │   ├── team-detect.sh     # Detects Claude Code Agent Teams environment
-│   └── checkpoint.sh      # Git tag checkpoint management
+│   ├── checkpoint.sh      # Git tag checkpoint management
+│   ├── check-versions.sh  # Version sync validation
+│   └── marketplace-sync.sh # Marketplace metadata sync
 ├── skills/                # Auto-activating skill definitions
 │   ├── code-simplification/
 │   ├── documentation/
@@ -296,6 +307,8 @@ shipyard/
 │   ├── state-read.bats
 │   ├── state-write.bats   # Includes teams-aware locking tests
 │   ├── checkpoint.bats
+│   ├── check-versions.bats # Version sync tests
+│   ├── marketplace-sync.bats # Marketplace sync tests
 │   ├── integration.bats
 │   ├── e2e-smoke.bats
 │   ├── team-detect.bats   # Team detection tests
@@ -303,7 +316,9 @@ shipyard/
 ├── CHANGELOG.md
 ├── CONTRIBUTING.md
 ├── LICENSE
-└── package.json
+├── README.md
+├── package.json
+└── package-lock.json
 ```
 
 ## Configuration
@@ -321,7 +336,7 @@ When you run `/shipyard:init`, Shipyard creates a `.shipyard/config.json` in you
 | `documentation_generation` | `true`, `false` | `true` | Generate docs after each phase |
 | `codebase_docs_path` | `.shipyard/codebase`, `docs/codebase` | `.shipyard/codebase` | Where brownfield analysis docs are stored |
 | `model_routing` | object | see `docs/PROTOCOLS.md` | Model selection per task type |
-| `context_tier` | `auto`, `minimal`, `full` | `auto` | Context loading at session start |
+| `context_tier` | `auto`, `minimal`, `planning`, `execution`, `brownfield`, `full` | `auto` | Context loading at session start |
 
 See `docs/PROTOCOLS.md` for model routing configuration and the full config.json skeleton.
 

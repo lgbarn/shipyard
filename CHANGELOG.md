@@ -4,6 +4,37 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [3.1.1] - 2026-02-09
+
+### Fixed
+- **Comprehensive documentation audit**: 24 files corrected across commands, skills, agents, and docs
+- README Plugin Structure tree: added 7 missing commands, 2 scripts, 2 tests, package-lock.json
+- README `context_tier` values: added missing `planning`, `execution`, `brownfield` options
+- AGENT-GUIDE overview table: architect dispatcher `init` → `brainstorm`, mapper dispatcher `init, map` → `map`
+- AGENT-GUIDE Mermaid diagram: added brainstorm to lifecycle flow
+- ship.md: sequential step numbering (was 3a/3b/4a), fixed next-milestone routing to `/brainstorm`
+- status.md: added routing entry for "shipped" state
+- worktree.md: consolidated nested `<output>` sections into single block
+- recover.md: `<error-handling>` tag → `<output>` for consistency
+- rollback.md: replaced hardcoded `${CLAUDE_PLUGIN_ROOT}` with Checkpoint Protocol reference
+- settings.md: added missing `context_tier` values, commit step after changes
+- brainstorm.md: added Model Routing and Agent Context Protocol references
+- build.md: added Model Routing Protocol to reviewer and verifier dispatches
+- plan.md: Agent Context Protocol format made consistent
+- quick.md: escalation path corrected to `/shipyard:plan`
+- move-docs.md: error suggestion corrected to `/shipyard:map`
+- resume.md: fragile step number reference replaced with descriptive name
+- using-shipyard skill: 6 missing commands added to "I Want To..." table, descriptions harmonized
+- shipyard-debugging skill: removed references to 3 non-existent supporting files
+- shipyard-writing-skills skill: merged duplicate `<instructions>` blocks, removed `@graphviz-conventions.dot` reference
+- shipyard-executing-plans skill: added PROTOCOLS.md links to Model Routing Protocol references
+- shipyard-brainstorming skill: clarified external skill reference
+- anthropic-best-practices.md: description guidance aligned with CSO section
+- lessons-learned skill: updated stale step reference
+- COMPARISON.md: corrected model routing category count and context tier count
+- PROTOCOLS.md: documented config schema version field
+- QUICKSTART.md: added worktree/move-docs/history to Manage State, qualified on-demand scope
+
 ## [3.1.0] - 2026-02-09
 
 ### Added

@@ -10,9 +10,9 @@ Shipyard is a Claude Code plugin for structured project execution. It helps you 
 | Set up a new project | `/shipyard:init` |
 | Explore requirements interactively | `/shipyard:brainstorm` |
 | Plan a phase of work | `/shipyard:plan 1` |
-| Build from a plan | `/shipyard:build` |
+| Build from a plan | `/shipyard:build` (execute plans with builder agents, review gates, and security audits) |
 | Quick single task | `/shipyard:quick "add health check endpoint"` |
-| Ship completed work | `/shipyard:ship` |
+| Ship completed work | `/shipyard:ship` (verify and deliver — merge, PR, or preserve) |
 
 ### Review and Improve Code
 | Situation | Command |
@@ -50,6 +50,9 @@ Shipyard is a Claude Code plugin for structured project execution. It helps you 
 | Rollback to checkpoint | `/shipyard:rollback` |
 | Recover from errors | `/shipyard:recover` |
 | View deferred issues | `/shipyard:issues` |
+| View past phase history | Read `.shipyard/HISTORY.md` or `/shipyard:status` |
+| Isolate feature work | `/shipyard:worktree create feature-name` |
+| Move codebase docs location | `/shipyard:move-docs` |
 
 ## Lifecycle vs On-Demand
 
@@ -135,4 +138,5 @@ Upgrade `security_audit` to opus for production systems with PII or financial da
 - **Agents start fresh every time** — they have no memory of previous dispatches. Context is passed explicitly.
 - **`/shipyard:quick` is underrated** — use it for small tasks instead of manual coding. You still get TDD, review, and atomic commits.
 - **Review before audit** — fix functional bugs before running security analysis.
-- **On-demand commands work anywhere** — they don't require `/shipyard:init`. Use them on any git repo.
+- **Most on-demand commands work without `/shipyard:init`** — review, audit, simplify, research, and map can run on any git repo. Phase-specific commands like `verify 3` require `.shipyard/` state.
+- **`/shipyard:settings` for quick adjustments** — toggle security audit, change model routing, or adjust context tier without re-initializing.

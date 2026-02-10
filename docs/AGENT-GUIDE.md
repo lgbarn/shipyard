@@ -10,7 +10,7 @@ For model routing configuration, see the [Model Routing Protocol](PROTOCOLS.md#m
 
 | Agent | Default Model | Config Key | Dispatched By | Blocking? | Tool Access |
 |-------|--------------|------------|---------------|-----------|-------------|
-| **architect** | opus | `architecture` | init, plan, quick | No | Read-only + write plans |
+| **architect** | opus | `architecture` | brainstorm, plan, quick | No | Read-only + write plans |
 | **builder** | sonnet | `building` | build, quick | Yes (blocks review) | Full (read, write, bash, git) |
 | **reviewer** | sonnet | `review` | build, review | Yes (blocks progress) | Read-only |
 | **verifier** | haiku | `validation` | plan, build, ship, verify | Yes (gates shipping) | Read + bash (test commands) |
@@ -18,7 +18,7 @@ For model routing configuration, see the [Model Routing Protocol](PROTOCOLS.md#m
 | **simplifier** | sonnet | `simplification` | build, simplify | No (advisory) | Read-only |
 | **documenter** | sonnet | `documentation` | build, ship, document | No (advisory) | Read + write docs |
 | **researcher** | sonnet | `planning` | plan, research | No | Read + web search/fetch |
-| **mapper** | sonnet | `mapping` | init, map | No | Read-only |
+| **mapper** | sonnet | `mapping` | map | No | Read-only |
 
 All model assignments are configurable via `model_routing` in `.shipyard/config.json`. See [Model Selection Guidance](PROTOCOLS.md#model-selection-guidance) for when to upgrade or downgrade.
 
@@ -50,7 +50,7 @@ graph LR
         AU2[auditor] --> DO2[documenter]
         DO2 --> V3[verifier]
     end
-    init --> plan --> build --> ship
+    init --> brainstorm --> plan --> build --> ship
 ```
 
 ---
@@ -63,7 +63,7 @@ graph LR
 - **Dispatched by:** `/shipyard:brainstorm` (roadmap), `/shipyard:plan` (roadmap + plans), `/shipyard:quick` (quick plans)
 - **Recommended max_turns:** 15
 - **Inputs:** PROJECT.md, ROADMAP.md, RESEARCH.md, CONTEXT-{N}.md, codebase docs
-- **Outputs:** ROADMAP.md (init), PLAN-{W}.{P}.md (plan)
+- **Outputs:** ROADMAP.md (brainstorm), PLAN-{W}.{P}.md (plan)
 - **Restrictions:**
   - Maximum 3 tasks per plan
   - Maximum 7 phases per milestone
@@ -192,7 +192,7 @@ graph LR
   - Must sample 2-3 files per module (no generalizing from single files)
   - Must flag uncertainty with `[Inferred]` marker
   - Each document must be independently useful
-- **Parallel dispatch:** Init runs 4 mapper instances concurrently, each with a different focus area.
+- **Parallel dispatch:** `/shipyard:map` runs 4 mapper instances concurrently, each with a different focus area.
 
 ---
 

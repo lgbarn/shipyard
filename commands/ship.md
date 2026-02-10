@@ -46,7 +46,7 @@ Detect and run the project's test suite:
 
 <execution>
 
-## Step 3a: Pre-Ship Security Audit
+## Step 4: Pre-Ship Security Audit
 
 **Note:** This audit runs regardless of `config.json` settings or `--light` usage during build. Shipping is the final gate — security is always checked here. If a passing `AUDIT-{N}.md` already exists from the build phase and no changes were made since, skip re-auditing and verify the existing report has no unresolved critical findings.
 
@@ -76,7 +76,7 @@ Produce audit report.
 - Only re-audit if new changes were made after the build audit
 - Otherwise, verify the existing audit report shows no unresolved critical findings
 
-## Step 3b: Comprehensive Documentation Generation
+## Step 5: Comprehensive Documentation Generation
 
 **Note:** This step runs regardless of `config.json` settings or `--light` usage during build. Shipping should produce comprehensive documentation.
 
@@ -104,7 +104,7 @@ The documenter produces:
 
 **If no critical gaps:** Continue. Display informational findings about optional improvements.
 
-## Step 4: Determine Scope
+## Step 6: Determine Scope
 
 Based on the argument and project state:
 
@@ -150,11 +150,11 @@ Based on the argument and project state:
 **Branch scope:**
 - Use whatever is on the current branch regardless of phase state
 
-## Step 4a: Capture Lessons Learned
+## Step 7: Capture Lessons Learned
 
 Invoke the `shipyard:lessons-learned` skill for format and quality guidance.
 
-### Step 4a-i: Extract Candidate Lessons from Build Summaries
+### Step 7a: Extract Candidate Lessons from Build Summaries
 
 Read all SUMMARY.md files in the shipping scope:
 - For phase scope: `.shipyard/phases/{N}/results/SUMMARY-*.md`
@@ -162,7 +162,7 @@ Read all SUMMARY.md files in the shipping scope:
 
 Extract content from "Issues Encountered" and "Decisions Made" sections as candidate lessons.
 
-### Step 4a-ii: Present to User
+### Step 7b: Present to User
 
 Use AskUserQuestion to present:
 
@@ -180,7 +180,7 @@ Use AskUserQuestion to present:
 >
 > Edit, add to, or approve the above. Type "skip" to skip lesson capture.
 
-### Step 4a-iii: Persist Lessons
+### Step 7c: Persist Lessons
 
 If user does not type "skip":
 
@@ -210,22 +210,20 @@ If user does not type "skip":
      - If not: append `## Lessons Learned` section at end of file
 4. Commit: `shipyard(phase-{N}): capture lessons learned`
 
-If user types "skip", continue to Step 5 with no lesson capture.
+If user types "skip", continue to Step 8 with no lesson capture.
 
-## Step 5: Present Delivery Options
+## Step 8: Present Delivery Options
 
 Use AskUserQuestion to present four options:
 
 > **Your work is ready to ship. Choose a delivery method:**
 >
-> 1. **Merge locally** -- Merge this branch into the base branch on your machine
-> 2. **Push & create PR** -- Push the branch and create a pull request
-> 3. **Preserve branch** -- Keep the branch as-is for later
-> 4. **Discard work** -- Delete the branch and all changes (DESTRUCTIVE)
->
-> Enter 1, 2, 3, or 4:
+> - **Merge locally** -- Merge this branch into the base branch on your machine
+> - **Push & create PR** -- Push the branch and create a pull request
+> - **Preserve branch** -- Keep the branch as-is for later
+> - **Discard work** -- Delete the branch and all changes (DESTRUCTIVE)
 
-## Step 6: Execute Delivery
+## Step 9: Execute Delivery
 
 ### Option 1: Merge Locally
 1. Identify the base branch (main/master/develop)
@@ -254,7 +252,7 @@ Use AskUserQuestion to present four options:
 4. Delete the working branch
 5. Display: "Branch deleted. All work has been discarded."
 
-## Step 7: Archive Artifacts
+## Step 10: Archive Artifacts
 
 If the milestone is complete (not just a phase):
 1. Create `.shipyard/archive/{milestone-name}/` directory
@@ -262,7 +260,7 @@ If the milestone is complete (not just a phase):
 3. Move ROADMAP.md, PROJECT.md, MILESTONE-REPORT.md to archive
 4. Keep STATE.json, HISTORY.md, and config.json in `.shipyard/` (reset state for next milestone)
 
-## Step 8: Update Tasks & State
+## Step 11: Update Tasks & State
 
 Follow **Native Task Scaffolding Protocol** (create/update native tasks for progress tracking via TaskCreate/TaskUpdate; see `docs/PROTOCOLS.md`) -- mark all relevant native tasks as `completed`.
 
@@ -272,7 +270,7 @@ Follow **State Update Protocol** (update `.shipyard/STATE.json` and `.shipyard/H
 - **Status:** shipped
 - **Message:** `Milestone shipped via {method}`
 
-## Step 9: Commit Archive
+## Step 12: Commit Archive
 
 If archiving was done:
 ```
@@ -283,15 +281,15 @@ shipyard: archive milestone {name}
 
 <output>
 
-## Step 10: Final Message
+## Step 13: Final Message
 
 Display:
 > "Ship complete! {summary of what was delivered}"
 >
 > If there are more milestones planned:
-> "To start the next milestone, run `/shipyard:init` to define new goals."
+> "To start the next milestone, run `/shipyard:brainstorm` to define new goals."
 >
-> If lessons were captured in Step 4a:
+> If lessons were captured in Step 7:
 > "Lessons learned have been saved to `.shipyard/LESSONS.md`."
 >
 > If `.shipyard/ISSUES.md` has open issues:
