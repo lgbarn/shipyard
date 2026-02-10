@@ -17,6 +17,9 @@ description: Use when you have a written implementation plan to execute, either 
 
 **Announce at start:** "I'm using the executing-plans skill to implement this plan."
 
+## Natural Language Triggers
+- "build this", "implement this", "build me this", "execute the plan", "run the plan"
+
 </activation>
 
 ## Overview

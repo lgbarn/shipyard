@@ -15,6 +15,9 @@ description: Use when implementing any feature or bugfix, before writing impleme
 - Plan tasks with `tdd="true"` marker
 - Files matching: `*.test.*`, `*.spec.*`, `__tests__/`, `*_test.go`
 
+## Natural Language Triggers
+- "test first", "write tests", "TDD", "red green refactor", "write a failing test"
+
 </activation>
 
 ## Overview

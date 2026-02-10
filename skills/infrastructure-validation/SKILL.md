@@ -15,6 +15,9 @@ description: Use when working with Terraform (.tf, .tfvars), Ansible (playbooks,
 - Templates with `AWSTemplateFormatVersion` (CloudFormation)
 - YAML with `apiVersion:` (Kubernetes)
 
+## Natural Language Triggers
+- "validate terraform", "check docker", "lint ansible", "IaC validation", "infrastructure check"
+
 </activation>
 
 ## Overview

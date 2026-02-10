@@ -163,6 +163,26 @@ When a trigger condition matches, invoke the corresponding skill before respondi
 | Duplicate, complex, bloat, refactor | `shipyard:code-simplification` |
 | Document, README, API docs, changelog | `shipyard:documentation` |
 
+### Natural Language Triggers
+| Phrase | Skill |
+|--------|-------|
+| "what should I do", "help me", "how do I", "where do I start" | `shipyard:using-shipyard` |
+| "build this", "implement this", "execute the plan" | `shipyard:shipyard-executing-plans` |
+| "fix this bug", "why is this failing", "debug this", "it's broken" | `shipyard:shipyard-debugging` |
+| "test first", "write tests", "TDD", "red green refactor" | `shipyard:shipyard-tdd` |
+| "I want to add", "let's design", "brainstorm", "what if we" | `shipyard:shipyard-brainstorming` |
+| "is this done", "verify this", "check my work" | `shipyard:shipyard-verification` |
+| "add tests", "test coverage", "testing strategy" | `shipyard:shipyard-testing` |
+| "security check", "is this secure", "vulnerability scan" | `shipyard:security-audit` |
+| "simplify this", "clean up", "too complex" | `shipyard:code-simplification` |
+| "document this", "write docs", "update README" | `shipyard:documentation` |
+| "create branch", "commit this", "merge branch", "start feature" | `shipyard:git-workflow` |
+| "what did we learn", "capture lessons", "retrospective" | `shipyard:lessons-learned` |
+| "validate terraform", "check docker", "lint ansible" | `shipyard:infrastructure-validation` |
+| "run in parallel", "do these at the same time" | `shipyard:parallel-dispatch` |
+| "write a plan", "create a plan", "plan this feature" | `shipyard:shipyard-writing-plans` |
+| "create a skill", "write a skill", "new skill" | `shipyard:shipyard-writing-skills` |
+
 </activation>
 
 <instructions>
@@ -182,6 +202,19 @@ If any trigger matches, invoke the skill before responding. Multiple triggers ca
 </instructions>
 
 <rules>
+
+## Conflict Resolution
+
+When multiple skills could activate for the same situation, follow this priority chain:
+
+1. **Debugging** (`shipyard-debugging`) — always investigate root cause before anything else
+2. **TDD** (`shipyard-tdd`) — if writing code, tests come first
+3. **Verification** (`shipyard-verification`) — before claiming anything is done
+4. **Brainstorming** (`shipyard-brainstorming`) — design before implementation
+5. **Security** (`security-audit`) — security concerns override feature work
+6. **All others** — apply in the order they match
+
+**Example:** User says "fix this bug and add tests" → debugging first (investigate), then TDD (write failing test), then verification (prove it works).
 
 ## Red Flags
 

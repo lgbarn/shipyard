@@ -11,8 +11,13 @@
 
 set -euo pipefail
 
-# Sanitize lesson content to prevent prompt injection
-# Strips XML/HTML tags, code blocks, prompt directives, and caps length
+# Sanitize lesson content — defense-in-depth, NOT a security boundary.
+# LESSONS.md is local user-edited content, not external/untrusted input.
+# This catches accidental prompt pollution (stray XML tags, copy-pasted
+# system prompts). It will NOT stop a determined adversary — regex-based
+# sanitization is inherently bypassable. The real protection is that
+# .shipyard/ is local-only and gitignored.
+# Strips XML/HTML tags, code blocks, prompt directives, and caps length.
 sanitize_lesson() {
     local raw="$1"
     # 1. Strip XML/HTML tags (closed and unclosed) and HTML-encoded tag entities
@@ -94,6 +99,15 @@ migrate_state_md() {
     echo "Migrated STATE.md -> STATE.json + HISTORY.md" >&2
 }
 
+# Parse arguments
+HUMAN_MODE=false
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --human) HUMAN_MODE=true; shift ;;
+        *) shift ;;
+    esac
+done
+
 # Check for jq dependency
 if ! command -v jq >/dev/null 2>&1; then
     echo '{"error":"Missing dependency: jq is required but not found in PATH","exitCode":3}' >&2
@@ -112,7 +126,7 @@ for skill_dir in "${PLUGIN_ROOT}"/skills/*/; do
     desc=$(sed -n '/^[^#]/{ s/^[[:space:]]*//; p; q; }' "${skill_dir}SKILL.md" 2>/dev/null || echo "")
     [ -z "$desc" ] && desc="(no description)"
     # Truncate long descriptions
-    [ "${#desc}" -gt 80 ] && desc="${desc:0:77}..."
+    [ "${#desc}" -gt 120 ] && desc="${desc:0:117}..."
     skill_list="${skill_list}\n- \`shipyard:${skill_name}\` - ${desc}"
 done
 
@@ -124,7 +138,7 @@ $(printf '%b' "$skill_list")
 
 **Triggers:** File patterns (*.tf, Dockerfile, *.test.*), task markers (tdd="true"), state conditions (claiming done, errors), and content patterns (security, refactor) activate skills automatically. If even 1% chance a skill applies, invoke it.
 
-**Commands:** /init, /plan, /build, /status, /resume, /quick, /ship, /issues, /rollback, /recover, /move-docs, /worktree
+**Commands:** /init, /plan, /build, /status, /resume, /quick, /ship, /issues, /rollback, /recover, /move-docs, /worktree, /help, /doctor, /cancel, /s, /b, /p, /q
 SKILLEOF
 
 # Build state context
@@ -152,15 +166,38 @@ if [ -d ".shipyard" ]; then
     fi
 
     if [ -f ".shipyard/STATE.json" ]; then
-        # Validate JSON structure
-        if ! jq -e 'has("schema") and has("phase") and has("status")' .shipyard/STATE.json > /dev/null 2>&1; then
-            jq -n '{
-                error: "STATE.json is corrupt or incomplete",
-                details: "Malformed JSON or missing required fields (schema, phase, status)",
-                exitCode: 2,
-                recovery: "Run: bash scripts/state-write.sh --recover"
-            }'
-            exit 2
+        # Verify integrity: checksum + JSON validation
+        _state_ok=true
+
+        # Checksum verification (if checksum file exists)
+        if [ -f ".shipyard/STATE.json.sha256" ]; then
+            _expected_sum=$(cat ".shipyard/STATE.json.sha256" 2>/dev/null || echo "")
+            _actual_sum=$(shasum -a 256 .shipyard/STATE.json | cut -d' ' -f1)
+            if [ -n "$_expected_sum" ] && [ "$_expected_sum" != "$_actual_sum" ]; then
+                _state_ok=false
+            fi
+        fi
+
+        # JSON structure validation
+        if [ "$_state_ok" = true ]; then
+            jq -e 'has("schema") and has("phase") and has("status")' .shipyard/STATE.json > /dev/null 2>&1 || _state_ok=false
+        fi
+
+        # Fallback to backup if primary is corrupt
+        if [ "$_state_ok" = false ]; then
+            if [ -f ".shipyard/STATE.json.bak" ] && \
+               jq -e 'has("schema") and has("phase") and has("status")' .shipyard/STATE.json.bak > /dev/null 2>&1; then
+                cp ".shipyard/STATE.json.bak" ".shipyard/STATE.json"
+                shasum -a 256 ".shipyard/STATE.json" | cut -d' ' -f1 > ".shipyard/STATE.json.sha256" 2>/dev/null || true
+            else
+                jq -n '{
+                    error: "STATE.json is corrupt or incomplete",
+                    details: "Malformed JSON or missing required fields (schema, phase, status)",
+                    exitCode: 2,
+                    recovery: "Run: bash scripts/state-write.sh --recover"
+                }'
+                exit 2
+            fi
         fi
 
         # Extract fields in one jq call (IFS=tab because position/blocker may contain spaces)
@@ -222,7 +259,7 @@ if [ -d ".shipyard" ]; then
             if [ -n "$phase" ]; then
                 # Find phase directory (handles zero-padded names like 01-name)
                 if [ -d ".shipyard/phases" ]; then
-                    phase_dir=$(find .shipyard/phases/ -maxdepth 1 -type d -name "${phase}*" -o -name "0${phase}*" 2>/dev/null | head -1)
+                    phase_dir=$(find .shipyard/phases/ -maxdepth 1 -type d \( -name "${phase}*" -o -name "0${phase}*" \) 2>/dev/null | head -1)
                 else
                     phase_dir=""
                 fi
@@ -282,6 +319,14 @@ if [ -d ".shipyard" ]; then
                 history_tail=$(tail -10 ".shipyard/HISTORY.md" 2>/dev/null || echo "")
                 if [ -n "$history_tail" ]; then
                     state_context="${state_context}\n### Recent History\n${history_tail}\n"
+                fi
+            fi
+
+            # Load working notes (execution/full tier only, last 20 lines)
+            if [ -f ".shipyard/NOTES.md" ]; then
+                notes_tail=$(tail -20 ".shipyard/NOTES.md" 2>/dev/null || echo "")
+                if [ -n "$notes_tail" ]; then
+                    state_context="${state_context}\n### Working Notes\n${notes_tail}\n"
                 fi
             fi
         fi
@@ -363,6 +408,42 @@ fi
 
 # Combine all context
 full_context="<EXTREMELY_IMPORTANT>\nYou have Shipyard available -- a structured project execution framework.\n\n**Current State:**\n${state_context}\n\n**Below are available Shipyard skills and commands. Use the Skill tool to load any skill for full details.**\n\n${skill_summary}\n</EXTREMELY_IMPORTANT>"
+
+# Human-readable output mode (--human flag)
+if [ "$HUMAN_MODE" = true ]; then
+    if [ -f ".shipyard/STATE.json" ]; then
+        _h_phase=$(jq -r '.phase' .shipyard/STATE.json)
+        _h_status=$(jq -r '.status' .shipyard/STATE.json)
+        _h_position=$(jq -r '.position // "none"' .shipyard/STATE.json)
+        _h_updated=$(jq -r '.updated_at // "unknown"' .shipyard/STATE.json)
+        _h_blocker=$(jq -r '.blocker // empty' .shipyard/STATE.json 2>/dev/null || true)
+        echo "=== Shipyard State ==="
+        echo "Phase:    ${_h_phase}"
+        echo "Status:   ${_h_status}"
+        echo "Position: ${_h_position}"
+        echo "Updated:  ${_h_updated}"
+        [ -n "$_h_blocker" ] && echo "Blocker:  ${_h_blocker}"
+        echo ""
+        if [ -f ".shipyard/HISTORY.md" ]; then
+            echo "=== Recent History ==="
+            tail -5 ".shipyard/HISTORY.md" 2>/dev/null || true
+            echo ""
+        fi
+        echo "=== Suggested Action ==="
+        case "$_h_status" in
+            ready)                       echo "Run: /shipyard:plan ${_h_phase}" ;;
+            planned)                     echo "Run: /shipyard:build ${_h_phase}" ;;
+            planning)                    echo "Continue planning or run /shipyard:status" ;;
+            building|in_progress)        echo "Run: /shipyard:resume" ;;
+            complete|complete_with_gaps) echo "Run: /shipyard:plan $((_h_phase + 1)) or /shipyard:ship" ;;
+            shipped)                     echo "Project shipped! Run /shipyard:init for new milestone" ;;
+            *)                           echo "Run: /shipyard:status" ;;
+        esac
+    else
+        echo "No Shipyard project detected. Run /shipyard:init to get started."
+    fi
+    exit 0
+fi
 
 # Output JSON (jq handles escaping natively)
 jq -n --arg ctx "$full_context" '{

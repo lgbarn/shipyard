@@ -50,10 +50,10 @@ if [ "${SHIPYARD_TEAMS_ENABLED:-}" = "true" ]; then
     LOCK_DIR="${TMPDIR:-/tmp}/shipyard-state-${SHIPYARD_DIR_HASH}.lock"
 
     # Acquire lock with retry (mkdir is atomic on all POSIX systems)
-    MAX_RETRIES="${SHIPYARD_LOCK_MAX_RETRIES:-30}"
+    MAX_RETRIES="${SHIPYARD_LOCK_MAX_RETRIES:-60}"
     RETRY_DELAY="${SHIPYARD_LOCK_RETRY_DELAY:-0.1}"
     # Validate lock parameters (prevent DoS via extreme env var values)
-    [[ "$MAX_RETRIES" =~ ^[0-9]+$ ]] && [ "$MAX_RETRIES" -ge 1 ] && [ "$MAX_RETRIES" -le 300 ] || MAX_RETRIES=30
+    [[ "$MAX_RETRIES" =~ ^[0-9]+$ ]] && [ "$MAX_RETRIES" -ge 1 ] && [ "$MAX_RETRIES" -le 300 ] || MAX_RETRIES=60
     [[ "$RETRY_DELAY" =~ ^[0-9]*\.?[0-9]+$ ]] || RETRY_DELAY=0.1
     (( $(awk "BEGIN{print ($RETRY_DELAY > 5.0)}") )) && RETRY_DELAY=0.1
     acquired=false
@@ -151,6 +151,7 @@ STATUS=""
 BLOCKER=""
 RAW_CONTENT=""
 RECOVER=false
+NOTE_TEXT=""
 TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
 while [[ $# -gt 0 ]]; do
@@ -178,6 +179,10 @@ while [[ $# -gt 0 ]]; do
         --recover)
             RECOVER=true
             shift
+            ;;
+        --note)
+            NOTE_TEXT="$2"
+            shift 2
             ;;
         *)
             echo "Unknown argument: $1" >&2
@@ -254,7 +259,9 @@ if [ "$RECOVER" = true ]; then
         --arg status "$recovered_status" \
         --arg updated_at "$TIMESTAMP" \
         '{schema: $schema, phase: $phase, position: $position, status: $status, updated_at: $updated_at, blocker: null}')
+    cp "$STATE_FILE" "${STATE_FILE}.bak" 2>/dev/null || true
     atomic_write "$NEW_CONTENT" "$STATE_FILE"
+    shasum -a 256 "$STATE_FILE" | cut -d' ' -f1 > "${STATE_FILE}.sha256"
 
     # Write history
     append_history "State recovered from .shipyard/ artifacts"
@@ -272,7 +279,9 @@ if [ -n "$RAW_CONTENT" ]; then
         echo "Error: --raw content is not valid JSON or missing required fields (schema, phase, status)" >&2
         exit 1
     fi
+    cp "$STATE_FILE" "${STATE_FILE}.bak" 2>/dev/null || true
     atomic_write "$RAW_CONTENT" "$STATE_FILE"
+    shasum -a 256 "$STATE_FILE" | cut -d' ' -f1 > "${STATE_FILE}.sha256"
     echo "STATE.json updated (raw write) at ${TIMESTAMP}"
     exit 0
 fi
@@ -287,12 +296,24 @@ if [ -n "$PHASE" ] || [ -n "$POSITION" ] || [ -n "$STATUS" ]; then
         --arg updated_at "$TIMESTAMP" \
         --arg blocker "${BLOCKER:-}" \
         '{schema: $schema, phase: $phase, position: $position, status: $status, updated_at: $updated_at, blocker: (if $blocker == "" then null else $blocker end)}')
+    cp "$STATE_FILE" "${STATE_FILE}.bak" 2>/dev/null || true
     atomic_write "$NEW_CONTENT" "$STATE_FILE"
+    shasum -a 256 "$STATE_FILE" | cut -d' ' -f1 > "${STATE_FILE}.sha256"
     append_history "Phase ${PHASE:-?}: ${POSITION:-updated} (${STATUS:-unknown})"
     echo "STATE.json updated at ${TIMESTAMP}: Phase=${PHASE:-?} Position=${POSITION:-?} Status=${STATUS:-?}"
-else
-    echo "Error: No updates provided. Use --phase, --position, --status, or --raw." >&2
+    # Auto-clear working notes on phase completion
+    if [ "$STATUS" = "complete" ] || [ "$STATUS" = "complete_with_gaps" ]; then
+        rm -f ".shipyard/NOTES.md"
+    fi
+elif [ -z "$NOTE_TEXT" ]; then
+    echo "Error: No updates provided. Use --phase, --position, --status, --raw, or --note." >&2
     exit 1
+fi
+
+# Append working note if provided
+if [ -n "$NOTE_TEXT" ]; then
+    printf '%s\n' "- [${TIMESTAMP}] ${NOTE_TEXT}" >> ".shipyard/NOTES.md"
+    echo "Note added to NOTES.md at ${TIMESTAMP}"
 fi
 
 exit 0

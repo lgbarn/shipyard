@@ -9,6 +9,7 @@ teardown() {
 
 # --- Negative tests: validation ---
 
+# bats test_tags=unit
 @test "state-write: --phase rejects non-integer" {
     setup_shipyard_dir
     run bash "$STATE_WRITE" --phase "abc" --position "test" --status ready
@@ -16,6 +17,7 @@ teardown() {
     assert_output --partial "positive integer"
 }
 
+# bats test_tags=unit
 @test "state-write: --status rejects invalid value" {
     setup_shipyard_dir
     run bash "$STATE_WRITE" --phase 1 --position "test" --status "bogus"
@@ -23,6 +25,7 @@ teardown() {
     assert_output --partial "must be one of"
 }
 
+# bats test_tags=unit
 @test "state-write: fails without .shipyard directory" {
     cd "$BATS_TEST_TMPDIR"
     # Do NOT create .shipyard
@@ -33,6 +36,7 @@ teardown() {
 
 # --- Positive tests: structured writes ---
 
+# bats test_tags=unit
 @test "state-write: structured write creates valid STATE.json" {
     setup_shipyard_dir
     run bash "$STATE_WRITE" --phase 2 --position "Building plan 1" --status in_progress
@@ -46,6 +50,7 @@ teardown() {
     assert_json_field "position" "Building plan 1"
 }
 
+# bats test_tags=unit
 @test "state-write: raw write replaces STATE.json content" {
     setup_shipyard_dir
     run bash "$STATE_WRITE" --raw '{"schema":3,"phase":1,"position":"Custom","status":"ready","updated_at":"2026-01-01T00:00:00Z","blocker":null}'
@@ -56,6 +61,7 @@ teardown() {
     assert_json_field "position" "Custom"
 }
 
+# bats test_tags=unit
 @test "state-write: history preserved across writes" {
     setup_shipyard_dir
     bash "$STATE_WRITE" --phase 1 --position "First" --status planning
@@ -67,6 +73,7 @@ teardown() {
     assert_output --partial "Phase 2"
 }
 
+# bats test_tags=unit
 @test "state-write: no arguments exits with error" {
     setup_shipyard_dir
     run bash "$STATE_WRITE"
@@ -76,6 +83,7 @@ teardown() {
 
 # --- Phase 3: atomic writes, schema version, exit codes ---
 
+# bats test_tags=unit
 @test "state-write: structured write includes schema 3" {
     setup_shipyard_dir
     run bash "$STATE_WRITE" --phase 1 --position "test" --status ready
@@ -83,6 +91,7 @@ teardown() {
     assert_json_field "schema" "3"
 }
 
+# bats test_tags=unit
 @test "state-write: atomic write leaves no temp files" {
     setup_shipyard_dir
     bash "$STATE_WRITE" --phase 1 --position "test" --status ready
@@ -90,6 +99,7 @@ teardown() {
     assert_output ""
 }
 
+# bats test_tags=unit
 @test "state-write: missing .shipyard exits code 3" {
     cd "$BATS_TEST_TMPDIR"
     run bash "$STATE_WRITE" --phase 1 --position "test" --status ready
@@ -99,6 +109,7 @@ teardown() {
 
 # --- Phase 3: recovery tests ---
 
+# bats test_tags=unit
 @test "state-write: --recover rebuilds from phase artifacts" {
     setup_shipyard_dir
     mkdir -p .shipyard/phases/2/plans
@@ -118,6 +129,7 @@ teardown() {
     assert_output --partial "recovered"
 }
 
+# bats test_tags=unit
 @test "state-write: --recover with no phases defaults to phase 1" {
     setup_shipyard_dir
     run bash "$STATE_WRITE" --recover
@@ -128,6 +140,7 @@ teardown() {
     assert_json_field "status" "ready"
 }
 
+# bats test_tags=unit
 @test "state-write: --recover detects completed phase from summary" {
     setup_shipyard_dir
     mkdir -p .shipyard/phases/3/results
@@ -141,6 +154,7 @@ teardown() {
     assert_json_field "status" "complete"
 }
 
+# bats test_tags=unit
 @test "state-write: --raw rejects invalid JSON" {
     setup_shipyard_dir
     run bash "$STATE_WRITE" --raw "not valid json"
@@ -150,6 +164,7 @@ teardown() {
 
 # --- Teams-aware locking tests ---
 
+# bats test_tags=unit
 @test "state-write: skips locking when SHIPYARD_TEAMS_ENABLED is unset" {
     setup_shipyard_dir
     unset SHIPYARD_TEAMS_ENABLED 2>/dev/null || true
@@ -159,6 +174,7 @@ teardown() {
     [ ! -d "$(compute_lock_dir)" ]
 }
 
+# bats test_tags=integration
 @test "state-write: acquires mkdir lock when SHIPYARD_TEAMS_ENABLED=true" {
     setup_shipyard_dir
 
@@ -190,6 +206,7 @@ teardown() {
     assert_json_field "status" "ready"
 }
 
+# bats test_tags=unit
 @test "state-write: cleans up lock on exit" {
     setup_shipyard_dir
     export SHIPYARD_TEAMS_ENABLED=true
@@ -200,6 +217,7 @@ teardown() {
     [ ! -d "$(compute_lock_dir)" ]
 }
 
+# bats test_tags=unit
 @test "state-write: fails when lock cannot be acquired" {
     setup_shipyard_dir
 
@@ -222,4 +240,111 @@ teardown() {
 
     # Clean up the lock
     rmdir "$lock_dir" 2>/dev/null || true
+}
+
+# --- Backup-on-write tests ---
+
+# bats test_tags=unit
+@test "state-write: creates .bak file on structured write" {
+    setup_shipyard_dir
+    # First write creates STATE.json (no .bak yet since no prior file)
+    bash "$STATE_WRITE" --phase 1 --position "First" --status ready
+    [ -f .shipyard/STATE.json ]
+
+    # Second write should create .bak from previous STATE.json
+    bash "$STATE_WRITE" --phase 2 --position "Second" --status building
+    [ -f .shipyard/STATE.json.bak ]
+
+    # .bak should contain the previous state (phase 1)
+    local bak_phase
+    bak_phase=$(jq -r '.phase' .shipyard/STATE.json.bak)
+    [ "$bak_phase" = "1" ]
+}
+
+# bats test_tags=unit
+@test "state-write: creates .bak file on raw write" {
+    setup_shipyard_dir
+    bash "$STATE_WRITE" --phase 1 --position "First" --status ready
+    bash "$STATE_WRITE" --raw '{"schema":3,"phase":5,"position":"Raw","status":"ready","updated_at":"2026-01-01T00:00:00Z","blocker":null}'
+    [ -f .shipyard/STATE.json.bak ]
+
+    local bak_phase
+    bak_phase=$(jq -r '.phase' .shipyard/STATE.json.bak)
+    [ "$bak_phase" = "1" ]
+}
+
+# --- Checksum tests ---
+
+# bats test_tags=unit
+@test "state-write: creates .sha256 checksum file on write" {
+    setup_shipyard_dir
+    bash "$STATE_WRITE" --phase 1 --position "test" --status ready
+    [ -f .shipyard/STATE.json.sha256 ]
+
+    # Checksum should match actual file
+    local expected actual
+    expected=$(cat .shipyard/STATE.json.sha256)
+    actual=$(shasum -a 256 .shipyard/STATE.json | cut -d' ' -f1)
+    [ "$expected" = "$actual" ]
+}
+
+# --- Working notes tests ---
+
+# bats test_tags=unit
+@test "state-write: --note appends timestamped entry to NOTES.md" {
+    setup_shipyard_dir
+    run bash "$STATE_WRITE" --note "Found a bug in auth module"
+    assert_success
+    assert_output --partial "Note added to NOTES.md"
+
+    [ -f .shipyard/NOTES.md ]
+    run cat .shipyard/NOTES.md
+    assert_output --partial "Found a bug in auth module"
+    # Should have timestamp format
+    assert_output --partial "- ["
+}
+
+# bats test_tags=unit
+@test "state-write: --note works with structured write" {
+    setup_shipyard_dir
+    run bash "$STATE_WRITE" --phase 1 --position "Building" --status in_progress --note "Starting build"
+    assert_success
+    assert_output --partial "STATE.json updated"
+    assert_output --partial "Note added"
+
+    assert_valid_state_json
+    [ -f .shipyard/NOTES.md ]
+    run cat .shipyard/NOTES.md
+    assert_output --partial "Starting build"
+}
+
+# bats test_tags=unit
+@test "state-write: --note accumulates multiple entries" {
+    setup_shipyard_dir
+    bash "$STATE_WRITE" --note "First note"
+    bash "$STATE_WRITE" --note "Second note"
+
+    run cat .shipyard/NOTES.md
+    assert_output --partial "First note"
+    assert_output --partial "Second note"
+}
+
+# bats test_tags=unit
+@test "state-write: phase completion auto-clears NOTES.md" {
+    setup_shipyard_dir
+    bash "$STATE_WRITE" --note "Working note"
+    [ -f .shipyard/NOTES.md ]
+
+    bash "$STATE_WRITE" --phase 1 --position "Done" --status complete
+    [ ! -f .shipyard/NOTES.md ]
+}
+
+# bats test_tags=unit
+@test "state-write: complete_with_gaps also clears NOTES.md" {
+    setup_shipyard_dir
+    bash "$STATE_WRITE" --note "Working note"
+    [ -f .shipyard/NOTES.md ]
+
+    bash "$STATE_WRITE" --phase 1 --position "Done with gaps" --status complete_with_gaps
+    [ ! -f .shipyard/NOTES.md ]
 }

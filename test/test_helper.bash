@@ -109,3 +109,13 @@ setup_shipyard_empty_json_state() {
     setup_shipyard_dir
     echo '{}' > .shipyard/STATE.json
 }
+
+# Default teardown: clean up env vars that tests may set.
+# Individual test files can override this if they need custom teardown.
+teardown() {
+    unset SHIPYARD_IS_TEAMMATE SHIPYARD_TEAMS_ENABLED SHIPYARD_TEAM_NAME \
+        SHIPYARD_DISABLE_HOOKS SHIPYARD_SKIP_HOOKS SHIPYARD_LOCK_MAX_RETRIES \
+        SHIPYARD_LOCK_RETRY_DELAY \
+        CLAUDE_CODE_TEAM_NAME CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS \
+        2>/dev/null || true
+}

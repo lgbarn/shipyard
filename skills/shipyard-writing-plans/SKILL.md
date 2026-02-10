@@ -21,6 +21,9 @@ description: Use when you have a spec or requirements for a multi-step task, bef
 
 **Save plans to:** `docs/plans/YYYY-MM-DD-<feature-name>.md`
 
+## Natural Language Triggers
+- "write a plan", "create a plan", "plan this feature", "break this down into tasks"
+
 </activation>
 
 <instructions>

@@ -18,6 +18,7 @@ For model routing configuration, see the [Model Routing Protocol](PROTOCOLS.md#m
 | **simplifier** | sonnet | `simplification` | build, simplify | No (advisory) | Read-only |
 | **documenter** | sonnet | `documentation` | build, ship, document | No (advisory) | Read + write docs |
 | **researcher** | sonnet | `planning` | plan, research | No | Read + web search/fetch |
+| **debugger** | sonnet | `debugging` | debug | No | Read + bash (test commands) |
 | **mapper** | sonnet | `mapping` | map | No | Read-only |
 
 All model assignments are configurable via `model_routing` in `.shipyard/config.json`. See [Model Selection Guidance](PROTOCOLS.md#model-selection-guidance) for when to upgrade or downgrade.
@@ -179,6 +180,21 @@ graph LR
   - Comparison matrix must use consistent criteria across all candidates
   - Uses WebSearch for breadth, WebFetch for depth, codebase tools for integration analysis
 
+### debugger
+
+- **Model:** sonnet (configurable via `model_routing.debugging`)
+- **Dispatched by:** `/shipyard:debug` (on-demand), `/shipyard:build` (optionally, on persistent critical issues)
+- **Recommended max_turns:** 20
+- **Inputs:** Error description, stack traces, test output, relevant source files, codebase docs
+- **Outputs:** ROOT-CAUSE.md
+- **Restrictions:**
+  - Must complete Phase 1 (root cause investigation) before proposing any fix
+  - Must base every conclusion on evidence (logs, code, command output)
+  - Must not edit source code — produces a remediation plan for the builder
+  - If 3+ hypotheses fail, must flag as potential architectural issue
+  - Follows the 5 Whys protocol: ask "Why?" iteratively until reaching a systemic root cause
+- **Why sonnet:** Requires tracing data flow and reading code carefully. Opus is available via config upgrade for complex multi-component failures.
+
 ### mapper
 
 - **Model:** sonnet (configurable via `model_routing.mapping`)
@@ -229,4 +245,47 @@ The **orchestrator** (the main Claude session) manages all agent dispatch and re
 - **documenter** — user decides: generate, defer, or dismiss
 - **researcher** — informs architect but doesn't gate planning
 - **architect** — produces plans for user approval
+- **debugger** — produces ROOT-CAUSE.md with remediation plan for builder
 - **mapper** — produces documentation for reference
+
+---
+
+## Common Agent Compositions
+
+Named workflows showing which agents work together for common scenarios. Use these as recipes when composing agent pipelines.
+
+### Full Build Pipeline
+```
+researcher → architect → [builder → reviewer]* → verifier → auditor → simplifier → documenter
+```
+Standard `/shipyard:build` flow. The `[builder → reviewer]*` loop repeats up to 2 retries on critical findings. Auditor, simplifier, and documenter run after phase verification.
+
+### Quick Task
+```
+architect → builder
+```
+Simplified `/shipyard:quick` flow. Architect produces a lightweight plan (max 3 steps), builder executes it. No review gate.
+
+### Investigation
+```
+debugger → builder → reviewer → verifier
+```
+Bug fix with root-cause analysis. Debugger produces diagnosis and remediation plan. Builder implements the fix. Reviewer and verifier confirm correctness.
+
+### Brownfield Onboarding
+```
+mapper(×4, parallel) → architect → researcher
+```
+Understand an existing codebase before planning. Four mapper instances run in parallel (technology, architecture, quality, concerns), producing codebase docs. Architect and researcher use those docs for informed planning.
+
+### Code Quality Audit
+```
+reviewer + auditor + simplifier (parallel)
+```
+On-demand quality check without building. All three agents run in parallel against the current diff or phase changes. Useful before shipping or after large refactors.
+
+### Planning Pipeline
+```
+researcher → architect → verifier
+```
+Standard `/shipyard:plan` flow. Researcher investigates the domain, architect decomposes into plans, verifier checks plan quality and coverage.

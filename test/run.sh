@@ -11,6 +11,10 @@ cd "$PROJECT_ROOT"
 # bats is installed via devDependencies (npm ci)
 BATS="./node_modules/.bin/bats"
 
-# Run all .bats files in test/
+# Run all .bats files in test/ (parallel when GNU parallel is available)
 echo "Running Shipyard test suite..."
-"$BATS" --formatter tap test/*.bats "$@"
+if command -v parallel &>/dev/null; then
+    "$BATS" --jobs "$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 2)" --formatter tap test/*.bats "$@"
+else
+    "$BATS" --formatter tap test/*.bats "$@"
+fi

@@ -36,6 +36,9 @@ When Claude Code Agent Teams is enabled (`SHIPYARD_TEAMS_ENABLED=true`):
 
 When teams are NOT enabled, this section has no effect — use subagents as normal.
 
+## Natural Language Triggers
+- "run in parallel", "do these at the same time", "parallel tasks", "concurrent agents"
+
 </activation>
 
 ## Overview

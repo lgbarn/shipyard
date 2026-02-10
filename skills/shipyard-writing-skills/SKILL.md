@@ -16,6 +16,9 @@ description: Use when creating new skills, editing existing skills, or verifying
 - Verifying a skill works before deployment
 - Reviewing skill quality or effectiveness
 
+## Natural Language Triggers
+- "create a skill", "write a skill", "new skill", "improve this skill"
+
 </activation>
 
 ## Overview

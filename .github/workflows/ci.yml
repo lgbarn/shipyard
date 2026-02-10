@@ -27,6 +27,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Check for dependency vulnerabilities
+        run: npm audit --audit-level=high || true
+
       - name: Run BATS tests
         run: npm test
 
@@ -42,7 +45,7 @@ jobs:
         run: sudo apt-get install -y shellcheck
 
       - name: Shellcheck scripts
-        run: shellcheck --severity=warning scripts/*.sh hooks/*.sh test/run.sh
+        run: shellcheck --severity=warning scripts/*.sh hooks/*.sh test/run.sh test/test_helper.bash
 
       - name: Check version sync across files
         run: bash scripts/check-versions.sh

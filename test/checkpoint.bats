@@ -3,6 +3,7 @@ load test_helper
 
 # --- Tag creation ---
 
+# bats test_tags=integration
 @test "checkpoint: creates tag with valid label" {
     setup_git_repo
     run bash "$CHECKPOINT" "pre-build-phase-2"
@@ -15,6 +16,7 @@ load test_helper
     assert_output --partial "pre-build-phase-2"
 }
 
+# bats test_tags=integration
 @test "checkpoint: sanitizes label with special characters" {
     setup_git_repo
     run bash "$CHECKPOINT" 'my<label>&here;now'
@@ -24,6 +26,7 @@ load test_helper
     assert_output --partial "mylabelherenow"
 }
 
+# bats test_tags=unit
 @test "checkpoint: non-git-repo produces warning, exits 0" {
     cd "$BATS_TEST_TMPDIR"
     # No git init -- just a bare directory
@@ -34,6 +37,7 @@ load test_helper
 
 # --- Prune ---
 
+# bats test_tags=integration
 @test "checkpoint: --prune rejects non-integer days" {
     setup_git_repo
     run bash "$CHECKPOINT" --prune "abc"
@@ -41,6 +45,7 @@ load test_helper
     assert_output --partial "positive integer"
 }
 
+# bats test_tags=integration
 @test "checkpoint: --prune removes old tags and reports count" {
     setup_git_repo
 
@@ -66,6 +71,7 @@ load test_helper
 
 # --- Exit codes and dirty worktree ---
 
+# bats test_tags=integration
 @test "checkpoint: warns when worktree is dirty" {
     setup_git_repo
     # Modify a tracked file without committing
@@ -75,6 +81,7 @@ load test_helper
     assert_output --partial "uncommitted changes"
 }
 
+# bats test_tags=integration
 @test "checkpoint: no warning when worktree is clean" {
     setup_git_repo
     run bash "$CHECKPOINT" "clean-test"
@@ -82,6 +89,7 @@ load test_helper
     refute_output --partial "uncommitted"
 }
 
+# bats test_tags=integration
 @test "checkpoint: label that sanitizes to empty string exits 1" {
     setup_git_repo
     run bash "$CHECKPOINT" '<>;&'

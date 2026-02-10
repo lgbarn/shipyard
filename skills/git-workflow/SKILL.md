@@ -16,6 +16,9 @@ description: Use when starting feature work that needs a branch, creating worktr
 - Completing a development branch (merge, PR, preserve, discard)
 - `/shipyard:worktree` command invoked
 
+## Natural Language Triggers
+- "create branch", "commit this", "merge branch", "start feature", "set up worktree"
+
 </activation>
 
 ## Overview

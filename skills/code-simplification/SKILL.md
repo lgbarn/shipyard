@@ -19,6 +19,9 @@ description: Use after implementing features, before claiming a phase is complet
 
 **The simplifier agent references this skill for systematic cross-task analysis.**
 
+## Natural Language Triggers
+- "simplify this", "clean up", "too complex", "reduce complexity", "this is bloated"
+
 </activation>
 
 ## Overview

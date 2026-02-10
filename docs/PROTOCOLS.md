@@ -65,9 +65,10 @@ Read `model_routing` from `.shipyard/config.json` and map agent roles to model k
 | Documenter | `model_routing.documentation` | sonnet |
 | Researcher | `model_routing.planning` | sonnet |
 | Architect | `model_routing.architecture` | opus |
+| Debugger | `model_routing.debugging` | sonnet |
 | Mapper | `model_routing.mapping` | sonnet |
 
-The `debugging` config key is reserved for future use. The `shipyard-debugging` skill runs within the current session context (not as a subagent) and uses the session's model. This key is included in the config structure for forward compatibility.
+The `debugging` config key maps to the debugger agent (subagent_type: `shipyard:debugger`), dispatched by `/shipyard:debug` for root-cause analysis.
 
 Pass the resolved model name as the `model` parameter in the Task tool call. Model names (`opus`, `sonnet`, `haiku`) resolve to the latest available version at dispatch time. Currently: Opus 4.6, Sonnet 4.5, Haiku 4.5.
 </instructions>
@@ -102,6 +103,29 @@ When customizing model routing, consider these tradeoffs:
 | `documentation` | Public API documentation; user-facing guides | Internal documentation; changelog entries |
 | `planning` | Novel domain research; critical technology decisions | Well-understood technology choices |
 | `mapping` | Large legacy codebases; acquisition due diligence | Small projects; familiar stacks |
+| `debugging` | Complex multi-component failures; architectural issues | Simple test failures; obvious errors |
+
+### Context Tier Model Adjustment
+
+When `context_tier` is `"auto"` in config.json, commands should assess the scope of changes before dispatching agents and adjust the model selection accordingly. This applies **after** reading `model_routing` config — user overrides always win.
+
+| Condition | Tier | Model Adjustment |
+|---|---|---|
+| <5 files changed, single plan | light | Use default or downgrade one step (sonnet→haiku) |
+| 5-20 files, single phase | standard | Use default model for the role |
+| >20 files, security-sensitive, or cross-phase | heavy | Upgrade one step (haiku→sonnet, sonnet→opus) |
+
+**How to assess tier:**
+1. Count files in the git diff or plan's file list
+2. Check if the phase involves security, authentication, or PII handling
+3. Check if the work spans multiple phases or cross-cutting concerns
+
+**Model step ladder:** haiku → sonnet → opus. Downgrade means move left; upgrade means move right. Never downgrade below haiku or upgrade above opus.
+
+**Example:**
+- Verifier (default: haiku) checking a 25-file phase with auth changes → tier: heavy → upgrade to sonnet
+- Reviewer (default: sonnet) checking a 2-file formatting change → tier: light → downgrade to haiku
+- Builder (default: sonnet) implementing a 10-file feature → tier: standard → keep sonnet
 
 **Full config.json structure** (used during `/shipyard:init`):
 ```json

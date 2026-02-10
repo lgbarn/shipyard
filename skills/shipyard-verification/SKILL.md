@@ -15,6 +15,9 @@ description: Use when about to claim work is complete, fixed, or passing, before
 - Before any success assertion -- must have fresh evidence first
 - Using words like "should", "probably", "seems to" about work state
 
+## Natural Language Triggers
+- "is this done", "verify this", "check my work", "are we done", "does this work"
+
 </activation>
 
 ## Overview

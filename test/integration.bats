@@ -1,6 +1,7 @@
 #!/usr/bin/env bats
 load test_helper
 
+# bats test_tags=integration
 @test "integration: write then read round-trip preserves state data" {
     setup_shipyard_dir
     mkdir -p .shipyard/phases
@@ -23,6 +24,7 @@ load test_helper
     echo "$output" | jq -e '.hookSpecificOutput.additionalContext' >/dev/null
 }
 
+# bats test_tags=integration
 @test "integration: checkpoint create then prune retains recent tags" {
     setup_git_repo
 
@@ -44,6 +46,7 @@ load test_helper
     [ -n "$output" ]
 }
 
+# bats test_tags=integration
 @test "integration: multiple writes accumulate history entries" {
     setup_shipyard_dir
     mkdir -p .shipyard/phases
@@ -59,6 +62,7 @@ load test_helper
     assert_output --partial "Step three"
 }
 
+# bats test_tags=integration
 @test "integration: corrupt state detected then recovered via --recover" {
     setup_shipyard_dir
     mkdir -p .shipyard/phases/2/plans
@@ -87,6 +91,7 @@ load test_helper
     assert_json_field "schema" "3"
 }
 
+# bats test_tags=integration
 @test "integration: schema version 3 survives write-read cycle" {
     setup_shipyard_dir
     mkdir -p .shipyard/phases
@@ -103,6 +108,7 @@ load test_helper
     assert_output --partial "Schema: 3"
 }
 
+# bats test_tags=integration
 @test "integration: write-recover-checkpoint round-trip" {
     setup_git_repo
     mkdir -p .shipyard/phases/3/results
@@ -131,6 +137,7 @@ load test_helper
     assert_output --partial "post-recovery"
 }
 
+# bats test_tags=integration
 @test "integration: auto-migration from STATE.md to STATE.json on read" {
     setup_shipyard_with_state
     mkdir -p .shipyard/phases

@@ -18,6 +18,9 @@ description: Use when generating documentation, updating README files, writing A
 - When documentation is flagged as incomplete
 - When conversation mentions: document, README, API docs, changelog
 
+## Natural Language Triggers
+- "document this", "write docs", "update README", "API docs", "needs documentation"
+
 </activation>
 
 Generate accurate, useful documentation that serves its audience. API docs for developers, guides for users, architecture docs for maintainers.

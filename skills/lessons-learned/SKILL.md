@@ -15,6 +15,9 @@ description: Use when capturing discoveries after phase completion, before shipp
 - When reflecting on completed work to extract reusable knowledge
 - When a build summary contains notable discoveries worth preserving
 
+## Natural Language Triggers
+- "what did we learn", "capture lessons", "retrospective", "lessons learned"
+
 </activation>
 
 ## Overview

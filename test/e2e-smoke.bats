@@ -7,6 +7,7 @@ setup() {
     mkdir -p .shipyard/phases
 }
 
+# bats test_tags=integration
 @test "e2e: structured write creates valid state then read returns JSON" {
     cd "$BATS_TEST_TMPDIR"
 
@@ -29,6 +30,7 @@ setup() {
     echo "$output" | jq -e '.hookSpecificOutput' >/dev/null
 }
 
+# bats test_tags=integration
 @test "e2e: checkpoint create and prune lifecycle" {
     cd "$BATS_TEST_TMPDIR"
 
@@ -58,6 +60,7 @@ setup() {
     [ -z "$output" ]
 }
 
+# bats test_tags=integration
 @test "e2e: recovery rebuilds state from artifacts" {
     cd "$BATS_TEST_TMPDIR"
 

@@ -7,6 +7,12 @@
 
 set -euo pipefail
 
+# Kill switch: skip all hooks
+if [ "${SHIPYARD_DISABLE_HOOKS:-}" = "true" ]; then exit 0; fi
+# Selective skip: comma-separated hook names
+HOOK_NAME="$(basename "${BASH_SOURCE[0]}" .sh)"
+if [[ ",${SHIPYARD_SKIP_HOOKS:-}," == *",$HOOK_NAME,"* ]]; then exit 0; fi
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "${SCRIPT_DIR}/scripts/team-detect.sh"
 

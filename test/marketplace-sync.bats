@@ -33,6 +33,7 @@ setup_marketplace_repo() {
 
 # --- Missing marketplace directory ---
 
+# bats test_tags=unit
 @test "marketplace-sync: exits 0 when marketplace directory does not exist" {
     # HOME is set to fakehome, which has no .claude/plugins/... directory
     run bash "$MARKETPLACE_SYNC"
@@ -42,6 +43,7 @@ setup_marketplace_repo() {
 
 # --- Throttle: sync less than 1 hour ago ---
 
+# bats test_tags=unit
 @test "marketplace-sync: skips sync when timestamp is recent" {
     local config_dir="${HOME}/.config/shipyard"
     mkdir -p "$config_dir"
@@ -59,6 +61,7 @@ setup_marketplace_repo() {
 
 # --- Non-numeric timestamp ---
 
+# bats test_tags=unit
 @test "marketplace-sync: handles non-numeric timestamp gracefully" {
     local config_dir="${HOME}/.config/shipyard"
     mkdir -p "$config_dir"
@@ -74,6 +77,7 @@ setup_marketplace_repo() {
 
 # --- Successful sync updates timestamp ---
 
+# bats test_tags=integration
 @test "marketplace-sync: updates timestamp file on sync attempt" {
     local config_dir="${HOME}/.config/shipyard"
     mkdir -p "$config_dir"
@@ -108,6 +112,7 @@ setup_marketplace_repo() {
 
 # --- No .git directory means not a git repo → exits 0 ---
 
+# bats test_tags=unit
 @test "marketplace-sync: exits 0 when marketplace dir exists but has no .git" {
     mkdir -p "${HOME}/.claude/plugins/marketplaces/shipyard"
     # No .git inside — script should exit 0 silently

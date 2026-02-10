@@ -17,6 +17,9 @@ description: Use when working with any code, infrastructure-as-code, configurati
 - Before claiming security posture is adequate
 - When conversation mentions: security, vulnerability, CVE, OWASP, secrets, hardening
 
+## Natural Language Triggers
+- "security check", "is this secure", "vulnerability scan", "audit security", "check for secrets"
+
 </activation>
 
 **Core principle:** Assume every change introduces risk until proven otherwise.

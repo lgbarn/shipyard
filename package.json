@@ -1,6 +1,6 @@
 {
   "name": "@lgbarn/shipyard",
-  "version": "3.1.1",
+  "version": "3.2.0",
   "description": "Ship software systematically: project lifecycle, TDD, parallel agents, code review, security auditing, and infrastructure validation — from idea to production",
   "keywords": [
     "claude-code-plugin",
@@ -32,6 +32,8 @@
   },
   "scripts": {
     "test": "bash test/run.sh",
+    "test:fast": "bats --filter-tags unit test/*.bats",
+    "test:ci": "bash -c 'JOBS=(); command -v parallel &>/dev/null && JOBS=(--jobs 4); ./node_modules/.bin/bats \"${JOBS[@]}\" --formatter tap test/*.bats'",
     "prepare": "husky"
   },
   "files": [

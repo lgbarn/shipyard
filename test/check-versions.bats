@@ -39,6 +39,7 @@ EOF
 
 # --- All versions match ---
 
+# bats test_tags=unit
 @test "check-versions: exits 0 when all versions match" {
     local root
     root=$(setup_version_fixture "4.5.6")
@@ -49,6 +50,7 @@ EOF
 
 # --- package-lock.json root version mismatch ---
 
+# bats test_tags=unit
 @test "check-versions: detects package-lock.json root version mismatch" {
     local root
     root=$(setup_version_fixture "2.0.0")
@@ -65,6 +67,7 @@ EOF
 
 # --- package-lock.json packages version mismatch ---
 
+# bats test_tags=unit
 @test "check-versions: detects package-lock.json packages version mismatch" {
     local root
     root=$(setup_version_fixture "2.0.0")
@@ -80,6 +83,7 @@ EOF
 
 # --- plugin.json mismatch ---
 
+# bats test_tags=unit
 @test "check-versions: detects plugin.json version mismatch" {
     local root
     root=$(setup_version_fixture "3.0.0")
@@ -95,6 +99,7 @@ EOF
 
 # --- marketplace.json mismatch ---
 
+# bats test_tags=unit
 @test "check-versions: detects marketplace.json version mismatch" {
     local root
     root=$(setup_version_fixture "3.0.0")
@@ -110,6 +115,7 @@ EOF
 
 # --- Multiple mismatches ---
 
+# bats test_tags=unit
 @test "check-versions: reports count of multiple mismatches" {
     local root
     root=$(setup_version_fixture "1.0.0")
@@ -129,6 +135,7 @@ EOF
 
 # --- Missing required file ---
 
+# bats test_tags=unit
 @test "check-versions: fails when package.json is missing" {
     local root
     root=$(setup_version_fixture "1.0.0")
@@ -138,6 +145,7 @@ EOF
     assert_failure
 }
 
+# bats test_tags=unit
 @test "check-versions: fails when plugin.json is missing" {
     local root
     root=$(setup_version_fixture "1.0.0")

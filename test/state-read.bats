@@ -3,6 +3,7 @@ load test_helper
 
 # --- Core behavior ---
 
+# bats test_tags=unit
 @test "state-read: no .shipyard directory outputs 'No Shipyard Project Detected' JSON" {
     cd "$BATS_TEST_TMPDIR"
     # No .shipyard dir exists
@@ -16,6 +17,7 @@ load test_helper
     assert_valid_json
 }
 
+# bats test_tags=unit
 @test "state-read: always outputs valid JSON with hookSpecificOutput structure" {
     setup_shipyard_with_json_state
     # STATE.json has Status: building -> auto-detects to execution tier
@@ -30,6 +32,7 @@ load test_helper
     assert_equal "$hook_name" "SessionStart"
 }
 
+# bats test_tags=unit
 @test "state-read: minimal tier includes STATE.json but excludes PROJECT.md and ROADMAP.md" {
     setup_shipyard_with_json_state
     # Set config to minimal tier
@@ -49,6 +52,7 @@ load test_helper
 
 # --- Context tier tests ---
 
+# bats test_tags=unit
 @test "state-read: auto-detect building status resolves to execution tier" {
     setup_shipyard_with_json_state
     # STATE.json already has Status: building
@@ -62,6 +66,7 @@ load test_helper
     assert_output --partial "Test Plan"
 }
 
+# bats test_tags=unit
 @test "state-read: planning tier includes PROJECT.md and ROADMAP.md" {
     setup_shipyard_dir
     # Create state with planning status
@@ -79,6 +84,7 @@ JSONEOF
     assert_output --partial "My Roadmap"
 }
 
+# bats test_tags=unit
 @test "state-read: missing config.json defaults to auto tier" {
     setup_shipyard_with_json_state
     # No config.json -- should default to auto, then resolve based on status
@@ -94,6 +100,7 @@ JSONEOF
 
 # --- Corruption detection tests ---
 
+# bats test_tags=unit
 @test "state-read: corrupt STATE.json exits code 2 with JSON error" {
     setup_shipyard_corrupt_json_state
     run bash "$STATE_READ"
@@ -103,6 +110,7 @@ JSONEOF
     echo "$output" | jq -e '.error' >/dev/null
 }
 
+# bats test_tags=unit
 @test "state-read: empty STATE.json (missing fields) exits code 2" {
     setup_shipyard_empty_json_state
     run bash "$STATE_READ"
@@ -110,6 +118,7 @@ JSONEOF
     assert_equal "$status" 2
 }
 
+# bats test_tags=unit
 @test "state-read: missing phases directory does not crash (Issue #4)" {
     setup_shipyard_with_json_state
     # Do NOT create .shipyard/phases/ -- this is the bug trigger
@@ -121,6 +130,7 @@ JSONEOF
 
 # --- Lessons loading tests ---
 
+# bats test_tags=unit
 @test "state-read: execution tier displays Recent Lessons when LESSONS.md exists" {
     setup_shipyard_with_json_state
     mkdir -p .shipyard/phases/1
@@ -165,6 +175,7 @@ EOF
     assert_output --partial "Phase 1"
 }
 
+# bats test_tags=unit
 @test "state-read: no Recent Lessons section when LESSONS.md does not exist" {
     setup_shipyard_with_json_state
     mkdir -p .shipyard/phases/1
@@ -177,6 +188,7 @@ EOF
     refute_output --partial "Recent Lessons"
 }
 
+# bats test_tags=unit
 @test "state-read: planning tier does not display lessons even when LESSONS.md exists" {
     setup_shipyard_dir
     cat > .shipyard/STATE.json <<'JSONEOF'
@@ -202,6 +214,7 @@ EOF
     refute_output --partial "Recent Lessons"
 }
 
+# bats test_tags=unit
 @test "state-read: execution tier limits lessons to most recent 5 when more exist" {
     setup_shipyard_with_json_state
     mkdir -p .shipyard/phases/1
@@ -264,6 +277,7 @@ EOF
     refute_output --partial "Lesson 2: Second"
 }
 
+# bats test_tags=unit
 @test "state-read: sanitizes malicious lesson content (prompt injection)" {
     setup_shipyard_with_json_state
     mkdir -p .shipyard/phases/1
@@ -298,6 +312,7 @@ EOF
     refute_output --partial "pretend to be"
 }
 
+# bats test_tags=unit
 @test "state-read: sanitizes unclosed XML tags in lessons (Issue #1)" {
     setup_shipyard_with_json_state
     mkdir -p .shipyard/phases/1
@@ -328,6 +343,7 @@ EOF
     refute_output --partial "partial_tag"
 }
 
+# bats test_tags=unit
 @test "state-read: truncates lessons exceeding 500 characters" {
     setup_shipyard_with_json_state
     mkdir -p .shipyard/phases/1
@@ -363,6 +379,7 @@ EOF
 
 # --- Migration tests ---
 
+# bats test_tags=unit
 @test "state-read: auto-migration converts STATE.md to STATE.json on first read" {
     setup_shipyard_with_state
     mkdir -p .shipyard/phases
@@ -389,6 +406,7 @@ EOF
     [ -f .shipyard/STATE.md ]
 }
 
+# bats test_tags=unit
 @test "state-read: auto-migration preserves history entries from STATE.md" {
     setup_shipyard_with_state
     mkdir -p .shipyard/phases
@@ -403,6 +421,7 @@ EOF
     assert_output --partial "Migrated from STATE.md"
 }
 
+# bats test_tags=unit
 @test "state-read: auto-migration of corrupt STATE.md exits code 2" {
     setup_shipyard_corrupt_state
     # No STATE.json exists, so migration path will be triggered
@@ -415,4 +434,141 @@ EOF
 
     # STATE.json should NOT have been created
     [ ! -f .shipyard/STATE.json ]
+}
+
+# --- Backup fallback tests ---
+
+# bats test_tags=unit
+@test "state-read: falls back to .bak when STATE.json is corrupt" {
+    setup_shipyard_dir
+    # Create a valid backup
+    cat > .shipyard/STATE.json.bak <<'JSONEOF'
+{"schema":3,"phase":2,"position":"Backup state","status":"planned","updated_at":"2026-01-01T00:00:00Z","blocker":null}
+JSONEOF
+    # Create a corrupt primary
+    echo "not valid json{" > .shipyard/STATE.json
+    mkdir -p .shipyard/phases
+
+    run bash "$STATE_READ"
+    assert_success
+    assert_valid_json
+
+    # Should have restored from backup (phase 2)
+    assert_output --partial "Phase: 2"
+    assert_output --partial "Status: planned"
+}
+
+# bats test_tags=unit
+@test "state-read: exits 2 when both STATE.json and .bak are corrupt" {
+    setup_shipyard_dir
+    echo "corrupt" > .shipyard/STATE.json
+    echo "also corrupt" > .shipyard/STATE.json.bak
+
+    run bash "$STATE_READ"
+    assert_failure
+    assert_equal "$status" 2
+}
+
+# --- Checksum verification tests ---
+
+# bats test_tags=unit
+@test "state-read: detects checksum mismatch and falls back to .bak" {
+    setup_shipyard_dir
+    # Create valid primary and backup
+    cat > .shipyard/STATE.json <<'JSONEOF'
+{"schema":3,"phase":1,"position":"Primary","status":"building","updated_at":"2026-01-01T00:00:00Z","blocker":null}
+JSONEOF
+    cat > .shipyard/STATE.json.bak <<'JSONEOF'
+{"schema":3,"phase":3,"position":"Backup","status":"ready","updated_at":"2026-01-01T00:00:00Z","blocker":null}
+JSONEOF
+    # Write wrong checksum to simulate tampering
+    echo "0000000000000000000000000000000000000000000000000000000000000000" > .shipyard/STATE.json.sha256
+    mkdir -p .shipyard/phases
+
+    run bash "$STATE_READ"
+    assert_success
+    assert_valid_json
+
+    # Should have fallen back to backup (phase 3)
+    assert_output --partial "Phase: 3"
+}
+
+# bats test_tags=unit
+@test "state-read: passes when checksum matches" {
+    setup_shipyard_with_json_state
+    mkdir -p .shipyard/phases
+    # Write correct checksum
+    shasum -a 256 .shipyard/STATE.json | cut -d' ' -f1 > .shipyard/STATE.json.sha256
+
+    run bash "$STATE_READ"
+    assert_success
+    assert_valid_json
+    assert_output --partial "Phase: 1"
+}
+
+# --- Working notes tests ---
+
+# bats test_tags=unit
+@test "state-read: execution tier loads NOTES.md content" {
+    setup_shipyard_with_json_state
+    mkdir -p .shipyard/phases/1
+    cat > .shipyard/NOTES.md <<'EOF'
+- [2026-02-10T10:00:00Z] Found edge case in auth
+- [2026-02-10T10:05:00Z] Need to check retry logic
+EOF
+
+    run bash "$STATE_READ"
+    assert_success
+    assert_valid_json
+    assert_output --partial "Working Notes"
+    assert_output --partial "Found edge case in auth"
+    assert_output --partial "Need to check retry logic"
+}
+
+# bats test_tags=unit
+@test "state-read: planning tier does not load NOTES.md" {
+    setup_shipyard_dir
+    cat > .shipyard/STATE.json <<'JSONEOF'
+{"schema":3,"phase":1,"position":"Planning","status":"planning","updated_at":"2026-01-01T00:00:00Z","blocker":null}
+JSONEOF
+    mkdir -p .shipyard/phases
+    echo "- [2026-02-10T10:00:00Z] Should not appear" > .shipyard/NOTES.md
+
+    run bash "$STATE_READ"
+    assert_success
+    assert_valid_json
+    refute_output --partial "Working Notes"
+}
+
+# --- Human-readable output tests ---
+
+# bats test_tags=unit
+@test "state-read: --human flag outputs readable text" {
+    setup_shipyard_with_json_state
+    run bash "$STATE_READ" --human
+    assert_success
+
+    assert_output --partial "=== Shipyard State ==="
+    assert_output --partial "Phase:    1"
+    assert_output --partial "Status:   building"
+    assert_output --partial "=== Suggested Action ==="
+    assert_output --partial "resume"
+}
+
+# bats test_tags=unit
+@test "state-read: --human shows recent history" {
+    setup_shipyard_with_json_state
+    run bash "$STATE_READ" --human
+    assert_success
+
+    assert_output --partial "=== Recent History ==="
+    assert_output --partial "Phase 1: Testing (building)"
+}
+
+# bats test_tags=unit
+@test "state-read: --human without .shipyard shows no-project message" {
+    cd "$BATS_TEST_TMPDIR"
+    run bash "$STATE_READ" --human
+    assert_success
+    assert_output --partial "No Shipyard project detected"
 }

@@ -17,6 +17,9 @@ description: Use when writing tests, structuring test suites, choosing test boun
 - Deciding between unit, integration, and E2E tests
 - Choosing when and how to use mocks, stubs, or fakes
 
+## Natural Language Triggers
+- "add tests", "test coverage", "testing strategy", "write tests for", "how should I test"
+
 </activation>
 
 ## Overview

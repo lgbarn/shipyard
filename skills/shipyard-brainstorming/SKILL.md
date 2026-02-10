@@ -17,6 +17,9 @@ description: You MUST use this before any creative work - creating features, bui
 - During `/shipyard:brainstorm` for requirements gathering
 - Before any creative work: creating features, building components, adding functionality, modifying behavior
 
+## Natural Language Triggers
+- "I want to add", "let's design", "brainstorm", "what if we", "I have an idea", "let's think about"
+
 </activation>
 
 ## Overview

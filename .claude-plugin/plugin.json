@@ -1,6 +1,6 @@
 {
   "name": "shipyard",
-  "version": "3.1.1",
+  "version": "3.2.0",
   "description": "Ship software systematically: project lifecycle, TDD, parallel agents, code review, security auditing, and infrastructure validation",
   "author": {
     "name": "lgbarn",

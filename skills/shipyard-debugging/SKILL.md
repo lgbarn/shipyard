@@ -15,6 +15,9 @@ description: Use when encountering any bug, test failure, or unexpected behavior
 - Error/exception/traceback/failure appearing in output
 - Before proposing any fix -- must investigate root cause first
 
+## Natural Language Triggers
+- "fix this bug", "why is this failing", "debug this", "it's broken", "something's wrong", "not working"
+
 </activation>
 
 ## Overview
