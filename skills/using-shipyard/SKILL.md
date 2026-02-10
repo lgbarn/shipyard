@@ -60,52 +60,66 @@ For quick one-off tasks, skip the lifecycle and use `/shipyard:quick 'descriptio
 
 ## Available Skills
 
-Shipyard provides 16 skills:
+Shipyard provides 16 skills. Skills are **behavioral disciplines** — they define HOW to do work, not what to build.
 
-| Skill | Purpose |
-|-------|---------|
-| `shipyard:using-shipyard` | How to find and use skills (this skill) |
-| `shipyard:shipyard-tdd` | TDD discipline for all implementation |
-| `shipyard:shipyard-debugging` | Root cause investigation before fixes |
-| `shipyard:shipyard-verification` | Evidence before completion claims |
-| `shipyard:shipyard-brainstorming` | Requirements gathering and design exploration |
-| `shipyard:security-audit` | OWASP, secrets, dependencies, IaC security |
-| `shipyard:code-simplification` | Duplication, dead code, AI bloat detection |
-| `shipyard:infrastructure-validation` | Terraform, Ansible, Docker validation workflows |
-| `shipyard:parallel-dispatch` | Concurrent agent dispatch for independent tasks |
-| `shipyard:shipyard-writing-plans` | Creating structured implementation plans |
-| `shipyard:shipyard-executing-plans` | Executing plans with builder/reviewer agents |
-| `shipyard:git-workflow` | Branch creation, commits, worktrees, and completion |
-| `shipyard:documentation` | After implementation, before shipping, when docs are incomplete |
-| `shipyard:shipyard-writing-skills` | Creating and testing new skills |
-| `shipyard:shipyard-testing` | Writing effective, maintainable tests |
-| `shipyard:lessons-learned` | Capturing discoveries and reusable patterns |
+| Skill | What It Actually Does |
+|-------|----------------------|
+| `shipyard:using-shipyard` | Index of all skills/commands with triggers and activation rules (this skill) |
+| `shipyard:shipyard-tdd` | Enforces write-failing-test → watch-fail → implement → watch-pass → refactor cycle. Tests written after code prove nothing. |
+| `shipyard:shipyard-debugging` | 4-phase investigation (root cause → pattern analysis → hypothesis test → fix). After 3 failed fixes, stop and question architecture. |
+| `shipyard:shipyard-verification` | Blocks "done"/"fixed"/"passing" claims until you run the actual command fresh and read the output. Evidence before assertions. |
+| `shipyard:shipyard-brainstorming` | One-question-at-a-time Socratic dialogue to turn vague ideas into validated designs with trade-offs before any code is written. |
+| `shipyard:security-audit` | Checks OWASP Top 10, scans for hardcoded secrets, audits dependencies and IaC (Terraform/Ansible/Docker). Critical findings block merge. |
+| `shipyard:code-simplification` | Post-implementation review for duplication (3+ occurrences → extract), dead code, over-engineering, and AI bloat patterns. |
+| `shipyard:infrastructure-validation` | Tool-chain workflows for Terraform (fmt/validate/plan/lint), Ansible (lint/syntax/dry-run), Docker (hadolint/build/trivy). |
+| `shipyard:parallel-dispatch` | Routes 2+ independent tasks to concurrent agents with isolated scope/constraints. Prevents sequential bottleneck. |
+| `shipyard:shipyard-writing-plans` | Converts specs into executable tasks with exact file paths, code samples, verification commands, and TDD steps for builder handoff. |
+| `shipyard:shipyard-executing-plans` | Runs fresh builder agent per task + two-stage review (spec compliance then code quality) + security audit + simplification gate. |
+| `shipyard:git-workflow` | Full branch lifecycle: create worktree → setup → baseline tests → work → verify → 4 completion options (merge/PR/keep/discard). |
+| `shipyard:documentation` | Generates code comments, API docs (params/returns/examples), architecture docs, and user guides. Verifies examples actually work. |
+| `shipyard:shipyard-writing-skills` | TDD for docs: run scenario WITHOUT skill (RED) → document agent rationalizations → write skill countering them (GREEN) → refine. |
+| `shipyard:shipyard-testing` | Enforces behavior-based testing via public APIs: AAA structure, DAMP not DRY, name tests after behavior, prefer state over mocks. |
+| `shipyard:lessons-learned` | After phase completion, captures what worked/surprised/failed into `.shipyard/LESSONS.md` and optionally feeds back to CLAUDE.md. |
 
 ## Shipyard Commands
 
-| Command | Purpose |
-|---------|---------|
-| `/shipyard:init` | Configure project preferences and create `.shipyard/` directory |
-| `/shipyard:brainstorm` | Explore requirements through interactive dialogue |
-| `/shipyard:plan [phase] [--skip-research]` | Plan a phase of work (creates roadmap if needed) |
-| `/shipyard:build [phase] [--plan N] [--light]` | Execute plans with builder agents, review gates, and security audits |
-| `/shipyard:status` | Show progress dashboard and route to next action |
-| `/shipyard:resume` | Restore context from a previous session |
-| `/shipyard:quick` | Quick single-task execution without full planning |
-| `/shipyard:ship [--phase \| --milestone \| --branch]` | Verify and deliver — merge, PR, or preserve |
-| `/shipyard:move-docs` | Move codebase analysis docs between `.shipyard/codebase/` and `docs/codebase/` |
-| `/shipyard:settings` | View or update workflow settings |
-| `/shipyard:issues` | View and manage deferred issues across sessions |
-| `/shipyard:rollback` | Revert to a previous checkpoint |
-| `/shipyard:recover` | Diagnose and recover from interrupted state |
-| `/shipyard:worktree` | Manage git worktrees for isolated feature development |
-| `/shipyard:review [target]` | On-demand code review — current changes, diff range, or files |
-| `/shipyard:audit [scope]` | On-demand security audit — OWASP, secrets, dependencies, IaC |
-| `/shipyard:simplify [scope]` | On-demand simplification — duplication, dead code, complexity |
-| `/shipyard:document [scope]` | On-demand documentation generation for changes or modules |
-| `/shipyard:research <topic>` | On-demand domain/technology research and comparison |
-| `/shipyard:verify [criteria]` | On-demand verification — run tests or check acceptance criteria |
-| `/shipyard:map [focus]` | On-demand codebase analysis — technology, architecture, quality, concerns |
+Commands are **actions** — they produce artifacts, change state, or trigger workflows.
+
+### Lifecycle Commands (run in order for full projects)
+
+| Command | What It Actually Does |
+|---------|----------------------|
+| `/shipyard:init` | **Settings only.** Asks ~9 preference questions (interaction mode, git strategy, review depth, quality gates, model routing) and writes `.shipyard/config.json`. No codebase analysis or planning. |
+| `/shipyard:brainstorm` | Socratic dialogue exploring goals/constraints → writes `.shipyard/PROJECT.md`. Optionally dispatches architect to generate `ROADMAP.md` with up to 3 revision cycles. |
+| `/shipyard:plan [phase] [--skip-research]` | Dispatches researcher → architect → verifier agents to create executable plan files (`PLAN-W.P.md`) with tasks, file paths, verification commands. Produces `RESEARCH.md` and context files. |
+| `/shipyard:build [phase] [--plan N] [--light]` | Dispatches builder agent per plan + two-stage review + optional security audit/simplification/docs. Handles retries (up to 2) on critical issues. Produces `SUMMARY` and `REVIEW` files per plan. |
+| `/shipyard:ship [--phase \| --milestone \| --branch]` | Pre-ship verification + tests + security audit + docs + lessons learned capture. Then presents 4 delivery options: merge locally, push PR, preserve branch, or discard. Archives artifacts. |
+
+### Session Management
+
+| Command | What It Actually Does |
+|---------|----------------------|
+| `/shipyard:status` | Reads state files and displays progress dashboard with blockers and next-action suggestion. No side effects. |
+| `/shipyard:resume` | Reconstructs context from `STATE.json` + `HISTORY.md` + artifacts to detect interrupted work and route to recovery. |
+| `/shipyard:settings` | Interactive menu to view/update `.shipyard/config.json` preferences. Supports `list`, `view <key>`, `set <key> <value>`. |
+| `/shipyard:issues` | Manages deferred issues in `.shipyard/ISSUES.md` with severity tracking. Supports `--add`, `--resolve`, `--list`. |
+| `/shipyard:rollback` | Reverts to a git checkpoint (state-only or full code+state). Lists recent checkpoints, creates safety checkpoint before reverting. |
+| `/shipyard:recover` | Diagnoses state inconsistencies and offers recovery: resume, rollback, rebuild state from artifacts, or full reset. |
+
+### On-Demand Tools (use anytime, no lifecycle required)
+
+| Command | What It Actually Does |
+|---------|----------------------|
+| `/shipyard:quick "task"` | Dispatches architect (simplified plan) → builder (execute + verify) for small self-contained tasks. Produces `QUICK-NNN.md`. No roadmap needed. |
+| `/shipyard:review [target]` | Two-stage code review (spec compliance if plan exists, otherwise quality). Accepts uncommitted changes, diff ranges, file paths, or branch comparisons. |
+| `/shipyard:audit [scope]` | OWASP Top 10 + secrets + dependencies + IaC security scan. Critical findings are hard gates. Accepts changes, ranges, directories, or full codebase. |
+| `/shipyard:simplify [scope]` | Detects duplication, dead code, unnecessary abstractions, and AI bloat. Non-blocking findings. Accepts changes, ranges, or directories. |
+| `/shipyard:document [scope]` | Generates API docs, architecture updates, user guides. Analyzes code vs existing docs to find gaps. Accepts changes, ranges, or directories. |
+| `/shipyard:research <topic>` | Dispatches researcher to evaluate technology options via web search + codebase analysis. Produces comparison matrix with recommendations. |
+| `/shipyard:verify [criteria]` | Runs acceptance criteria or test suites, records PASS/FAIL with evidence. Accepts test suite, criteria file, phase number, or inline text. |
+| `/shipyard:map [focus]` | Deep codebase analysis producing up to 7 docs (STACK, INTEGRATIONS, ARCHITECTURE, STRUCTURE, CONVENTIONS, TESTING, CONCERNS). Supports parallel "all" mode. |
+| `/shipyard:worktree` | Git worktree management: `create` (isolated branch + setup + tests), `list`, `switch`, `remove` (with dirty-state safety checks). |
+| `/shipyard:move-docs` | Relocates codebase docs between `.shipyard/codebase/` (private) and `docs/codebase/` (public) using `git mv`. |
 
 <activation>
 
