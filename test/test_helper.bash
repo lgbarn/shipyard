@@ -5,9 +5,14 @@
 PROJECT_ROOT="$(cd "$(dirname "${BATS_TEST_FILENAME}")/.." && pwd)"
 
 # Script paths (absolute, so tests can cd freely)
+# These variables are used by sourcing test files, not directly in this helper.
+# shellcheck disable=SC2034
 STATE_READ="${PROJECT_ROOT}/scripts/state-read.sh"
+# shellcheck disable=SC2034
 STATE_WRITE="${PROJECT_ROOT}/scripts/state-write.sh"
+# shellcheck disable=SC2034
 CHECKPOINT="${PROJECT_ROOT}/scripts/checkpoint.sh"
+# shellcheck disable=SC2034
 TEAM_DETECT="${PROJECT_ROOT}/scripts/team-detect.sh"
 
 # Load bats helper libraries
@@ -16,7 +21,7 @@ load "${PROJECT_ROOT}/node_modules/bats-assert/load"
 
 # Common setup: create an isolated working directory with .shipyard skeleton
 setup_shipyard_dir() {
-    cd "$BATS_TEST_TMPDIR"
+    cd "$BATS_TEST_TMPDIR" || return 1
     mkdir -p .shipyard
 }
 
@@ -38,6 +43,7 @@ STATEEOF
 }
 
 # Assert that $output is valid JSON (replaces fragile jq + $? pattern)
+# shellcheck disable=SC2154  # $output is a BATS built-in
 assert_valid_json() {
     run jq . <<< "$output"
     assert_success
@@ -59,7 +65,7 @@ compute_lock_dir() {
 
 # Initialize a real git repo in BATS_TEST_TMPDIR (for checkpoint tests)
 setup_git_repo() {
-    cd "$BATS_TEST_TMPDIR"
+    cd "$BATS_TEST_TMPDIR" || return 1
     git init -q
     git config user.email "test@shipyard.dev"
     git config user.name "Shipyard Test"
