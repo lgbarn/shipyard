@@ -87,6 +87,8 @@ Follow **State Update Protocol** (update `.shipyard/STATE.json` and `.shipyard/H
 
 ## Step 4: Research (unless --skip-research)
 
+**Dispatch:** Always uses Task dispatch (single-agent step — team overhead not justified). This applies regardless of `dispatch_mode`.
+
 Follow **Agent Context Protocol** (pass PROJECT.md, config.json, working directory, branch, and worktree status to all agents; see `docs/PROTOCOLS.md`) for standard context. Dispatch a **researcher agent** (subagent_type: "shipyard:researcher") with:
 - The phase description from ROADMAP.md
 - Essential and conditional context per **Agent Context Protocol**
@@ -101,6 +103,8 @@ The researcher agent should:
 - Write findings to `.shipyard/phases/{N}/RESEARCH.md`
 
 ## Step 5: Architecture & Plan Generation
+
+**Dispatch:** Always uses Task dispatch (single-agent step — team overhead not justified). This applies regardless of `dispatch_mode`.
 
 Dispatch an **architect agent** (subagent_type: "shipyard:architect") with context per **Agent Context Protocol** (pass PROJECT.md, config.json, working directory, branch, and worktree status to all agents; see `docs/PROTOCOLS.md`):
 - Phase description from ROADMAP.md
@@ -147,6 +151,8 @@ The architect agent must produce plan files in `.shipyard/phases/{N}/plans/`:
 ```
 
 ## Step 6: Plan Verification
+
+**Dispatch:** Always uses Task dispatch (single-agent step — team overhead not justified). This applies regardless of `dispatch_mode`.
 
 Dispatch a **verifier agent** (subagent_type: "shipyard:verifier") with:
 - All generated plans
