@@ -193,6 +193,8 @@ Follow **Native Task Scaffolding Protocol** (create/update native tasks for prog
 
 ## Step 5: Phase Verification
 
+**Dispatch:** Always uses Task dispatch (single-agent step -- team overhead not justified). This applies regardless of `dispatch_mode`.
+
 Dispatch a **verifier agent** (subagent_type: "shipyard:verifier") following the **Model Routing Protocol** (select the correct model for each agent role using `model_routing` from config; see `docs/PROTOCOLS.md`) with:
 - All SUMMARY.md and REVIEW.md files for this phase
 - The phase description from ROADMAP.md
@@ -214,6 +216,8 @@ Produce `.shipyard/phases/{N}/VERIFICATION.md` with:
 - Recommendations
 
 ## Step 5a: Security Audit
+
+**Dispatch:** Always uses Task dispatch (single-agent step -- team overhead not justified). This applies regardless of `dispatch_mode`.
 
 **Skip this step if:** `--light` flag was passed, OR `config.json` has `"security_audit": false`.
 
@@ -239,6 +243,8 @@ Produce `.shipyard/phases/{N}/results/AUDIT-{N}.md`.
 
 ## Step 5b: Simplification Review
 
+**Dispatch:** Always uses Task dispatch (single-agent step -- team overhead not justified). This applies regardless of `dispatch_mode`.
+
 **Skip this step if:** `--light` flag was passed, OR `config.json` has `"simplification_review": false`.
 
 After the audit (or directly after verification if audit was skipped), dispatch a **simplifier agent** (subagent_type: "shipyard:simplifier") with:
@@ -263,6 +269,8 @@ Produce `.shipyard/phases/{N}/results/SIMPLIFICATION-{N}.md`.
 
 ## Step 5c: Documentation Generation
 
+**Dispatch:** Always uses Task dispatch (single-agent step -- team overhead not justified). This applies regardless of `dispatch_mode`.
+
 **Skip this step if:** `--light` flag was passed, OR `config.json` has `"documentation_generation": false`.
 
 After simplification review (or directly after verification if simplification was skipped), dispatch a **documenter agent** (subagent_type: "shipyard:documenter") with:
@@ -284,6 +292,18 @@ Produce `.shipyard/phases/{N}/results/DOCUMENTATION-{N}.md`.
 1. **Generate documentation** — Dispatch the documenter agent to create/update documentation in `docs/` (recommended if significant gaps exist)
 2. **Defer to ship time** — Note findings for comprehensive documentation at ship time
 3. **Dismiss** — Acknowledge and proceed without documentation changes
+
+## Team Cleanup
+
+**This section applies only when `dispatch_mode` is `team`.**
+
+Before proceeding to Step 6, verify that all teams created during this build have been properly cleaned up. For each wave that used team mode:
+
+1. Confirm `SendMessage(shutdown_request)` was sent to all teammates in `shipyard-build-phase-{N}-wave-{W}`
+2. Confirm `TeamDelete(name: "shipyard-build-phase-{N}-wave-{W}")` was called
+3. If any team was not cleaned up (due to an error or early exit), run the shutdown + delete now
+
+**Critical rule:** If `dispatch_mode` is `team` and you are about to exit early (error, user cancellation, or unresolved critical issues), you MUST run SendMessage(shutdown_request) + TeamDelete for every active team before exiting. Never leave orphaned teams running.
 
 ## Step 6: Update Roadmap & State
 
