@@ -29,6 +29,22 @@ You are executing the Shipyard build workflow. Follow these steps precisely.
 5. Check which plans have already been completed (have SUMMARY.md files in `.shipyard/phases/{N}/results/`).
 6. If all plans are complete, inform the user and suggest `/shipyard:ship` or next phase.
 
+## Step 2b: Team or Agent Dispatch
+
+**Detection:** Check the `SHIPYARD_TEAMS_ENABLED` environment variable (exported by `scripts/team-detect.sh`). This variable is set to `true` when `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`.
+
+**Prompt (conditional):** If `SHIPYARD_TEAMS_ENABLED=true`, use `AskUserQuestion` with exactly two options:
+- "Team mode (parallel teammates)" -- uses TeamCreate/TaskCreate/SendMessage/TeamDelete lifecycle
+- "Agent mode (subagents)" -- uses standard Task dispatch (current behavior)
+
+Question text: "Teams available. Use team mode (parallel teammates) or agent mode (subagents)?"
+
+**Silent fallback:** If `SHIPYARD_TEAMS_ENABLED` is `false` or unset, silently set `dispatch_mode` to `agent` with no prompt (zero overhead).
+
+**Variable storage:** Store the result as `dispatch_mode` (value: `team` or `agent`). This variable is referenced by all subsequent dispatch steps.
+
+**Note:** In team mode, single-agent steps (verifier, auditor, simplifier, documenter) still use Task dispatch -- team overhead is not justified for one agent. Team mode applies only to multi-agent steps (builders per wave, reviewers per wave).
+
 </prerequisites>
 
 <execution>
