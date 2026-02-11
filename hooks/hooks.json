@@ -44,7 +44,7 @@
     ],
     "PreToolUse": [
       {
-        "matcher": "",
+        "matcher": "Task|Bash|Write",
         "hooks": [
           {
             "type": "command",
