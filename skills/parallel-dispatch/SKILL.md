@@ -31,10 +31,33 @@ When Claude Code Agent Teams is enabled (`SHIPYARD_TEAMS_ENABLED=true`):
 - **Teammates** are independent Claude Code instances with their own context windows. They share a task list and mailbox but NOT your conversation history.
 - **Subagents** (Task tool) are spawned within your session. They share your working directory but have fresh context.
 
-**Use teammates when:** Tasks are truly independent, each takes significant time (>5 min), and isolation prevents cross-contamination.
-**Use subagents when:** Tasks need results fed back into your current context, or when coordination is tight (same files, dependent changes).
+#### Shipyard Dispatch Pattern
 
-When teams are NOT enabled, this section has no effect — use subagents as normal.
+Shipyard multi-agent commands (`build`, `plan`, `map`, `ship`) use a standardized detect/ask/branch flow when dispatching agents:
+
+1. **Detect:** Check `SHIPYARD_TEAMS_ENABLED` env var (set when `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`)
+2. **Ask:** If enabled, prompt the user via `AskUserQuestion`: "Team mode (parallel teammates)" vs "Agent mode (subagents)"
+3. **Branch:** Store the choice as `dispatch_mode` (`team` or `agent`) and use it at every dispatch point
+4. **Silent fallback:** If teams are not enabled, silently use agent mode with no prompt
+
+**Team mode lifecycle (per wave):**
+- `TeamCreate` with name `shipyard-{command}-phase-{N}-wave-{W}`
+- `TaskCreate` for each unit of work + `TaskUpdate` to pre-assign owners
+- `Task(team_name, name, subagent_type)` to spawn teammates
+- Monitor via `TaskList` until all tasks reach terminal state
+- `SendMessage(shutdown_request)` + `TeamDelete` for cleanup
+
+**Key rules:**
+- Single-agent steps (verifier, auditor, simplifier, documenter) always use Task dispatch regardless of mode
+- Team mode provides real value only for parallel steps (multiple builders per wave, multiple reviewers per wave, multiple mappers)
+- Team cleanup (shutdown + delete) is mandatory, even on error
+- Pre-assign tasks before spawning to avoid race conditions
+
+**When to choose each mode:**
+
+- **Use team mode when:** Multiple agents work in parallel on independent tasks within the same wave (build plans, map focus areas). Each takes significant time (>5 min) and isolation prevents cross-contamination.
+- **Use agent mode when:** Tasks are sequential, single-agent, or need results fed back into your current context. Also preferred when coordination is tight (same files, dependent changes).
+- **When teams are NOT enabled:** This entire section has no effect — use subagents as normal.
 
 ## Natural Language Triggers
 - "run in parallel", "do these at the same time", "parallel tasks", "concurrent agents"
