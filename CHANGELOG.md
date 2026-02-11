@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [3.2.3] - 2026-02-11
 
+### Changed
+- **map command defaults to "all"**: `/shipyard:map` with no argument now runs all 4 focus areas (technology, architecture, quality, concerns) in parallel instead of just technology
+- **map auto-saves and deletes old docs**: Results are written directly to `.shipyard/codebase/` after deleting any existing docs — no archive, no save prompt
+
 ### Removed
 - PreToolUse hook due to errors
 

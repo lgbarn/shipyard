@@ -81,7 +81,7 @@ For the full command reference and common workflows, see [docs/QUICKSTART.md](do
 | `/shipyard:document [scope]` | On-demand documentation generation for changes or modules |
 | `/shipyard:research <topic>` | On-demand domain/technology research and comparison |
 | `/shipyard:verify [criteria]` | On-demand verification — run tests or check acceptance criteria |
-| `/shipyard:map [focus]` | On-demand codebase analysis — technology, architecture, quality, concerns |
+| `/shipyard:map [focus]` | On-demand codebase analysis — defaults to all 4 focus areas (technology, architecture, quality, concerns) |
 | `/shipyard:help [topic]` | Quick-reference table or detailed help for a specific command/skill |
 | `/shipyard:doctor` | Health-check diagnostic — jq, git, skills, hooks, `.shipyard/` structure |
 | `/shipyard:cancel` | Graceful build interruption — checkpoint, pause, resume later |

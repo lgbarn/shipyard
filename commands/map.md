@@ -1,7 +1,7 @@
 ---
 description: "On-demand codebase analysis — map technology stack, architecture, quality, or concerns"
 disable-model-invocation: true
-argument-hint: "[focus] — technology (default), architecture, quality, or concerns"
+argument-hint: "[focus] — all (default), technology, architecture, quality, or concerns"
 ---
 
 # /shipyard:map - On-Demand Codebase Analysis
@@ -14,11 +14,11 @@ You are executing on-demand codebase analysis. Follow these steps precisely.
 
 Extract from the command:
 - `focus` (optional): Analysis focus area. Accepts:
-  - **No argument / "technology"**: Map technology stack — languages, frameworks, dependencies, build tools (produces STACK.md + INTEGRATIONS.md)
+  - **No argument / "all"**: Run all 4 focus areas in parallel (dispatches 4 mapper agents)
+  - **"technology"**: Map technology stack — languages, frameworks, dependencies, build tools (produces STACK.md + INTEGRATIONS.md)
   - **"architecture"**: Map system architecture — patterns, layers, boundaries, data flow (produces ARCHITECTURE.md + STRUCTURE.md)
   - **"quality"**: Map code quality — conventions, testing, patterns (produces CONVENTIONS.md + TESTING.md)
   - **"concerns"**: Map technical debt — outdated deps, security risks, performance issues (produces CONCERNS.md)
-  - **"all"**: Run all 4 focus areas in parallel (dispatches 4 mapper agents)
 
 ## Step 2: Detect Context
 
@@ -99,14 +99,15 @@ After all mapper tasks complete, verify that the team has been properly cleaned 
 
 <output>
 
-## Step 5: Present Results
+## Step 5: Save Results
 
-Display the analysis document(s) to the user.
+1. Delete any existing codebase docs: remove all files in `.shipyard/codebase/` (create the directory if it doesn't exist)
+2. Write the new analysis document(s) to `.shipyard/codebase/`
+3. Display a summary of what was written
 
 Offer follow-up:
 > "Would you like me to:
-> - Save these documents to `.shipyard/codebase/` (or `docs/codebase/`)
-> - Analyze another focus area
+> - Analyze a specific focus area in more detail
 > - Create an improvement plan based on the findings"
 
 </output>
