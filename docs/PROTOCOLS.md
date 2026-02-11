@@ -602,3 +602,58 @@ Bad:
 - `feat: Changes` (vague description, capitalized)
 - `fix(auth): Fixed the bug where users couldn't log in when they had special characters in their password and the server was running in production mode` (too long)
 </example>
+
+---
+
+## Team Dispatch Protocol
+
+<purpose>
+Standardize the detect/ask/branch pattern used by multi-agent commands (build, plan, map, ship) to optionally use Claude Code native teams instead of Task subagents. This ensures consistent behavior, language, and cleanup patterns across all team-capable commands.
+</purpose>
+
+<instructions>
+1. **Detect:** Check `SHIPYARD_TEAMS_ENABLED` environment variable (exported by `scripts/team-detect.sh`). Set to `true` when `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`.
+
+2. **Prompt (conditional):** If `SHIPYARD_TEAMS_ENABLED=true`, use `AskUserQuestion` with exactly two options:
+   - "Team mode (parallel teammates)" — uses TeamCreate/TaskCreate/SendMessage/TeamDelete lifecycle
+   - "Agent mode (subagents)" — uses standard Task dispatch (current behavior)
+   - Question text: "Teams available. Use team mode (parallel teammates) or agent mode (subagents)?"
+
+3. **Silent fallback:** If `SHIPYARD_TEAMS_ENABLED` is `false` or unset, silently set `dispatch_mode` to `agent` with no prompt (zero overhead).
+
+4. **Variable storage:** Store the result as `dispatch_mode` (value: `team` or `agent`). This variable is referenced by all subsequent dispatch steps in the command.
+
+5. **Team mode lifecycle:**
+   - `TeamCreate(name: "shipyard-{command}-{scope}")` — descriptive team name
+   - `TaskCreate` for each unit of work with full context
+   - `TaskUpdate` to pre-assign owners BEFORE spawning teammates (avoids race conditions)
+   - `Task(team_name, name, subagent_type)` to spawn each teammate
+   - `TaskList` to monitor progress (poll until terminal state)
+   - `SendMessage(shutdown_request)` to all teammates when done
+   - `TeamDelete` for cleanup
+
+6. **Agent mode:** Standard `Task(subagent_type, model, prompt)` dispatch. No TeamCreate/SendMessage/TeamDelete overhead.
+
+7. **Single-agent exception:** Steps that dispatch only one agent (verifier, auditor, simplifier, documenter, researcher, architect) always use Task dispatch regardless of `dispatch_mode`. Team overhead is not justified for a single agent.
+
+8. **Team cleanup is mandatory:** Always run `SendMessage(shutdown_request)` + `TeamDelete` even if errors occur. Before any early return or error exit in team mode, ensure team cleanup runs. Never leave orphaned teams.
+</instructions>
+
+<rules>
+- The dispatch section must appear in `<prerequisites>` before any agent dispatch steps
+- All 4 commands (build, plan, map, ship) must use identical detection, prompt, and fallback language
+- Sequential-workflow commands (plan, ship) should include a recommendation note that agent mode is preferred
+- Pre-assignment via TaskUpdate before spawning prevents race conditions — there is no atomic claiming
+- Team names should be descriptive and scoped: `shipyard-build-phase-{N}-wave-{W}`, `shipyard-map-all`
+</rules>
+
+<example description="Dispatch pattern in a command with both parallel and single-agent steps">
+Build command (parallel builders, single-agent reviewers):
+
+1. Step 2b: Team or Agent Dispatch — detect, prompt, store dispatch_mode
+2. Step 4a (Builders): if team → TeamCreate + TaskCreate + spawn; if agent → parallel Task calls
+3. Step 4c (Reviewers): if team → same team or new team + TaskCreate + spawn; if agent → parallel Task calls
+4. Step 5 (Verifier): always Task dispatch (single agent)
+5. Steps 5a/5b/5c (Audit, Simplify, Document): always Task dispatch (single agent)
+6. Team Cleanup: shutdown + delete after each team-mode section
+</example>
