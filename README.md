@@ -128,7 +128,7 @@ Shipyard dispatches 10 specialized agents for different phases of work:
 | **verifier** | Post-execution verification (including IaC) | haiku | `/shipyard:plan`, `/shipyard:build`, `/shipyard:ship`, `/shipyard:verify` |
 | **debugger** | Root-cause analysis with 5 Whys protocol | sonnet | `/shipyard:debug` |
 
-All agents have formal definition files in `.claude/agents/` with tool restrictions (e.g., reviewers can only read, builders can edit). See [`docs/AGENT-GUIDE.md`](docs/AGENT-GUIDE.md) for detailed documentation including model assignments, tool access, and composition patterns.
+All agents have formal definition files in `.claude/agents/` with tool restrictions and model defaults. See [`docs/AGENT-GUIDE.md`](docs/AGENT-GUIDE.md) for detailed documentation including model assignments, tool access, and composition patterns.
 
 ## Agent Teams Support
 

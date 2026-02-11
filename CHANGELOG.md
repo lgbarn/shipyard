@@ -4,6 +4,30 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [3.2.2] - 2026-02-10
+
+### Changed
+- **Agent tool access expanded**: Added `Write` tool to auditor, mapper, researcher, reviewer, simplifier, and verifier agents so they can produce output artifacts directly
+
+## [3.2.1] - 2026-02-10
+
+### Added
+- **Optional team dispatch pattern**: All 4 multi-agent commands (`build`, `plan`, `map`, `ship`) now support Claude Code native teams when `SHIPYARD_TEAMS_ENABLED=true` — presents user choice between team mode (parallel teammates) and agent mode (subagents)
+- **Team Dispatch Protocol**: New protocol section in `docs/PROTOCOLS.md` documenting the detect/ask/branch pattern
+- **Team-lead context in executing-plans**: Teammate Mode skill updated with team-lead orchestration guidance
+
+### Changed
+- **build.md**: Added Step 2b (Team or Agent Dispatch), team-mode branches for builders and reviewers, single-agent step notes, Team Cleanup block
+- **plan.md**: Added Step 2c team/agent dispatch, Task dispatch notes for research, architect, and verifier steps
+- **map.md**: Added team dispatch pattern for parallel mapper agents
+- **ship.md**: Added Step 1a (Team or Agent Dispatch) for auditor, documenter, and verifier
+- **parallel-dispatch skill**: Updated with concrete team dispatch pattern reference
+- **Dispatch section formatting**: Aligned across all 4 commands for consistency
+
+### Fixed
+- **PreToolUse hook hardened**: Guard against malformed input and restrict matcher to prevent false-positive nudges
+- **ShellCheck warnings**: Resolved warnings in `test/test_helper.bash`
+
 ## [3.2.0] - 2026-02-10
 
 ### Added
