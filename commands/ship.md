@@ -21,6 +21,22 @@ Determine the shipping scope:
 Follow **Worktree Protocol** (detect if running in a git worktree; if so, use worktree root for paths and record the branch name; see `docs/PROTOCOLS.md`) -- detect worktree, record working directory and branch.
 Follow **Model Routing Protocol** (select the correct model for each agent role using `model_routing` from config; see `docs/PROTOCOLS.md`) -- read `model_routing` from config for agent model selection.
 
+## Step 1a: Team or Agent Dispatch
+
+**Detection:** Check the `SHIPYARD_TEAMS_ENABLED` environment variable (exported by `scripts/team-detect.sh`). This variable is set to `true` when `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`.
+
+**Prompt (conditional):** If `SHIPYARD_TEAMS_ENABLED=true`, use `AskUserQuestion` with exactly two options:
+- "Team mode (parallel teammates)" — uses TeamCreate/TaskCreate/SendMessage/TeamDelete lifecycle
+- "Agent mode (subagents)" — uses standard Task dispatch (current behavior)
+
+Question text: "Teams available. Use team mode (parallel teammates) or agent mode (subagents)?"
+
+**Silent fallback:** If `SHIPYARD_TEAMS_ENABLED` is `false` or unset, silently set `dispatch_mode` to `agent` with no prompt (zero overhead).
+
+**Variable storage:** Store the result as `dispatch_mode` (value: `team` or `agent`). This variable is referenced by all subsequent dispatch steps.
+
+**Recommendation:** For the ship command, agent mode is preferred. The sequential workflow (verify → audit → document → deliver) has no parallelism benefit from team mode. All dispatch steps below use Task dispatch regardless of `dispatch_mode`. The dispatch section is included for consistency with other Shipyard commands.
+
 ## Step 2: Pre-Ship Verification
 
 Invoke the `shipyard:shipyard-verification` skill to run a comprehensive check.
