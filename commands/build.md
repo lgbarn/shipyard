@@ -68,6 +68,8 @@ Group plans by wave number. Execute waves sequentially, plans within a wave in p
 
 #### Step 4a: Launch Builders (parallel within wave)
 
+**If dispatch_mode is agent:**
+
 For each incomplete plan in this wave, dispatch a **builder agent** (subagent_type: "shipyard:builder") with context per **Agent Context Protocol** (pass PROJECT.md, config.json, working directory, branch, and worktree status to all agents; see `docs/PROTOCOLS.md`):
 - The full plan content (PLAN-{W}.{P}.md)
 - Codebase docs per **Codebase Docs Protocol** (resolve configured codebase docs path and load CONVENTIONS.md, STACK.md, ARCHITECTURE.md, etc.; see `docs/PROTOCOLS.md`)
@@ -113,11 +115,24 @@ For each incomplete plan in this wave, dispatch a **builder agent** (subagent_ty
 
 These entries will be used as pre-populated suggestions when capturing lessons at ship time.
 
+**If dispatch_mode is team:**
+
+1. `TeamCreate(name: "shipyard-build-phase-{N}-wave-{W}")` -- create a team scoped to this wave
+2. For each incomplete plan in the wave, `TaskCreate` with:
+   - Subject: "Build Plan {W}.{P}: {plan_title}"
+   - Description: the full plan content (PLAN-{W}.{P}.md) plus codebase docs, CONTEXT-{N}.md, and results from previous waves
+3. `TaskUpdate` to pre-assign each task to a specific teammate name (e.g., `builder-{W}-{P}`) BEFORE spawning
+4. For each task, `Task(team_name: "shipyard-build-phase-{N}-wave-{W}", name: "builder-{W}-{P}", subagent_type: "shipyard:builder")` to spawn the teammate, following the Model Routing Protocol for model selection
+5. Monitor progress via `TaskList` -- poll until all builder tasks reach a terminal state (completed or failed)
+6. Do NOT shutdown the team yet -- reviewers will be added to the same team (per CONTEXT-1.md decision)
+
 #### Step 4b: Collect Results
 
 Wait for all builders in the wave to complete. Read their SUMMARY.md files.
 
 #### Step 4c: Review Gate
+
+**If dispatch_mode is agent:**
 
 For each completed plan, dispatch a **reviewer agent** (subagent_type: "shipyard:reviewer") following the **Model Routing Protocol** (select the correct model for each agent role using `model_routing` from config; see `docs/PROTOCOLS.md`) with the same working directory context (path, branch, worktree status) and `.shipyard/phases/{N}/CONTEXT-{N}.md` (if exists) for user intent, performing a **two-stage review**:
 
@@ -149,6 +164,17 @@ The reviewer produces `.shipyard/phases/{N}/results/REVIEW-{W}.{P}.md`:
 - {things done well}
 ```
 
+**If dispatch_mode is team:**
+
+1. For each completed plan in the wave, `TaskCreate` in the SAME team (`shipyard-build-phase-{N}-wave-{W}`) with:
+   - Subject: "Review Plan {W}.{P}"
+   - Description: the plan, its SUMMARY.md, git diff for the plan's commits, and CONTEXT-{N}.md
+2. `TaskUpdate` to pre-assign each review task (e.g., `reviewer-{W}-{P}`)
+3. `Task(team_name: "shipyard-build-phase-{N}-wave-{W}", name: "reviewer-{W}-{P}", subagent_type: "shipyard:reviewer")` to spawn reviewer teammates, following Model Routing Protocol
+4. Monitor via `TaskList` until all review tasks complete
+5. After all reviews complete: `SendMessage(shutdown_request)` to all teammates in the team, then `TeamDelete(name: "shipyard-build-phase-{N}-wave-{W}")`
+6. Read reviewer task results to produce REVIEW-{W}.{P}.md files (same format as agent mode)
+
 #### Step 4d: Handle Critical Issues
 
 If any review has `CRITICAL_ISSUES`:
@@ -156,6 +182,8 @@ If any review has `CRITICAL_ISSUES`:
 2. The builder should fix only the critical issues
 3. Re-run the review after fixes
 4. If still failing after 2 retries, mark the plan as `needs_attention` and continue
+
+**Note:** This step works the same in both modes. In team mode, create a new fix task via `TaskCreate` in a new team and spawn a builder teammate. In agent mode, dispatch a Task. The retry dispatches use the same mode as the original build.
 
 #### Step 4e: Update Tasks
 
