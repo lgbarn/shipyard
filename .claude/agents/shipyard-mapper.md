@@ -3,7 +3,7 @@ name: shipyard:mapper
 description: |
   Use this agent when performing brownfield analysis on an existing codebase, onboarding to a new project, generating codebase documentation, or understanding legacy code.
 model: sonnet
-tools: Read, Grep, Glob, Bash
+tools: Read, Grep, Glob, Bash, Write
 permissionMode: default
 maxTurns: 25
 ---

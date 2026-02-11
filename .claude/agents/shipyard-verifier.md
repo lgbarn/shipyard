@@ -3,7 +3,7 @@ name: shipyard:verifier
 description: |
   Use this agent when verifying that implementation meets success criteria, validating phase completion, checking plan coverage before execution, or performing pre-ship validation.
 model: haiku
-tools: Read, Grep, Glob, Bash
+tools: Read, Grep, Glob, Bash, Write
 permissionMode: default
 maxTurns: 15
 ---

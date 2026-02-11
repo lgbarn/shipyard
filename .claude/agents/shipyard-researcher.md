@@ -3,7 +3,7 @@ name: shipyard:researcher
 description: |
   Use this agent when conducting domain research, evaluating technology options, investigating ecosystem choices, or gathering knowledge for a development phase.
 model: sonnet
-tools: Read, Grep, Glob, WebSearch, WebFetch
+tools: Read, Grep, Glob, WebSearch, WebFetch, Write
 permissionMode: default
 maxTurns: 20
 ---

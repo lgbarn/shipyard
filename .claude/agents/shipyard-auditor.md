@@ -3,7 +3,7 @@ name: shipyard:auditor
 description: |
   Use this agent for comprehensive security and compliance analysis across all changes in a phase or milestone. Covers OWASP Top 10, secrets detection, dependency vulnerabilities, IaC security, and supply chain risks.
 model: sonnet
-tools: Read, Grep, Glob, Bash
+tools: Read, Grep, Glob, Bash, Write
 permissionMode: default
 maxTurns: 15
 ---

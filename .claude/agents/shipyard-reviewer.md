@@ -3,7 +3,7 @@ name: shipyard:reviewer
 description: |
   Use this agent for code review, verifying spec compliance, conducting quality review after a build, or checking that an implementation matches its plan.
 model: sonnet
-tools: Read, Grep, Glob
+tools: Read, Grep, Glob, Write
 permissionMode: default
 maxTurns: 15
 ---

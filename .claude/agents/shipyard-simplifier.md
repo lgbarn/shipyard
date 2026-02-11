@@ -3,7 +3,7 @@ name: shipyard:simplifier
 description: |
   Use this agent to review cumulative code changes across a phase for duplication, unnecessary complexity, dead code, and AI-generated bloat that individual task reviewers miss.
 model: sonnet
-tools: Read, Grep, Glob
+tools: Read, Grep, Glob, Write
 permissionMode: default
 maxTurns: 15
 ---
