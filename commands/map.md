@@ -62,6 +62,9 @@ Assemble context per **Agent Context Protocol** (see `docs/PROTOCOLS.md`):
 ## Step 4: Dispatch Mapper
 
 **Single focus:**
+
+**Dispatch:** Always uses Task dispatch (single-agent step — team overhead not justified). This applies regardless of `dispatch_mode`.
+
 Dispatch a **mapper agent** (subagent_type: "shipyard:mapper") with:
 - Follow **Model Routing Protocol** — resolve model from `model_routing.mapping` (default: sonnet)
 - max_turns: 20
@@ -69,7 +72,33 @@ Dispatch a **mapper agent** (subagent_type: "shipyard:mapper") with:
 - Instruction: Analyze the codebase for the specified focus area. Cite every finding with file paths. Mark inferences with "[Inferred]".
 
 **All focuses (parallel):**
+
+**If dispatch_mode is agent:**
+
 Dispatch **4 mapper agents** in parallel, one per focus area (technology, architecture, quality, concerns), each with the same context but different focus instructions.
+
+**If dispatch_mode is team:**
+
+1. `TeamCreate(name: "shipyard-map-all")` — create a single team for all mappers
+2. For each of the 4 focus areas (technology, architecture, quality, concerns), `TaskCreate` with:
+   - Subject: "Map {focus_area}"
+   - Description: the focus area instructions plus all context from Step 3
+3. `TaskUpdate` to pre-assign each task to a specific teammate name (e.g., `mapper-technology`, `mapper-architecture`, `mapper-quality`, `mapper-concerns`) BEFORE spawning
+4. For each task, `Task(team_name: "shipyard-map-all", name: "mapper-{focus}", subagent_type: "shipyard:mapper")` to spawn the teammate, following the Model Routing Protocol for model selection
+5. Monitor progress via `TaskList` — poll until all 4 mapper tasks reach a terminal state
+6. `SendMessage(shutdown_request)` to all teammates, then `TeamDelete(name: "shipyard-map-all")`
+
+## Team Cleanup
+
+**This section applies only when `dispatch_mode` is `team` and focus is `all`.**
+
+After all mapper tasks complete, verify that the team has been properly cleaned up:
+
+1. Confirm `SendMessage(shutdown_request)` was sent to all teammates in `shipyard-map-all`
+2. Confirm `TeamDelete(name: "shipyard-map-all")` was called
+3. If the team was not cleaned up (due to an error or early exit), run the shutdown + delete now
+
+**Critical rule:** If `dispatch_mode` is `team` and you are about to exit early (error or user cancellation), you MUST run SendMessage(shutdown_request) + TeamDelete for the active team before exiting. Never leave orphaned teams running.
 
 </execution>
 
