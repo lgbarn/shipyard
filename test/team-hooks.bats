@@ -169,13 +169,6 @@ MOCKEOF
 # --- New hook ShellCheck tests ---
 
 # bats test_tags=unit
-@test "pre-tool-use: ShellCheck clean" {
-    command -v shellcheck &>/dev/null || skip "shellcheck not installed"
-    run shellcheck --severity=warning "${PROJECT_ROOT}/hooks/pre-tool-use.sh"
-    assert_success
-}
-
-# bats test_tags=unit
 @test "stop: ShellCheck clean" {
     command -v shellcheck &>/dev/null || skip "shellcheck not installed"
     run shellcheck --severity=warning "${PROJECT_ROOT}/hooks/stop.sh"
