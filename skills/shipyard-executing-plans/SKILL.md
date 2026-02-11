@@ -192,14 +192,28 @@ After quality gates pass:
 
 ### Teammate Mode
 
-When `SHIPYARD_IS_TEAMMATE=true` (detected automatically via Claude Code Agent Teams):
+**This section applies when running in a Claude Code Agent Teams context.**
+
+#### As Team Lead (dispatch_mode is team)
+
+When Shipyard created the team via `/shipyard:build` team mode:
+
+- **Orchestrate teammates** via TeamCreate → TaskCreate (pre-assign) → Task(team_name) → TaskList (monitor)
+- **Handle shutdown/cleanup** via SendMessage(shutdown_request) + TeamDelete
+- **Quality gates remain with lead** — auditor, simplifier, documenter are dispatched as single-agent Task calls by the lead, not delegated to teammates
+- **Monitor progress** via TaskList polling until all tasks reach terminal state
+- **Cleanup is mandatory** — always run shutdown + delete even on errors
+
+#### As Team Member (SHIPYARD_IS_TEAMMATE=true)
+
+When Shipyard is running inside someone else's team:
 
 - **Execute tasks directly** instead of dispatching builder subagents (you ARE the builder)
 - **Skip quality gate dispatch** (auditor, simplifier) — the lead agent handles these
 - **Write results to task metadata** instead of STATE.json — the lead reads task list for progress
 - **Respect TeammateIdle hook** — ensure tests pass before stopping work
 
-In solo mode (`SHIPYARD_IS_TEAMMATE=false`), this section has no effect — standard subagent dispatch applies.
+In solo mode (neither team-lead nor team-member), this section has no effect — standard subagent dispatch applies.
 
 </instructions>
 

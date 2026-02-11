@@ -66,6 +66,8 @@ Detect and run the project's test suite:
 
 **Note:** This audit runs regardless of `config.json` settings or `--light` usage during build. Shipping is the final gate — security is always checked here. If a passing `AUDIT-{N}.md` already exists from the build phase and no changes were made since, skip re-auditing and verify the existing report has no unresolved critical findings.
 
+**Dispatch:** Always uses Task dispatch (single-agent step — team overhead not justified). This applies regardless of `dispatch_mode`.
+
 Dispatch an **auditor agent** (subagent_type: "shipyard:auditor") with context per **Agent Context Protocol** (pass PROJECT.md, config.json, working directory, branch, and worktree status to all agents; see `docs/PROTOCOLS.md`):
 - Git diff of ALL changes in the shipping scope (phase, milestone, or branch)
 - Codebase docs per **Codebase Docs Protocol** (resolve configured codebase docs path and load CONVENTIONS.md, STACK.md, ARCHITECTURE.md, etc.; see `docs/PROTOCOLS.md`)
@@ -95,6 +97,8 @@ Produce audit report.
 ## Step 5: Comprehensive Documentation Generation
 
 **Note:** This step runs regardless of `config.json` settings or `--light` usage during build. Shipping should produce comprehensive documentation.
+
+**Dispatch:** Always uses Task dispatch (single-agent step — team overhead not justified). This applies regardless of `dispatch_mode`.
 
 If phase-level `DOCUMENTATION-{N}.md` files exist from the build phase and are up-to-date (no changes since last documentation run), verify completeness and skip to documentation assembly. Otherwise, dispatch a **documenter agent** (subagent_type: "shipyard:documenter") with:
 - Git diff of ALL changes in the shipping scope (phase, milestone, or branch)
