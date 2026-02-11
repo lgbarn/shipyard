@@ -29,24 +29,19 @@ Extract from the command:
 
 ## Step 2a: Team or Agent Dispatch
 
-**Detection:**
-Check the `SHIPYARD_TEAMS_ENABLED` environment variable (exported by `scripts/team-detect.sh`). This variable is set to `true` when `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`.
+**Detection:** Check the `SHIPYARD_TEAMS_ENABLED` environment variable (exported by `scripts/team-detect.sh`). This variable is set to `true` when `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`.
 
-**Conditional Prompt:**
-If `SHIPYARD_TEAMS_ENABLED=true`, use `AskUserQuestion` with exactly two options:
+**Prompt (conditional):** If `SHIPYARD_TEAMS_ENABLED=true`, use `AskUserQuestion` with exactly two options:
 - "Team mode (parallel teammates)" — uses TeamCreate/TaskCreate/SendMessage/TeamDelete lifecycle
 - "Agent mode (subagents)" — uses standard Task dispatch (current behavior)
 
 Question text: "Teams available. Use team mode (parallel teammates) or agent mode (subagents)?"
 
-**Silent Fallback:**
-If `SHIPYARD_TEAMS_ENABLED` is `false` or unset, silently set `dispatch_mode` to `agent` with no prompt (zero overhead).
+**Silent fallback:** If `SHIPYARD_TEAMS_ENABLED` is `false` or unset, silently set `dispatch_mode` to `agent` with no prompt (zero overhead).
 
-**Variable Storage:**
-Store the result as `dispatch_mode` (value: `team` or `agent`). This variable is referenced by all subsequent dispatch steps.
+**Variable storage:** Store the result as `dispatch_mode` (value: `team` or `agent`). This variable is referenced by all subsequent dispatch steps.
 
-**Usage Note:**
-Team mode provides parallelism benefit only for `map all` (4 mapper agents). Single-focus maps always use Task dispatch regardless of `dispatch_mode`.
+**Note:** Team mode provides parallelism benefit only for `map all` (4 mapper agents). Single-focus maps always use Task dispatch regardless of `dispatch_mode`.
 
 </prerequisites>
 

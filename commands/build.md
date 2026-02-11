@@ -193,7 +193,7 @@ Follow **Native Task Scaffolding Protocol** (create/update native tasks for prog
 
 ## Step 5: Phase Verification
 
-**Dispatch:** Always uses Task dispatch (single-agent step -- team overhead not justified). This applies regardless of `dispatch_mode`.
+**Dispatch:** Always uses Task dispatch (single-agent step — team overhead not justified). This applies regardless of `dispatch_mode`.
 
 Dispatch a **verifier agent** (subagent_type: "shipyard:verifier") following the **Model Routing Protocol** (select the correct model for each agent role using `model_routing` from config; see `docs/PROTOCOLS.md`) with:
 - All SUMMARY.md and REVIEW.md files for this phase
@@ -217,7 +217,7 @@ Produce `.shipyard/phases/{N}/VERIFICATION.md` with:
 
 ## Step 5a: Security Audit
 
-**Dispatch:** Always uses Task dispatch (single-agent step -- team overhead not justified). This applies regardless of `dispatch_mode`.
+**Dispatch:** Always uses Task dispatch (single-agent step — team overhead not justified). This applies regardless of `dispatch_mode`.
 
 **Skip this step if:** `--light` flag was passed, OR `config.json` has `"security_audit": false`.
 
@@ -243,7 +243,7 @@ Produce `.shipyard/phases/{N}/results/AUDIT-{N}.md`.
 
 ## Step 5b: Simplification Review
 
-**Dispatch:** Always uses Task dispatch (single-agent step -- team overhead not justified). This applies regardless of `dispatch_mode`.
+**Dispatch:** Always uses Task dispatch (single-agent step — team overhead not justified). This applies regardless of `dispatch_mode`.
 
 **Skip this step if:** `--light` flag was passed, OR `config.json` has `"simplification_review": false`.
 
@@ -269,7 +269,7 @@ Produce `.shipyard/phases/{N}/results/SIMPLIFICATION-{N}.md`.
 
 ## Step 5c: Documentation Generation
 
-**Dispatch:** Always uses Task dispatch (single-agent step -- team overhead not justified). This applies regardless of `dispatch_mode`.
+**Dispatch:** Always uses Task dispatch (single-agent step — team overhead not justified). This applies regardless of `dispatch_mode`.
 
 **Skip this step if:** `--light` flag was passed, OR `config.json` has `"documentation_generation": false`.
 
