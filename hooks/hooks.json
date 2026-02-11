@@ -42,18 +42,6 @@
         ]
       }
     ],
-    "PreToolUse": [
-      {
-        "matcher": "Task|Bash|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/pre-tool-use.sh",
-            "timeout": 5
-          }
-        ]
-      }
-    ],
     "Stop": [
       {
         "matcher": "",

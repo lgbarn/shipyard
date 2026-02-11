@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [3.2.3] - 2026-02-11
+
+### Removed
+- PreToolUse hook due to errors
+
 ## [3.2.2] - 2026-02-10
 
 ### Changed
