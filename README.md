@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/shipyard_logo.png" alt="Shipyard Logo" width="300">
+  <img src="assets/shipyard_logo.png" alt="Shipyard Logo" width="400">
 </p>
 
 # Shipyard
