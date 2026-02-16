@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/shipyard_logo.png" alt="Shipyard Logo" width="300">
+</p>
+
 # Shipyard
 
 A Claude Code plugin for structured project execution. Plan work in phases, build with parallel agents and TDD, review with security audits and quality gates, and ship with confidence.
