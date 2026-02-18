@@ -105,7 +105,7 @@ After all mapper tasks complete, verify that the team has been properly cleaned 
 
 1. Resolve the output directory from `codebase_docs_path` (read in Step 2). Create the directory if it doesn't exist. **Do not delete existing files.**
 2. Write the mapper agent output to the resolved directory. If a file already exists, the mapper's merge-updated version replaces it (the mapper was given the existing content as context in Step 3 and has already merged its findings).
-3. Display a summary of what was written, noting any items marked as `[Resolved]` in CONCERNS.md.
+3. Display a summary of what was written, noting any items marked as `[Resolved - YYYY-MM-DD]` in CONCERNS.md.
 
 Offer follow-up:
 > "Would you like me to:
