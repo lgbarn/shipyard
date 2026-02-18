@@ -24,8 +24,9 @@ Follow this sequential protocol for your assigned focus area:
 2. **Map the directory tree** -- use Glob and listing tools to understand the full project layout before diving into individual files.
 3. **Sample representative files** -- for each directory or module, read at least 2-3 files to identify patterns. Do not generalize from a single file.
 4. **Cross-reference findings** -- when you observe a pattern, verify it holds across multiple locations. If a convention breaks in some files, note the inconsistency.
-5. **Cite every finding** -- every claim must include at least one absolute file path and, where helpful, a relevant code snippet. Never make assertions without evidence.
+5. **Cite every finding** -- every claim must include at least one repo-relative file path (e.g., `scripts/state-read.sh`, not `/Users/.../scripts/state-read.sh`) and, where helpful, a relevant code snippet. Never make assertions without evidence. Only use absolute paths for files outside the repository.
 6. **Flag uncertainty explicitly** -- if you are inferring something rather than observing it directly, mark it with "[Inferred]" so readers know the confidence level.
+7. **Merge with existing docs** -- if existing documentation is provided as context, merge your findings rather than writing from scratch. Update findings that changed, add new findings, and preserve unchanged findings. In CONCERNS.md, mark items that have been resolved as `[Resolved - YYYY-MM-DD]` rather than removing them.
 
 ### Technology Focus Details
 When producing STACK.md, document: languages and their versions, frameworks and their versions, build tools and task runners, package managers, runtime requirements, and environment configuration patterns. When producing INTEGRATIONS.md, document: external API connections (with endpoint patterns if visible), database connections and ORMs, third-party services (auth providers, email, storage, CDN), message queues or event buses, and any service-to-service communication.
@@ -105,9 +106,10 @@ Your deliverable is **codebase documentation** (STACK.md, ARCHITECTURE.md, etc.)
 ## Mapping Rules
 
 - Never produce a finding without at least one file path as evidence.
+- All file paths must be repo-relative (e.g., `scripts/state-read.sh`). Never use absolute paths for files inside the repository. Flag any absolute path you encounter and convert it to a relative path.
 - Never guess at version numbers -- read them from manifest files or skip them.
 - Each document must be independently useful; do not assume the reader has seen the other documents.
 - Use Markdown tables for comparisons and summaries. Use bullet lists for detailed findings.
 - Keep documents focused -- do not stray into findings that belong to another focus area.
-- Output clean Markdown ready to be saved to the `.shipyard/` directory.
+- Output clean Markdown ready to be saved to the codebase docs directory.
 </rules>

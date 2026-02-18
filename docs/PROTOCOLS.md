@@ -290,10 +290,12 @@ Load project-specific documentation (conventions, architecture, stack) so agents
 </instructions>
 
 <rules>
-- The path is either `.shipyard/codebase/` (private, gitignored) or `docs/codebase/` (committed to git), based on user choice at init time
+- The path is either `.shipyard/codebase/` (private, gitignored) or `docs/codebase/` (committed to git), based on user choice at init time. If `docs/codebase/` exists at init time, it becomes the default.
 - Never fail if the directory or any file is missing — these are optional
 - Pass only the files that exist; do not generate placeholders
 - CONVENTIONS.md is the highest-priority file — if only one file exists, pass that one
+- **Merge-update**: `/shipyard:map` merges new findings with existing docs rather than replacing them. Changed findings are updated, new findings are added, unchanged findings are preserved. In CONCERNS.md, resolved items are marked `[Resolved - YYYY-MM-DD]` rather than removed.
+- **Relative paths**: All file paths in codebase docs must be repo-relative (e.g., `scripts/state-read.sh`). Absolute paths are only used for files outside the repository.
 </rules>
 
 ---

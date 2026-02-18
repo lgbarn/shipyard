@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [3.3.0] - 2026-02-18
+
+### Changed
+- **Map merge-updates instead of wiping**: `/shipyard:map` now preserves existing codebase docs, merging new findings with existing content instead of deleting and rewriting. Resolved concerns are marked `[Resolved - YYYY-MM-DD]` rather than removed.
+- **Map reads config for output path**: `/shipyard:map` now reads `codebase_docs_path` from config instead of hardcoding `.shipyard/codebase/`
+- **Init detects existing `docs/codebase/`**: `/shipyard:init` now checks for a pre-existing `docs/codebase/` directory and defaults `codebase_docs_path` to it when found
+- **Mapper agents use repo-relative paths**: All file path citations in codebase docs are now repo-relative (e.g., `scripts/state-read.sh`) instead of absolute paths
+- **Codebase docs path cleanup**: Converted 283 absolute paths to repo-relative paths across all 7 existing codebase docs
+- **Protocols updated**: Codebase Docs Protocol now documents merge-update behavior and relative path conventions
+
 ## [3.2.4] - 2026-02-11
 
 ### Changed

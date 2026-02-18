@@ -61,8 +61,17 @@ Produce CONCERNS.md:
 ## Evidence Requirements
 
 - Every finding must cite at least one file path as evidence
+- All file paths must be repo-relative (e.g., `scripts/state-read.sh`, not `/Users/.../scripts/state-read.sh`). Only use absolute paths for files outside the repository.
 - Flag uncertainty with `[Inferred]` marker
 - Each document must be independently useful (no forward references to other focus area docs)
+
+## Merge-Update Behavior
+
+When existing documentation is provided as context, merge your findings rather than writing from scratch:
+- Update findings that have changed
+- Add new findings not present in the existing docs
+- Preserve unchanged findings as-is
+- In CONCERNS.md, mark resolved items as `[Resolved - YYYY-MM-DD]` rather than removing them
 </instructions>
 
 <rules>
@@ -74,7 +83,7 @@ You MUST NOT:
 - Write documentation for focus areas not assigned to you
 
 You MUST:
-- Cite file paths as evidence for every finding
+- Cite repo-relative file paths as evidence for every finding
 - Mark uncertain conclusions with `[Inferred]`
 - Sample multiple files before drawing conclusions
 - Produce independently useful documentation

@@ -26,7 +26,9 @@ Check if a `.shipyard/` directory already exists in the current project root.
 
 Determine whether this is a **brownfield** (existing source code) or **greenfield** (empty/new project) by checking for source files and package manifests (e.g., `package.json`, `go.mod`, `Cargo.toml`, `requirements.txt`, `*.py`, `*.ts`, `*.go`, `*.rs`, etc.).
 
-This is only used to tailor next-steps guidance in Step 5 — no codebase mapping or analysis is performed.
+Also check if `docs/codebase/` exists and contains `.md` files. If it does, this means a previous `/shipyard:map` was run and committed — store this as `detected_codebase_path = "docs/codebase"` for use in Step 4.
+
+This is used to tailor next-steps guidance in Step 5 and to set a smart default for `codebase_docs_path` — no codebase mapping or analysis is performed.
 
 </prerequisites>
 
@@ -99,7 +101,7 @@ Write `.shipyard/config.json` with the user's choices. Map answers to config key
 - Batch 2: `security_audit` (`true` / `false`), `simplification_review` (`true` / `false`), `iac_validation` (`"auto"` / `true` / `false`), `documentation_generation` (`true` / `false`)
 - Batch 3: `model_routing` (object — see **Model Routing Protocol** in `docs/PROTOCOLS.md` for the full key set and defaults per strategy), `context_tier` (`"auto"` / `"minimal"` / `"full"`)
 
-Also include: `codebase_docs_path` (default `".shipyard/codebase"`), `created_at` (ISO timestamp), `version` (`"1.3"`).
+Also include: `codebase_docs_path` (use `detected_codebase_path` from Step 2 if set, otherwise default `".shipyard/codebase"`), `created_at` (ISO timestamp), `version` (`"1.3"`).
 
 Use defaults from `docs/PROTOCOLS.md` for any unanswered or skipped fields: `security_audit: true`, `simplification_review: true`, `iac_validation: "auto"`, `documentation_generation: true`, `context_tier: "auto"`.
 

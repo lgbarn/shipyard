@@ -23,9 +23,10 @@ Extract from the command:
 ## Step 2: Detect Context
 
 1. Check if `.shipyard/` exists (optional — this command works anywhere).
-2. If `.shipyard/config.json` exists, read `model_routing.mapping` for model selection.
-3. Otherwise, use default model: **sonnet**.
+2. If `.shipyard/config.json` exists, read `model_routing.mapping` for model selection and `codebase_docs_path` for the output directory.
+3. Otherwise, use default model: **sonnet** and default `codebase_docs_path`: `.shipyard/codebase`.
 4. Follow **Worktree Protocol** (see `docs/PROTOCOLS.md`) — detect worktree context.
+5. Store the resolved `codebase_docs_path` for use in Steps 3 and 5.
 
 ## Step 2a: Team or Agent Dispatch
 
@@ -53,6 +54,7 @@ Assemble context per **Agent Context Protocol** (see `docs/PROTOCOLS.md`):
 - The focus area from Step 1
 - Working directory, current branch, and worktree status
 - `.shipyard/PROJECT.md` (if exists)
+- **Existing codebase docs** (if any): Read any existing `.md` files from the resolved `codebase_docs_path` directory that match the focus area's output files. Pass their content to the mapper agent so it can merge-update rather than write from scratch. For example, if the focus is "concerns" and `CONCERNS.md` exists, include its content as context.
 
 ## Step 4: Dispatch Mapper
 
@@ -101,9 +103,9 @@ After all mapper tasks complete, verify that the team has been properly cleaned 
 
 ## Step 5: Save Results
 
-1. Delete any existing codebase docs: remove all files in `.shipyard/codebase/` (create the directory if it doesn't exist)
-2. Write the new analysis document(s) to `.shipyard/codebase/`
-3. Display a summary of what was written
+1. Resolve the output directory from `codebase_docs_path` (read in Step 2). Create the directory if it doesn't exist. **Do not delete existing files.**
+2. Write the mapper agent output to the resolved directory. If a file already exists, the mapper's merge-updated version replaces it (the mapper was given the existing content as context in Step 3 and has already merged its findings).
+3. Display a summary of what was written, noting any items marked as `[Resolved]` in CONCERNS.md.
 
 Offer follow-up:
 > "Would you like me to:
