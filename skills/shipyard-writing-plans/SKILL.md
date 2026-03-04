@@ -1,9 +1,9 @@
 ---
 name: shipyard-writing-plans
-description: Use when you have a spec or requirements for a multi-step task, before touching code
+description: Use when you have a spec, requirements, or design for a multi-step task — before touching code. Also triggers on "plan this", "break this down", "create tasks", "decompose this feature", or when a task clearly needs more than 2-3 steps to implement. If you're about to start building without a plan, this skill applies.
 ---
 
-<!-- TOKEN BUDGET: 220 lines / ~660 tokens -->
+<!-- TOKEN BUDGET: 290 lines / ~870 tokens -->
 
 # Writing Plans
 
@@ -62,6 +62,16 @@ Shipyard plans use XML-structured tasks with verification criteria. Each task in
 
 This structured format enables `/shipyard:build` to parse and execute tasks systematically, and `/shipyard:status` to track progress.
 
+## Task Granularity Guide
+
+| Size | Example | Action |
+|------|---------|--------|
+| **Too big** | "Implement authentication system" | Split — no single commit for a whole system |
+| **Right size** | "Add JWT token validation middleware" | Keep — one TDD cycle, one commit |
+| **Too small** | "Add import statement" | Merge with its parent task |
+
+**Target:** Each task = one TDD cycle (write test → fail → implement → pass → commit). If a task needs more than one commit, split it.
+
 ## Bite-Sized Task Granularity
 
 **Each step is one action (2-5 minutes):**
@@ -70,6 +80,29 @@ This structured format enables `/shipyard:build` to parse and execute tasks syst
 - "Implement the minimal code to make the test pass" - step
 - "Run the tests and make sure they pass" - step
 - "Commit" - step
+
+## Coupling Detection
+
+Before ordering tasks, check for dependencies. Tasks that must share state or touch the same file need sequencing:
+
+| Dependency Type | Example | Resolution |
+|----------------|---------|------------|
+| Same file | Tasks A and B both modify `auth.py` | Sequence them; never parallelize |
+| Import dependency | Task B imports what Task A creates | B blocks on A |
+| Interface contract | Task B depends on Task A's return type | Define interface in Task A, implement in B |
+| Shared utility | Both tasks call a helper that doesn't exist yet | Create helper as Task 0 |
+
+**Red flag:** Two tasks listed as parallelizable that both modify the same file — this will produce merge conflicts.
+
+## Mid-Phase Adaptation
+
+When reality diverges from the plan during execution:
+
+- **Minor divergence** (file path changed, one extra step) — adapt in place, note in SUMMARY.md
+- **Major divergence** (wrong architecture, missing component) — pause, update plan, re-approve before continuing
+- **Blocker** (dependency missing, API changed) — stop, document in SUMMARY.md as blocker, escalate
+
+Do not silently adapt major changes. The plan is a contract; changes need acknowledgment.
 
 ## Plan Document Header
 
@@ -196,6 +229,37 @@ The good example provides exact file paths, complete code, exact commands with e
 - Reference relevant skills with @ syntax
 - DRY, YAGNI, TDD, frequent commits
 
+## Red Flags
+
+A plan is not ready to ship if any task:
+- Has no file path (builder must guess where to put the code)
+- Has no verification command (builder cannot confirm it worked)
+- Touches the same file as an adjacent task (guaranteed conflict)
+- Would take more than 20 minutes (too big — split it)
+- Mentions "implement feature X" without TDD steps (builder will skip tests)
+
+## AI-Awareness: Common Plan Quality Failures
+
+AI writers produce plans with predictable failure modes:
+
+| Failure | Symptom | Fix |
+|---------|---------|-----|
+| Tightly-coupled tasks | Two tasks listed as parallel both modify same file | Add dependency, sequence them |
+| Vague verification | `<expected>success</expected>` | Specify exact output or exit code |
+| Missing file paths | "Add auth middleware" without path | Read codebase, provide exact path |
+| Over-scoped tasks | Single task covers auth + session + logging | Split into one concern per task |
+| Missing TDD steps | Steps go straight to implementation | Add write-test, run-test, implement, verify |
+
+## Rationalization Prevention
+
+| Excuse | Reality |
+|--------|---------|
+| "The path is obvious" | Builders hallucinate paths when not given them. Provide exact paths. |
+| "I'll flesh out the test later" | "Later" = never in execution pressure. Write test code in the plan. |
+| "These tasks are independent enough" | If they touch the same file, they are coupled. No exceptions. |
+| "The verification step is implied" | Implied verification is skipped verification. Write the command. |
+| "The task is simple, no need to split" | Simple tasks that take >20 min are not simple. Split them. |
+
 </rules>
 
 ## Execution Handoff
@@ -218,3 +282,9 @@ After saving the plan, offer execution choice:
 **If Parallel Session chosen:**
 - Guide them to open new session in worktree
 - **REQUIRED SUB-SKILL:** New session uses shipyard:shipyard-executing-plans
+
+## Integration
+
+**Called by:** shipyard:shipyard-brainstorming — after requirements are gathered, planning begins
+**Pairs with:** shipyard:shipyard-tdd — TDD steps are embedded in every task
+**Leads to:** shipyard:shipyard-executing-plans — plan is handed off for execution

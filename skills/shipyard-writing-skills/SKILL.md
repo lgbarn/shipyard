@@ -1,9 +1,9 @@
 ---
 name: shipyard-writing-skills
-description: Use when creating new skills, editing existing skills, or verifying skills work before deployment
+description: Use when creating/editing skills, or a skill isn't triggering correctly. Also triggers on "create a skill", "write a skill", "new skill", "improve this skill", "skill isn't triggering", or when editing any SKILL.md file.
 ---
 
-<!-- TOKEN BUDGET: 530 lines / ~1590 tokens -->
+<!-- TOKEN BUDGET: 380 lines / ~1140 tokens -->
 
 # Writing Skills
 
@@ -32,8 +32,6 @@ You write test cases (pressure scenarios with subagents), watch them fail (basel
 **Core principle:** If you didn't watch an agent fail without the skill, you don't know if the skill teaches the right thing.
 
 **REQUIRED BACKGROUND:** You MUST understand shipyard:shipyard-tdd before using this skill. That skill defines the fundamental RED-GREEN-REFACTOR cycle. This skill adapts TDD to documentation.
-
-**Official guidance:** For Anthropic's official skill authoring best practices, see anthropic-best-practices.md. This document provides additional patterns and guidelines that complement the TDD-focused approach in this skill.
 
 ## What is a Skill?
 
@@ -89,7 +87,6 @@ API docs, syntax guides, tool documentation (office docs)
 
 ## Directory Structure
 
-
 ```
 skills/
   skill-name/
@@ -132,8 +129,6 @@ description: Use when [specific triggering conditions and symptoms]
 What is this? Core principle in 1-2 sentences.
 
 ## When to Use
-[Small inline flowchart IF decision non-obvious]
-
 Bullet list with SYMPTOMS and use cases
 When NOT to use
 
@@ -145,152 +140,49 @@ Table or bullets for scanning common operations
 
 ## Implementation
 Inline code for simple patterns
-Link to file for heavy reference or reusable tools
-
-## Common Mistakes
-What goes wrong + fixes
-
-## Real-World Impact (optional)
-Concrete results
 ```
 
-## Claude Search Optimization (CSO)
+## Claude Search Optimization (CSO) — Quick Reference
 
-**Critical for discovery:** Future Claude needs to FIND your skill
+| Element | Rule | Example |
+|---------|------|---------|
+| Description | Triggering conditions only, no workflow | `"Use when tests hang waiting for async ops"` |
+| Keywords | Error messages, symptoms, tool names | `"ENOTEMPTY", "flaky", "bats-core"` |
+| Name | Verb-first, hyphenated | `condition-based-waiting` not `async-helpers` |
+| Token budget | `<150 words` getting-started, `<500 words` others | Compress, cross-reference |
+| Cross-refs | Skill name + requirement marker, no `@` links | `**REQUIRED SUB-SKILL:** Use shipyard:foo` |
 
-### 1. Rich Description Field
+**Why no `@` links:** `@` syntax force-loads files immediately, consuming context tokens you may not need yet.
 
-**Purpose:** Claude reads description to decide which skills to load for a given task. Make it answer: "Should I read this skill right now?"
-
-**Format:** Start with "Use when..." to focus on triggering conditions
-
-**CRITICAL: Description = When to Use, NOT What the Skill Does**
-
-The description should ONLY describe triggering conditions. Do NOT summarize the skill's process or workflow in the description.
-
-**Why this matters:** Testing revealed that when a description summarizes the skill's workflow, Claude may follow the description instead of reading the full skill content. A description saying "code review between tasks" caused Claude to do ONE review, even though the skill's flowchart clearly showed TWO reviews (spec compliance then code quality).
-
-When the description was changed to just "Use when executing implementation plans with independent tasks" (no workflow summary), Claude correctly read the flowchart and followed the two-stage review process.
-
-**The trap:** Descriptions that summarize workflow create a shortcut Claude will take. The skill body becomes documentation Claude skips.
-
-### CSO Continued
-
-**Content:**
-- Use concrete triggers, symptoms, situations -- describe the *problem* not language-specific symptoms
-- Technology-agnostic unless the skill itself is technology-specific
-- Third person (injected into system prompt)
-- **NEVER summarize the skill's process or workflow**
-
-### 2. Keyword Coverage
-
-Use words Claude would search for:
-- Error messages: "Hook timed out", "ENOTEMPTY", "race condition"
-- Symptoms: "flaky", "hanging", "zombie", "pollution"
-- Synonyms: "timeout/hang/freeze", "cleanup/teardown/afterEach"
-- Tools: Actual commands, library names, file types
-
-### 3. Descriptive Naming
-
-**Use active voice, verb-first:**
-- `creating-skills` not `skill-creation`
-- `condition-based-waiting` not `async-test-helpers`
-
-### 4. Token Efficiency (Critical)
-
-**Targets:** getting-started <150 words, frequently-loaded <200 words, others <500 words.
-
-**Key techniques:** Move details to `--help`, use cross-references instead of repeating content, compress examples to minimal form, eliminate redundancy. See EXAMPLES.md for detailed token efficiency patterns.
-
-**Naming:** Use active verb-first names (`condition-based-waiting` not `async-test-helpers`). Gerunds work well for processes (`creating-skills`, `testing-skills`).
-
-### 5. Cross-Referencing Other Skills
-
-**When writing documentation that references other skills:**
-
-Use skill name only, with explicit requirement markers:
-- Good: `**REQUIRED SUB-SKILL:** Use shipyard:shipyard-tdd`
-- Good: `**REQUIRED BACKGROUND:** You MUST understand shipyard:shipyard-debugging`
-- Bad: `See skills/testing/test-driven-development` (unclear if required)
-- Bad: `@skills/testing/test-driven-development/SKILL.md` (force-loads, burns context)
-
-**Why no @ links:** `@` syntax force-loads files immediately, consuming context tokens you may not need yet.
+**Critical CSO rule — Description = When to Use, NOT What the Skill Does:**
+When a description summarizes the skill's workflow, Claude follows the description instead of reading the full skill. A description saying "code review between tasks" caused Claude to do ONE review even though the skill showed TWO stages. Keep descriptions as triggering conditions only.
 
 ## Flowchart Usage
 
-```dot
-digraph when_flowchart {
-    "Need to show information?" [shape=diamond];
-    "Decision where I might go wrong?" [shape=diamond];
-    "Use markdown" [shape=box];
-    "Small inline flowchart" [shape=box];
-
-    "Need to show information?" -> "Decision where I might go wrong?" [label="yes"];
-    "Decision where I might go wrong?" -> "Small inline flowchart" [label="yes"];
-    "Decision where I might go wrong?" -> "Use markdown" [label="no"];
-}
-```
-
-**Use flowcharts ONLY for:**
+Use flowcharts ONLY for:
 - Non-obvious decision points
 - Process loops where you might stop too early
 - "When to use A vs B" decisions
 
-**Never use flowcharts for:**
-- Reference material -- Tables, lists
-- Code examples -- Markdown blocks
-- Linear instructions -- Numbered lists
-- Labels without semantic meaning (step1, helper2)
+Never use flowcharts for reference material, code examples, linear instructions, or labels without semantic meaning.
 
 ## Code Examples
 
 **One excellent example beats many mediocre ones**
 
-Choose most relevant language:
-- Testing techniques -- TypeScript/JavaScript
-- System debugging -- Shell/Python
-- Data processing -- Python
+Choose most relevant language (testing → TypeScript/JS, system debug → Shell/Python, data → Python).
 
-**Good example:**
-- Complete and runnable
-- Well-commented explaining WHY
-- From real scenario
-- Shows pattern clearly
-- Ready to adapt (not generic template)
+Good example: complete, runnable, well-commented WHY, from real scenario, ready to adapt.
 
-**Don't:**
-- Implement in 5+ languages
-- Create fill-in-the-blank templates
-- Write contrived examples
-
-You're good at porting - one great example is enough.
+Don't: implement in 5+ languages, create fill-in-the-blank templates, write contrived examples.
 
 ## File Organization
 
-### Self-Contained Skill
-```
-defense-in-depth/
-  SKILL.md    # Everything inline
-```
-When: All content fits, no heavy reference needed
-
-### Skill with Reusable Tool
-```
-condition-based-waiting/
-  SKILL.md    # Overview + patterns
-  example.ts  # Working helpers to adapt
-```
-When: Tool is reusable code, not just narrative
-
-### Skill with Heavy Reference
-```
-pptx/
-  SKILL.md       # Overview + workflows
-  pptxgenjs.md   # 600 lines API reference
-  ooxml.md       # 500 lines XML structure
-  scripts/       # Executable tools
-```
-When: Reference material too large for inline
+| Pattern | Structure | When |
+|---------|-----------|------|
+| Self-contained | `SKILL.md` only | All content fits |
+| With reusable tool | `SKILL.md` + `example.ts` | Tool is reusable code |
+| With heavy reference | `SKILL.md` + `ref.md` + `scripts/` | Reference too large for inline |
 
 </instructions>
 
@@ -376,52 +268,50 @@ Edit skill without testing? Same violation.
 - Don't "adapt" while running tests
 - Delete means delete
 
-**REQUIRED BACKGROUND:** The shipyard:shipyard-tdd skill explains why this matters. Same principles apply to documentation.
+**Spirit vs. Letter:** Technically having a test scenario counts as "testing" only if you watched it fail first. Running a test after writing the skill is not RED-GREEN — it's just GREEN. Always establish a failing baseline first.
+
+**REQUIRED BACKGROUND:** The shipyard:shipyard-tdd skill explains why this matters.
 
 ## Testing All Skill Types
 
-Different skill types need different test approaches:
-
-### Discipline-Enforcing Skills
-Test with academic questions, pressure scenarios (time + sunk cost + exhaustion combined), and rationalization tracking. **Pass:** Agent follows rule under maximum pressure.
-
-### Technique Skills
-Test with application scenarios, edge-case variations, and gap detection. **Pass:** Agent applies technique correctly to new scenarios.
-
-### Pattern Skills
-Test with recognition scenarios, application tasks, and counter-examples. **Pass:** Agent identifies when/how to apply pattern and when NOT to.
-
-### Reference Skills
-Test with retrieval tasks, application scenarios, and coverage gaps. **Pass:** Agent finds and correctly applies reference information.
+| Skill Type | Test Approach | Pass Condition |
+|-----------|--------------|----------------|
+| Discipline-Enforcing | Pressure scenarios (time + sunk cost + exhaustion combined) | Agent follows rule under maximum pressure |
+| Technique | Application scenarios + edge-case variations | Agent applies technique correctly to new scenarios |
+| Pattern | Recognition + application + counter-examples | Agent identifies when/how AND when NOT to apply |
+| Reference | Retrieval tasks + coverage gaps | Agent finds and correctly applies reference info |
 
 ## Common Rationalizations for Skipping Testing
 
 | Excuse | Reality |
 |--------|---------|
-| "Skill is obviously clear" | Clear to you does not equal clear to other agents. Test it. |
+| "Skill is obviously clear" | Clear to you ≠ clear to other agents. Test it. |
 | "Testing is overkill" | Untested skills have issues. Always. 15 min saves hours. |
-| "Academic review is enough" | Reading does not equal using. Test application scenarios. |
+| "Academic review is enough" | Reading ≠ using. Test application scenarios. |
 | "No time to test" | Deploying untested wastes more time fixing later. |
-
-**All of these mean: Test before deploying. No exceptions.**
 
 ## Bulletproofing Skills Against Rationalization
 
-Discipline skills must resist rationalization. Key strategies:
+Discipline skills must resist rationalization:
 
-1. **Close every loophole explicitly** -- don't just state the rule, forbid specific workarounds with "No exceptions" lists
-2. **Address "Spirit vs Letter"** -- add early: "Violating the letter of the rules is violating the spirit of the rules"
-3. **Build rationalization tables** from baseline testing -- every excuse agents make gets a counter
+1. **Close every loophole explicitly** -- forbid specific workarounds with "No exceptions" lists
+2. **Address "Spirit vs Letter"** -- add early: violating the letter violates the spirit
+3. **Build rationalization tables** from baseline testing -- every excuse gets a counter
 4. **Create red flags lists** for agent self-check (e.g., "Code before test", "This is different because...")
 5. **Update CSO descriptions** with violation symptoms as triggers
 
-See EXAMPLES.md for detailed good/bad examples of each strategy.
+## Anti-Patterns
+
+| Anti-Pattern | Symptom | Fix |
+|-------------|---------|-----|
+| Narrative example | "Last week I found that..." | Rewrite as reusable pattern |
+| Multi-language dilution | Same example in 5 languages | Keep only most relevant language |
+| Code in flowcharts | Can't copy-paste, hard to read | Use markdown code blocks |
+| Generic labels | `helper1`, `step3` have no meaning | Use descriptive names |
 
 </rules>
 
 ## RED-GREEN-REFACTOR for Skills
-
-Follow the TDD cycle:
 
 ### RED: Write Failing Test (Baseline)
 
@@ -441,28 +331,6 @@ Run same scenarios WITH skill. Agent should now comply.
 ### REFACTOR: Close Loopholes
 
 Agent found new rationalization? Add explicit counter. Re-test until bulletproof.
-
-## Anti-Patterns
-
-- **Narrative Example** -- session-specific stories are not reusable
-- **Multi-Language Dilution** -- one excellent example beats five mediocre translations
-- **Code in Flowcharts** -- can't copy-paste, hard to read (use markdown blocks)
-- **Generic Labels** -- helper1/step3 have no semantic meaning; use descriptive names
-
-See EXAMPLES.md for detailed anti-pattern examples.
-
-## STOP: Before Moving to Next Skill
-
-**After writing ANY skill, you MUST STOP and complete the deployment process.**
-
-**Do NOT:**
-- Create multiple skills in batch without testing each
-- Move to next skill before current one is verified
-- Skip testing because "batching is more efficient"
-
-**The deployment checklist below is MANDATORY for EACH skill.**
-
-Deploying untested skills = deploying untested code. It's a violation of quality standards.
 
 ## Skill Creation Checklist (TDD Adapted)
 
@@ -494,3 +362,22 @@ How future Claude finds your skill:
 5. **Loads example** (only when implementing)
 
 **Optimize for this flow** - put searchable terms early and often.
+
+## STOP: Before Moving to Next Skill
+
+**After writing ANY skill, you MUST STOP and complete the deployment process.**
+
+**Do NOT:**
+- Create multiple skills in batch without testing each
+- Move to next skill before current one is verified
+- Skip testing because "batching is more efficient"
+
+**The deployment checklist above is MANDATORY for EACH skill.**
+
+Deploying untested skills = deploying untested code.
+
+## Integration
+
+**Called by:** shipyard:shipyard-brainstorming — when new skill patterns are identified during brainstorming
+**Pairs with:** shipyard:shipyard-tdd — RED-GREEN-REFACTOR cycle applies to skill creation
+**Leads to:** shipyard:shipyard-verification — verify skill triggers and works before deploying
