@@ -71,11 +71,20 @@ Help developers use public interfaces correctly.
 5. For HTTP APIs: add authentication/authorization requirements
 6. Run every example to verify it works
 
+**Per endpoint/function:**
+- Description (one sentence)
+- Parameters with types and constraints
+- Return values
+- Error conditions
+- At least one realistic example
+- Authentication/authorization requirements (for APIs)
+
 **Checklist:**
 - [ ] All public functions/endpoints documented
 - [ ] Parameter types and constraints specified
-- [ ] Return values described with error conditions
-- [ ] At least one working example per function
+- [ ] Return values described
+- [ ] Error conditions documented
+- [ ] At least one example per function
 - [ ] Auth requirements noted for HTTP APIs
 
 ### 3. Architecture Documentation

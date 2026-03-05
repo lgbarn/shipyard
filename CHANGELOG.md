@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [3.4.1] - 2026-03-05
+
+### Fixed
+- **Restored documentation quality gate**: Re-added "Per endpoint/function" detailed requirements section removed in v3.4.0, restoring full API documentation enforcement checklist
+- **Fixed dispatch tool inconsistency**: Reverted `Agent()` back to `Task()` in parallel-dispatch and executing-plans skills to match authoritative command definitions (build.md, plan.md, ship.md)
+
 ## [3.4.0] - 2026-03-04
 
 ### Changed

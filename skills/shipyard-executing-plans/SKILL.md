@@ -198,7 +198,7 @@ After quality gates pass:
 
 When Shipyard created the team via `/shipyard:build` team mode:
 
-- **Orchestrate teammates** via TeamCreate → TaskCreate (pre-assign) → Agent(team_name) → TaskList (monitor)
+- **Orchestrate teammates** via TeamCreate → TaskCreate (pre-assign) → Task(team_name) → TaskList (monitor)
 - **Handle shutdown/cleanup** via SendMessage(shutdown_request) + TeamDelete
 - **Quality gates remain with lead** — auditor, simplifier, documenter are dispatched as single-agent Task calls by the lead, not delegated to teammates
 - **Monitor progress** via TaskList polling until all tasks reach terminal state

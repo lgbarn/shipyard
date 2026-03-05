@@ -43,7 +43,7 @@ Shipyard multi-agent commands (`build`, `plan`, `map`, `ship`) use a standardize
 **Team mode lifecycle (per wave):**
 - `TeamCreate` with name `shipyard-{command}-phase-{N}-wave-{W}`
 - `TaskCreate` for each unit of work + `TaskUpdate` to pre-assign owners
-- `Agent(team_name, name, subagent_type)` to spawn teammates
+- `Task(team_name, name, subagent_type)` to spawn teammates
 - Monitor via `TaskList` until all tasks reach terminal state
 - `SendMessage(shutdown_request)` + `TeamDelete` for cleanup
 
@@ -114,10 +114,10 @@ Each agent gets:
 ### 3. Dispatch in Parallel
 
 ```
-// Claude Code Agent tool — all three dispatched in the same message
-Agent(subagent_type: "general-purpose", prompt: "Fix agent-tool-abort.test.ts failures...")
-Agent(subagent_type: "general-purpose", prompt: "Fix batch-completion-behavior.test.ts failures...")
-Agent(subagent_type: "general-purpose", prompt: "Fix tool-approval-race-conditions.test.ts failures...")
+// Claude Code — all three dispatched in the same message
+Task(subagent_type: "general-purpose", prompt: "Fix agent-tool-abort.test.ts failures...")
+Task(subagent_type: "general-purpose", prompt: "Fix batch-completion-behavior.test.ts failures...")
+Task(subagent_type: "general-purpose", prompt: "Fix tool-approval-race-conditions.test.ts failures...")
 // All three run concurrently
 ```
 
