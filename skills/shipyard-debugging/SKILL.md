@@ -1,6 +1,6 @@
 ---
 name: shipyard-debugging
-description: Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes
+description: Use when encountering any bug, test failure, unexpected behavior, or error message — before proposing any fixes. Also use when you see tracebacks, exceptions, "not working" complaints, build failures, performance problems, or integration issues. If you're tempted to "just try changing X and see if it works", this skill applies. Systematic root cause investigation always comes before fix attempts.
 ---
 
 <!-- TOKEN BUDGET: 380 lines / ~1140 tokens -->

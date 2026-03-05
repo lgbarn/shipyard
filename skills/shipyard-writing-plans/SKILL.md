@@ -1,6 +1,6 @@
 ---
 name: shipyard-writing-plans
-description: Use when you have a spec, requirements, or design for a multi-step task — before touching code. Also triggers on "plan this", "break this down", "create tasks", "decompose this feature", or when a task clearly needs more than 2-3 steps to implement. If you're about to start building without a plan, this skill applies.
+description: Use when you have a spec, requirements, or design for a multi-step task — before touching code. Also triggers on "plan this", "break this down", "create tasks", "decompose this feature", or when a task clearly needs more than 2-3 steps to implement. If you're about to start building without a plan, or writing vague tasks like "implement feature X" without file paths and verification commands, this skill applies.
 ---
 
 <!-- TOKEN BUDGET: 290 lines / ~870 tokens -->

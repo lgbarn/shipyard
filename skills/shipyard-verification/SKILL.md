@@ -1,6 +1,6 @@
 ---
 name: shipyard-verification
-description: Use when about to claim work is complete, fixed, or passing, before committing or creating PRs - requires running verification commands and confirming output before making any success claims; evidence before assertions always
+description: Use when about to claim work is complete, fixed, or passing — before committing, creating PRs, or moving to the next task. Also use when you catch yourself using words like "should", "probably", or "seems to" about work state, or when expressing satisfaction ("Great!", "Done!") before running verification commands. Evidence before assertions, always.
 ---
 
 <!-- TOKEN BUDGET: 180 lines / ~540 tokens -->

@@ -1,6 +1,6 @@
 ---
 name: infrastructure-validation
-description: Use when working with Terraform (.tf, .tfvars), Ansible (playbooks, roles, inventory), Docker (Dockerfile, docker-compose.yml), CloudFormation, or any infrastructure-as-code files — provides validation workflows, tool chains, and common mistake prevention
+description: Use when working with Terraform (.tf, .tfvars), Ansible (playbooks, roles, inventory), Docker (Dockerfile, docker-compose.yml), Kubernetes (manifests, Helm charts), CloudFormation, or any infrastructure-as-code files. Also use when running terraform plan/apply, building Docker images, writing Helm templates, or when IaC changes touch security groups, IAM policies, or secrets. Provides validation workflows, tool chains, and common mistake prevention.
 ---
 
 <!-- TOKEN BUDGET: 140 lines / ~420 tokens -->
@@ -61,6 +61,17 @@ trivy image test-build                  # 3. Security scan (if installed)
 docker compose config                   # 4. Validate compose (if applicable)
 ```
 
+## Kubernetes Workflow
+
+```
+kubectl --dry-run=client -f manifest.yml  # 1. Client-side validation
+kubectl --dry-run=server -f manifest.yml  # 2. Server-side validation (if cluster access)
+kubeval --strict manifest.yml             # 3. Schema validation (if installed)
+kubeconform -strict manifest.yml          # 4. Schema validation alternative
+kube-linter lint .                        # 5. Best practices (if installed)
+helm template . | kubeval --strict        # 6. Helm chart validation (if applicable)
+```
+
 </instructions>
 
 ## Common Mistakes
@@ -91,6 +102,16 @@ docker compose config                   # 4. Validate compose (if applicable)
 | Secrets in ENV/ARG | Use build secrets or runtime injection |
 | No health check | Add `HEALTHCHECK` instruction |
 | Single-stage build | Use multi-stage builds |
+
+### Kubernetes
+| Mistake | Fix |
+|---------|-----|
+| No resource limits | Set `resources.requests` and `resources.limits` |
+| Running as root | `securityContext.runAsNonRoot: true` |
+| `latest` image tag | Pin exact version or digest |
+| No liveness/readiness probes | Add probes matching app health endpoints |
+| Default namespace for workloads | Use dedicated namespaces with RBAC |
+| No network policies | Restrict pod-to-pod traffic with NetworkPolicy |
 
 <rules>
 

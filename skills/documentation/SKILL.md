@@ -1,6 +1,6 @@
 ---
 name: documentation
-description: Use when shipping features with public interfaces that lack docs, generating documentation, updating README files, writing API docs, creating architecture documentation, or when documentation is incomplete or outdated.
+description: Use when shipping features with public interfaces that lack docs, generating documentation, updating README files, writing API docs, creating architecture documentation, or when documentation is incomplete or outdated. Also use when adding breaking changes, implementing complex algorithms, or before shipping any phase — if a public function lacks a docstring, this skill applies.
 ---
 
 <!-- TOKEN BUDGET: 290 lines / ~870 tokens -->
@@ -71,20 +71,12 @@ Help developers use public interfaces correctly.
 5. For HTTP APIs: add authentication/authorization requirements
 6. Run every example to verify it works
 
-**Per endpoint/function:**
-- Description (one sentence)
-- Parameters with types and constraints
-- Return values
-- Error conditions
-- At least one realistic example
-- Authentication/authorization requirements (for APIs)
-
 **Checklist:**
 - [ ] All public functions/endpoints documented
 - [ ] Parameter types and constraints specified
-- [ ] Return values described
-- [ ] Error conditions documented
-- [ ] At least one example per function
+- [ ] Return values described with error conditions
+- [ ] At least one working example per function
+- [ ] Auth requirements noted for HTTP APIs
 
 ### 3. Architecture Documentation
 

@@ -1,6 +1,6 @@
 ---
 name: shipyard-tdd
-description: Use when implementing any feature or bugfix, before writing implementation code
+description: Use when implementing any feature or bugfix, before writing implementation code. Also use when touching test files (*.test.*, *.spec.*, *_test.go), when plan tasks have tdd="true", or when the user says "test first", "write tests", "TDD", or "red green refactor". If you're about to write production code without a failing test, this skill applies.
 ---
 
 <!-- TOKEN BUDGET: 480 lines / ~1440 tokens -->

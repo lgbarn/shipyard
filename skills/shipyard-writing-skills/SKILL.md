@@ -1,6 +1,6 @@
 ---
 name: shipyard-writing-skills
-description: Use when creating/editing skills, or a skill isn't triggering correctly. Also triggers on "create a skill", "write a skill", "new skill", "improve this skill", "skill isn't triggering", or when editing any SKILL.md file.
+description: Use when creating, editing, or improving skills, or when a skill isn't triggering correctly. Also use when editing any SKILL.md file, writing skill descriptions, or debugging why a skill doesn't activate. Triggers on "create a skill", "write a skill", "new skill", "improve this skill", "skill isn't triggering", or when reviewing skill quality and effectiveness.
 ---
 
 <!-- TOKEN BUDGET: 380 lines / ~1140 tokens -->

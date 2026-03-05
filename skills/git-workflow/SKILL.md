@@ -1,6 +1,6 @@
 ---
 name: git-workflow
-description: Use when starting feature work that needs a branch, creating worktrees for isolation, making atomic commits during development, or completing a development branch via merge, PR, preserve, or discard
+description: Use when starting feature work that needs a branch, creating worktrees for isolation, making atomic commits during development, or completing a development branch via merge, PR, preserve, or discard. Also use when the user says "set up worktree", "create PR", "finish this branch", "start feature", or when you need an isolated workspace for implementation.
 ---
 
 <!-- TOKEN BUDGET: 480 lines / ~1440 tokens -->

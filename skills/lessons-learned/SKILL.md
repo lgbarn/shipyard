@@ -1,6 +1,6 @@
 ---
 name: lessons-learned
-description: Use when a phase/milestone is complete and you need to extract reusable knowledge, before shipping, or when reflecting on completed work. Also triggers on "what did we learn", "capture lessons", "retrospective", "wrap up", "ship this phase", or "done with this phase".
+description: Use when a phase or milestone is complete and you need to extract reusable knowledge, before shipping, or when reflecting on completed work. Also use when the user says "what did we learn", "capture lessons", "retrospective", "wrap up", "ship this phase", or "done with this phase". If a phase is about to ship without lesson capture, this skill must activate.
 ---
 
 <!-- TOKEN BUDGET: 215 lines / ~645 tokens -->

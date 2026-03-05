@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [3.4.0] - 2026-03-04
+
+### Changed
+- **All 16 skill descriptions improved**: Descriptions now include specific trigger phrases, quantitative thresholds, and natural language patterns for better activation accuracy
+- **Stale content fixed**: Updated TypeScript `Task()` pseudo-code to `Agent()` tool syntax in parallel-dispatch and executing-plans skills
+- **Added missing `/shipyard:debug` command**: using-shipyard skill now documents the debug command
+- **Infrastructure validation expanded**: Added Kubernetes validation workflow and common mistakes table
+- **Code simplification expanded**: Added bash/shell-specific AI anti-patterns with examples
+- **Documentation skill trimmed**: Removed redundant duplicated section
+
 ## [3.3.0] - 2026-02-18
 
 ### Changed

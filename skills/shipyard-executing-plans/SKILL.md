@@ -1,6 +1,6 @@
 ---
 name: shipyard-executing-plans
-description: Use when you have a written implementation plan to execute, either in the current session with builder/reviewer agents or in a separate session with review checkpoints
+description: Use when you have a written implementation plan to execute, either in the current session with builder/reviewer agents or in a separate session with review checkpoints. Also use when the user says "build this", "implement this", "execute the plan", "run the plan", or when a plan file has been loaded with independent tasks suitable for agent dispatch.
 ---
 
 <!-- TOKEN BUDGET: 300 lines / ~900 tokens -->
@@ -198,7 +198,7 @@ After quality gates pass:
 
 When Shipyard created the team via `/shipyard:build` team mode:
 
-- **Orchestrate teammates** via TeamCreate → TaskCreate (pre-assign) → Task(team_name) → TaskList (monitor)
+- **Orchestrate teammates** via TeamCreate → TaskCreate (pre-assign) → Agent(team_name) → TaskList (monitor)
 - **Handle shutdown/cleanup** via SendMessage(shutdown_request) + TeamDelete
 - **Quality gates remain with lead** — auditor, simplifier, documenter are dispatched as single-agent Task calls by the lead, not delegated to teammates
 - **Monitor progress** via TaskList polling until all tasks reach terminal state

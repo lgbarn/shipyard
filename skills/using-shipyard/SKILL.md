@@ -1,6 +1,6 @@
 ---
 name: using-shipyard
-description: Use when starting any conversation - establishes how to find and use skills, requiring Skill tool invocation before ANY response including clarifying questions
+description: Use when starting any conversation, when the user asks "what should I do", "help me", "how do I use shipyard", or "where do I start". Establishes how to find and use skills, requiring Skill tool invocation before ANY response including clarifying questions. Also use when unsure which skill or command applies to the current situation.
 ---
 
 <!-- TOKEN BUDGET: 220 lines / ~660 tokens -->
@@ -117,6 +117,7 @@ Commands are **actions** — they produce artifacts, change state, or trigger wo
 | `/shipyard:document [scope]` | Generates API docs, architecture updates, user guides. Analyzes code vs existing docs to find gaps. Accepts changes, ranges, or directories. |
 | `/shipyard:research <topic>` | Dispatches researcher to evaluate technology options via web search + codebase analysis. Produces comparison matrix with recommendations. |
 | `/shipyard:verify [criteria]` | Runs acceptance criteria or test suites, records PASS/FAIL with evidence. Accepts test suite, criteria file, phase number, or inline text. |
+| `/shipyard:debug <error>` | Dispatches debugger agent for systematic root-cause analysis using 5 Whys protocol. Accepts error descriptions or test names. |
 | `/shipyard:map [focus]` | Deep codebase analysis producing up to 7 docs (STACK, INTEGRATIONS, ARCHITECTURE, STRUCTURE, CONVENTIONS, TESTING, CONCERNS). Supports parallel "all" mode. |
 | `/shipyard:worktree` | Git worktree management: `create` (isolated branch + setup + tests), `list`, `switch`, `remove` (with dirty-state safety checks). |
 | `/shipyard:move-docs` | Relocates codebase docs between `.shipyard/codebase/` (private) and `docs/codebase/` (public) using `git mv`. |

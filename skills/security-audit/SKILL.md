@@ -1,6 +1,6 @@
 ---
 name: security-audit
-description: Use when working with any code, infrastructure-as-code, configuration files, dependencies, or before claiming security posture is adequate — covers OWASP Top 10, secrets detection, dependency vulnerabilities, IaC security, Docker hardening, and supply chain risks
+description: Use when working with any code that handles user input, authentication, authorization, or secrets. Also use when adding or updating dependencies, reviewing infrastructure-as-code, or before claiming security posture is adequate. Covers OWASP Top 10, secrets detection (API keys, passwords, tokens in code), dependency vulnerabilities, IaC security, Docker hardening, and supply chain risks. If code touches a database query, HTTP endpoint, or config file with credentials, this skill applies.
 ---
 
 <!-- TOKEN BUDGET: 110 lines / ~330 tokens -->

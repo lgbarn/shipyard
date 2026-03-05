@@ -1,6 +1,6 @@
 ---
 name: shipyard-brainstorming
-description: You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation. Invoked by /shipyard:brainstorm for requirements gathering.
+description: You MUST use this before any creative work — creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements, and design through Socratic dialogue before implementation. Also use when the user says "I want to add", "let's design", "what if we", "I have an idea", or when a design discussion is happening. Invoked by /shipyard:brainstorm for requirements gathering.
 ---
 
 <!-- TOKEN BUDGET: 130 lines / ~390 tokens -->

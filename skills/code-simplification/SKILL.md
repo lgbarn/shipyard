@@ -1,6 +1,6 @@
 ---
 name: code-simplification
-description: Use after implementing features, before claiming a phase is complete, when reviewing AI-generated code, or when code feels overly complex — detects duplication, dead code, over-engineering, and AI-specific bloat patterns
+description: Use after implementing features, before claiming a phase is complete, when reviewing AI-generated code, or when code feels overly complex. Also use when you notice repeated patterns across files, a function exceeds 40 lines, nesting exceeds 3 levels, or an abstraction has only one implementation. Covers duplication, dead code, over-engineering, and AI-specific bloat patterns like verbose error handling and redundant type checks.
 ---
 
 <!-- TOKEN BUDGET: 400 lines / ~1200 tokens -->
@@ -281,6 +281,52 @@ def read_json_file(path):
 # Used exactly once -- just inline it
 with open(config_path) as f:
     config = json.load(f)
+```
+
+### Shell/Bash AI Anti-Patterns
+
+```bash
+# AI BLOAT: Excessive logging in every function
+my_function() {
+  log_info "Entering my_function with args: $*"
+  log_debug "Checking if file exists: $1"
+  if [ -f "$1" ]; then
+    log_info "File found: $1"
+    cat "$1"
+    log_info "Exiting my_function successfully"
+  else
+    log_error "File not found: $1"
+    return 1
+  fi
+}
+
+# SIMPLER: Let set -e and meaningful exit codes do the work
+my_function() {
+  cat "$1"
+}
+```
+
+```bash
+# AI BLOAT: Wrapping simple commands in functions used once
+get_current_branch() { git rev-parse --abbrev-ref HEAD; }
+get_repo_root() { git rev-parse --show-toplevel; }
+
+# SIMPLER: Inline when used once
+branch=$(git rev-parse --abbrev-ref HEAD)
+```
+
+```bash
+# AI BLOAT: Redundant existence checks
+if [ -n "${MY_VAR:-}" ]; then
+  if [ "${MY_VAR}" != "" ]; then  # Redundant -- -n already checks this
+    process "$MY_VAR"
+  fi
+fi
+
+# SIMPLER: One check is enough
+if [ -n "${MY_VAR:-}" ]; then
+  process "$MY_VAR"
+fi
 ```
 
 </instructions>
