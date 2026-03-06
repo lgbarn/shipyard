@@ -178,14 +178,40 @@ The reviewer produces `.shipyard/phases/{N}/results/REVIEW-{W}.{P}.md`:
 #### Step 4d: Handle Critical Issues
 
 If any review has `CRITICAL_ISSUES`:
-1. Dispatch the builder agent again with the review feedback (max **2 retries** -- each retry is one additional builder dispatch that attempts to fix critical issues; if the second retry still fails, the plan is marked `needs_attention`)
+
+**Include recent outcomes in the retry prompt.** Before dispatching the retry builder, read all existing SUMMARY and REVIEW files for this phase and include a brief outcome summary:
+```
+### Recent Outcomes (this phase)
+- Plan {W}.{P}: {verdict} ({model}, attempt {N}, {task_type})
+- Plan {W}.{P}: {verdict} ({model}, attempt {N}, {task_type})
+Pattern: {any observed pattern, e.g. "Refactoring tasks needed retries"}
+```
+This gives the retry builder context on what has worked and what hasn't in the current phase.
+
+1. Dispatch the builder agent again with the review feedback AND the recent outcomes summary (max **2 retries** -- each retry is one additional builder dispatch that attempts to fix critical issues; if the second retry still fails, the plan is marked `needs_attention`)
 2. The builder should fix only the critical issues
 3. Re-run the review after fixes
 4. If still failing after 2 retries, mark the plan as `needs_attention` and continue
 
 **Note:** This step works the same in both modes. In team mode, create a new fix task via `TaskCreate` in a new team and spawn a builder teammate. In agent mode, dispatch a Task. The retry dispatches use the same mode as the original build.
 
-#### Step 4e: Update Tasks
+#### Step 4e: Log Structured Outcomes
+
+After each plan's review verdict is final (PASS, MINOR_ISSUES, or CRITICAL_ISSUES after retries), log the outcome to HISTORY.md via `state-write.sh --note`:
+
+```bash
+scripts/state-write.sh --note "Phase {N}: Plan {W}.{P} complete [builder:{model}, verdict:{verdict}, retries:{count}, domain:{task_type}]"
+```
+
+Where:
+- `{model}` is the model used for the builder (from model_routing config)
+- `{verdict}` is the final review verdict (PASS, MINOR_ISSUES, CRITICAL_ISSUES, or needs_attention)
+- `{count}` is the number of retry attempts (0 = first attempt succeeded)
+- `{task_type}` is inferred from the plan title/content (feature, refactor, test, bugfix, docs, infra)
+
+This produces structured entries in NOTES.md that can be read by future dispatches.
+
+#### Step 4f: Update Tasks
 
 Follow **Native Task Scaffolding Protocol** (create/update native tasks for progress tracking via TaskCreate/TaskUpdate; see `docs/PROTOCOLS.md`) -- update task status based on build and review results.
 

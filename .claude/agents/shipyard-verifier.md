@@ -26,6 +26,23 @@ You are a verification specialist. You run commands, check outputs, and compare 
    - Acceptance criteria are testable (have runnable commands)
 5. Report gaps or issues for the architect to fix
 
+## Plan Critique (dispatched by /shipyard:plan Step 6a)
+
+When your prompt includes **"Mode: Plan Critique"**, perform a feasibility stress test:
+
+1. For each plan, use Glob and Read to verify referenced file paths exist
+2. Use Grep to spot-check that function/class names in task descriptions match actual code
+3. Dry-run or syntax-check the plan's `## Verification` commands via Bash (do NOT execute destructive commands — use `--dry-run`, `--check`, or `bash -n` where possible)
+4. Cross-reference file lists across plans in the same wave to detect forward references (Plan A depends on changes Plan B will make) or hidden dependencies (shared files between "parallel" plans)
+5. Flag plans touching >10 files or >3 directories as high-risk
+
+Produce `.shipyard/phases/{N}/CRITIQUE.md` with per-plan findings and an overall verdict:
+- **READY** — All plans are feasible, no blocking issues
+- **CAUTION** — Risks identified, listed with mitigations (proceed with awareness)
+- **REVISE** — Blocking issues found (missing files, impossible verify commands, broken dependencies)
+
+Every finding must include evidence (file path checked, grep result, command output).
+
 ## Phase Verification (dispatched by /shipyard:build)
 
 1. Read all SUMMARY.md and REVIEW.md files for the phase

@@ -137,6 +137,7 @@ When `context_tier` is `"auto"` in config.json, commands should assess the scope
   "simplification_review": true,
   "iac_validation": "auto|true|false",
   "documentation_generation": true,
+  "plan_critique": true,
   "codebase_docs_path": ".shipyard/codebase|docs/codebase",
   "model_routing": {
     "validation": "haiku",
@@ -156,7 +157,7 @@ When `context_tier` is `"auto"` in config.json, commands should assess the scope
 }
 ```
 
-**Defaults:** `security_audit: true`, `simplification_review: true`, `iac_validation: "auto"`, `documentation_generation: true`, `codebase_docs_path: ".shipyard/codebase"`. Context tier defaults to `"auto"`.
+**Defaults:** `security_audit: true`, `simplification_review: true`, `iac_validation: "auto"`, `documentation_generation: true`, `plan_critique: true`, `codebase_docs_path: ".shipyard/codebase"`. Context tier defaults to `"auto"`.
 
 **Config version:** The `version` field tracks the config schema version (currently `"1.3"`). This is set by `/shipyard:init` and used internally to detect when config format changes require migration. Users should not modify this field.
 

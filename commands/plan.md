@@ -168,6 +168,41 @@ The verifier must check:
 
 If issues are found, feed them back to the architect agent for one revision cycle.
 
+## Step 6a: Plan Critique (Feasibility Stress Test)
+
+**Skip this step if:** `config.json` has `"plan_critique": false`.
+
+**Dispatch:** Always uses Task dispatch (single-agent step). This applies regardless of `dispatch_mode`.
+
+Dispatch a **verifier agent** (subagent_type: "shipyard:verifier") with:
+- All generated plans from Step 5
+- The current codebase (working directory access)
+- Phase requirements from ROADMAP.md
+- PROJECT.md requirements
+
+Include this instruction in the verifier prompt:
+> **Mode: Plan Critique (feasibility stress test)**
+>
+> For each plan, check:
+> 1. **File paths exist** — Do files referenced in plan tasks actually exist? (Use Glob/Read to verify)
+> 2. **API surface matches** — Do function/class/method names in task descriptions match actual code? (Use Grep to spot-check)
+> 3. **Verify commands runnable** — Can the `## Verification` commands execute in the current state? (Syntax-check or dry-run via Bash)
+> 4. **Forward references** — Do any plans depend on changes from OTHER plans in the same wave? (Cross-reference file lists)
+> 5. **Hidden dependencies** — Are there implicit ordering constraints between "parallel" plans? (Check for shared files or modules)
+> 6. **Complexity flags** — Flag plans that touch >10 files or cross >3 directories as high-risk
+>
+> Produce `.shipyard/phases/{N}/CRITIQUE.md` with:
+> - Per-plan findings (file existence, API mismatches, dependency issues)
+> - Overall verdict: **READY**, **CAUTION**, or **REVISE**
+>   - READY: All plans are feasible, proceed to build
+>   - CAUTION: Risks identified with mitigations listed (proceed with awareness)
+>   - REVISE: Blocking issues found (missing files, broken dependencies, impossible verify commands)
+
+**Handling the verdict:**
+- **READY:** Proceed to Step 7.
+- **CAUTION:** Display the caution items to the user, then proceed to Step 7.
+- **REVISE:** Feed the critique back to the architect agent (Step 5) for one revision cycle. After revision, re-run the critique. If still REVISE after one cycle, display findings to the user and let them decide whether to proceed or stop.
+
 ## Step 7: Task Scaffolding
 
 Follow **Native Task Scaffolding Protocol** (create/update native tasks for progress tracking via TaskCreate/TaskUpdate; see `docs/PROTOCOLS.md`) -- create a native task for each plan.

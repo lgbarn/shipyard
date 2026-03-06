@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [3.5.0] - 2026-03-06
+
+### Added
+- **Plan critique (feasibility stress test)**: `/shipyard:plan` now runs a Step 6a critique that checks file existence, API surface matches, verify command runnability, forward references, hidden dependencies, and complexity before building. Produces `CRITIQUE.md` with READY/CAUTION/REVISE verdict. Gated on `plan_critique` config option (default: `true`).
+- **Outcome surfacing in retries**: Builder retry prompts now include a "Recent Outcomes" summary from the current phase, giving retry agents context on what worked and what failed.
+- **Structured outcome logging**: After each plan's review verdict, structured metadata (`builder:{model}, verdict:{verdict}, retries:{count}, domain:{task_type}`) is logged to NOTES.md via `state-write.sh --note`.
+
+### Changed
+- **Verifier agent expanded**: Added Plan Critique protocol section to `shipyard-verifier.md` agent definition with 5 feasibility checks and evidence requirements.
+- **Config schema updated**: Added `plan_critique` (boolean, default `true`) to config.json schema in init, protocols, and defaults.
+
 ## [3.4.1] - 2026-03-05
 
 ### Fixed

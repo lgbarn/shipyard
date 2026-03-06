@@ -98,12 +98,12 @@ After collecting all answers, write the following files:
 
 Write `.shipyard/config.json` with the user's choices. Map answers to config keys:
 - Batch 1: `interaction_mode` (`"interactive"` / `"autonomous"`), `git_strategy` (`"per_task"` / `"per_phase"` / `"manual"`), `review_depth` (`"detailed"` / `"lightweight"`)
-- Batch 2: `security_audit` (`true` / `false`), `simplification_review` (`true` / `false`), `iac_validation` (`"auto"` / `true` / `false`), `documentation_generation` (`true` / `false`)
+- Batch 2: `security_audit` (`true` / `false`), `simplification_review` (`true` / `false`), `iac_validation` (`"auto"` / `true` / `false`), `documentation_generation` (`true` / `false`), `plan_critique` (`true` / `false`)
 - Batch 3: `model_routing` (object — see **Model Routing Protocol** in `docs/PROTOCOLS.md` for the full key set and defaults per strategy), `context_tier` (`"auto"` / `"minimal"` / `"full"`)
 
 Also include: `codebase_docs_path` (use `detected_codebase_path` from Step 2 if set, otherwise default `".shipyard/codebase"`), `created_at` (ISO timestamp), `version` (`"1.3"`).
 
-Use defaults from `docs/PROTOCOLS.md` for any unanswered or skipped fields: `security_audit: true`, `simplification_review: true`, `iac_validation: "auto"`, `documentation_generation: true`, `context_tier: "auto"`.
+Use defaults from `docs/PROTOCOLS.md` for any unanswered or skipped fields: `security_audit: true`, `simplification_review: true`, `iac_validation: "auto"`, `documentation_generation: true`, `plan_critique: true`, `context_tier: "auto"`.
 
 ### STATE.json & HISTORY.md
 
