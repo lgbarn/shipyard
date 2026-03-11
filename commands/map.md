@@ -107,9 +107,26 @@ After all mapper tasks complete, verify that the team has been properly cleaned 
 2. Write the mapper agent output to the resolved directory. If a file already exists, the mapper's merge-updated version replaces it (the mapper was given the existing content as context in Step 3 and has already merged its findings).
 3. Display a summary of what was written, noting any items marked as `[Resolved - YYYY-MM-DD]` in CONCERNS.md.
 
-Offer follow-up:
-> "Would you like me to:
-> - Analyze a specific focus area in more detail
-> - Create an improvement plan based on the findings"
+## Step 6: Route Forward
+
+Display the next step based on project state:
+
+Check if `.shipyard/PROJECT.md` exists.
+
+**If PROJECT.md does NOT exist:**
+> Codebase mapped! Your next step:
+>
+> **Run `/shipyard:brainstorm`** — Now that Shipyard understands your codebase, let's define what you want to build. This walks you through a requirements conversation to capture your goals, scope, and success criteria.
+
+**If PROJECT.md exists but no ROADMAP.md:**
+> Codebase mapped! Your next step:
+>
+> **Run `/shipyard:plan`** — Your project definition and codebase analysis are ready. Plan your first phase of work.
+
+**If both PROJECT.md and ROADMAP.md exist:**
+> Codebase mapping updated! You can continue with your current workflow.
+>
+> - `/shipyard:plan` — Plan the next phase
+> - `/shipyard:status` — Check current progress
 
 </output>

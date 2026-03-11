@@ -129,22 +129,17 @@ git commit -m "shipyard: initialize project"
 Display contextual guidance based on brownfield/greenfield detection from Step 2:
 
 **Brownfield (existing codebase):**
-> Project initialized! Here's what to do next:
+> Project initialized! Your next step:
 >
-> - `/shipyard:map` — Analyze your existing codebase (recommended first step)
-> - `/shipyard:brainstorm` — Explore requirements and capture project definition
-> - `/shipyard:plan` — Plan a phase of work (creates roadmap if needed)
-> - `/shipyard:quick` — Quick one-off task without full planning
+> **Run `/shipyard:map`** — This analyzes your codebase so Shipyard understands your project's stack, architecture, conventions, and concerns. It takes a few minutes and everything after this will be better for it.
 >
-> Use `/shipyard:settings` to change preferences later.
+> After mapping, Shipyard will guide you to the next step.
 
 **Greenfield (new project):**
-> Project initialized! Here's what to do next:
+> Project initialized! Your next step:
 >
-> - `/shipyard:brainstorm` — Explore requirements and capture project definition (recommended first step)
-> - `/shipyard:plan` — Plan a phase of work (creates roadmap if needed)
-> - `/shipyard:quick` — Quick one-off task without full planning
+> **Run `/shipyard:brainstorm`** — This walks you through a requirements conversation to define what you're building, your goals, constraints, and success criteria. Shipyard will capture everything into a project definition.
 >
-> Use `/shipyard:settings` to change preferences later.
+> After brainstorming, Shipyard will guide you to the next step.
 
 </output>

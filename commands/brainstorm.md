@@ -85,17 +85,23 @@ Follow **State Update Protocol** (update `.shipyard/STATE.json` and `.shipyard/H
 
 ## Step 7: Route Forward
 
-Display contextual guidance:
+Display the next step based on project state:
 
-> Requirements captured! Next steps:
+Check whether `.shipyard/ROADMAP.md` exists and whether codebase analysis docs exist (in configured `codebase_docs_path`).
 
-Check whether `.shipyard/ROADMAP.md` exists. If a roadmap was created:
-> - `/shipyard:plan 1` — Start planning Phase 1
+**If no codebase docs AND the project has existing source code:**
+> Requirements captured! Your next step:
+>
+> **Run `/shipyard:map`** — Analyze your existing codebase so Shipyard understands the stack, architecture, and conventions before planning. This makes plans much more accurate.
 
-If no roadmap was created:
-> - `/shipyard:plan` — Plan a phase of work (will offer to create a roadmap)
+**If a roadmap was created:**
+> Requirements captured! Your next step:
+>
+> **Run `/shipyard:plan 1`** — Your project definition and roadmap are ready. Start planning Phase 1.
 
-Check whether codebase analysis docs exist (in configured `codebase_docs_path`). If they do NOT exist and the project has existing source code:
-> - `/shipyard:map` — Analyze your existing codebase
+**If no roadmap was created (but codebase is mapped or greenfield):**
+> Requirements captured! Your next step:
+>
+> **Run `/shipyard:plan`** — This will generate a roadmap from your project definition, then plan the first phase of work.
 
 </output>
