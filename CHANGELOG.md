@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [3.6.1] - 2026-03-11
+
+### Fixed
+- **Init re-prompts all settings**: `/shipyard:init` now re-prompts all configuration options when run on an existing project, with current values as pre-filled defaults. Previously it refused to run and directed users to `/settings` or `--fresh`.
+- **Codebase docs location is now an explicit prompt**: Added as question 8 in init settings collection instead of silently auto-detecting from `docs/codebase/`.
+
 ## [3.6.0] - 2026-03-11
 
 ### Added
