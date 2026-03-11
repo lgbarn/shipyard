@@ -4,6 +4,31 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [3.6.0] - 2026-03-11
+
+### Added
+- **STRIDE threat model for auditor**: Maps attack surface and trust boundaries before scanning, prioritizing the 6 analysis areas by actual risk
+- **Divio documentation categories for documenter**: Every document typed as Tutorial, How-to guide, Reference, or Explanation — never mixed
+- **Code example verification for documenter**: Bash tool added so documenter verifies code snippets run before including them
+- **Skeptical review stance for reviewer**: Default assumes issues exist until evidence proves otherwise; zero-finding reviews trigger deeper inspection
+- **Prior finding cross-validation for reviewer**: Checks REVIEW-*.md and ISSUES.md before starting; unresolved Critical findings auto-fail Stage 1
+- **Hypothesis timeboxing for debugger**: ~15 minute timebox per hypothesis to prevent rabbit holes
+- **Severity tags for debugger**: ROOT-CAUSE.md includes SEV1-4 rating for builder prioritization
+- **Pre-build baseline for builder**: Runs test suite before changes to distinguish pre-existing failures from regressions
+- **ISSUES.md consumption for builder**: Reads prior review findings before starting work
+- **Structured failure documentation for builder**: Failure blocks include task, error output, files touched, and hypothesis for the debugger
+- **Risk tags for architect**: Each plan tagged `Risk: low|medium|high` with rationale for builder/reviewer focus
+- **ISSUES.md in architect instructions**: Plan decomposition now reads unresolved findings from prior reviews
+- **Source freshness tracking for researcher**: External sources require publication dates; sources older than 2 years flagged as [Stale]
+- **Inconclusive escalation for researcher**: "Decision Required" section when no clear winner exists
+- **Effort estimation for simplifier**: Every finding tagged `trivial|moderate|significant` for builder prioritization
+- **Codebase metrics for mapper**: Quantitative metrics per focus area (dependency count, test ratios, module count, etc.)
+- **Output location discovery for mapper**: Proactively finds existing codebase directories and merges into them
+- **Regression baseline for verifier**: References prior VERIFICATION.md files to define "previously passing"
+
+### Changed
+- **AGENT-GUIDE.md updated**: All 10 agent descriptions reflect new capabilities, inputs, and restrictions
+
 ## [3.5.0] - 2026-03-06
 
 ### Added

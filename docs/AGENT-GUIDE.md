@@ -16,7 +16,7 @@ For model routing configuration, see the [Model Routing Protocol](PROTOCOLS.md#m
 | **verifier** | haiku | `validation` | plan, build, ship, verify | Yes (gates shipping) | Read + bash (test commands) |
 | **auditor** | sonnet | `security_audit` | build, ship, audit | Yes (critical findings block) | Read-only |
 | **simplifier** | sonnet | `simplification` | build, simplify | No (advisory) | Read-only |
-| **documenter** | sonnet | `documentation` | build, ship, document | No (advisory) | Read + write docs |
+| **documenter** | sonnet | `documentation` | build, ship, document | No (advisory) | Read + write docs + bash |
 | **researcher** | sonnet | `planning` | plan, research | No | Read + web search/fetch |
 | **debugger** | sonnet | `debugging` | debug | No | Read + bash (test commands) |
 | **mapper** | sonnet | `mapping` | map | No | Read-only |
@@ -63,7 +63,7 @@ graph LR
 - **Model:** opus (configurable via `model_routing.architecture`)
 - **Dispatched by:** `/shipyard:brainstorm` (roadmap), `/shipyard:plan` (roadmap + plans), `/shipyard:quick` (quick plans)
 - **Recommended max_turns:** 15
-- **Inputs:** PROJECT.md, ROADMAP.md, RESEARCH.md, CONTEXT-{N}.md, codebase docs
+- **Inputs:** PROJECT.md, ROADMAP.md, RESEARCH.md, CONTEXT-{N}.md, ISSUES.md, codebase docs
 - **Outputs:** ROADMAP.md (brainstorm), PLAN-{W}.{P}.md (plan)
 - **Restrictions:**
   - Maximum 3 tasks per plan
@@ -71,6 +71,7 @@ graph LR
   - Every task must have a runnable `<verify>` command
   - Done criteria must be observable, not subjective
   - Wave dependency ordering required for parallel execution
+  - Each plan must have a risk tag (`Risk: low|medium|high`) with rationale
 - **Why opus:** System decomposition and dependency analysis require the strongest reasoning. Bad plans waste all downstream work.
 
 ### builder
@@ -78,7 +79,7 @@ graph LR
 - **Model:** sonnet (configurable via `model_routing.building`)
 - **Dispatched by:** `/shipyard:build` (per-plan), `/shipyard:quick`
 - **Recommended max_turns:** 30
-- **Inputs:** PLAN.md, CONVENTIONS.md, prior wave SUMMARY.md files, CONTEXT-{N}.md
+- **Inputs:** PLAN.md, CONVENTIONS.md, prior wave SUMMARY.md files, CONTEXT-{N}.md, ISSUES.md (prior review findings)
 - **Outputs:** SUMMARY-{W}.{P}.md, git commits (one per task)
 - **Restrictions:**
   - Must follow TDD protocol when `tdd="true"` (test fails before implementation)
@@ -86,6 +87,8 @@ graph LR
   - Must not make architectural changes not in the plan
   - Must not combine tasks into a single commit
   - Must not skip tests or verification
+  - Runs a pre-build baseline test to distinguish pre-existing failures from builder-introduced regressions
+  - On failure, produces structured failure documentation (task, error, files touched, hypothesis) for the debugger
   - Stops on `checkpoint:human-verify`, `checkpoint:decision`, `checkpoint:human-action`
   - IaC tasks require additional validation (terraform validate, ansible-lint, hadolint)
 - **Fresh context:** Each plan gets a fresh builder agent to prevent context pollution.
@@ -95,9 +98,11 @@ graph LR
 - **Model:** sonnet (configurable via `model_routing.review`)
 - **Dispatched by:** `/shipyard:build` (after each plan completes), `/shipyard:review` (on-demand)
 - **Recommended max_turns:** 15
-- **Inputs:** PLAN.md (spec), SUMMARY.md (what was done), git diff (actual changes), CONTEXT-{N}.md
+- **Inputs:** PLAN.md (spec), SUMMARY.md (what was done), git diff (actual changes), CONTEXT-{N}.md, prior REVIEW-*.md and ISSUES.md
 - **Outputs:** REVIEW-{W}.{P}.md
 - **Restrictions:**
+  - Pre-check: cross-validates prior findings from REVIEW-*.md and ISSUES.md before starting
+  - Default stance is skeptical — assumes implementations have issues until evidence proves otherwise
   - Strict two-stage protocol: Stage 1 (spec compliance) gates Stage 2 (code quality)
   - If Stage 1 fails, Stage 2 is not performed
   - Every PASS must include file path evidence
@@ -116,7 +121,7 @@ graph LR
 - **Restrictions:**
   - Must never mark PASS without concrete evidence (test output, file path, command result)
   - Conservative bias: false FAIL > false PASS
-  - Must check for regressions in previously passing phases
+  - Must check for regressions in previously passing phases (references prior VERIFICATION.md as baseline)
   - IaC verification requires running validation tools (terraform validate, ansible-lint)
   - MANUAL findings must describe exactly what a human should check
 - **Why haiku:** Mechanical task — run commands, check output, compare to criteria. Speed matters more than deep reasoning.
@@ -132,6 +137,7 @@ graph LR
   - Critical findings block shipping — phase must not proceed to `/shipyard:ship`
   - Every finding must include file path, line number, and concrete remediation
   - Must reference standards (CWE, OWASP, CIS) where applicable
+  - Performs STRIDE threat model before scanning to prioritize by actual attack surface
   - Analyzes 6 areas: code security, secrets, dependencies, IaC, Docker, configuration
   - Cross-task analysis is the unique value — checks component interactions, not individual files
 - **Upgrade consideration:** For production codebases handling PII, financial data, or complex auth systems, consider `security_audit: "opus"`.
@@ -148,6 +154,7 @@ graph LR
   - Rule of Three: 2 occurrences = note, 3+ = recommend extraction
   - Must include exact file paths and line numbers for every finding
   - Must not flag test utilities, public API surfaces, or intentionally redundant code
+  - Each finding includes effort estimate (trivial, moderate, significant) for builder prioritization
   - Deferred findings appended to `.shipyard/ISSUES.md`
 - **Unique value:** Sees the cumulative effect of multiple isolated builder agents — catches duplication, dead code, and AI bloat patterns that per-task reviewers miss.
 
@@ -162,6 +169,8 @@ graph LR
   - Non-blocking — findings are advisory
   - Must update existing docs rather than creating duplicates
   - Document "what" and "why", not "how" (unless logic is complex)
+  - Categorizes every document using Divio types: Tutorial, How-to guide, Reference, Explanation
+  - Verifies code examples actually run before including them (via Bash)
   - Public interfaces only — no over-documenting internal implementation
   - Prioritize examples over prose
 
@@ -174,7 +183,8 @@ graph LR
 - **Outputs:** RESEARCH.md
 - **Restrictions:**
   - Must evaluate at least 3 distinct options for technology choices
-  - Must cite sources (URLs) for every factual claim
+  - Must cite sources (URLs) with publication dates for every factual claim (sources older than 2 years flagged as [Stale])
+  - Escalates inconclusive research as "Decision Required" for user resolution
   - Must check existing codebase before claiming compatibility
   - Must include Uncertainty Flags for inconclusive areas
   - Comparison matrix must use consistent criteria across all candidates
@@ -192,6 +202,8 @@ graph LR
   - Must base every conclusion on evidence (logs, code, command output)
   - Must not edit source code — produces a remediation plan for the builder
   - If 3+ hypotheses fail, must flag as potential architectural issue
+  - Timeboxes each hypothesis (~15 minutes) — pivots if no confirming evidence
+  - Includes severity tag (SEV1-Critical through SEV4-Low) in ROOT-CAUSE.md for builder prioritization
   - Follows the 5 Whys protocol: ask "Why?" iteratively until reaching a systemic root cause
 - **Why sonnet:** Requires tracing data flow and reading code carefully. Opus is available via config upgrade for complex multi-component failures.
 
@@ -208,6 +220,8 @@ graph LR
   - Must sample 2-3 files per module (no generalizing from single files)
   - Must flag uncertainty with `[Inferred]` marker
   - Each document must be independently useful
+  - Discovers existing codebase directories and merges into them
+  - Includes quantitative metrics per focus area (dependency count, test ratios, etc.)
 - **Parallel dispatch:** `/shipyard:map` runs 4 mapper instances concurrently, each with a different focus area.
 
 ---
