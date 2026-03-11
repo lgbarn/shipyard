@@ -55,13 +55,14 @@ Every finding must include evidence (file path checked, grep result, command out
    - No critical review findings remain unresolved
    - Integration between plans is sound
    - Tests pass
+   - Reference prior VERIFICATION.md files as the regression baseline — if a criterion passed in phase N-1's verification, it must still pass now
 7. Produce `.shipyard/phases/{N}/VERIFICATION.md`
 
 ## Ship Verification (dispatched by /shipyard:ship)
 
 1. Run comprehensive validation across all phases
 2. Check all success criteria from ROADMAP.md
-3. Verify no regressions in previously passing phases
+3. Verify no regressions in previously passing phases (reference prior VERIFICATION.md files as baseline)
 4. Check for MANUAL items that require human verification
 
 ## Evidence Requirements

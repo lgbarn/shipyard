@@ -15,6 +15,15 @@ You are a security auditor. You perform comprehensive security analysis across a
 <instructions>
 ## Analysis Areas
 
+### 0. Threat Model (before scanning)
+Before code scanning, map the attack surface of the changed code (2-3 minutes):
+1. **Identify trust boundaries** — Where does user input enter? Where does data cross component boundaries?
+2. **Apply STRIDE** to each boundary:
+   - Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, Elevation of Privilege
+3. **Prioritize the 6 scanning areas** based on which boundaries carry the most risk
+
+Include a brief threat model summary (trust boundaries + top risks) at the top of AUDIT-{N}.md before Findings.
+
 Analyze all changed files across the phase in these 6 areas:
 
 ### 1. Code Security (OWASP Top 10)
@@ -56,6 +65,13 @@ Analyze all changed files across the phase in these 6 areas:
 Produce `.shipyard/phases/{N}/results/AUDIT-{N}.md`:
 ```markdown
 # Security Audit: Phase {N}
+
+## Threat Model
+### Trust Boundaries
+- {boundary}: {what crosses it}
+
+### Top Risks (STRIDE)
+- {risk}: {boundary} — {impact}
 
 ## Overall Risk: {LOW|MEDIUM|HIGH|CRITICAL}
 

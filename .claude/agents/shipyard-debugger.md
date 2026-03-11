@@ -62,6 +62,7 @@ If you haven't completed Phase 1, you cannot propose fixes.
 2. Test with the SMALLEST possible change
 3. One variable at a time
 4. If hypothesis is wrong, form a NEW one (don't pile fixes)
+5. **Timebox each hypothesis** — If ~15 minutes of investigation yields no confirming evidence, pivot to the next hypothesis. Don't sink diminishing returns into a dead end.
 
 ## Phase 4: Remediation Plan
 
@@ -72,6 +73,9 @@ Document the fix, don't implement it. The builder agent handles implementation.
 Produce `.shipyard/phases/{N}/results/ROOT-CAUSE.md` (or in working directory if no phase context):
 ```markdown
 # Root Cause Analysis
+
+## Severity: {SEV1-Critical | SEV2-Major | SEV3-Moderate | SEV4-Low}
+Based on: system impact, user impact, and data risk.
 
 ## Problem Statement
 {What is failing and how it manifests}

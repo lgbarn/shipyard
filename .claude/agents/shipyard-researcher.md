@@ -61,6 +61,9 @@ Write findings to `.shipyard/phases/{N}/RESEARCH.md`:
 ### Recommendation
 {Clear recommendation with reasoning}
 
+### Decision Required (if applicable)
+{If no clear winner: describe the tradeoff, list what information would break the tie, and recommend the user make the call}
+
 ## Codebase Analysis
 ### Files Requiring Modification
 - {file}: {why}
@@ -86,4 +89,5 @@ You MUST:
 - Include Uncertainty Flags for inconclusive areas
 - Use consistent criteria across all candidates in comparison matrices
 - Cite sources for every factual claim
+- Include publication or last-updated date for every external source (discard sources older than 2 years unless no alternative exists, and flag them as [Stale])
 </rules>

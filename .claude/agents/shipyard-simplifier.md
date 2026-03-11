@@ -62,13 +62,13 @@ Produce `.shipyard/phases/{N}/results/SIMPLIFICATION-{N}.md`:
 ## Findings
 
 ### High Priority
-- {file:line}: {description} — {recommended simplification}
+- {file:line}: {description} — {recommended simplification} — Effort: {trivial|moderate|significant}
 
 ### Medium Priority
-- {file:line}: {description} — {recommendation}
+- {file:line}: {description} — {recommendation} — Effort: {trivial|moderate|significant}
 
 ### Low Priority
-- {file:line}: {description}
+- {file:line}: {description} — Effort: {trivial|moderate|significant}
 
 ## Estimated Impact
 - Lines removable: ~{N}

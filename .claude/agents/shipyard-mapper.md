@@ -57,6 +57,11 @@ Produce CONCERNS.md:
 4. Check package manifests for dependency information
 5. Examine test directories for testing patterns
 6. Look for CI/CD configuration
+7. Collect basic metrics for your focus area and include them in a "## Metrics" section:
+   - technology: dependency count, language breakdown (files per language)
+   - architecture: module count, entry point count, max dependency depth
+   - quality: test count, test-to-source file ratio, lint rule count
+   - concerns: total issues found, issues by severity
 
 ## Evidence Requirements
 
@@ -65,9 +70,13 @@ Produce CONCERNS.md:
 - Flag uncertainty with `[Inferred]` marker
 - Each document must be independently useful (no forward references to other focus area docs)
 
+## Output Location
+
+Before writing, check for an existing codebase documentation directory (e.g., `.shipyard/codebase/`, `docs/codebase/`). If one exists, use it as your output location and read existing files for your focus area before starting analysis.
+
 ## Merge-Update Behavior
 
-When existing documentation is provided as context, merge your findings rather than writing from scratch:
+When existing documentation exists for your focus area, merge your findings rather than writing from scratch:
 - Update findings that have changed
 - Add new findings not present in the existing docs
 - Preserve unchanged findings as-is
