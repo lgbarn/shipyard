@@ -14,11 +14,9 @@ You are executing the Shipyard initialization workflow. Follow these steps preci
 
 Check if a `.shipyard/` directory already exists in the current project root.
 
-- **If it exists AND `.shipyard/config.json` exists:** Tell the user:
-  > "Project already initialized. Use `/shipyard:settings` to update preferences or run `/shipyard:init --fresh` to start over."
-  Then stop.
+- **If it exists AND `.shipyard/config.json` exists:** Read existing config.json values. These become the pre-filled defaults shown in Step 3 (in parentheses after each option). Proceed to Step 2 — the user may want to change any or all settings.
 
-- **If `--fresh` flag is provided:** Require explicit confirmation from the user before proceeding. If confirmed, rename `.shipyard/` to `.shipyard-archive-{YYYY-MM-DD}/` and create a fresh `.shipyard/` directory. If not confirmed, stop.
+- **If `--fresh` flag is provided:** Require explicit confirmation from the user before proceeding. If confirmed, rename `.shipyard/` to `.shipyard-archive-{YYYY-MM-DD}/` and create a fresh `.shipyard/` directory (no pre-filled defaults). If not confirmed, stop.
 
 - **If `.shipyard/` does not exist:** Create the `.shipyard/` directory and proceed to Step 2.
 
@@ -76,16 +74,21 @@ Use `AskUserQuestion` with these 4 questions:
    - `Yes (Recommended)` — Auto-generate and update docs after each phase. Keeps documentation current.
    - `No` — Skip documentation generation. You can still run `/shipyard:document` manually.
 
-### Batch 3: Model & Context Preferences
+### Batch 3: Storage, Model & Context Preferences
 
-Use `AskUserQuestion` with these 2 questions:
+Use `AskUserQuestion` with these 3 questions:
 
-8. **Model routing** — "Which model routing strategy should Shipyard use for its agents?"
+8. **Codebase docs location** — "Where should Shipyard store codebase analysis docs?"
+   - `.shipyard/codebase (Recommended)` — Keeps analysis in the local `.shipyard/` directory (gitignored by default).
+   - `docs/codebase` — Stores in the project's `docs/` directory so analysis is committed and shared with the team.
+   If a `docs/codebase/` directory with `.md` files was detected in Step 2, note this to the user and default to `docs/codebase`.
+
+9. **Model routing** — "Which model routing strategy should Shipyard use for its agents?"
    - `Default routing (Recommended)` — Haiku for validation, Sonnet for building/review/planning/auditing/simplification/documentation/mapping, Opus for architecture/debugging. Balances cost and quality.
    - `All Sonnet` — Use Sonnet for everything. Good balance of speed and capability.
    - `All Opus` — Use Opus for everything. Maximum quality, highest cost.
 
-9. **Context loading** — "How much project context should Shipyard load at session start?"
+10. **Context loading** — "How much project context should Shipyard load at session start?"
    - `Auto (Recommended)` — Adjusts based on current state (minimal when idle, full during execution).
    - `Minimal` — Always load minimal context. Fastest startup, less awareness.
    - `Full` — Always load everything including codebase docs. Slowest startup, maximum awareness.
@@ -99,11 +102,11 @@ After collecting all answers, write the following files:
 Write `.shipyard/config.json` with the user's choices. Map answers to config keys:
 - Batch 1: `interaction_mode` (`"interactive"` / `"autonomous"`), `git_strategy` (`"per_task"` / `"per_phase"` / `"manual"`), `review_depth` (`"detailed"` / `"lightweight"`)
 - Batch 2: `security_audit` (`true` / `false`), `simplification_review` (`true` / `false`), `iac_validation` (`"auto"` / `true` / `false`), `documentation_generation` (`true` / `false`), `plan_critique` (`true` / `false`)
-- Batch 3: `model_routing` (object — see **Model Routing Protocol** in `docs/PROTOCOLS.md` for the full key set and defaults per strategy), `context_tier` (`"auto"` / `"minimal"` / `"full"`)
+- Batch 3: `codebase_docs_path` (`".shipyard/codebase"` / `"docs/codebase"`), `model_routing` (object — see **Model Routing Protocol** in `docs/PROTOCOLS.md` for the full key set and defaults per strategy), `context_tier` (`"auto"` / `"minimal"` / `"full"`)
 
-Also include: `codebase_docs_path` (use `detected_codebase_path` from Step 2 if set, otherwise default `".shipyard/codebase"`), `created_at` (ISO timestamp), `version` (`"1.3"`).
+Also include: `created_at` (ISO timestamp), `version` (`"1.3"`).
 
-Use defaults from `docs/PROTOCOLS.md` for any unanswered or skipped fields: `security_audit: true`, `simplification_review: true`, `iac_validation: "auto"`, `documentation_generation: true`, `plan_critique: true`, `context_tier: "auto"`.
+Use defaults from `docs/PROTOCOLS.md` for any unanswered or skipped fields: `security_audit: true`, `simplification_review: true`, `iac_validation: "auto"`, `documentation_generation: true`, `plan_critique: true`, `codebase_docs_path: ".shipyard/codebase"`, `context_tier: "auto"`.
 
 ### STATE.json & HISTORY.md
 
