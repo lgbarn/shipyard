@@ -11,93 +11,10 @@
 
 set -euo pipefail
 
-# Sanitize lesson content — defense-in-depth, NOT a security boundary.
-# LESSONS.md is local user-edited content, not external/untrusted input.
-# This catches accidental prompt pollution (stray XML tags, copy-pasted
-# system prompts). It will NOT stop a determined adversary — regex-based
-# sanitization is inherently bypassable. The real protection is that
-# .shipyard/ is local-only and gitignored.
-# Strips XML/HTML tags, code blocks, prompt directives, and caps length.
-sanitize_lesson() {
-    local raw="$1"
-    # 1. Strip XML/HTML tags (closed and unclosed) and HTML-encoded tag entities
-    raw=$(printf '%s\n' "$raw" | sed 's/<[^>]*>//g; s/<[a-zA-Z\/!][^>]*$//g; s/&lt;/ /g; s/&gt;/ /g; s/&#60;/ /g; s/&#62;/ /g')
-    # 2. Remove code blocks (lines between triple-backtick fences, inclusive)
-    raw=$(printf '%s\n' "$raw" | awk '/```/{skip=!skip; next} !skip{print}')
-    # 3. Filter lines containing prompt directive patterns (case-insensitive)
-    raw=$(printf '%s\n' "$raw" | grep -viE '^\s*(SYSTEM|ASSISTANT|USER)\s*:|\bSYSTEM\s+PROMPT\b|\bIGNORE\s+(ALL\s+)?(PREVIOUS|ABOVE)\b|\bNEW\s+INSTRUCTION\b' || true)
-    # 4. Cap at 500 characters
-    if [ "${#raw}" -gt 500 ]; then
-        raw="${raw:0:497}..."
-    fi
-    printf '%s' "$raw"
-}
+# .shipyard/ is trusted local content — gitignored and never written by external actors.
+# Sanitization of lesson/notes content was removed in v4.0 as security theater:
+# regex-based stripping is bypassable and the real protection is local-only ownership.
 
-# Auto-migrate STATE.md to STATE.json + HISTORY.md
-# Called when STATE.json is missing but STATE.md exists
-migrate_state_md() {
-    local state_md
-    state_md=$(cat ".shipyard/STATE.md" 2>/dev/null || echo "")
-
-    # Validate required fields (same checks as legacy code)
-    if [ -z "$state_md" ]; then
-        jq -n '{
-            error: "STATE.md is corrupt or incomplete",
-            details: "File is empty",
-            exitCode: 2,
-            recovery: "Run: bash scripts/state-write.sh --recover"
-        }'
-        exit 2
-    fi
-    local local_missing=""
-    echo "$state_md" | grep -q '\*\*Status:\*\*' || local_missing="Status"
-    echo "$state_md" | grep -q '\*\*Current Phase:\*\*' || local_missing="${local_missing:+$local_missing, }Current Phase"
-    if [ -n "$local_missing" ]; then
-        jq -n --arg missing "$local_missing" '{
-            error: "STATE.md is corrupt or incomplete",
-            details: ("Missing required field(s): " + $missing),
-            exitCode: 2,
-            recovery: "Run: bash scripts/state-write.sh --recover"
-        }'
-        exit 2
-    fi
-
-    # Extract fields
-    local m_status m_phase m_position m_blocker m_updated
-    m_status=$(echo "$state_md" | sed -n 's/^.*\*\*Status:\*\* \(.*\)$/\1/p' | head -1)
-    m_phase=$(echo "$state_md" | sed -n 's/^.*\*\*Current Phase:\*\* \([0-9][0-9]*\).*$/\1/p' | head -1)
-    m_position=$(echo "$state_md" | sed -n 's/^.*\*\*Current Position:\*\* \(.*\)$/\1/p' | head -1)
-    m_blocker=$(echo "$state_md" | sed -n 's/^.*\*\*Blocker:\*\* \(.*\)$/\1/p' | head -1)
-    m_updated=$(echo "$state_md" | sed -n 's/^.*\*\*Last Updated:\*\* \(.*\)$/\1/p' | head -1)
-    m_updated="${m_updated:-$(date -u +"%Y-%m-%dT%H:%M:%SZ")}"
-
-    # Validate phase integer
-    if [ -n "$m_phase" ] && ! [[ "$m_phase" =~ ^[0-9]+$ ]]; then
-        m_phase="0"
-    fi
-
-    # Write STATE.json
-    jq -n \
-        --argjson schema 3 \
-        --argjson phase "${m_phase:-0}" \
-        --arg position "${m_position:-}" \
-        --arg status "${m_status:-unknown}" \
-        --arg updated_at "$m_updated" \
-        --arg blocker "${m_blocker:-}" \
-        '{schema: $schema, phase: $phase, position: $position, status: $status, updated_at: $updated_at, blocker: (if $blocker == "" then null else $blocker end)}' \
-        > .shipyard/STATE.json
-
-    # Extract history section from STATE.md and write HISTORY.md
-    local history_section=""
-    history_section=$(echo "$state_md" | sed -n '/^## History$/,$ { /^## History$/d; p; }' | sed '/^$/d')
-    if [ -n "$history_section" ]; then
-        printf '%s\n' "$history_section" > .shipyard/HISTORY.md
-    fi
-    # Append migration log entry
-    printf '%s\n' "- [$(date -u +"%Y-%m-%dT%H:%M:%SZ")] Migrated from STATE.md to STATE.json (schema 3)" >> .shipyard/HISTORY.md
-
-    echo "Migrated STATE.md -> STATE.json + HISTORY.md" >&2
-}
 
 # Parse arguments
 HUMAN_MODE=false
@@ -160,9 +77,8 @@ if [ -d ".shipyard" ]; then
         # PRIMARY PATH: Read STATE.json via jq
         :
     elif [ -f ".shipyard/STATE.md" ]; then
-        # MIGRATION PATH: Convert STATE.md -> STATE.json + HISTORY.md
-        migrate_state_md
-        # Fall through to read the newly-created STATE.json
+        # v4.0: Legacy state file detected — remove silently and continue
+        rm -f ".shipyard/STATE.md"
     fi
 
     if [ -f ".shipyard/STATE.json" ]; then
@@ -235,7 +151,7 @@ if [ -d ".shipyard" ]; then
             esac
         fi
 
-        # Render structured STATE.json context (replaces raw STATE.md dump)
+        # Render structured state context
         state_context="## Shipyard Project State Detected\n\nA .shipyard/ directory exists in this project. Below is the current state.\n\n### STATE.json\nPhase: ${phase}\nStatus: ${status}\nPosition: ${position:-none}\nBlocker: ${blocker:-none}\nSchema: ${schema}\n"
 
         # Planning tier and above: load PROJECT.md + ROADMAP.md
@@ -305,7 +221,6 @@ if [ -d ".shipyard" ]; then
                     while IFS=: read -r line_num _; do
                         # Extract header + ~7 lines of lesson content (8 lines total per lesson)
                         chunk=$(sed -n "${line_num},$((line_num + 8))p" ".shipyard/LESSONS.md" 2>/dev/null || echo "")
-                        chunk=$(sanitize_lesson "$chunk")
                         lesson_snippet="${lesson_snippet}${chunk}\n"
                     done <<< "$last_five"
                     if [ -n "$lesson_snippet" ]; then
