@@ -60,12 +60,9 @@ if [ "${SHIPYARD_TEAMS_ENABLED:-}" = "true" ]; then
     LOCK_DIR="${TMPDIR:-/tmp}/shipyard-state-${SHIPYARD_DIR_HASH}.lock"
 
     # Acquire lock with retry (mkdir is atomic on all POSIX systems)
-    MAX_RETRIES="${SHIPYARD_LOCK_MAX_RETRIES:-60}"
-    RETRY_DELAY="${SHIPYARD_LOCK_RETRY_DELAY:-0.1}"
+    MAX_RETRIES="${SHIPYARD_LOCK_MAX_RETRIES:-120}"
     # Validate lock parameters (prevent DoS via extreme env var values)
-    [[ "$MAX_RETRIES" =~ ^[0-9]+$ ]] && [ "$MAX_RETRIES" -ge 1 ] && [ "$MAX_RETRIES" -le 300 ] || MAX_RETRIES=60
-    [[ "$RETRY_DELAY" =~ ^[0-9]*\.?[0-9]+$ ]] || RETRY_DELAY=0.1
-    (( $(awk "BEGIN{print ($RETRY_DELAY > 5.0)}") )) && RETRY_DELAY=0.1
+    [[ "$MAX_RETRIES" =~ ^[0-9]+$ ]] && [ "$MAX_RETRIES" -ge 1 ] && [ "$MAX_RETRIES" -le 600 ] || MAX_RETRIES=120
     acquired=false
     for (( i=0; i<MAX_RETRIES; i++ )); do
         if mkdir "$LOCK_DIR" 2>/dev/null; then
@@ -87,7 +84,8 @@ if [ "${SHIPYARD_TEAMS_ENABLED:-}" = "true" ]; then
                 fi
             fi
         fi
-        sleep "$RETRY_DELAY"
+        _delay=$(awk "BEGIN{d=0.05*(2^$i); print (d>1.0)?1.0:d}")
+        sleep "$_delay"
     done
 
     if [ "$acquired" != "true" ]; then
@@ -112,8 +110,7 @@ atomic_write() {
     local content="$1"
     local target="$2"
     local tmpfile
-    tmpfile=$(mktemp "${target}.tmp.XXXXXX" 2>/dev/null) || \
-    tmpfile=$(mktemp -t "state-write.XXXXXX") || {
+    tmpfile=$(mktemp "${target}.tmp.XXXXXX") || {
         echo "Error: Failed to create temporary file" >&2
         exit 3
     }
