@@ -18,7 +18,13 @@ MARKETPLACE_DIR="${HOME}/.claude/plugins/marketplaces/shipyard"
 
 mkdir -p "${SHIPYARD_CONFIG_DIR}"
 
-log() { echo "[$(date -u +"%Y-%m-%dT%H:%M:%SZ")] $*" >> "${SYNC_LOG}"; }
+log() {
+    # Rotate if log exceeds 100KB (keep last 500 lines)
+    if [[ -f "${SYNC_LOG}" ]] && (( $(wc -c < "${SYNC_LOG}") > 102400 )); then
+        tail -500 "${SYNC_LOG}" > "${SYNC_LOG}.tmp" && mv "${SYNC_LOG}.tmp" "${SYNC_LOG}"
+    fi
+    echo "[$(date -u +"%Y-%m-%dT%H:%M:%SZ")] $*" >> "${SYNC_LOG}"
+}
 
 # Throttle: skip if synced recently
 if [[ -f "${SYNC_TIMESTAMP}" ]]; then
