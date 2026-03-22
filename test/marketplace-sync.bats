@@ -110,6 +110,44 @@ setup_marketplace_repo() {
     [ "$ts" -ge "$before" ]
 }
 
+# --- Log rotation ---
+
+# bats test_tags=unit
+@test "marketplace-sync: log rotation trims file over 100KB" {
+    mkdir -p "${HOME}/.config/shipyard"
+    local logfile="${HOME}/.config/shipyard/marketplace-sync.log"
+
+    # Create a log file larger than 100KB (~105KB = 1050 lines of ~100 chars each)
+    for i in $(seq 1 1050); do
+        printf '[2026-01-01T00:00:00Z] Line %04d padding to make this line about one hundred characters long xxxx\n' "$i"
+    done > "$logfile"
+
+    local size_before
+    size_before=$(wc -c < "$logfile")
+    # Confirm it is over 102400 bytes
+    (( size_before > 102400 ))
+
+    # Set up conditions so the script runs the log path (needs marketplace dir with .git)
+    mkdir -p "${HOME}/.claude/plugins/marketplaces/shipyard/.git"
+
+    # Remove cooldown timestamp so the script proceeds past throttle check
+    rm -f "${HOME}/.config/shipyard/marketplace-sync.last"
+
+    # The fetch will fail (no real remote), but log() will be called with the failure message
+    # which triggers the rotation check
+    run bash "$MARKETPLACE_SYNC"
+
+    # After rotation, the log should be significantly smaller (500 lines + 1 new entry)
+    local size_after
+    size_after=$(wc -c < "$logfile")
+    (( size_after < size_before ))
+
+    # Should have approximately 501 lines (500 kept + 1 new log entry)
+    local line_count
+    line_count=$(wc -l < "$logfile")
+    (( line_count <= 510 ))
+}
+
 # --- No .git directory means not a git repo → exits 0 ---
 
 # bats test_tags=unit

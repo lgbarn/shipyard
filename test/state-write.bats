@@ -2,7 +2,7 @@
 load test_helper
 
 teardown() {
-    unset SHIPYARD_TEAMS_ENABLED SHIPYARD_LOCK_MAX_RETRIES SHIPYARD_LOCK_RETRY_DELAY 2>/dev/null || true
+    unset SHIPYARD_TEAMS_ENABLED SHIPYARD_LOCK_MAX_RETRIES 2>/dev/null || true
     # Kill any lingering background state-write processes
     jobs -p 2>/dev/null | xargs kill 2>/dev/null || true
 }
@@ -232,7 +232,6 @@ teardown() {
     # Override MAX_RETRIES via env var — the script should fail with exit 4 (lock timeout)
     export SHIPYARD_TEAMS_ENABLED=true
     export SHIPYARD_LOCK_MAX_RETRIES=2
-    export SHIPYARD_LOCK_RETRY_DELAY=0.05
     run bash "$STATE_WRITE" --phase 1 --position "blocked" --status ready
     assert_failure
     assert_equal "$status" 4
@@ -240,6 +239,14 @@ teardown() {
 
     # Clean up the lock
     rmdir "$lock_dir" 2>/dev/null || true
+}
+
+# bats test_tags=unit
+@test "state-write: lock retry uses exponential backoff" {
+    # Verify the backoff computation is present in the script
+    # This is a static check — runtime backoff testing would require timing
+    run grep -q 'awk.*2\^' "$STATE_WRITE"
+    assert_success
 }
 
 # --- Backup-on-write tests ---
