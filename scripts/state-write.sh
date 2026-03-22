@@ -20,6 +20,8 @@
 
 set -euo pipefail
 
+readonly STATE_SCHEMA_VERSION=3
+
 # Reject symlinked .shipyard directory (security: prevent writes outside project)
 if [ -L ".shipyard" ]; then
     echo "Error: .shipyard is a symlink, which is not allowed" >&2
@@ -272,7 +274,7 @@ if [ "$RECOVER" = true ]; then
     # Generate recovered STATE.json
     TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
     NEW_CONTENT=$(jq -n \
-        --argjson schema 3 \
+        --argjson schema "$STATE_SCHEMA_VERSION" \
         --argjson phase "$latest_phase" \
         --arg position "$recovered_position" \
         --arg status "$recovered_status" \
@@ -310,7 +312,7 @@ fi
 # If we have structured updates, apply them
 if [ -n "$PHASE" ] || [ -n "$POSITION" ] || [ -n "$STATUS" ]; then
     NEW_CONTENT=$(jq -n \
-        --argjson schema 3 \
+        --argjson schema "$STATE_SCHEMA_VERSION" \
         --argjson phase "${PHASE:-0}" \
         --arg position "${POSITION:-}" \
         --arg status "${STATUS:-unknown}" \

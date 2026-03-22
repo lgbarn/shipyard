@@ -11,6 +11,9 @@
 
 set -euo pipefail
 
+# shellcheck disable=SC2034  # declared for consistency with state-write.sh; unused in read path
+readonly STATE_SCHEMA_VERSION=3
+
 # .shipyard/ is trusted local content — gitignored and never written by external actors.
 # Sanitization of lesson/notes content was removed in v4.0 as security theater:
 # regex-based stripping is bypassable and the real protection is local-only ownership.
