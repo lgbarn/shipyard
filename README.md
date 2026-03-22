@@ -375,6 +375,33 @@ When you run `/shipyard:init`, Shipyard creates a `.shipyard/config.json` in you
 
 See `docs/PROTOCOLS.md` for model routing configuration and the full config.json skeleton.
 
+## Environment Variables
+
+**User-configurable:**
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `SHIPYARD_LOCK_MAX_RETRIES` | `120` | Max lock acquisition attempts in team mode (range: 1-600) |
+| `SHIPYARD_DISABLE_HOOKS` | unset | Set to `true` to disable all Shipyard hooks |
+| `SHIPYARD_SKIP_HOOKS` | unset | Comma-separated list of hook names to skip (e.g., `stop,teammate-idle`) |
+
+**Auto-detected (do not set manually):**
+
+| Variable | Description |
+|----------|-------------|
+| `SHIPYARD_TEAMS_ENABLED` | `true` when `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` |
+| `SHIPYARD_IS_TEAMMATE` | `true` when running as a teammate in agent teams |
+| `SHIPYARD_TEAM_NAME` | Copy of `CLAUDE_CODE_TEAM_NAME` |
+
+**Claude Code-managed:**
+
+| Variable | Description |
+|----------|-------------|
+| `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` | Feature flag for agent teams (`1` = enabled) |
+| `CLAUDE_CODE_TEAM_NAME` | Set when running as teammate |
+
+Note: Lock retry uses exponential backoff (0.05s start, doubles each retry, 1.0s cap). This is not configurable.
+
 ## Memory
 
 Shipyard v3.0 removed its built-in episodic memory system in favor of Claude's native memory, which provides better recall, zero maintenance, and cross-tool context automatically. See [CHANGELOG.md](CHANGELOG.md) for details on this change.
