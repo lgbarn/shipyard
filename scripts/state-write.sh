@@ -35,7 +35,17 @@ fi
 STATE_FILE=".shipyard/STATE.json"
 HISTORY_FILE=".shipyard/HISTORY.md"
 
+# Defense-in-depth: ensure .shipyard/ contents are never tracked by git
+if [ ! -f ".shipyard/.gitignore" ]; then
+    printf '*\n' > ".shipyard/.gitignore"
+fi
+
 # --- Teams-aware locking (only when teams enabled) ---
+# Security note: The lock path in /tmp is predictable by design (derived from the
+# .shipyard directory hash). The threat model assumes that local filesystem access
+# is already a full compromise — an attacker who can write to /tmp can do far worse.
+# Stale lock detection (via PID existence check) mitigates the practical risk of
+# lock file persistence after an interrupted process.
 LOCK_DIR=""
 _release_lock() {
     if [ -n "$LOCK_DIR" ] && [ -d "$LOCK_DIR" ]; then
@@ -142,6 +152,18 @@ atomic_write() {
 append_history() {
     local entry="$1"
     printf '%s\n' "- [${TIMESTAMP}] ${entry}" >> "$HISTORY_FILE"
+}
+
+# Check content for common secret patterns — non-blocking warning only.
+# Patterns: OpenAI keys (sk-), GitHub tokens (ghp_), AWS access keys (AKIA),
+# PEM blocks (-----BEGIN), Slack tokens (xox[bpras]-), JWT tokens (eyJ).
+check_secrets_patterns() {
+    local content="$1"
+    local pattern='sk-|ghp_|AKIA|-----BEGIN|xox[bpras]-|eyJ'
+    if grep -qE "$pattern" <<< "$content" 2>/dev/null; then
+        echo "Warning: possible secret detected in state content" >&2
+    fi
+    return 0
 }
 
 # Parse arguments
@@ -260,6 +282,7 @@ if [ "$RECOVER" = true ]; then
         --arg updated_at "$TIMESTAMP" \
         '{schema: $schema, phase: $phase, position: $position, status: $status, updated_at: $updated_at, blocker: null}')
     cp "$STATE_FILE" "${STATE_FILE}.bak" 2>/dev/null || true
+    check_secrets_patterns "$NEW_CONTENT"
     atomic_write "$NEW_CONTENT" "$STATE_FILE"
     shasum -a 256 "$STATE_FILE" | cut -d' ' -f1 > "${STATE_FILE}.sha256"
 
@@ -280,6 +303,7 @@ if [ -n "$RAW_CONTENT" ]; then
         exit 1
     fi
     cp "$STATE_FILE" "${STATE_FILE}.bak" 2>/dev/null || true
+    check_secrets_patterns "$RAW_CONTENT"
     atomic_write "$RAW_CONTENT" "$STATE_FILE"
     shasum -a 256 "$STATE_FILE" | cut -d' ' -f1 > "${STATE_FILE}.sha256"
     echo "STATE.json updated (raw write) at ${TIMESTAMP}"
@@ -297,6 +321,7 @@ if [ -n "$PHASE" ] || [ -n "$POSITION" ] || [ -n "$STATUS" ]; then
         --arg blocker "${BLOCKER:-}" \
         '{schema: $schema, phase: $phase, position: $position, status: $status, updated_at: $updated_at, blocker: (if $blocker == "" then null else $blocker end)}')
     cp "$STATE_FILE" "${STATE_FILE}.bak" 2>/dev/null || true
+    check_secrets_patterns "$NEW_CONTENT"
     atomic_write "$NEW_CONTENT" "$STATE_FILE"
     shasum -a 256 "$STATE_FILE" | cut -d' ' -f1 > "${STATE_FILE}.sha256"
     append_history "Phase ${PHASE:-?}: ${POSITION:-updated} (${STATUS:-unknown})"
@@ -312,6 +337,7 @@ fi
 
 # Append working note if provided
 if [ -n "$NOTE_TEXT" ]; then
+    check_secrets_patterns "$NOTE_TEXT"
     printf '%s\n' "- [${TIMESTAMP}] ${NOTE_TEXT}" >> ".shipyard/NOTES.md"
     echo "Note added to NOTES.md at ${TIMESTAMP}"
 fi

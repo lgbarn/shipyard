@@ -348,3 +348,63 @@ teardown() {
     bash "$STATE_WRITE" --phase 1 --position "Done with gaps" --status complete_with_gaps
     [ ! -f .shipyard/NOTES.md ]
 }
+
+# --- Secrets detection tests ---
+
+# bats test_tags=unit
+@test "state-write: warns on stderr when content contains ghp_ secret pattern" {
+    setup_shipyard_dir
+    run bash "$STATE_WRITE" --raw '{"schema":3,"phase":1,"position":"ghp_abc123","status":"ready","updated_at":"2026-01-01T00:00:00Z","blocker":null}'
+    assert_success
+    assert_output --partial "Warning"
+}
+
+# bats test_tags=unit
+@test "state-write: warns on stderr when content contains AKIA secret pattern" {
+    setup_shipyard_dir
+    run bash "$STATE_WRITE" --raw '{"schema":3,"phase":1,"position":"AKIA1234567890","status":"ready","updated_at":"2026-01-01T00:00:00Z","blocker":null}'
+    assert_success
+    assert_output --partial "Warning"
+}
+
+# bats test_tags=unit
+@test "state-write: warns on stderr when note contains BEGIN PRIVATE KEY" {
+    setup_shipyard_dir
+    run bash "$STATE_WRITE" --note "-----BEGIN PRIVATE KEY-----"
+    assert_success
+    assert_output --partial "Warning"
+}
+
+# bats test_tags=unit
+@test "state-write: no warning on clean content" {
+    setup_shipyard_dir
+    run bash "$STATE_WRITE" --phase 1 --position "Normal clean content" --status ready
+    assert_success
+    refute_output --partial "Warning"
+}
+
+# --- Gitignore protection tests ---
+
+# bats test_tags=unit
+@test "state-write: creates .shipyard/.gitignore on first write" {
+    setup_shipyard_dir
+    [ ! -f .shipyard/.gitignore ]
+
+    bash "$STATE_WRITE" --phase 1 --position "test" --status ready
+
+    [ -f .shipyard/.gitignore ]
+    run cat .shipyard/.gitignore
+    assert_output --partial "*"
+}
+
+# bats test_tags=unit
+@test "state-write: does not overwrite existing .shipyard/.gitignore" {
+    setup_shipyard_dir
+    echo "*.log" > .shipyard/.gitignore
+
+    bash "$STATE_WRITE" --phase 1 --position "test" --status ready
+
+    run cat .shipyard/.gitignore
+    assert_output --partial "*.log"
+    refute_output --partial "^*$"
+}

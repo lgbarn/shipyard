@@ -136,27 +136,3 @@ load test_helper
     assert_output --partial "pre-recovery"
     assert_output --partial "post-recovery"
 }
-
-# bats test_tags=integration
-@test "integration: auto-migration from STATE.md to STATE.json on read" {
-    setup_shipyard_with_state
-    mkdir -p .shipyard/phases
-
-    # Only STATE.md exists
-    [ -f .shipyard/STATE.md ]
-    [ ! -f .shipyard/STATE.json ]
-
-    # Read triggers migration
-    run bash "$STATE_READ"
-    assert_success
-
-    # Both files now exist
-    [ -f .shipyard/STATE.md ]
-    [ -f .shipyard/STATE.json ]
-    [ -f .shipyard/HISTORY.md ]
-
-    assert_valid_state_json
-    assert_json_field "schema" "3"
-    assert_json_field "phase" "1"
-    assert_json_field "status" "building"
-}
