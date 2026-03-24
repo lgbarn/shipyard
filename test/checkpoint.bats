@@ -69,6 +69,16 @@ load test_helper
     [ -n "$output" ]
 }
 
+# bats test_tags=integration
+@test "checkpoint: --prune 0 exercises CUTOFF date computation" {
+    setup_git_repo
+    git tag -a "shipyard-checkpoint-zeroprobe-20200101T000000Z" -m "probe"
+    run bash "$CHECKPOINT" --prune 0
+    assert_success
+    # shellcheck disable=SC2154
+    assert_output --partial "Pruned 1 checkpoint(s)"
+}
+
 # --- Exit codes and dirty worktree ---
 
 # bats test_tags=integration
