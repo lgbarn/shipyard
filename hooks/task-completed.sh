@@ -15,6 +15,7 @@ if [[ ",${SHIPYARD_SKIP_HOOKS:-}," == *",$HOOK_NAME,"* ]]; then exit 0; fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "${SCRIPT_DIR}/scripts/team-detect.sh"
+source "${SCRIPT_DIR}/scripts/hook-log.sh"
 
 # Solo mode: skip gates
 if [ "${SHIPYARD_IS_TEAMMATE}" != "true" ]; then
@@ -53,10 +54,16 @@ if [ -d ".shipyard/phases" ]; then
         if [ "$has_substance" = true ]; then
             exit 0
         fi
-        echo "BLOCKED: Evidence files exist but none have substantive content (>3 lines). Add real verification results." >&2
+        _msg="BLOCKED: Evidence files exist but none have substantive content (>3 lines). Add real verification results."
+        echo "$_msg" >&2
+        echo "  (see ${HOOK_LOG} for details)" >&2
+        log_hook_failure "$HOOK_NAME" "2" "$_msg"
         exit 2
     fi
 fi
 
-echo "BLOCKED: No verification evidence found. Run tests and produce results before marking task complete." >&2
+_msg="BLOCKED: No verification evidence found. Run tests and produce results before marking task complete."
+echo "$_msg" >&2
+echo "  (see ${HOOK_LOG} for details)" >&2
+log_hook_failure "$HOOK_NAME" "2" "$_msg"
 exit 2
