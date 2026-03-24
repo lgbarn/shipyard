@@ -166,9 +166,29 @@ if [ -d ".shipyard" ]; then
                 fi
             fi
             if [ -f ".shipyard/ROADMAP.md" ]; then
-                roadmap_summary=$(head -80 ".shipyard/ROADMAP.md" 2>/dev/null || echo "")
+                context_phase_scope="true"
+                if [ -f ".shipyard/config.json" ]; then
+                    context_phase_scope=$(jq -r '.context_phase_scope // "true"' ".shipyard/config.json" 2>/dev/null || echo "true")
+                fi
+                roadmap_summary=""
+                roadmap_label="ROADMAP.md (first 80 lines)"
+                if [ "$context_phase_scope" = "true" ] && [ -n "$phase" ]; then
+                    roadmap_summary=$(awk \
+                        -v target="## Phase ${phase}" \
+                        'BEGIN{found=0}
+                         $0==target{found=1; print; next}
+                         found && /^## Phase |^---/{exit}
+                         found{print}' \
+                        ".shipyard/ROADMAP.md" 2>/dev/null || echo "")
+                    if [ -n "$roadmap_summary" ]; then
+                        roadmap_label="ROADMAP.md (Phase ${phase})"
+                    fi
+                fi
+                if [ -z "$roadmap_summary" ]; then
+                    roadmap_summary=$(head -80 ".shipyard/ROADMAP.md" 2>/dev/null || echo "")
+                fi
                 if [ -n "$roadmap_summary" ]; then
-                    state_context="${state_context}\n### ROADMAP.md (first 80 lines)\n${roadmap_summary}\n"
+                    state_context="${state_context}\n### ${roadmap_label}\n${roadmap_summary}\n"
                 fi
             fi
         fi
@@ -361,6 +381,17 @@ if [ "$HUMAN_MODE" = true ]; then
         echo "No Shipyard project detected. Run /shipyard:init to get started."
     fi
     exit 0
+fi
+
+# Context rot detection: warn if full_context exceeds threshold
+context_warn_threshold=8000
+if [ -f ".shipyard/config.json" ]; then
+    context_warn_threshold=$(jq -r '.context_warn_threshold // 8000' ".shipyard/config.json" 2>/dev/null || echo "8000")
+fi
+_ctx_size=${#full_context}
+if [ "$_ctx_size" -gt "$context_warn_threshold" ]; then
+    _ctx_warning="[SHIPYARD WARNING] Context size ${_ctx_size} chars exceeds threshold ${context_warn_threshold}. Large context may degrade model performance. Consider switching to a narrower context_tier in .shipyard/config.json.\n\n"
+    full_context="${_ctx_warning}${full_context}"
 fi
 
 # Output JSON (jq handles escaping natively)
