@@ -8,8 +8,8 @@
 # Do NOT add a shebang — this file is always sourced, never executed directly.
 # Do NOT add set -euo pipefail — callers already set it.
 #
+# shellcheck shell=bash
 
-# shellcheck disable=SC2034  # HOOK_LOG is used by callers after sourcing
 SHIPYARD_CONFIG_DIR="${HOME}/.config/shipyard"
 HOOK_LOG="${SHIPYARD_CONFIG_DIR}/hooks.log"
 
