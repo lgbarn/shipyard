@@ -4,6 +4,41 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [4.0.0] - 2026-03-24
+
+### BREAKING CHANGES
+- **v2-to-v3 migration code removed** (MAINT-001): Users on v2.x must upgrade to v3.x first, then to v4.0. See `docs/MIGRATION-v3-v4.md`.
+
+### Security
+- Removed sanitize_lesson() security theater — `.shipyard/` documented as trusted local content (SEC-001)
+- Added secrets pattern detection (sk-, ghp_, AKIA, BEGIN PRIVATE KEY) with stderr warnings on state writes (SEC-002)
+- Created `.shipyard/.gitignore` as defense-in-depth against accidental commits (SEC-002)
+- Documented lock security model and threat assumptions (SEC-003)
+
+### Reliability
+- Lock retry uses exponential backoff (0.05s → 1.0s cap, 120 max retries) for better concurrency (REL-002)
+- Removed cross-filesystem mktemp fallback — atomic writes guaranteed or fail-fast with exit 3 (REL-003)
+- Added bash 4.0+ runtime version check with macOS Homebrew hint (REL-004)
+- Added log rotation to marketplace sync (100KB threshold, 500 lines retained) (REL-005)
+
+### Maintainability
+- Extracted STATE_SCHEMA_VERSION constant — replaces 6 hardcoded values (MAINT-002)
+- Added debugger agent to packaged agents for marketplace distribution (MAINT-004)
+
+### Documentation
+- Created `docs/STATE-SCHEMA.md` with full JSON schema definition and evolution history (DOC-001)
+- Documented all SHIPYARD_* environment variables in README.md (DOC-002)
+- Created `docs/MIGRATION-v3-v4.md` with upgrade path and FAQ (DOC-003)
+
+### Operations
+- Added persistent hook failure logging to `~/.config/shipyard/hooks.log` with rotation (OPS-002)
+- Added auto checkpoint pruning (>30 days) to ship command (OPS-003)
+
+### Platform
+- Added `windows-2022` (WSL) to CI matrix with Vampire/setup-wsl (COMPAT-001)
+- Created `.gitattributes` for LF line ending enforcement (COMPAT-001)
+- Replaced date command try-fail-fallback with upfront BSD/GNU detection (COMPAT-002)
+
 ## [3.6.1] - 2026-03-11
 
 ### Fixed
