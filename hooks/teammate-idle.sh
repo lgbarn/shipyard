@@ -15,6 +15,7 @@ if [[ ",${SHIPYARD_SKIP_HOOKS:-}," == *",$HOOK_NAME,"* ]]; then exit 0; fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "${SCRIPT_DIR}/scripts/team-detect.sh"
+source "${SCRIPT_DIR}/scripts/hook-log.sh"
 
 # Solo mode: skip gates
 if [ "${SHIPYARD_IS_TEAMMATE}" != "true" ]; then
@@ -24,16 +25,22 @@ fi
 # Gate 1: Version check
 if [ -f "${SCRIPT_DIR}/scripts/check-versions.sh" ]; then
     if ! _output=$(bash "${SCRIPT_DIR}/scripts/check-versions.sh" 2>&1); then
-        echo "BLOCKED: Version check failed. Fix version mismatches before stopping." >&2
+        _msg="BLOCKED: Version check failed. Fix version mismatches before stopping."
+        echo "$_msg" >&2
         echo "$_output" | tail -5 >&2
+        echo "  (see ${HOOK_LOG} for details)" >&2
+        log_hook_failure "$HOOK_NAME" "2" "$_msg"
         exit 2
     fi
 fi
 
 # Gate 2: Tests must pass
 if ! _output=$(npm test --prefix "${SCRIPT_DIR}" 2>&1); then
-    echo "BLOCKED: Tests are failing. Fix test failures before stopping." >&2
+    _msg="BLOCKED: Tests are failing. Fix test failures before stopping."
+    echo "$_msg" >&2
     echo "$_output" | tail -10 >&2
+    echo "  (see ${HOOK_LOG} for details)" >&2
+    log_hook_failure "$HOOK_NAME" "2" "$_msg"
     exit 2
 fi
 
