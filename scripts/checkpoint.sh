@@ -24,7 +24,18 @@ if [ "${1:-}" = "--prune" ]; then
         echo "Error: --prune argument must be a positive integer, got '${DAYS}'" >&2
         exit 1
     fi
-    CUTOFF=$(date -u -v-"${DAYS}"d +"%Y%m%dT%H%M%SZ" 2>/dev/null || date -u -d "${DAYS} days ago" +"%Y%m%dT%H%M%SZ")
+    # Detect date command style (BSD vs GNU)
+    if date -u -v-1d +%s >/dev/null 2>&1; then
+        DATE_STYLE="bsd"
+    else
+        DATE_STYLE="gnu"
+    fi
+
+    if [ "$DATE_STYLE" = "bsd" ]; then
+        CUTOFF=$(date -u -v-"${DAYS}"d +"%Y%m%dT%H%M%SZ")
+    else
+        CUTOFF=$(date -u -d "${DAYS} days ago" +"%Y%m%dT%H%M%SZ")
+    fi
     PRUNED=0
     while IFS= read -r tag; do
         [ -z "$tag" ] && continue
