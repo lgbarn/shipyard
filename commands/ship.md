@@ -277,7 +277,7 @@ Use AskUserQuestion to present four options:
 Run checkpoint pruning to clean up stale rollback points. This is non-blocking — if pruning fails, emit a warning and continue.
 
 ```bash
-bash "${SCRIPT_DIR}/scripts/checkpoint.sh" --prune 30 >/dev/null 2>&1 || echo "Warning: Checkpoint pruning failed (non-blocking)" >&2
+bash "${SCRIPT_DIR}/scripts/checkpoint.sh" --prune 30 >/dev/null || echo "Warning: Checkpoint pruning failed (non-blocking)" >&2
 ```
 
 This step is silent on success. Old checkpoints (>30 days) are removed automatically.
