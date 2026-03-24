@@ -433,3 +433,174 @@ JSONEOF
     assert_success
     assert_output --partial "No Shipyard project detected"
 }
+
+# --- CTX-001: Phase-scoped ROADMAP extraction tests ---
+
+# bats test_tags=unit
+@test "state-read: CTX-001 scoped extraction returns correct phase section only" {
+    setup_shipyard_dir
+    cat > .shipyard/STATE.json <<'JSONEOF'
+{"schema":3,"phase":2,"position":"Planning","status":"planning","updated_at":"2026-01-01T00:00:00Z","blocker":null}
+JSONEOF
+
+    cat > .shipyard/ROADMAP.md <<'EOF'
+## Phase 1
+Phase one content unique marker alpha
+
+## Phase 2
+Phase two content unique marker beta
+
+## Phase 3
+Phase three content unique marker gamma
+EOF
+
+    run bash "$STATE_READ"
+    assert_success
+    assert_output --partial "marker beta"
+    refute_output --partial "marker alpha"
+    refute_output --partial "marker gamma"
+}
+
+# bats test_tags=unit
+@test "state-read: CTX-001 scoped extraction falls back to head-80 when phase not in ROADMAP" {
+    setup_shipyard_dir
+    cat > .shipyard/STATE.json <<'JSONEOF'
+{"schema":3,"phase":99,"position":"Planning","status":"planning","updated_at":"2026-01-01T00:00:00Z","blocker":null}
+JSONEOF
+
+    cat > .shipyard/ROADMAP.md <<'EOF'
+## Phase 1
+Phase one content
+
+## Phase 2
+Phase two content
+EOF
+
+    run bash "$STATE_READ"
+    assert_success
+    assert_valid_json
+    # Should not crash; ROADMAP content from head-80 appears in output
+    assert_output --partial "ROADMAP"
+}
+
+# bats test_tags=unit
+@test "state-read: CTX-001 scoped extraction disabled via config returns full head-80" {
+    setup_shipyard_dir
+    cat > .shipyard/STATE.json <<'JSONEOF'
+{"schema":3,"phase":2,"position":"Planning","status":"planning","updated_at":"2026-01-01T00:00:00Z","blocker":null}
+JSONEOF
+
+    echo '{"context_phase_scope": "false"}' > .shipyard/config.json
+
+    cat > .shipyard/ROADMAP.md <<'EOF'
+## Phase 1
+Phase one content head-80 visible
+
+## Phase 2
+Phase two content
+EOF
+
+    run bash "$STATE_READ"
+    assert_success
+    # head-80 includes everything from the top — Phase 1 content should be present
+    assert_output --partial "Phase one content head-80 visible"
+}
+
+# bats test_tags=unit
+@test "state-read: CTX-001 section label changes to Phase N when scoped" {
+    setup_shipyard_dir
+    cat > .shipyard/STATE.json <<'JSONEOF'
+{"schema":3,"phase":3,"position":"Planning","status":"planning","updated_at":"2026-01-01T00:00:00Z","blocker":null}
+JSONEOF
+
+    cat > .shipyard/ROADMAP.md <<'EOF'
+## Phase 1
+Phase one content
+
+## Phase 2
+Phase two content
+
+## Phase 3
+Phase three content for the label test
+EOF
+
+    run bash "$STATE_READ"
+    assert_success
+    assert_output --partial "ROADMAP.md (Phase 3)"
+}
+
+# bats test_tags=unit
+@test "state-read: CTX-001 delimiter --- terminates phase section extraction" {
+    setup_shipyard_dir
+    cat > .shipyard/STATE.json <<'JSONEOF'
+{"schema":3,"phase":1,"position":"Planning","status":"planning","updated_at":"2026-01-01T00:00:00Z","blocker":null}
+JSONEOF
+
+    cat > .shipyard/ROADMAP.md <<'EOF'
+## Phase 1
+Content inside phase one section
+
+---
+Content after delimiter should not appear
+EOF
+
+    run bash "$STATE_READ"
+    assert_success
+    assert_output --partial "Content inside phase one section"
+    refute_output --partial "Content after delimiter should not appear"
+}
+
+# --- CTX-005: Context rot detection tests ---
+
+# bats test_tags=unit
+@test "state-read: CTX-005 warning fires when context exceeds threshold" {
+    setup_shipyard_with_json_state
+    mkdir -p .shipyard/phases
+    echo '{"context_warn_threshold": 1}' > .shipyard/config.json
+
+    run bash "$STATE_READ"
+    assert_success
+    assert_output --partial "SHIPYARD WARNING"
+}
+
+# bats test_tags=unit
+@test "state-read: CTX-005 warning absent when context is below threshold" {
+    setup_shipyard_dir
+    cat > .shipyard/STATE.json <<'JSONEOF'
+{"schema":3,"phase":1,"position":"Planning","status":"planning","updated_at":"2026-01-01T00:00:00Z","blocker":null}
+JSONEOF
+    echo '{"context_warn_threshold": 999999}' > .shipyard/config.json
+
+    run bash "$STATE_READ"
+    assert_success
+    refute_output --partial "SHIPYARD WARNING"
+}
+
+# bats test_tags=unit
+@test "state-read: CTX-005 warning absent when no config.json (default threshold is high enough)" {
+    setup_shipyard_dir
+    cat > .shipyard/STATE.json <<'JSONEOF'
+{"schema":3,"phase":1,"position":"Planning","status":"planning","updated_at":"2026-01-01T00:00:00Z","blocker":null}
+JSONEOF
+    # No config.json — default threshold is 8000; minimal planning context is well below this
+
+    run bash "$STATE_READ"
+    assert_success
+    refute_output --partial "SHIPYARD WARNING"
+}
+
+# bats test_tags=unit
+@test "state-read: CTX-005 warning does not write to stderr" {
+    setup_shipyard_with_json_state
+    mkdir -p .shipyard/phases
+    echo '{"context_warn_threshold": 1}' > .shipyard/config.json
+
+    local stderr_file="/tmp/state-read-stderr-$$"
+    run bash "$STATE_READ" 2>"$stderr_file"
+    assert_success
+    assert_output --partial "SHIPYARD WARNING"
+
+    # Stderr must be empty — warning goes into context only
+    [ ! -s "$stderr_file" ]
+    rm -f "$stderr_file"
+}
