@@ -94,7 +94,7 @@ For the full command reference and common workflows, see [docs/QUICKSTART.md](do
 
 ## Skills (Auto-Activating)
 
-Shipyard includes 16 skills that Claude invokes automatically when trigger conditions match:
+Shipyard includes 17 skills that Claude invokes automatically when trigger conditions match:
 
 | Skill | When It Activates |
 |-------|-------------------|
@@ -113,6 +113,7 @@ Shipyard includes 16 skills that Claude invokes automatically when trigger condi
 | `using-shipyard` | Every session (skill discovery protocol) |
 | `shipyard-testing` | Writing effective, maintainable tests |
 | `shipyard-writing-skills` | Creating new skills |
+| `shipyard-handoff` | Session transfer: "handoff", "I'm done for now", "save context" |
 | `lessons-learned` | After phase completion, before shipping, reflecting on work |
 
 ## Agents
@@ -212,6 +213,7 @@ Shipyard uses a dual state system:
 - **Code simplification**: Post-phase analysis catches AI-generated duplication and bloat across tasks
 - **Documentation generation**: Post-phase documentation keeps docs synchronized with code changes
 - **IaC support**: Terraform, Ansible, Docker validation workflows built into the builder and verifier
+- **Context engineering (WISC)**: Phase-scoped loading reduces context noise, handoff protocol enables clean session transfers, micro-lessons provide within-phase feedback, agent metrics surface task sizing issues. See [`docs/CONTEXT-ENGINEERING.md`](docs/CONTEXT-ENGINEERING.md)
 - **Max 3 tasks per plan**: Keeps each agent's workload within the quality budget
 - **Atomic commits**: Every task produces a separate, revertable commit
 - **Phase-based planning**: Break large projects into manageable phases with clear success criteria
@@ -227,6 +229,7 @@ Shipyard uses a dual state system:
 ├── STATE.json.sha256   # Checksum for integrity verification
 ├── HISTORY.md          # Append-only audit trail
 ├── NOTES.md            # Working notes (compaction-resilient, auto-cleared per phase)
+├── HANDOFF.md          # Session transfer context (consumed one-shot on next start)
 ├── config.json         # Workflow preferences
 ├── codebase/           # Brownfield analysis (default; or docs/codebase/ if configured)
 ├── phases/
@@ -235,6 +238,8 @@ Shipyard uses a dual state system:
 │       ├── 01-PLAN.md
 │       ├── 01-SUMMARY.md
 │       ├── VERIFICATION.md
+│       ├── MICRO-LESSONS.md      # Within-phase builder takeaways
+│       ├── AGENT-METRICS.md      # Agent context consumption log
 │       ├── AUDIT-{N}.md          # Security audit report
 │       ├── SIMPLIFICATION-{N}.md # Code simplification report
 │       └── DOCUMENTATION-{N}.md  # Documentation generation report
@@ -252,6 +257,7 @@ shipyard/
 │   ├── architect.md       # Roadmap and plan decomposition
 │   ├── auditor.md         # Security and compliance analysis
 │   ├── builder.md         # Task execution with TDD
+│   ├── debugger.md        # Root-cause analysis with 5 Whys
 │   ├── documenter.md      # Documentation generation
 │   ├── mapper.md          # Brownfield codebase analysis
 │   ├── researcher.md      # Domain/technology research
@@ -292,8 +298,11 @@ shipyard/
 │   ├── AGENT-GUIDE.md        # Detailed agent documentation
 │   ├── AGENT-TEAMS-GUIDE.md  # Agent teams usage guide
 │   ├── COMPARISON.md         # Feature comparison with other frameworks
+│   ├── CONTEXT-ENGINEERING.md # WISC context engineering design
+│   ├── MIGRATION-v3-v4.md    # Upgrade guide for v4.0 breaking changes
 │   ├── PROTOCOLS.md          # Model routing and config.json reference
-│   └── QUICKSTART.md         # Command reference and common workflows
+│   ├── QUICKSTART.md         # Command reference and common workflows
+│   └── STATE-SCHEMA.md       # STATE.json field definitions and schema history
 ├── .claude/
 │   └── agents/            # Agent definition files with tool restrictions
 │       ├── shipyard-architect.md
@@ -316,6 +325,7 @@ shipyard/
 │   ├── state-read.sh      # Adaptive context loading on session start
 │   ├── state-write.sh     # Updates .shipyard/STATE.json (teams-aware locking)
 │   ├── team-detect.sh     # Detects Claude Code Agent Teams environment
+│   ├── hook-log.sh        # Hook failure logging with rotation
 │   ├── checkpoint.sh      # Git tag checkpoint management
 │   ├── check-versions.sh  # Version sync validation
 │   └── marketplace-sync.sh # Marketplace metadata sync
@@ -330,6 +340,7 @@ shipyard/
 │   ├── shipyard-brainstorming/
 │   ├── shipyard-debugging/
 │   ├── shipyard-executing-plans/
+│   ├── shipyard-handoff/
 │   ├── shipyard-tdd/
 │   ├── shipyard-testing/
 │   ├── shipyard-verification/
@@ -346,6 +357,7 @@ shipyard/
 │   ├── marketplace-sync.bats # Marketplace sync tests
 │   ├── integration.bats
 │   ├── e2e-smoke.bats
+│   ├── hook-log.bats      # Hook failure logging tests
 │   ├── team-detect.bats   # Team detection tests
 │   └── team-hooks.bats    # TeammateIdle and TaskCompleted tests
 ├── CHANGELOG.md
@@ -372,6 +384,9 @@ When you run `/shipyard:init`, Shipyard creates a `.shipyard/config.json` in you
 | `codebase_docs_path` | `.shipyard/codebase`, `docs/codebase` | `.shipyard/codebase` | Where brownfield analysis docs are stored |
 | `model_routing` | object | see `docs/PROTOCOLS.md` | Model selection per task type |
 | `context_tier` | `auto`, `minimal`, `planning`, `execution`, `brownfield`, `full` | `auto` | Context loading at session start |
+| `context_phase_scope` | `true`, `false` | `true` | Scope ROADMAP loading to current phase in execution tier |
+| `context_warn_threshold` | integer (chars) | `8000` | Warn when assembled context exceeds this size |
+| `plan_critique` | `true`, `false` | `true` | Run feasibility stress test on generated plans |
 
 See `docs/PROTOCOLS.md` for model routing configuration and the full config.json skeleton.
 

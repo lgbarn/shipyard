@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [4.1.0] - 2026-03-25
+
+### Added
+- **Phase-scoped context loading** (CTX-001): Execution tier now extracts only the current phase's section from ROADMAP.md via awk, reducing context noise by ~500 tokens. Falls back to first 80 lines if extraction fails. Configurable via `context_phase_scope` in config.json.
+- **Context rot detection** (CTX-005): Warns when assembled context exceeds a configurable threshold (default 8000 chars). Warning appears in agent context, not stderr. Configurable via `context_warn_threshold` in config.json.
+- **Handoff skill** (CTX-003): New `/shipyard:handoff` command produces a structured HANDOFF.md for clean session transfers. Consumed one-shot on next session start (renamed to `.consumed`). Orchestrator writes the file directly (not delegated to sub-agents).
+- **Mid-execution micro-lessons** (CTX-004): After each builder completes, orchestrator extracts a one-line takeaway to MICRO-LESSONS.md. Next builder in the same phase receives it as context. Phase-scoped, best-effort.
+- **Agent context reporting** (CTX-002): Opt-in convention for agents to report turn count, compression status, and completion via `<!-- context: ... -->` comment. Logged to AGENT-METRICS.md for task sizing analysis.
+- **WISC documentation**: New `docs/CONTEXT-ENGINEERING.md` explains Shipyard's context engineering design aligned with the WISC framework (Write, Isolate, Select, Compress).
+
 ## [4.0.0] - 2026-03-24
 
 ### BREAKING CHANGES
