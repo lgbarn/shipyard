@@ -277,6 +277,84 @@ EOF
     refute_output --partial "Lesson 2: Second"
 }
 
+# --- HANDOFF detection tests ---
+
+# bats test_tags=unit
+@test "state-read: HANDOFF.md content is injected and file renamed to .consumed" {
+    setup_shipyard_with_json_state
+    mkdir -p .shipyard/phases
+
+    cat > .shipyard/HANDOFF.md <<'EOF'
+## Current Task
+Refactoring the auth module.
+
+## Approach
+Splitting into smaller functions.
+
+## Tried
+Extracted validate_token() — tests pass.
+
+## Remaining
+Extract refresh_token() and update integration tests.
+
+## Open Questions
+Should we support OAuth2 refresh tokens in v2?
+EOF
+
+    run bash "$STATE_READ"
+    assert_success
+    assert_output --partial "Handoff Context"
+    assert_output --partial "Current Task"
+    assert_output --partial "Refactoring the auth module"
+
+    # File must have been renamed to .consumed
+    [ ! -f ".shipyard/HANDOFF.md" ]
+    [ -f ".shipyard/HANDOFF.md.consumed" ]
+}
+
+# bats test_tags=unit
+@test "state-read: no HANDOFF.md produces no handoff section" {
+    setup_shipyard_with_json_state
+    mkdir -p .shipyard/phases
+    # Confirm no HANDOFF.md exists
+    rm -f .shipyard/HANDOFF.md .shipyard/HANDOFF.md.consumed
+
+    run bash "$STATE_READ"
+    assert_success
+    refute_output --partial "Handoff Context"
+}
+
+# bats test_tags=unit
+@test "state-read: empty HANDOFF.md is renamed but produces no handoff section" {
+    setup_shipyard_with_json_state
+    mkdir -p .shipyard/phases
+    # Create an empty HANDOFF.md
+    > .shipyard/HANDOFF.md
+
+    run bash "$STATE_READ"
+    assert_success
+    refute_output --partial "Handoff Context"
+
+    # File is still renamed even when empty (consume it to prevent re-reading)
+    [ -f ".shipyard/HANDOFF.md.consumed" ]
+}
+
+# bats test_tags=unit
+@test "state-read: HANDOFF.md.consumed is not re-injected" {
+    setup_shipyard_with_json_state
+    mkdir -p .shipyard/phases
+    # Only the .consumed file exists (previous session already consumed it)
+    cat > .shipyard/HANDOFF.md.consumed <<'EOF'
+## Current Task
+Already consumed — should not re-appear.
+EOF
+
+    run bash "$STATE_READ"
+    assert_success
+    refute_output --partial "Already consumed"
+    refute_output --partial "Handoff Context"
+}
+
 # bats test_tags=unit
 @test "state-read: documents .shipyard as trusted local content" {
     grep -q 'trusted local content' "$STATE_READ"
