@@ -101,7 +101,8 @@ digraph process {
     "Code quality reviewer approves?" -> "Builder fixes quality issues" [label="no"];
     "Builder fixes quality issues" -> "Dispatch code quality reviewer agent" [label="re-review"];
     "Code quality reviewer approves?" -> "Mark task complete" [label="yes"];
-    "Mark task complete" -> "More tasks remain?";
+    "Mark task complete" -> "Extract micro-lesson (best-effort)";
+    "Extract micro-lesson (best-effort)" -> "More tasks remain?";
     "More tasks remain?" -> "Dispatch builder agent" [label="yes"];
     "More tasks remain?" -> "Dispatch final reviewer for entire implementation" [label="no"];
     "Dispatch final reviewer for entire implementation" -> "Dispatch auditor for security review";
@@ -115,6 +116,8 @@ digraph process {
     "High priority simplifications?" -> "Use shipyard:git-workflow to complete" [label="no / user defers"];
 }
 ```
+
+> **Micro-lesson (best-effort):** After marking complete, extract one line: what surprised you, what failed first, or what you'd do differently. Append to `.shipyard/phases/{N}/MICRO-LESSONS.md` as `- [PLAN-{W}.{P} Task {T}] <takeaway>`. Pass the file contents to the next builder agent as context. If no clear takeaway, skip silently.
 
 **Batch Mode (separate session):**
 
@@ -131,10 +134,7 @@ When batch complete:
 - Show verification output
 - Say: "Ready for feedback."
 
-Based on feedback:
-- Apply changes if needed
-- Execute next batch
-- Repeat until complete
+Based on feedback: apply changes if needed, execute next batch, repeat until complete.
 
 ### Two-Stage Review Pattern
 
@@ -157,7 +157,6 @@ Based on feedback:
 After the final reviewer approves the entire implementation, run these quality gates:
 
 #### Security Audit
-
 Dispatch an **auditor agent** (subagent_type: "shipyard:auditor") with:
 - Git diff of all files changed during plan execution
 - All task summaries and context
@@ -171,7 +170,6 @@ Dispatch an **auditor agent** (subagent_type: "shipyard:auditor") with:
 3. If fixing, re-run audit after fixes
 
 #### Simplification Review
-
 After the audit, dispatch a **simplifier agent** (subagent_type: "shipyard:simplifier") with:
 - Git diff of all files changed during plan execution
 - All task summaries
@@ -195,7 +193,6 @@ After quality gates pass:
 **This section applies when running in a Claude Code Agent Teams context.**
 
 #### As Team Lead (dispatch_mode is team)
-
 When Shipyard created the team via `/shipyard:build` team mode:
 
 - **Orchestrate teammates** via TeamCreate → TaskCreate (pre-assign) → Task(team_name) → TaskList (monitor)
@@ -205,7 +202,6 @@ When Shipyard created the team via `/shipyard:build` team mode:
 - **Cleanup is mandatory** — always run shutdown + delete even on errors
 
 #### As Team Member (SHIPYARD_IS_TEAMMATE=true)
-
 When Shipyard is running inside someone else's team:
 
 - **Execute tasks directly** instead of dispatching builder subagents (you ARE the builder)

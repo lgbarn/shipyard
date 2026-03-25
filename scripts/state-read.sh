@@ -157,6 +157,15 @@ if [ -d ".shipyard" ]; then
         # Render structured state context
         state_context="## Shipyard Project State Detected\n\nA .shipyard/ directory exists in this project. Below is the current state.\n\n### STATE.json\nPhase: ${phase}\nStatus: ${status}\nPosition: ${position:-none}\nBlocker: ${blocker:-none}\nSchema: ${schema}\n"
 
+        # HANDOFF.md detection: consume and inject into context before tier loading
+        if [ -f ".shipyard/HANDOFF.md" ]; then
+            _handoff_content=$(cat ".shipyard/HANDOFF.md" 2>/dev/null || echo "")
+            if [ -n "$_handoff_content" ]; then
+                state_context="${state_context}\n### Handoff Context (from previous session)\n${_handoff_content}\n"
+            fi
+            mv ".shipyard/HANDOFF.md" ".shipyard/HANDOFF.md.consumed" 2>/dev/null || true
+        fi
+
         # Planning tier and above: load PROJECT.md + ROADMAP.md
         if [ "$context_tier" != "minimal" ]; then
             if [ -f ".shipyard/PROJECT.md" ]; then
