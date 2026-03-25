@@ -117,7 +117,7 @@ digraph process {
 }
 ```
 
-> **Micro-lesson (best-effort):** After marking complete, extract one line: what surprised you, what failed first, or what you'd do differently. Append to `.shipyard/phases/{N}/MICRO-LESSONS.md` as `- [PLAN-{W}.{P} Task {T}] <takeaway>`. Pass the file contents to the next builder agent as context. If no clear takeaway, skip silently.
+> **Micro-lesson (best-effort):** After marking complete, extract one line: what surprised you, what failed first, or what you'd do differently. Append to `.shipyard/phases/{N}/MICRO-LESSONS.md` as `- [PLAN-{W}.{P} Task {T}] <takeaway>`. Pass the file contents to the next builder agent as context. If no clear takeaway, skip silently. **Metrics Collection (best-effort):** Also check agent output for `<!-- context: ... -->`. If found, append to `.shipyard/phases/{N}/AGENT-METRICS.md`: `{ISO timestamp} | {agent-type} | {task-label} | turns={N} | compressed={yes|no} | complete={yes|no}`. Skip silently if missing.
 
 **Batch Mode (separate session):**
 
@@ -184,7 +184,7 @@ After the audit, dispatch a **simplifier agent** (subagent_type: "shipyard:simpl
 ### Step 4: Complete Development
 
 After quality gates pass:
-- Announce: "I'm using the git-workflow skill to complete this work."
+- **Context Health Summary:** If `AGENT-METRICS.md` exists, review for patterns and include a "Context Health" paragraph in the phase summary. Then announce: "I'm using the git-workflow skill to complete this work."
 - **REQUIRED SUB-SKILL:** Use shipyard:git-workflow
 - Follow that skill to verify tests, present options, execute choice
 
@@ -263,6 +263,7 @@ Builder agents should:
 - Ask questions before AND during work if unclear
 - Self-review before handing off to reviewers
 - Commit after each task
+- **Context Reporting:** End response with exactly: `<!-- context: turns={tool calls made}, compressed={yes|no}, task_complete={yes|no} -->`
 
 ## Red Flags
 
