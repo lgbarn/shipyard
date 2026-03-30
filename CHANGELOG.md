@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [4.3.0] - 2026-03-30
+
+### Added
+- **`/shipyard:import-spec-file`**: New command for importing handwritten or freeform spec documents (architecture docs, requirements files, validation specs, RFCs) into Shipyard — no spec-kit required. Reads the spec, heuristically maps its sections to `PROJECT.md`, then conducts a focused gap-filling interview (2-5 questions) to cover what the spec doesn't define. The original spec is staged as `RESEARCH.md` so all downstream agents have full access during planning and implementation.
+- **Brownfield-aware routing in `import-spec-file`**: After import, checks for existing codebase docs before routing forward. Suggests `/shipyard:map` first when a codebase exists without analysis docs — consistent with the `brainstorm` routing pattern.
+- **`/shipyard:plan` RESEARCH.md skip updated**: Pre-check now recognizes `RESEARCH.md` populated by either `/shipyard:import-spec` or `/shipyard:import-spec-file`, with updated user message.
+- **`/shipyard:init` greenfield guidance updated**: Post-init next-step guidance now surfaces all three entry paths: `brainstorm`, `import-spec`, and `import-spec-file`.
+
 ## [4.2.0] - 2026-03-30
 
 ### Added

@@ -65,6 +65,8 @@ Match the topic argument to a command or skill:
 |-------|---------|
 | `init` | `/shipyard:init` — Set up project preferences (interaction mode, git strategy, quality gates) |
 | `brainstorm` | `/shipyard:brainstorm` — Socratic dialogue exploring goals/constraints, produces PROJECT.md |
+| `import-spec` | `/shipyard:import-spec <feature-path>` — Import a spec-kit feature spec (replaces brainstorm) |
+| `import-spec-file` | `/shipyard:import-spec-file <path>` — Import a handwritten spec file; interviews to fill gaps |
 | `plan` | `/shipyard:plan [phase]` — Research + architect + verify agents create executable plans |
 | `build` | `/shipyard:build [phase]` — Builder agents per plan + two-stage review + security audit |
 | `ship` | `/shipyard:ship` — Verification + tests + audit + docs + delivery options |

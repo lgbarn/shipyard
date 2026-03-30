@@ -143,6 +143,10 @@ Display contextual guidance based on brownfield/greenfield detection from Step 2
 >
 > **Run `/shipyard:brainstorm`** — This walks you through a requirements conversation to define what you're building, your goals, constraints, and success criteria. Shipyard will capture everything into a project definition.
 >
-> After brainstorming, Shipyard will guide you to the next step.
+> **Already have a spec?** Use one of these instead:
+> - `/shipyard:import-spec <feature-path>` — import from a spec-kit feature directory
+> - `/shipyard:import-spec-file <path/to/spec.md>` — import a handwritten or freeform spec file
+>
+> After brainstorming or importing, Shipyard will guide you to the next step.
 
 </output>

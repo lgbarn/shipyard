@@ -91,9 +91,9 @@ Follow **State Update Protocol** (update `.shipyard/STATE.json` and `.shipyard/H
 
 **Pre-check: spec-kit research artifacts**
 
-Before dispatching the researcher, check if `.shipyard/phases/{N}/RESEARCH.md` already exists (populated by `/shipyard:import-spec`).
+Before dispatching the researcher, check if `.shipyard/phases/{N}/RESEARCH.md` already exists (populated by `/shipyard:import-spec` or `/shipyard:import-spec-file`).
 
-- **If RESEARCH.md exists and is non-empty:** Skip researcher dispatch. Notify the user: "Using existing research from spec-kit import — researcher agent step skipped." Proceed directly to Step 5 using the existing RESEARCH.md as the research output.
+- **If RESEARCH.md exists and is non-empty:** Skip researcher dispatch. Notify the user: "Using existing research from spec import — researcher agent step skipped." Proceed directly to Step 5 using the existing RESEARCH.md as the research output.
 - **If RESEARCH.md does not exist:** Dispatch the researcher agent normally as described below.
 
 Follow **Agent Context Protocol** (pass PROJECT.md, config.json, working directory, branch, and worktree status to all agents; see `docs/PROTOCOLS.md`) for standard context. Dispatch a **researcher agent** (subagent_type: "shipyard:researcher") with:

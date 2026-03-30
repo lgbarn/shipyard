@@ -9,7 +9,8 @@ A Claude Code plugin for structured project execution. Plan work in phases, buil
 ```
 IDEA → /init → /brainstorm → /plan → /build → /ship → SHIPPED
          ↑
-         └── or: /import-spec (from spec-kit) → /plan → /build → /ship
+         ├── or: /import-spec (from spec-kit) → /plan → /build → /ship
+         └── or: /import-spec-file (handwritten spec) → /plan → /build → /ship
 ```
 
 ## Prerequisites
@@ -105,6 +106,27 @@ The `/shipyard:plan` command automatically detects these staged artifacts:
 - **`[NEEDS CLARIFICATION]` markers**: surfaced as an Open Questions section in PROJECT.md rather than silently dropped
 - **Existing PROJECT.md**: asks whether to replace or merge
 
+## Handwritten Spec Import
+
+Don't have spec-kit? Use `/shipyard:import-spec-file` to import any existing specification document directly — architecture docs, requirements files, validation specs, RFC-style documents, or anything written by hand.
+
+```bash
+# Import a handwritten spec file
+/shipyard:import-spec-file docs/my-feature-spec.md
+/shipyard:import-spec-file /path/to/validation-spec.md
+
+# Or let Shipyard auto-discover spec files in the project root
+/shipyard:import-spec-file
+```
+
+The command reads the spec, maps its sections to PROJECT.md, then conducts a short interview to fill any gaps the spec doesn't cover (integration context, success criteria, non-goals). The spec itself is staged as `RESEARCH.md` so every downstream agent — architect, builder, reviewer — has full access to the original rules during planning and implementation.
+
+`/shipyard:import-spec-file` handles:
+- **Any spec format**: sections are mapped heuristically (Overview → Description, Rules/Requirements → Functional Requirements, Open Questions → Open Questions, etc.)
+- **Gap-filling interview**: asks 2-5 focused questions about what the spec doesn't define
+- **Brownfield-aware routing**: suggests `/shipyard:map` first if the project has existing source code without codebase docs
+- **Existing PROJECT.md**: asks whether to replace or merge
+
 ## Commands
 
 | Command | Purpose |
@@ -112,6 +134,7 @@ The `/shipyard:plan` command automatically detects these staged artifacts:
 | `/shipyard:init` | Configure project preferences and create `.shipyard/` directory |
 | `/shipyard:brainstorm` | Explore requirements through interactive dialogue |
 | `/shipyard:import-spec [feature-path]` | Import a spec-kit feature spec, replacing brainstorming |
+| `/shipyard:import-spec-file [file-path]` | Import a handwritten spec file; interviews to fill gaps |
 | `/shipyard:plan [phase] [--skip-research]` | Plan a phase of work (creates roadmap if needed) |
 | `/shipyard:build [phase] [--plan N] [--light]` | Execute plans with parallel builder agents and review gates |
 | `/shipyard:status` | Show progress dashboard and route to next action |
@@ -235,8 +258,9 @@ See [docs/AGENT-TEAMS-GUIDE.md](docs/AGENT-TEAMS-GUIDE.md) for the full Agent Te
 
 ```
 IDEA → /init (configure preferences)
-     → /brainstorm (explore requirements)          ← interactive dialogue
-     → OR /import-spec (from spec-kit artifacts)   ← spec-driven alternative
+     → /brainstorm (explore requirements)           ← interactive dialogue
+     → OR /import-spec (from spec-kit artifacts)    ← spec-driven alternative
+     → OR /import-spec-file (handwritten spec)      ← existing doc alternative
      → /plan (research + decompose)
      → /build (parallel execute + review)
      → repeat plan→build per phase
@@ -315,6 +339,7 @@ shipyard/
 │   ├── b.md               # /shipyard:b (alias → build)
 │   ├── brainstorm.md      # /shipyard:brainstorm
 │   ├── import-spec.md     # /shipyard:import-spec
+│   ├── import-spec-file.md # /shipyard:import-spec-file
 │   ├── build.md           # /shipyard:build
 │   ├── cancel.md          # /shipyard:cancel
 │   ├── debug.md           # /shipyard:debug
