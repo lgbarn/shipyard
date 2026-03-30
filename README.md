@@ -8,6 +8,8 @@ A Claude Code plugin for structured project execution. Plan work in phases, buil
 
 ```
 IDEA → /init → /brainstorm → /plan → /build → /ship → SHIPPED
+         ↑
+         └── or: /import-spec (from spec-kit) → /plan → /build → /ship
 ```
 
 ## Prerequisites
@@ -61,12 +63,55 @@ Once installed, navigate to any project directory and run:
 
 For the full command reference and common workflows, see [docs/QUICKSTART.md](docs/QUICKSTART.md).
 
+## spec-kit Integration
+
+Shipyard integrates with [spec-kit](https://github.com/github/spec-kit) (GitHub's Spec-Driven Development toolkit), letting you use spec-kit's structured specification workflow as a higher-quality alternative to `/shipyard:brainstorm`.
+
+### How It Works
+
+spec-kit produces a rich set of artifacts in `specs/[###-feature]/`:
+
+| spec-kit artifact | Mapped to |
+|---|---|
+| `spec.md` (user stories, acceptance criteria) | `.shipyard/PROJECT.md` |
+| `.specify/constitution.md` (project principles) | PROJECT.md constraints section |
+| `plan.md` (technical implementation plan) | Input for ROADMAP.md generation |
+| `research.md` + `data-model.md` + `contracts/` | `.shipyard/phases/1/RESEARCH.md` |
+| `tasks.md` (flat task list with `[P]` markers) | `.shipyard/phases/1/SPECKIT-TASKS.md` — seeds the architect |
+
+The `/shipyard:plan` command automatically detects these staged artifacts:
+- **Skips the researcher agent** when `RESEARCH.md` already exists
+- **Seeds the architect** with `SPECKIT-TASKS.md` to generate accurate wave/plan decomposition with less hallucination
+
+### Workflow
+
+```bash
+# 1. Use spec-kit to build the spec
+/speckit.specify   My feature description
+/speckit.plan      Tech stack choices
+/speckit.tasks
+
+# 2. Import into Shipyard (replaces /shipyard:brainstorm)
+/shipyard:import-spec specs/001-my-feature
+
+# 3. Continue with the normal Shipyard pipeline
+/shipyard:plan 1   # researcher skipped, architect seeded from tasks.md
+/shipyard:build 1
+/shipyard:ship
+```
+
+`/shipyard:import-spec` also handles:
+- **Auto-discovery**: if no argument is given, lists available `specs/` directories
+- **`[NEEDS CLARIFICATION]` markers**: surfaced as an Open Questions section in PROJECT.md rather than silently dropped
+- **Existing PROJECT.md**: asks whether to replace or merge
+
 ## Commands
 
 | Command | Purpose |
 |---------|---------|
 | `/shipyard:init` | Configure project preferences and create `.shipyard/` directory |
 | `/shipyard:brainstorm` | Explore requirements through interactive dialogue |
+| `/shipyard:import-spec [feature-path]` | Import a spec-kit feature spec, replacing brainstorming |
 | `/shipyard:plan [phase] [--skip-research]` | Plan a phase of work (creates roadmap if needed) |
 | `/shipyard:build [phase] [--plan N] [--light]` | Execute plans with parallel builder agents and review gates |
 | `/shipyard:status` | Show progress dashboard and route to next action |
@@ -190,7 +235,8 @@ See [docs/AGENT-TEAMS-GUIDE.md](docs/AGENT-TEAMS-GUIDE.md) for the full Agent Te
 
 ```
 IDEA → /init (configure preferences)
-     → /brainstorm (explore requirements)
+     → /brainstorm (explore requirements)          ← interactive dialogue
+     → OR /import-spec (from spec-kit artifacts)   ← spec-driven alternative
      → /plan (research + decompose)
      → /build (parallel execute + review)
      → repeat plan→build per phase
@@ -268,6 +314,7 @@ shipyard/
 │   ├── audit.md           # /shipyard:audit
 │   ├── b.md               # /shipyard:b (alias → build)
 │   ├── brainstorm.md      # /shipyard:brainstorm
+│   ├── import-spec.md     # /shipyard:import-spec
 │   ├── build.md           # /shipyard:build
 │   ├── cancel.md          # /shipyard:cancel
 │   ├── debug.md           # /shipyard:debug

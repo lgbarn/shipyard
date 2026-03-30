@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [4.2.0] - 2026-03-30
+
+### Added
+- **spec-kit integration** (`/shipyard:import-spec`): New command that bridges [spec-kit](https://github.com/github/spec-kit) artifacts into Shipyard's pipeline, replacing `/shipyard:brainstorm` when a spec already exists. Maps `spec.md` → `PROJECT.md`, stages `research.md`/`data-model.md`/`contracts/` → phase `RESEARCH.md`, and stages `tasks.md` → `SPECKIT-TASKS.md` for architect seeding.
+- **spec-kit-aware `/shipyard:plan`**: Step 4 (Research) now skips the researcher agent when `RESEARCH.md` already exists from an import. Step 5 (Architecture) passes `SPECKIT-TASKS.md` to the architect as a seed for wave/plan decomposition when available.
+- **`[NEEDS CLARIFICATION]` handling**: Unresolved spec-kit clarification markers are surfaced as an Open Questions section in `PROJECT.md` rather than silently dropped.
+
 ## [4.1.0] - 2026-03-25
 
 ### Added
