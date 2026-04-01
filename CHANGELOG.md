@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [4.5.0] - 2026-04-01
+
+### Changed
+- **`/shipyard:ship` cleanup**: Step 10 now runs `scripts/clean.sh` instead of archiving artifacts into a subdirectory. The script lists what it intends to delete and requires the user to type `CLEAN` to confirm. Cleanup is optional — ship completes even if the user declines.
+- **`import-spec` and `import-spec-file` moved from commands to skills**: Removes the dual command+skill duplication introduced in v4.3.0. Both remain invocable via `/shipyard:import-spec` and `/shipyard:import-spec-file` as skills.
+
+### Fixed
+- **`using-shipyard` skill index**: Added 3 missing skills (`shipyard-handoff`, `import-spec`, `import-spec-file`) to the table and activation triggers. Updated count from 16 to 19.
+- **Stale README references**: Removed deleted alias commands (`b`, `p`, `q`, `s`) from file tree and command table. Updated skills count to 19 with `import-spec` and `import-spec-file` entries.
+- **`help.md` stale aliases**: Removed references to deleted alias commands.
+
+### Removed
+- **Alias commands**: `/shipyard:b`, `/shipyard:p`, `/shipyard:q`, `/shipyard:s` command files removed.
+- **Duplicate command files**: `commands/import-spec.md` and `commands/import-spec-file.md` removed (skill versions are the canonical source).
+
 ## [4.3.0] - 2026-03-30
 
 ### Added

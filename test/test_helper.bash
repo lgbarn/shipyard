@@ -14,6 +14,8 @@ STATE_WRITE="${PROJECT_ROOT}/scripts/state-write.sh"
 CHECKPOINT="${PROJECT_ROOT}/scripts/checkpoint.sh"
 # shellcheck disable=SC2034
 TEAM_DETECT="${PROJECT_ROOT}/scripts/team-detect.sh"
+# shellcheck disable=SC2034
+CLEAN="${PROJECT_ROOT}/scripts/clean.sh"
 
 # Load bats helper libraries
 load "${PROJECT_ROOT}/node_modules/bats-support/load"

@@ -1,6 +1,6 @@
 {
   "name": "@lgbarn/shipyard",
-  "version": "4.4.0",
+  "version": "4.5.0",
   "description": "Ship software systematically: project lifecycle, TDD, parallel agents, code review, security auditing, and infrastructure validation — from idea to production",
   "keywords": [
     "claude-code-plugin",

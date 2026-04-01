@@ -282,13 +282,16 @@ bash "${SCRIPT_DIR}/scripts/checkpoint.sh" --prune 30 >/dev/null || echo "Warnin
 
 This step is silent on success. Old checkpoints (>30 days) are removed automatically.
 
-## Step 10: Archive Artifacts
+## Step 10: Clean Stale Artifacts
 
-If the milestone is complete (not just a phase):
-1. Create `.shipyard/archive/{milestone-name}/` directory
-2. Move all phase directories into the archive
-3. Move ROADMAP.md, PROJECT.md, MILESTONE-REPORT.md to archive
-4. Keep STATE.json, HISTORY.md, and config.json in `.shipyard/` (reset state for next milestone)
+Run the cleanup script to remove stale state files. This preserves cross-milestone files and deletes everything else (phases, plans, roadmap, project definition, reports, etc.). Run `clean.sh --dry-run` first to see what the script preserves and deletes.
+
+```bash
+bash "${SCRIPT_DIR}/scripts/clean.sh"
+cleanup_exit=$?
+```
+
+The script will list what it intends to delete and ask the user to type `CLEAN` to confirm. If the user declines (exit code 2) or the script fails, ship still completes — cleanup is optional. Track `cleanup_exit` for Step 12.
 
 ## Step 11: Update Tasks & State
 
@@ -300,11 +303,12 @@ Follow **State Update Protocol** (update `.shipyard/STATE.json` and `.shipyard/H
 - **Status:** shipped
 - **Message:** `Milestone shipped via {method}`
 
-## Step 12: Commit Archive
+## Step 12: Commit Cleanup
 
-If archiving was done:
-```
-shipyard: archive milestone {name}
+If `cleanup_exit` from Step 10 is 0 (cleanup was performed):
+```bash
+git add -A .shipyard/ docs/plans/
+git commit -m "shipyard: clean stale artifacts"
 ```
 
 </execution>

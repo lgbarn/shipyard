@@ -158,11 +158,10 @@ The command reads the spec, maps its sections to PROJECT.md, then conducts a sho
 | `/shipyard:doctor` | Health-check diagnostic — jq, git, skills, hooks, `.shipyard/` structure |
 | `/shipyard:cancel` | Graceful build interruption — checkpoint, pause, resume later |
 | `/shipyard:debug [description]` | Root-cause analysis with 5 Whys protocol via debugger agent |
-| `/shipyard:s` / `b` / `p` / `q` | Aliases for status, build, plan, quick |
 
 ## Skills (Auto-Activating)
 
-Shipyard includes 17 skills that Claude invokes automatically when trigger conditions match:
+Shipyard includes 19 skills that Claude invokes automatically when trigger conditions match:
 
 | Skill | When It Activates |
 |-------|-------------------|
@@ -183,6 +182,8 @@ Shipyard includes 17 skills that Claude invokes automatically when trigger condi
 | `shipyard-writing-skills` | Creating new skills |
 | `shipyard-handoff` | Session transfer: "handoff", "I'm done for now", "save context" |
 | `lessons-learned` | After phase completion, before shipping, reflecting on work |
+| `import-spec` | Importing a spec-kit feature directory into Shipyard |
+| `import-spec-file` | Importing a handwritten spec document into Shipyard |
 
 ## Agents
 
@@ -336,10 +337,7 @@ shipyard/
 │   └── verifier.md        # Post-execution verification
 ├── commands/              # Slash command definitions
 │   ├── audit.md           # /shipyard:audit
-│   ├── b.md               # /shipyard:b (alias → build)
 │   ├── brainstorm.md      # /shipyard:brainstorm
-│   ├── import-spec.md     # /shipyard:import-spec
-│   ├── import-spec-file.md # /shipyard:import-spec-file
 │   ├── build.md           # /shipyard:build
 │   ├── cancel.md          # /shipyard:cancel
 │   ├── debug.md           # /shipyard:debug
@@ -350,16 +348,13 @@ shipyard/
 │   ├── issues.md          # /shipyard:issues
 │   ├── map.md             # /shipyard:map
 │   ├── move-docs.md       # /shipyard:move-docs
-│   ├── p.md               # /shipyard:p (alias → plan)
 │   ├── plan.md            # /shipyard:plan
-│   ├── q.md               # /shipyard:q (alias → quick)
 │   ├── quick.md           # /shipyard:quick
 │   ├── recover.md         # /shipyard:recover
 │   ├── research.md        # /shipyard:research
 │   ├── resume.md          # /shipyard:resume
 │   ├── review.md          # /shipyard:review
 │   ├── rollback.md        # /shipyard:rollback
-│   ├── s.md               # /shipyard:s (alias → status)
 │   ├── settings.md        # /shipyard:settings
 │   ├── ship.md            # /shipyard:ship
 │   ├── simplify.md        # /shipyard:simplify

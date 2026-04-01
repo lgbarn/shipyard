@@ -60,7 +60,7 @@ For quick one-off tasks, skip the lifecycle and use `/shipyard:quick 'descriptio
 
 ## Available Skills
 
-Shipyard provides 16 skills. Skills are **behavioral disciplines** — they define HOW to do work, not what to build.
+Shipyard provides 19 skills. Skills are **behavioral disciplines** — they define HOW to do work, not what to build.
 
 | Skill | What It Actually Does |
 |-------|----------------------|
@@ -80,6 +80,9 @@ Shipyard provides 16 skills. Skills are **behavioral disciplines** — they defi
 | `shipyard:shipyard-writing-skills` | TDD for docs: run scenario WITHOUT skill (RED) → document agent rationalizations → write skill countering them (GREEN) → refine. |
 | `shipyard:shipyard-testing` | Enforces behavior-based testing via public APIs: AAA structure, DAMP not DRY, name tests after behavior, prefer state over mocks. |
 | `shipyard:lessons-learned` | After phase completion, captures what worked/surprised/failed into `.shipyard/LESSONS.md` and optionally feeds back to CLAUDE.md. |
+| `shipyard:shipyard-handoff` | Captures session context into `.shipyard/HANDOFF.md` so the next session can resume without losing progress. |
+| `shipyard:import-spec` | Imports a spec-kit feature directory into Shipyard, replacing brainstorming. Maps spec artifacts to PROJECT.md and ROADMAP.md. |
+| `shipyard:import-spec-file` | Imports a handwritten spec document into Shipyard, replacing brainstorming. Interviews to fill gaps via Socratic dialogue. |
 
 ## Shipyard Commands
 
@@ -183,6 +186,8 @@ When a trigger condition matches, invoke the corresponding skill before respondi
 | "run in parallel", "do these at the same time" | `shipyard:parallel-dispatch` |
 | "write a plan", "create a plan", "plan this feature" | `shipyard:shipyard-writing-plans` |
 | "create a skill", "write a skill", "new skill" | `shipyard:shipyard-writing-skills` |
+| "handoff", "hand off", "transfer session", "save context", "I'm done for now" | `shipyard:shipyard-handoff` |
+| "import spec", "import my spec", "use this spec" | `shipyard:import-spec`, `shipyard:import-spec-file` |
 
 </activation>
 

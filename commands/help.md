@@ -44,8 +44,6 @@ Rollback to checkpoint              /shipyard:rollback
 Recover from errors                 /shipyard:recover
 Ship completed work                 /shipyard:ship
 
-Aliases: /shipyard:s (status), /shipyard:b (build),
-         /shipyard:p (plan), /shipyard:q (quick)
 ```
 
 Then display:
