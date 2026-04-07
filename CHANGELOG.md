@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [4.6.0] - 2026-04-06
+
+### Changed
+- **All 10 agents hardened**: Added explicit `tools` restrictions, `maxTurns` limits, context reporting rules, and Workflow Integration sections to every agent (architect, auditor, builder, debugger, documenter, mapper, researcher, reviewer, simplifier, verifier).
+- **Architect agent**: Restored pipeline-compatible plan format (`tdd="true"`, `<action>/<verify>/<done>` XML tags, `.shipyard/phases/` output path). Restored max 3 tasks per plan, max 7 phases per milestone, and risk tag requirements.
+- **Auditor agent**: Added STRIDE threat model as pre-scan step. Merged Docker into IaC section (6 areas → 5). Fixed Workflow Integration to reference verifier, not reviewer.
+- **Builder agent**: Added pre-build baseline testing and structured failure documentation for debugger handoff. Inlined commit convention table.
+- **Reviewer agent**: Added pre-check cross-validation of prior findings. Default stance set to skeptical.
+- **Documenter agent**: Added Divio type categorization and code example verification via Bash.
+- **Mapper agent**: Added quantitative metrics section and codebase docs directory discovery.
+- **Researcher agent**: Added stale source flagging and "Decision Required" escalation for inconclusive research.
+- **Simplifier agent**: Added effort estimates (Trivial/Moderate/Significant) to findings format.
+- **Verifier agent**: Added regression baseline from prior VERIFICATION.md files.
+- **AGENT-GUIDE**: Updated tool access for auditor (added Bash) and mapper (added Bash). Fixed analysis area count (6 → 5).
+
 ## [4.5.0] - 2026-04-01
 
 ### Changed

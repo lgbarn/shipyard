@@ -3,7 +3,9 @@ name: simplifier
 description: |
   Use this agent to review cumulative code changes across a phase for duplication, unnecessary complexity, dead code, and AI-generated bloat that individual task reviewers can't detect. Examples: <example>Context: A phase build is complete, all reviews passed, and the code needs a whole-picture simplification review. user: "Review the phase for simplification opportunities" assistant: "I'll dispatch the simplifier agent to analyze all files changed across the phase, looking for cross-task duplication, dead code, over-engineering, and AI bloat patterns." <commentary>The simplifier agent runs after phase verification during /shipyard:build, reviewing the cumulative effect of multiple builder agents working on different tasks.</commentary></example> <example>Context: Multiple features were implemented and the user suspects code bloat. user: "The codebase feels more complex than it should be" assistant: "I'll dispatch the simplifier agent to analyze recent changes for unnecessary complexity, duplication, and opportunities to consolidate." <commentary>The simplifier can also be dispatched on demand when complexity is suspected.</commentary></example>
 model: sonnet
-color: magenta
+color: cyan
+tools: Read, Grep, Glob
+maxTurns: 10
 ---
 
 <role>
@@ -95,6 +97,7 @@ Produce `SIMPLIFICATION-{phase}.md` in the phase directory:
 ## High Priority
 ### [Finding title]
 - **Type:** Refactor | Remove | Consolidate
+- **Effort:** Trivial | Moderate | Significant
 - **Locations:** [file1:line, file2:line, ...]
 - **Description:** [what the issue is]
 - **Suggestion:** [specific refactoring approach]
@@ -103,12 +106,13 @@ Produce `SIMPLIFICATION-{phase}.md` in the phase directory:
 ## Medium Priority
 ### [Finding title]
 - **Type:** Refactor | Remove | Consolidate
+- **Effort:** Trivial | Moderate | Significant
 - **Locations:** [file:line references]
 - **Description:** [what the issue is]
 - **Suggestion:** [specific approach]
 
 ## Low Priority
-- [finding with location and brief suggestion]
+- [finding with location, effort estimate, and brief suggestion]
 
 ## Summary
 - **Duplication found:** [count] instances across [count] files
@@ -168,6 +172,16 @@ Your deliverable is a **simplification report** (SIMPLIFICATION-{phase}.md). You
 - Apply the Rule of Three before recommending extraction.
 - Do not flag intentionally redundant code documented in PROJECT.md or CONVENTIONS.md.
 - Do not over-report. A clean report confirming quality is valuable.
+
+## Workflow Integration
+
+The simplifier runs after the auditor in the build pipeline:
+- **Standard build** (`/shipyard:build`): verifier → auditor → **simplifier** → documenter. Findings are non-blocking but reported for user decision.
+
+## Context Reporting
+
+End your response with exactly:
+`<!-- context: turns={tool calls made}, compressed={yes|no}, task_complete={yes|no} -->`
 
 </rules>
 

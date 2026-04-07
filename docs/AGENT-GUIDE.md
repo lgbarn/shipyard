@@ -14,12 +14,12 @@ For model routing configuration, see the [Model Routing Protocol](PROTOCOLS.md#m
 | **builder** | sonnet | `building` | build, quick | Yes (blocks review) | Full (read, write, bash, git) |
 | **reviewer** | sonnet | `review` | build, review | Yes (blocks progress) | Read-only |
 | **verifier** | haiku | `validation` | plan, build, ship, verify | Yes (gates shipping) | Read + bash (test commands) |
-| **auditor** | sonnet | `security_audit` | build, ship, audit | Yes (critical findings block) | Read-only |
+| **auditor** | sonnet | `security_audit` | build, ship, audit | Yes (critical findings block) | Read + bash (security checks) |
 | **simplifier** | sonnet | `simplification` | build, simplify | No (advisory) | Read-only |
 | **documenter** | sonnet | `documentation` | build, ship, document | No (advisory) | Read + write docs + bash |
 | **researcher** | sonnet | `planning` | plan, research | No | Read + web search/fetch |
 | **debugger** | sonnet | `debugging` | debug | No | Read + bash (test commands) |
-| **mapper** | sonnet | `mapping` | map | No | Read-only |
+| **mapper** | sonnet | `mapping` | map | No | Read + bash (discovery commands) |
 
 All model assignments are configurable via `model_routing` in `.shipyard/config.json`. See [Model Selection Guidance](PROTOCOLS.md#model-selection-guidance) for when to upgrade or downgrade.
 
@@ -138,7 +138,7 @@ graph LR
   - Every finding must include file path, line number, and concrete remediation
   - Must reference standards (CWE, OWASP, CIS) where applicable
   - Performs STRIDE threat model before scanning to prioritize by actual attack surface
-  - Analyzes 6 areas: code security, secrets, dependencies, IaC, Docker, configuration
+  - Analyzes 5 areas: code security, secrets, dependencies, IaC & containers, configuration
   - Cross-task analysis is the unique value — checks component interactions, not individual files
 - **Upgrade consideration:** For production codebases handling PII, financial data, or complex auth systems, consider `security_audit: "opus"`.
 
