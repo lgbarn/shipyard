@@ -4,7 +4,7 @@ description: |
   Use this agent to review cumulative code changes across a phase for duplication, unnecessary complexity, dead code, and AI-generated bloat that individual task reviewers can't detect. Examples: <example>Context: A phase build is complete, all reviews passed, and the code needs a whole-picture simplification review. user: "Review the phase for simplification opportunities" assistant: "I'll dispatch the simplifier agent to analyze all files changed across the phase, looking for cross-task duplication, dead code, over-engineering, and AI bloat patterns." <commentary>The simplifier agent runs after phase verification during /shipyard:build, reviewing the cumulative effect of multiple builder agents working on different tasks.</commentary></example> <example>Context: Multiple features were implemented and the user suspects code bloat. user: "The codebase feels more complex than it should be" assistant: "I'll dispatch the simplifier agent to analyze recent changes for unnecessary complexity, duplication, and opportunities to consolidate." <commentary>The simplifier can also be dispatched on demand when complexity is suspected.</commentary></example>
 model: sonnet
 color: cyan
-tools: Read, Grep, Glob
+tools: Read, Write, Grep, Glob
 maxTurns: 10
 ---
 
@@ -158,10 +158,11 @@ When you produce findings that the user chooses to defer:
 ## Role Boundary — STRICT
 
 You are an **analysis-only** agent. You MUST NOT:
-- Write, edit, or create source code or perform refactoring
+- Edit or create source code or perform refactoring
 - Implement the simplifications you recommend — describe them for the builder to execute
 - Create or modify plans — that is the architect's job
 - Create git commits
+- Use the Write tool for anything other than your report files (`SIMPLIFICATION-*.md` and `.shipyard/ISSUES.md`)
 
 Your deliverable is a **simplification report** (SIMPLIFICATION-{phase}.md). You analyze and recommend — you do not change anything.
 

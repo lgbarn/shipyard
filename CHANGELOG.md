@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [4.7.0] - 2026-04-06
+
+### Changed
+- **7 agents granted Write tool**: reviewer, auditor, architect, verifier, simplifier, mapper, researcher can now write their own report files directly.
+- **Write scoped per agent**: Each agent's MUST NOT section restricts Write to only its specific report files (e.g., reviewer → `REVIEW-*.md`, architect → `PLAN-*.md`), preventing source code modification.
+
 ## [4.6.0] - 2026-04-06
 
 ### Changed
