@@ -75,7 +75,7 @@ spec-kit produces a rich set of artifacts in `specs/[###-feature]/`:
 | spec-kit artifact | Mapped to |
 |---|---|
 | `spec.md` (user stories, acceptance criteria) | `.shipyard/PROJECT.md` |
-| `.specify/constitution.md` (project principles) | PROJECT.md constraints section |
+| `.specify/memory/constitution.md` (project principles) | PROJECT.md constraints section |
 | `plan.md` (technical implementation plan) | Input for ROADMAP.md generation |
 | `research.md` + `data-model.md` + `contracts/` | `.shipyard/phases/1/RESEARCH.md` |
 | `tasks.md` (flat task list with `[P]` markers) | `.shipyard/phases/1/SPECKIT-TASKS.md` — seeds the architect |
