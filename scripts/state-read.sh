@@ -14,6 +14,15 @@ set -euo pipefail
 # shellcheck disable=SC2034  # declared for consistency with state-write.sh; unused in read path
 readonly STATE_SCHEMA_VERSION=3
 
+# Portable SHA-256: prefer sha256sum (Linux coreutils), fall back to shasum -a 256 (macOS/Perl).
+_sha256() {
+    if command -v sha256sum >/dev/null 2>&1; then
+        sha256sum "$@"
+    else
+        shasum -a 256 "$@"
+    fi
+}
+
 # .shipyard/ is trusted local content — gitignored and never written by external actors.
 # Sanitization of lesson/notes content was removed in v4.0 as security theater:
 # regex-based stripping is bypassable and the real protection is local-only ownership.
@@ -91,7 +100,7 @@ if [ -d ".shipyard" ]; then
         # Checksum verification (if checksum file exists)
         if [ -f ".shipyard/STATE.json.sha256" ]; then
             _expected_sum=$(cat ".shipyard/STATE.json.sha256" 2>/dev/null || echo "")
-            _actual_sum=$(shasum -a 256 .shipyard/STATE.json | cut -d' ' -f1)
+            _actual_sum=$(_sha256 .shipyard/STATE.json | cut -d' ' -f1)
             if [ -n "$_expected_sum" ] && [ "$_expected_sum" != "$_actual_sum" ]; then
                 _state_ok=false
             fi
@@ -107,7 +116,7 @@ if [ -d ".shipyard" ]; then
             if [ -f ".shipyard/STATE.json.bak" ] && \
                jq -e 'has("schema") and has("phase") and has("status")' .shipyard/STATE.json.bak > /dev/null 2>&1; then
                 cp ".shipyard/STATE.json.bak" ".shipyard/STATE.json"
-                shasum -a 256 ".shipyard/STATE.json" | cut -d' ' -f1 > ".shipyard/STATE.json.sha256" 2>/dev/null || true
+                _sha256 ".shipyard/STATE.json" | cut -d' ' -f1 > ".shipyard/STATE.json.sha256" 2>/dev/null || true
             else
                 jq -n '{
                     error: "STATE.json is corrupt or incomplete",

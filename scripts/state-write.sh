@@ -22,6 +22,15 @@ set -euo pipefail
 
 readonly STATE_SCHEMA_VERSION=3
 
+# Portable SHA-256: prefer sha256sum (Linux coreutils), fall back to shasum -a 256 (macOS/Perl).
+_sha256() {
+    if command -v sha256sum >/dev/null 2>&1; then
+        sha256sum "$@"
+    else
+        shasum -a 256 "$@"
+    fi
+}
+
 # Reject symlinked .shipyard directory (security: prevent writes outside project)
 if [ -L ".shipyard" ]; then
     echo "Error: .shipyard is a symlink, which is not allowed" >&2
@@ -283,7 +292,7 @@ if [ "$RECOVER" = true ]; then
     cp "$STATE_FILE" "${STATE_FILE}.bak" 2>/dev/null || true
     check_secrets_patterns "$NEW_CONTENT"
     atomic_write "$NEW_CONTENT" "$STATE_FILE"
-    shasum -a 256 "$STATE_FILE" | cut -d' ' -f1 > "${STATE_FILE}.sha256"
+    _sha256 "$STATE_FILE" | cut -d' ' -f1 > "${STATE_FILE}.sha256"
 
     # Write history
     append_history "State recovered from .shipyard/ artifacts"
@@ -304,7 +313,7 @@ if [ -n "$RAW_CONTENT" ]; then
     cp "$STATE_FILE" "${STATE_FILE}.bak" 2>/dev/null || true
     check_secrets_patterns "$RAW_CONTENT"
     atomic_write "$RAW_CONTENT" "$STATE_FILE"
-    shasum -a 256 "$STATE_FILE" | cut -d' ' -f1 > "${STATE_FILE}.sha256"
+    _sha256 "$STATE_FILE" | cut -d' ' -f1 > "${STATE_FILE}.sha256"
     echo "STATE.json updated (raw write) at ${TIMESTAMP}"
     exit 0
 fi
@@ -322,7 +331,7 @@ if [ -n "$PHASE" ] || [ -n "$POSITION" ] || [ -n "$STATUS" ]; then
     cp "$STATE_FILE" "${STATE_FILE}.bak" 2>/dev/null || true
     check_secrets_patterns "$NEW_CONTENT"
     atomic_write "$NEW_CONTENT" "$STATE_FILE"
-    shasum -a 256 "$STATE_FILE" | cut -d' ' -f1 > "${STATE_FILE}.sha256"
+    _sha256 "$STATE_FILE" | cut -d' ' -f1 > "${STATE_FILE}.sha256"
     append_history "Phase ${PHASE:-?}: ${POSITION:-updated} (${STATUS:-unknown})"
     echo "STATE.json updated at ${TIMESTAMP}: Phase=${PHASE:-?} Position=${POSITION:-?} Status=${STATUS:-?}"
     # Auto-clear working notes on phase completion
