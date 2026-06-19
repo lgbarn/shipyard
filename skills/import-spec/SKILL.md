@@ -28,7 +28,7 @@ You are executing the Shipyard spec-kit import workflow. This replaces `/shipyar
    - `<feature-path>/data-model.md` (optional — appended to RESEARCH.md)
    - `<feature-path>/contracts/` directory (optional — summarized into RESEARCH.md)
    - `<feature-path>/tasks.md` (optional — seeded into architect input at plan time)
-   - `.specify/constitution.md` (optional — added to PROJECT.md constraints)
+   - `.specify/memory/constitution.md` (optional — added to PROJECT.md constraints)
 
 ## Step 3: Check Existing PROJECT.md
 
@@ -54,7 +54,7 @@ Read `<feature-path>/spec.md` and extract the following to write `.shipyard/PROJ
 - **Requirements (Functional)**: expand each user story's acceptance scenarios into concrete requirements, grouped by user story
 - **Non-Functional Requirements**: extract any performance, security, or scale constraints mentioned
 - **Success Criteria**: map each user story's "Independent Test" description into a success criterion
-- **Constraints**: note any `[NEEDS CLARIFICATION]` markers as open questions; if `.specify/constitution.md` exists, extract relevant principles as technical constraints
+- **Constraints**: note any `[NEEDS CLARIFICATION]` markers as open questions; if `.specify/memory/constitution.md` exists, extract relevant principles as technical constraints
 
 **Handle `[NEEDS CLARIFICATION]` markers:** If spec.md contains unresolved `[NEEDS CLARIFICATION: ...]` markers, list them in a `## Open Questions` section at the bottom of PROJECT.md and notify the user: "The imported spec has N unresolved clarification items — see Open Questions in PROJECT.md."
 

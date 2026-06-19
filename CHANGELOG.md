@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [4.12.2] - 2026-06-19
+
+### Fixed
+- **spec-kit constitution path**: corrected `.specify/constitution.md` → `.specify/memory/constitution.md` in the README and the `import-spec` skill, matching spec-kit's actual layout (#10, thanks @pdcribeiro). The Codex mirror of the skill was regenerated to match.
+
 ## [4.12.1] - 2026-06-19
 
 ### Changed
