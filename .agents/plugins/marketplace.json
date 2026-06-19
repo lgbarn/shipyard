@@ -1,0 +1,19 @@
+{
+  "name": "shipyard",
+  "interface": {
+    "displayName": "Shipyard"
+  },
+  "plugins": [
+    {
+      "name": "shipyard",
+      "source": {
+        "source": "local",
+        "path": "./plugins/shipyard"
+      },
+      "policy": {
+        "installation": "AVAILABLE"
+      },
+      "category": "Engineering"
+    }
+  ]
+}

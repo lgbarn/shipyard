@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [4.8.0] - 2026-06-19
+
+### Added
+- **Codex support (walking skeleton)**: Shipyard can now be installed under Codex CLI via `codex plugin marketplace add lgbarn/shipyard`. Best-effort, not parity — skills run natively; parallel agents and lifecycle hooks degrade (tracked in #14).
+- **Codex tree generator** (`scripts/build-codex.sh`): generates the Codex plugin tree (`plugins/shipyard/`, `.agents/plugins/marketplace.json`) from the canonical Claude Code artifacts. Currently emits the `using-shipyard` skill as the proof-of-pipeline skill; later slices fan out the rest.
+- **Codex drift guard** (`scripts/check-codex-sync.sh`): fails CI when the committed Codex tree differs from the generator output, keeping the Claude artifacts the single source of truth.
+- **Corrected `AGENTS.md`**: Codex-facing repo-development guide (replaces a broken find/replace artifact).
+
+### Changed
+- **Version sync now covers 6 files**: `check-versions.sh` also verifies the generated `plugins/shipyard/.codex-plugin/plugin.json`.
+- **Pre-commit and CI** now run `check-codex-sync.sh` alongside the version check and tests.
+
 ## [4.7.0] - 2026-04-06
 
 ### Changed
