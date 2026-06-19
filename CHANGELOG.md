@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [4.12.1] - 2026-06-19
+
+### Changed
+- **CI**: bump `Vampire/setup-wsl` from 5.0.1 to 7.0.0 (#11, dependabot).
+
 ## [4.12.0] - 2026-06-19
 
 ### Added
