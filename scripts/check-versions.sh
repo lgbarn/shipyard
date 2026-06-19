@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 #
 # Verify all version strings are in sync across the project.
-# Checks: package.json, package-lock.json (2 locations), plugin.json, marketplace.json
+# Checks: package.json, package-lock.json (2 locations), plugin.json, marketplace.json,
+#         and the generated Codex plugin manifest.
 #
 
 set -euo pipefail
@@ -19,6 +20,7 @@ LOCK_VERSION=$(jq -r '.version' "${ROOT_DIR}/package-lock.json")
 LOCK_PKG_VERSION=$(jq -r '.packages[""].version' "${ROOT_DIR}/package-lock.json")
 PLUGIN_VERSION=$(jq -r '.version' "${ROOT_DIR}/.claude-plugin/plugin.json")
 MKT_VERSION=$(jq -r '.plugins[0].version' "${ROOT_DIR}/.claude-plugin/marketplace.json")
+CODEX_PLUGIN_VERSION=$(jq -r '.version' "${ROOT_DIR}/plugins/shipyard/.codex-plugin/plugin.json")
 
 ERRORS=0
 
@@ -39,6 +41,11 @@ fi
 
 if [[ "${MKT_VERSION}" != "${PKG_VERSION}" ]]; then
     echo "ERROR: marketplace.json version (${MKT_VERSION}) != package.json (${PKG_VERSION})"
+    ERRORS=$((ERRORS + 1))
+fi
+
+if [[ "${CODEX_PLUGIN_VERSION}" != "${PKG_VERSION}" ]]; then
+    echo "ERROR: codex plugin.json version (${CODEX_PLUGIN_VERSION}) != package.json (${PKG_VERSION})"
     ERRORS=$((ERRORS + 1))
 fi
 
