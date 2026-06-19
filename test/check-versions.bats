@@ -10,6 +10,7 @@ setup_version_fixture() {
 
     mkdir -p "${root}/scripts"
     mkdir -p "${root}/.claude-plugin"
+    mkdir -p "${root}/plugins/shipyard/.codex-plugin"
 
     # Symlink the real script so SCRIPT_DIR resolves to our fake root/scripts
     cp "$CHECK_VERSIONS" "${root}/scripts/check-versions.sh"
@@ -32,6 +33,11 @@ EOF
     # marketplace.json
     cat > "${root}/.claude-plugin/marketplace.json" <<EOF
 {"plugins":[{"name":"test","version":"${version}"}]}
+EOF
+
+    # generated Codex plugin manifest
+    cat > "${root}/plugins/shipyard/.codex-plugin/plugin.json" <<EOF
+{"name":"test","version":"${version}"}
 EOF
 
     echo "$root"
@@ -111,6 +117,22 @@ EOF
     run bash "${root}/scripts/check-versions.sh"
     assert_failure
     assert_output --partial "marketplace.json version (7.7.7) != package.json (3.0.0)"
+}
+
+# --- codex plugin.json mismatch ---
+
+# bats test_tags=unit
+@test "check-versions: detects codex plugin.json version mismatch" {
+    local root
+    root=$(setup_version_fixture "3.0.0")
+
+    cat > "${root}/plugins/shipyard/.codex-plugin/plugin.json" <<'EOF'
+{"name":"test","version":"5.5.5"}
+EOF
+
+    run bash "${root}/scripts/check-versions.sh"
+    assert_failure
+    assert_output --partial "codex plugin.json version (5.5.5) != package.json (3.0.0)"
 }
 
 # --- Multiple mismatches ---
