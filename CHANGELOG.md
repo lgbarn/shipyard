@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [4.10.0] - 2026-06-19
+
+### Added
+- **Codex orchestration entrypoint skills** (#17): Codex-only skills in `codex/skills-extra/` that bring Shipyard's multi-agent workflows to Codex as **inline sequential personas** (Codex has no parallel subagents). New skills: `shipyard-codex-orchestration` (degradation model + router), `shipyard-review`, `shipyard-research`, `shipyard-map`, `shipyard-ship`. Each carries an explicit honest-degradation note (no parallelism, no fresh-context isolation; review/verify gates preserved).
+- These fill the gap where an agent persona (reviewer, researcher, mapper) had no skill home in Codex. Commands already covered by a canonical skill (build→executing-plans, audit→security-audit, plan→writing-plans) get no duplicate skill — only the inline-sequential framing via the orchestration router.
+
+### Changed
+- **`build-codex.sh` merges two skill sources**: canonical `skills/` plus Codex-only `codex/skills-extra/`.
+
 ## [4.9.0] - 2026-06-19
 
 ### Added

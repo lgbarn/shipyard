@@ -9,5 +9,6 @@
 # spurious drift failure. Skill sources are byte-copied into the tree, so pin
 # them too.
 skills/**/*.md text eol=lf
+codex/skills-extra/**/*.md text eol=lf
 plugins/** text eol=lf
 .agents/** text eol=lf

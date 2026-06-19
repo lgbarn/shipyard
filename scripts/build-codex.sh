@@ -66,18 +66,23 @@ jq -n --arg name "${NAME}" '{
       ]
     }' > "${MARKETPLACE}"
 
-# --- copy every canonical skill byte-for-byte (Codex SKILL.md format is identical) ---
+# --- copy skills byte-for-byte (Codex SKILL.md format is identical) ---
+# Sources: the canonical shared skills, plus Codex-only entrypoint skills that
+# exist because Codex has no slash commands / parallel subagents (codex/skills-extra).
 skill_count=0
-for src in "${ROOT_DIR}"/skills/*/; do
-    [[ -f "${src}SKILL.md" ]] || continue
-    name="$(basename "${src}")"
-    mkdir -p "${PLUGIN_DIR}/skills/${name}"
-    cp "${src}SKILL.md" "${PLUGIN_DIR}/skills/${name}/SKILL.md"
-    skill_count=$((skill_count + 1))
+for skills_root in "${ROOT_DIR}/skills" "${ROOT_DIR}/codex/skills-extra"; do
+    [[ -d "${skills_root}" ]] || continue
+    for src in "${skills_root}"/*/; do
+        [[ -f "${src}SKILL.md" ]] || continue
+        name="$(basename "${src}")"
+        mkdir -p "${PLUGIN_DIR}/skills/${name}"
+        cp "${src}SKILL.md" "${PLUGIN_DIR}/skills/${name}/SKILL.md"
+        skill_count=$((skill_count + 1))
+    done
 done
 
 if [[ ${skill_count} -eq 0 ]]; then
-    echo "Error: no canonical skills found under ${ROOT_DIR}/skills" >&2
+    echo "Error: no skills found under ${ROOT_DIR}/skills or ${ROOT_DIR}/codex/skills-extra" >&2
     exit 1
 fi
 

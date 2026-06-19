@@ -45,17 +45,31 @@ CHECK_SYNC="${PROJECT_ROOT}/scripts/check-codex-sync.sh"
 @test "build-codex: emits every canonical skill, byte-for-byte" {
     bash "$BUILD_CODEX" "${BATS_TEST_TMPDIR}"
 
+    # the tree contains the canonical skills plus any Codex-only entrypoint skills,
+    # so it has at least as many skills as skills/ — every canonical one byte-identical.
     local src_count gen_count
     src_count=$(find "${PROJECT_ROOT}/skills" -mindepth 2 -maxdepth 2 -name SKILL.md | wc -l)
     gen_count=$(find "${BATS_TEST_TMPDIR}/plugins/shipyard/skills" -mindepth 2 -maxdepth 2 -name SKILL.md | wc -l)
-    [ "$src_count" -eq "$gen_count" ]
-    [ "$gen_count" -gt 1 ]
+    [ "$gen_count" -ge "$src_count" ]
+    [ "$src_count" -gt 1 ]
 
     # every canonical skill is present and identical in the generated tree
     for src in "${PROJECT_ROOT}"/skills/*/SKILL.md; do
         local name
         name="$(basename "$(dirname "$src")")"
         diff "$src" "${BATS_TEST_TMPDIR}/plugins/shipyard/skills/${name}/SKILL.md"
+    done
+}
+
+# bats test_tags=unit
+@test "build-codex: merges Codex-only entrypoint skills from codex/skills-extra" {
+    bash "$BUILD_CODEX" "${BATS_TEST_TMPDIR}"
+    for extra in "${PROJECT_ROOT}"/codex/skills-extra/*/; do
+        [ -f "${extra}SKILL.md" ] || continue
+        local name
+        name="$(basename "${extra}")"
+        [ -f "${BATS_TEST_TMPDIR}/plugins/shipyard/skills/${name}/SKILL.md" ]
+        diff "${extra}SKILL.md" "${BATS_TEST_TMPDIR}/plugins/shipyard/skills/${name}/SKILL.md"
     done
 }
 
