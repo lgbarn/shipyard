@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [4.11.0] - 2026-06-19
+
+### Added
+- **Codex state/utility entrypoint skill** (#18): `shipyard-state` brings Shipyard's state lifecycle (status, resume, cancel, rollback) to Codex. Because Codex has no `SessionStart` hook, the skill loads state **on demand** by invoking the bundled bash scripts (`state-read.sh`, `state-write.sh`, `checkpoint.sh`) rather than relying on auto-injection. Full state fidelity is retained; the teammate lifecycle hooks intentionally do not port (moot in single-context Codex).
+
 ## [4.10.0] - 2026-06-19
 
 ### Added
