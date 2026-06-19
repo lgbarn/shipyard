@@ -42,6 +42,24 @@ CHECK_SYNC="${PROJECT_ROOT}/scripts/check-codex-sync.sh"
 }
 
 # bats test_tags=unit
+@test "build-codex: emits every canonical skill, byte-for-byte" {
+    bash "$BUILD_CODEX" "${BATS_TEST_TMPDIR}"
+
+    local src_count gen_count
+    src_count=$(find "${PROJECT_ROOT}/skills" -mindepth 2 -maxdepth 2 -name SKILL.md | wc -l)
+    gen_count=$(find "${BATS_TEST_TMPDIR}/plugins/shipyard/skills" -mindepth 2 -maxdepth 2 -name SKILL.md | wc -l)
+    [ "$src_count" -eq "$gen_count" ]
+    [ "$gen_count" -gt 1 ]
+
+    # every canonical skill is present and identical in the generated tree
+    for src in "${PROJECT_ROOT}"/skills/*/SKILL.md; do
+        local name
+        name="$(basename "$(dirname "$src")")"
+        diff "$src" "${BATS_TEST_TMPDIR}/plugins/shipyard/skills/${name}/SKILL.md"
+    done
+}
+
+# bats test_tags=unit
 @test "build-codex: committed Codex tree is in sync with generator output" {
     run bash "$CHECK_SYNC"
     assert_success

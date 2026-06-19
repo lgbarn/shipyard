@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [4.9.0] - 2026-06-19
+
+### Added
+- **All 19 skills available in Codex** (#16): the Codex generator now copies every canonical `skills/*/SKILL.md` into the Codex plugin tree, so the full Shipyard skill set auto-activates natively under Codex — not just the walking-skeleton skill.
+
+### Changed
+- **`build-codex.sh` enumerates skills dynamically**: instead of a hardcoded list, it copies every `skills/*/` that contains a `SKILL.md`, so future skills are included automatically. Errors out if no skills are found.
+
 ## [4.8.0] - 2026-06-19
 
 ### Added

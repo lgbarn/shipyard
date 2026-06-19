@@ -31,9 +31,6 @@ PLUGIN_DIR="${OUT_DIR}/plugins/shipyard"
 CODEX_MANIFEST="${PLUGIN_DIR}/.codex-plugin/plugin.json"
 MARKETPLACE="${OUT_DIR}/.agents/plugins/marketplace.json"
 
-# Skills included in the walking skeleton (Slice 1). Later slices expand this set.
-SKELETON_SKILLS=("using-shipyard")
-
 NAME=$(jq -r '.name' "${SRC_PLUGIN}")
 
 # --- clean previous output so removals are reflected deterministically ---
@@ -69,15 +66,19 @@ jq -n --arg name "${NAME}" '{
       ]
     }' > "${MARKETPLACE}"
 
-# --- copy skills byte-for-byte (Codex SKILL.md format is identical) ---
-for skill in "${SKELETON_SKILLS[@]}"; do
-    src="${ROOT_DIR}/skills/${skill}"
-    if [[ ! -f "${src}/SKILL.md" ]]; then
-        echo "Error: canonical skill not found: ${skill}" >&2
-        exit 1
-    fi
-    mkdir -p "${PLUGIN_DIR}/skills/${skill}"
-    cp "${src}/SKILL.md" "${PLUGIN_DIR}/skills/${skill}/SKILL.md"
+# --- copy every canonical skill byte-for-byte (Codex SKILL.md format is identical) ---
+skill_count=0
+for src in "${ROOT_DIR}"/skills/*/; do
+    [[ -f "${src}SKILL.md" ]] || continue
+    name="$(basename "${src}")"
+    mkdir -p "${PLUGIN_DIR}/skills/${name}"
+    cp "${src}SKILL.md" "${PLUGIN_DIR}/skills/${name}/SKILL.md"
+    skill_count=$((skill_count + 1))
 done
 
-echo "Generated Codex plugin tree at ${OUT_DIR} (${#SKELETON_SKILLS[@]} skill(s))"
+if [[ ${skill_count} -eq 0 ]]; then
+    echo "Error: no canonical skills found under ${ROOT_DIR}/skills" >&2
+    exit 1
+fi
+
+echo "Generated Codex plugin tree at ${OUT_DIR} (${skill_count} skill(s))"
