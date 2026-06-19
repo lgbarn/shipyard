@@ -2,3 +2,13 @@
 *.sh text eol=lf
 *.bats text eol=lf
 *.bash text eol=lf
+
+# Generated Codex tree must stay LF so the drift guard (check-codex-sync.sh)
+# matches the generator's jq output on every platform. Without this, Windows
+# checks out the committed JSON as CRLF while jq regenerates LF, causing a
+# spurious drift failure. Skill sources are byte-copied into the tree, so pin
+# them too.
+skills/**/*.md text eol=lf
+codex/skills-extra/**/*.md text eol=lf
+plugins/** text eol=lf
+.agents/** text eol=lf

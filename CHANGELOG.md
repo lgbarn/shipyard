@@ -4,6 +4,55 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [4.12.2] - 2026-06-19
+
+### Fixed
+- **spec-kit constitution path**: corrected `.specify/constitution.md` → `.specify/memory/constitution.md` in the README and the `import-spec` skill, matching spec-kit's actual layout (#10, thanks @pdcribeiro). The Codex mirror of the skill was regenerated to match.
+
+## [4.12.1] - 2026-06-19
+
+### Changed
+- **CI**: bump `Vampire/setup-wsl` from 5.0.1 to 7.0.0 (#11, dependabot).
+
+## [4.12.0] - 2026-06-19
+
+### Added
+- **"Using Shipyard with Codex" guide** (#19): `docs/using-shipyard-with-codex.md` documents install (`codex plugin marketplace add lgbarn/shipyard`), intent-based invocation, the capability mapping vs Claude Code, and the three accepted costs (sequential workflows, no fresh-context review isolation, on-demand state). Notes `codex exec` emulation as a documented future upgrade path. README gains a "Using Shipyard with Codex" section linking to the guide.
+
+## [4.11.0] - 2026-06-19
+
+### Added
+- **Codex state/utility entrypoint skill** (#18): `shipyard-state` brings Shipyard's state lifecycle (status, resume, cancel, rollback) to Codex. Because Codex has no `SessionStart` hook, the skill loads state **on demand** by invoking the bundled bash scripts (`state-read.sh`, `state-write.sh`, `checkpoint.sh`) rather than relying on auto-injection. Full state fidelity is retained; the teammate lifecycle hooks intentionally do not port (moot in single-context Codex).
+
+## [4.10.0] - 2026-06-19
+
+### Added
+- **Codex orchestration entrypoint skills** (#17): Codex-only skills in `codex/skills-extra/` that bring Shipyard's multi-agent workflows to Codex as **inline sequential personas** (Codex has no parallel subagents). New skills: `shipyard-codex-orchestration` (degradation model + router), `shipyard-review`, `shipyard-research`, `shipyard-map`, `shipyard-ship`. Each carries an explicit honest-degradation note (no parallelism, no fresh-context isolation; review/verify gates preserved).
+- These fill the gap where an agent persona (reviewer, researcher, mapper) had no skill home in Codex. Commands already covered by a canonical skill (build→executing-plans, audit→security-audit, plan→writing-plans) get no duplicate skill — only the inline-sequential framing via the orchestration router.
+
+### Changed
+- **`build-codex.sh` merges two skill sources**: canonical `skills/` plus Codex-only `codex/skills-extra/`.
+
+## [4.9.0] - 2026-06-19
+
+### Added
+- **All 19 skills available in Codex** (#16): the Codex generator now copies every canonical `skills/*/SKILL.md` into the Codex plugin tree, so the full Shipyard skill set auto-activates natively under Codex — not just the walking-skeleton skill.
+
+### Changed
+- **`build-codex.sh` enumerates skills dynamically**: instead of a hardcoded list, it copies every `skills/*/` that contains a `SKILL.md`, so future skills are included automatically. Errors out if no skills are found.
+
+## [4.8.0] - 2026-06-19
+
+### Added
+- **Codex support (walking skeleton)**: Shipyard can now be installed under Codex CLI via `codex plugin marketplace add lgbarn/shipyard`. Best-effort, not parity — skills run natively; parallel agents and lifecycle hooks degrade (tracked in #14).
+- **Codex tree generator** (`scripts/build-codex.sh`): generates the Codex plugin tree (`plugins/shipyard/`, `.agents/plugins/marketplace.json`) from the canonical Claude Code artifacts. Currently emits the `using-shipyard` skill as the proof-of-pipeline skill; later slices fan out the rest.
+- **Codex drift guard** (`scripts/check-codex-sync.sh`): fails CI when the committed Codex tree differs from the generator output, keeping the Claude artifacts the single source of truth.
+- **Corrected `AGENTS.md`**: Codex-facing repo-development guide (replaces a broken find/replace artifact).
+
+### Changed
+- **Version sync now covers 6 files**: `check-versions.sh` also verifies the generated `plugins/shipyard/.codex-plugin/plugin.json`.
+- **Pre-commit and CI** now run `check-codex-sync.sh` alongside the version check and tests.
+
 ## [4.7.0] - 2026-04-06
 
 ### Changed
