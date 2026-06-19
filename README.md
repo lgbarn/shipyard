@@ -41,6 +41,23 @@ claude plugin install shipyard@shipyard
 claude /shipyard:status
 ```
 
+## Using Shipyard with Codex
+
+Shipyard also installs under [Codex CLI](https://github.com/openai/codex) (0.124.0+) on a
+**best-effort, not-parity** basis — all skills run natively; the multi-agent workflows
+degrade to inline sequential personas.
+
+```bash
+codex plugin marketplace add lgbarn/shipyard
+# then enable the shipyard plugin in Codex
+```
+
+What you get and what degrades is documented in full in
+**[docs/using-shipyard-with-codex.md](docs/using-shipyard-with-codex.md)**. In short: skills
+auto-activate identically; orchestration (build/audit/ship/review) runs sequentially in one
+context (no parallelism, no fresh-context review isolation); and state loads on demand
+instead of via a session hook.
+
 ## Quick Start
 
 Once installed, navigate to any project directory and run:

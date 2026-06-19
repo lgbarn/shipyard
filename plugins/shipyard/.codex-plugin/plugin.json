@@ -1,0 +1,19 @@
+{
+  "name": "shipyard",
+  "version": "4.12.1",
+  "description": "Ship software systematically: project lifecycle, TDD, parallel agents, code review, security auditing, and infrastructure validation",
+  "author": {
+    "name": "lgbarn",
+    "email": "lgbarn@users.noreply.github.com"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Shipyard",
+    "shortDescription": "Ship software systematically with Codex",
+    "category": "Engineering",
+    "defaultPrompt": [
+      "Help me ship this feature systematically",
+      "What should I do next in Shipyard?"
+    ]
+  }
+}
