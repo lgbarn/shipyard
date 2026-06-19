@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [4.12.0] - 2026-06-19
+
+### Added
+- **"Using Shipyard with Codex" guide** (#19): `docs/using-shipyard-with-codex.md` documents install (`codex plugin marketplace add lgbarn/shipyard`), intent-based invocation, the capability mapping vs Claude Code, and the three accepted costs (sequential workflows, no fresh-context review isolation, on-demand state). Notes `codex exec` emulation as a documented future upgrade path. README gains a "Using Shipyard with Codex" section linking to the guide.
+
 ## [4.11.0] - 2026-06-19
 
 ### Added
