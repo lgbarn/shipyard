@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [4.12.3] - 2026-06-19
+
+### Fixed
+- **Portable SHA-256 in state scripts**: `state-read.sh` and `state-write.sh` now prefer `sha256sum` (Linux coreutils) and fall back to `shasum -a 256` (macOS), via a shared `_sha256` helper. Previously only `shasum` was used, which can be absent on minimal Linux images (#12, thanks @pubyun).
+
 ## [4.12.2] - 2026-06-19
 
 ### Fixed
