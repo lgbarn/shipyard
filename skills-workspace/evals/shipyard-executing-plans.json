@@ -1,0 +1,17 @@
+[
+  {"query": "execute the plan in PLAN-1.1.md — dispatch builder agents for each task", "should_trigger": true},
+  {"query": "build this — I have a plan with 8 tasks ready to go, start implementing them", "should_trigger": true},
+  {"query": "implement the tasks from the plan we just wrote — use fresh agents and two-stage review", "should_trigger": true},
+  {"query": "run the plan — start with task 1 and work through each task sequentially with reviews", "should_trigger": true},
+  {"query": "start building from the implementation plan — dispatch a builder for each task", "should_trigger": true},
+  {"query": "the plan is ready, now let's execute it task by task with spec compliance and code quality reviews", "should_trigger": true},
+  {"query": "implement this — here's the plan file with all the tasks, file paths, and verification steps", "should_trigger": true},
+  {"query": "let's brainstorm the architecture for the notification system", "should_trigger": false},
+  {"query": "create a plan for the auth feature — break it into tasks with TDD steps", "should_trigger": false},
+  {"query": "fix the bug where the session cookie expires too early", "should_trigger": false},
+  {"query": "write tests for the payment processing module", "should_trigger": false},
+  {"query": "create a feature branch for the new work", "should_trigger": false},
+  {"query": "document the REST API endpoints", "should_trigger": false},
+  {"query": "review the PR for security issues", "should_trigger": false},
+  {"query": "simplify the overengineered service layer", "should_trigger": false}
+]

@@ -1,0 +1,30 @@
+{
+  "enabledPlugins": {
+    "skill-creator@claude-plugins-official": true
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "file=\"$CLAUDE_TOOL_ARG_file_path\"; case \"$file\" in *.env|*.env.*|credentials.json|*.pem|*.key) echo 'BLOCKED: sensitive file'; exit 2 ;; esac"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "file=\"$CLAUDE_TOOL_ARG_file_path\"; case \"$file\" in *.sh) shellcheck --severity=warning \"$file\" 2>&1 | head -20 ;; esac",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

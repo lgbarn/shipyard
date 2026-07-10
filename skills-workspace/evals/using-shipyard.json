@@ -1,0 +1,17 @@
+[
+  {"query": "what should I do first? I just installed shipyard and don't know where to start", "should_trigger": true},
+  {"query": "help me — what commands does shipyard have?", "should_trigger": true},
+  {"query": "how do I use shipyard to plan and build a new feature?", "should_trigger": true},
+  {"query": "where do I start with this project? I want to use shipyard for structured development", "should_trigger": true},
+  {"query": "what skills are available in shipyard? how do I trigger them?", "should_trigger": true},
+  {"query": "I'm confused about the shipyard workflow — what's the difference between plan, build, and ship?", "should_trigger": true},
+  {"query": "what commands are available for managing my project with shipyard?", "should_trigger": true},
+  {"query": "implement the email verification feature with token-based confirmation", "should_trigger": false},
+  {"query": "fix the bug in the payment processing module", "should_trigger": false},
+  {"query": "write tests for the user authentication flow", "should_trigger": false},
+  {"query": "check the terraform config for security issues", "should_trigger": false},
+  {"query": "create a detailed implementation plan for the search feature", "should_trigger": false},
+  {"query": "simplify the complex factory pattern in the notification service", "should_trigger": false},
+  {"query": "document the REST API endpoints with examples", "should_trigger": false},
+  {"query": "set up a worktree for isolated feature development", "should_trigger": false}
+]

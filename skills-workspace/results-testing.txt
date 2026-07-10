@@ -1,0 +1,157 @@
+Evaluating: Use when writing tests, structuring test suites, choosing test boundaries, or debugging test quality issues like flakiness, over-mocking, or brittle tests. Also triggers on "how should I test this", "mock vs stub", "test keeps failing randomly", "test coverage", "unit vs integration", or when tests break during refactoring.
+Results: 8/16 passed
+  [FAIL] rate=0/1 expected=True: how should I test the payment processing module? I'm not sure whether 
+  [FAIL] rate=0/1 expected=True: my tests keep breaking every time I refactor the internal helper funct
+  [FAIL] rate=0/1 expected=True: the test for the notification service mocks literally everything — am 
+  [FAIL] rate=0/1 expected=True: should I write a unit test or an integration test for the database que
+  [FAIL] rate=0/1 expected=True: what's the right way to test an async function that makes HTTP calls t
+  [FAIL] rate=0/1 expected=True: I have a flaky test that passes 90% of the time but occasionally fails
+  [FAIL] rate=0/1 expected=True: I need to add test coverage for the new user roles feature — where sho
+  [FAIL] rate=0/1 expected=True: should I use jest.mock or dependency injection for testing this servic
+  [PASS] rate=0/1 expected=False: implement the password reset feature with email verification
+  [PASS] rate=0/1 expected=False: brainstorm ideas for a recommendation engine
+  [PASS] rate=0/1 expected=False: create a PR for the caching layer improvements
+  [PASS] rate=0/1 expected=False: deploy the staging environment using our existing CI/CD pipeline
+  [PASS] rate=0/1 expected=False: debug why the API is returning 502 errors under heavy load
+  [PASS] rate=0/1 expected=False: write documentation for the GraphQL schema
+  [PASS] rate=0/1 expected=False: simplify the order processing module — too many abstractions
+  [PASS] rate=0/1 expected=False: scan the codebase for hardcoded secrets and API keys
+{
+  "skill_name": "shipyard-testing",
+  "description": "Use when writing tests, structuring test suites, choosing test boundaries, or debugging test quality issues like flakiness, over-mocking, or brittle tests. Also triggers on \"how should I test this\", \"mock vs stub\", \"test keeps failing randomly\", \"test coverage\", \"unit vs integration\", or when tests break during refactoring.",
+  "results": [
+    {
+      "query": "how should I test the payment processing module? I'm not sure whether to use mocks or a real test database",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "my tests keep breaking every time I refactor the internal helper functions even though the API behavior hasn't changed",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "the test for the notification service mocks literally everything \u2014 am I over-mocking?",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "should I write a unit test or an integration test for the database query that joins 3 tables?",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "what's the right way to test an async function that makes HTTP calls to an external API?",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "I have a flaky test that passes 90% of the time but occasionally fails with a timeout \u2014 how do I fix this?",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "I need to add test coverage for the new user roles feature \u2014 where should I start?",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "should I use jest.mock or dependency injection for testing this service class?",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "implement the password reset feature with email verification",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "brainstorm ideas for a recommendation engine",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "create a PR for the caching layer improvements",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "deploy the staging environment using our existing CI/CD pipeline",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "debug why the API is returning 502 errors under heavy load",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "write documentation for the GraphQL schema",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "simplify the order processing module \u2014 too many abstractions",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "scan the codebase for hardcoded secrets and API keys",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    }
+  ],
+  "summary": {
+    "total": 16,
+    "passed": 8,
+    "failed": 8
+  }
+}

@@ -1,0 +1,18 @@
+[
+  {"query": "how should I test the payment processing module? I'm not sure whether to use mocks or a real test database", "should_trigger": true},
+  {"query": "my tests keep breaking every time I refactor the internal helper functions even though the API behavior hasn't changed", "should_trigger": true},
+  {"query": "should I write a unit test or an integration test for the database query that joins 3 tables?", "should_trigger": true},
+  {"query": "the test for the notification service mocks literally everything — am I over-mocking?", "should_trigger": true},
+  {"query": "I have a flaky test that passes 90% of the time but occasionally fails with a timeout — how do I fix this?", "should_trigger": true},
+  {"query": "what's the right way to test an async function that makes HTTP calls to an external API?", "should_trigger": true},
+  {"query": "I need to add test coverage for the new user roles feature — where should I start?", "should_trigger": true},
+  {"query": "should I use jest.mock or dependency injection for testing this service class?", "should_trigger": true},
+  {"query": "implement the password reset feature with email verification", "should_trigger": false},
+  {"query": "brainstorm ideas for a recommendation engine", "should_trigger": false},
+  {"query": "deploy the staging environment using our existing CI/CD pipeline", "should_trigger": false},
+  {"query": "create a PR for the caching layer improvements", "should_trigger": false},
+  {"query": "debug why the API is returning 502 errors under heavy load", "should_trigger": false},
+  {"query": "write documentation for the GraphQL schema", "should_trigger": false},
+  {"query": "simplify the order processing module — too many abstractions", "should_trigger": false},
+  {"query": "scan the codebase for hardcoded secrets and API keys", "should_trigger": false}
+]

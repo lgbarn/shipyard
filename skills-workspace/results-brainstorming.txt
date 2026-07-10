@@ -1,0 +1,157 @@
+Evaluating: You MUST use this before any creative work — creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation. Also triggers on "I want to add", "let's design", "brainstorm", "what if we", "I have an idea", "let's think about", or any task where requirements aren't fully specified. Invoked by /shipyard:brainstorm for requirements gathering.
+Results: 8/16 passed
+  [FAIL] rate=0/1 expected=True: I want to add a notification system to my app but I'm not sure what ap
+  [FAIL] rate=0/1 expected=True: let's think about how to handle file uploads — should we use S3 direct
+  [FAIL] rate=0/1 expected=True: I need to build a search feature for our product catalog, let's figure
+  [FAIL] rate=0/1 expected=True: I want to add SSO support but I don't know whether to use SAML or OIDC
+  [FAIL] rate=0/1 expected=True: what if we added a plugin system so users could extend the app with th
+  [FAIL] rate=0/1 expected=True: I have an idea for a dashboard that shows real-time metrics, what do y
+  [FAIL] rate=0/1 expected=True: let's design a caching strategy for the API — I'm thinking Redis but o
+  [FAIL] rate=0/1 expected=True: brainstorm with me on how to structure the permissions system for our 
+  [PASS] rate=0/1 expected=False: fix the bug in src/auth/login.ts where the session cookie isn't being 
+  [PASS] rate=0/1 expected=False: run the test suite and tell me which tests are failing
+  [PASS] rate=0/1 expected=False: read through the codebase and explain how the payment processing works
+  [PASS] rate=0/1 expected=False: deploy the application to the staging environment using our existing t
+  [PASS] rate=0/1 expected=False: the API is returning 503 errors intermittently — help me investigate
+  [PASS] rate=0/1 expected=False: commit the changes I just made with the message 'fix: resolve token ex
+  [PASS] rate=0/1 expected=False: update the API documentation to include the new search endpoints
+  [PASS] rate=0/1 expected=False: review the PR at https://github.com/our-org/our-repo/pull/142 for secu
+{
+  "skill_name": "shipyard-brainstorming",
+  "description": "You MUST use this before any creative work \u2014 creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation. Also triggers on \"I want to add\", \"let's design\", \"brainstorm\", \"what if we\", \"I have an idea\", \"let's think about\", or any task where requirements aren't fully specified. Invoked by /shipyard:brainstorm for requirements gathering.",
+  "results": [
+    {
+      "query": "I want to add a notification system to my app but I'm not sure what approach to take",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "let's think about how to handle file uploads \u2014 should we use S3 directly or go through our API?",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "I need to build a search feature for our product catalog, let's figure out the requirements first",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "I want to add SSO support but I don't know whether to use SAML or OIDC",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "what if we added a plugin system so users could extend the app with their own integrations?",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "I have an idea for a dashboard that shows real-time metrics, what do you think?",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "let's design a caching strategy for the API \u2014 I'm thinking Redis but open to alternatives",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "brainstorm with me on how to structure the permissions system for our multi-tenant app",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "fix the bug in src/auth/login.ts where the session cookie isn't being set correctly",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "run the test suite and tell me which tests are failing",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "read through the codebase and explain how the payment processing works",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "deploy the application to the staging environment using our existing terraform config",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "the API is returning 503 errors intermittently \u2014 help me investigate",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "commit the changes I just made with the message 'fix: resolve token expiration bug'",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "update the API documentation to include the new search endpoints",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "review the PR at https://github.com/our-org/our-repo/pull/142 for security issues",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    }
+  ],
+  "summary": {
+    "total": 16,
+    "passed": 8,
+    "failed": 8
+  }
+}

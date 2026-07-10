@@ -1,0 +1,18 @@
+[
+  {"query": "this module feels way too complex — there are 5 layers of abstraction for what should be a simple CRUD operation", "should_trigger": true},
+  {"query": "I notice the same validation logic is copy-pasted in 4 different route handlers, can you clean this up?", "should_trigger": true},
+  {"query": "after the last sprint, the codebase has a lot of dead code and unused imports — help me simplify", "should_trigger": true},
+  {"query": "the AI generated a bunch of verbose error handling in every function — catch/rethrow patterns everywhere. can you trim the bloat?", "should_trigger": true},
+  {"query": "we have an AbstractFactoryProvider class with exactly one implementation. is this over-engineered?", "should_trigger": true},
+  {"query": "reduce complexity in the order processing module — functions are 80+ lines with 4 levels of nesting", "should_trigger": true},
+  {"query": "review what the 3 builder agents produced in this phase and look for duplication across their outputs", "should_trigger": true},
+  {"query": "this is bloated — there are wrapper functions that just call through to the underlying library with no added value", "should_trigger": true},
+  {"query": "implement a new payment gateway integration with Stripe for processing subscription payments", "should_trigger": false},
+  {"query": "write tests for the user authentication flow", "should_trigger": false},
+  {"query": "debug why the webhook handler is dropping events silently", "should_trigger": false},
+  {"query": "set up terraform for our AWS infrastructure with VPC, ECS, and RDS", "should_trigger": false},
+  {"query": "document the REST API endpoints for the inventory management system", "should_trigger": false},
+  {"query": "create a new branch and set up the worktree for feature development", "should_trigger": false},
+  {"query": "I want to brainstorm how to architect our notification system", "should_trigger": false},
+  {"query": "check if our dependencies have any known CVEs or security vulnerabilities", "should_trigger": false}
+]

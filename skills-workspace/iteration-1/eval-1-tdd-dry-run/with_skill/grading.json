@@ -1,0 +1,32 @@
+{
+  "eval_id": 1,
+  "run_id": "eval-1-with_skill",
+  "expectations": [
+    {
+      "text": "First step is writing a failing test, not implementation code",
+      "passed": true,
+      "evidence": "Step 1 explicitly titled 'Write the first failing test (RED)' — opens test file first, states 'The Iron Law applies: no production code without a failing test first'"
+    },
+    {
+      "text": "Specifies running the test to verify it fails before implementing",
+      "passed": true,
+      "evidence": "Step 2 'Verify the test fails for the right reason (Verify RED)' — includes exact command and expected failure output 'expected exit code 0, got 1'"
+    },
+    {
+      "text": "Implementation step comes AFTER test verification step",
+      "passed": true,
+      "evidence": "Step 3 'Write minimal implementation (GREEN)' comes after Step 2 verification. Explicitly says 'Only now open scripts/state-write.sh'"
+    },
+    {
+      "text": "Includes a step to verify tests pass after implementation",
+      "passed": true,
+      "evidence": "Step 4 'Verify the test passes (Verify GREEN)' with exact command, plus full regression run: 'All previously passing tests must still pass'"
+    },
+    {
+      "text": "Does not add features beyond what was requested (no over-engineering)",
+      "passed": true,
+      "evidence": "Implementation is minimal: 3 small changes. Explicitly states 'Nothing else changes. No new abstractions, no refactoring other code.'"
+    }
+  ],
+  "pass_rate": 1.0
+}

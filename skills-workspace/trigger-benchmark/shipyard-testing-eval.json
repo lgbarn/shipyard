@@ -1,0 +1,82 @@
+[
+  {
+    "query": "I need to write BATS tests for the new shipyard archive command. Help me decide the right test boundaries — should I test archive_phase() as a unit test mocking the filesystem, or as an integration test with real files? The function reads STATE.json, writes ARCHIVE.json, and updates STATE.json. What's the right testing approach?",
+    "should_trigger": true
+  },
+  {
+    "query": "Our test for the hook system mocks out the entire shell environment including PATH, HOME, and the config loader. The test setup is 35 lines long and the actual assertion is 2 lines. Every time we refactor hooks.sh, these tests break even though behavior hasn't changed. How do I fix this testing approach?",
+    "should_trigger": true
+  },
+  {
+    "query": "I'm seeing flaky tests in test/integration/test_concurrent.bats — about 20% failure rate. The tests create temp files in /tmp and sometimes collide with parallel test runs. I think the issue is shared mutable state between tests. How should I restructure the test isolation?",
+    "should_trigger": true
+  },
+  {
+    "query": "I need to add tests for the new plugin validation feature. Should these be unit tests, integration tests, or E2E tests? The validator checks SKILL.md structure, verifies file paths exist, and runs a syntax check on bash scripts. Help me pick the right test level for each aspect",
+    "should_trigger": true
+  },
+  {
+    "query": "I'm writing tests for the state backup system and I'm not sure if I'm over-mocking. My test stubs out jq, shasum, cp, and mv to test backup_state(). The real function is 10 lines but my mock setup is 40 lines. Is there a better way to test this without mocking every external command?",
+    "should_trigger": true
+  },
+  {
+    "query": "Help me structure a BATS test file for the shipyard init command. I want to follow AAA pattern and use DAMP naming. The init command does: create .shipyard/, generate STATE.json, discover skills, and set up hooks. What should the test cases be and how should I name them?",
+    "should_trigger": true
+  },
+  {
+    "query": "Our test suite has grown to 150 tests and many of them test the same behavior from different angles. For example, we have 5 tests that all verify STATE.json gets updated after advance — from unit, integration, and E2E levels. How should I think about the testing pyramid here? Which tests should I keep vs remove?",
+    "should_trigger": true
+  },
+  {
+    "query": "I refactored scripts/commands.sh to extract helper functions into utils.sh and now 23 tests are broken. The tests were checking internal function calls and variable values rather than observable behavior. How should I rewrite these tests so they survive future refactoring?",
+    "should_trigger": true
+  },
+  {
+    "query": "I'm writing integration tests for the builder agent dispatch and need to decide what to mock at the boundary. The dispatch calls out to Claude API, writes to the filesystem, and logs to HISTORY.md. What should I fake vs use real implementations? I don't want the tests to be slow or flaky but I also need confidence",
+    "should_trigger": true
+  },
+  {
+    "query": "My test names in test_commands.bats are like 'test_init_works', 'test_init_fails', 'test_init_edge_case'. These names don't tell me what broke when they fail. Help me adopt better test naming conventions and restructure the file to be more maintainable. Show me the DAMP approach for BATS tests",
+    "should_trigger": true
+  },
+  {
+    "query": "I need to implement a new 'shipyard archive' command. Before writing the production code, I want to write failing tests first that define the expected behavior. Let's do TDD — red tests first, then make them green",
+    "should_trigger": false
+  },
+  {
+    "query": "The CI pipeline is failing on ubuntu-latest with exit code 137 during the test phase. The tests pass locally on my Mac. Can you figure out why it's dying in CI? I think it might be an OOM kill but I need to confirm",
+    "should_trigger": false
+  },
+  {
+    "query": "Execute the implementation plan in PLAN.md. It has 8 tasks across 3 phases — dispatch builder agents for the independent tasks in phase 1 and use review checkpoints between phases",
+    "should_trigger": false
+  },
+  {
+    "query": "I want to add a --verbose flag to all shipyard commands. The flag should enable bash -x tracing and set SHIPYARD_VERBOSE=true. Implement this across all command handlers in scripts/commands.sh",
+    "should_trigger": false
+  },
+  {
+    "query": "Can you explain how the BATS testing framework works? I'm new to bash testing and want to understand the basics — how to write tests, run them, and use assertions. This is a learning question, not about writing tests for our project",
+    "should_trigger": false
+  },
+  {
+    "query": "Profile the test suite execution time and find the 10 slowest tests. I want to optimize overall test runtime from 90 seconds to under 30 seconds. Don't change any tests yet — just identify bottlenecks and suggest which tests to parallelize",
+    "should_trigger": false
+  },
+  {
+    "query": "There's a bug in the checksum verification — restored files have 3 extra bytes. This only happens with unicode content. I need to debug the root cause in scripts/state.sh before making any fixes. Can you trace through the backup/restore flow?",
+    "should_trigger": false
+  },
+  {
+    "query": "Set up GitHub Actions to run our BATS tests on every PR. I need the workflow file to use matrix strategy for ubuntu and macos, install BATS, and report test results. This is CI configuration, not test writing",
+    "should_trigger": false
+  },
+  {
+    "query": "Review the code in scripts/state.sh and suggest improvements for error handling, input validation, and edge cases. I want a code review focused on production code quality, not test quality",
+    "should_trigger": false
+  },
+  {
+    "query": "I need to benchmark shipyard init across repo sizes of 100, 1000, and 10000 files. Write a benchmark script that measures execution time, memory usage, and file I/O. This is performance testing infrastructure, not functional test writing",
+    "should_trigger": false
+  }
+]

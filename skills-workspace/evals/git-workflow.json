@@ -1,0 +1,18 @@
+[
+  {"query": "I'm about to start working on the new auth feature — can you create a branch and set up a worktree?", "should_trigger": true},
+  {"query": "ok the feature is done, let's merge this branch back into main", "should_trigger": true},
+  {"query": "create a PR for the changes on the feat-notifications branch with a summary of what changed", "should_trigger": true},
+  {"query": "I want to discard this branch — the approach didn't work out and I want to start fresh", "should_trigger": true},
+  {"query": "commit these changes with the message 'feat: add rate limiting to API endpoints'", "should_trigger": true},
+  {"query": "set up an isolated workspace so I can work on the migration without affecting the main branch", "should_trigger": true},
+  {"query": "start feature work on the user roles system — I need a clean branch from main", "should_trigger": true},
+  {"query": "push the current branch and create a pull request for review", "should_trigger": true},
+  {"query": "implement the email verification flow with token generation and validation", "should_trigger": false},
+  {"query": "debug why the API is returning 500 errors on the /users endpoint", "should_trigger": false},
+  {"query": "write tests for the new payment processing module", "should_trigger": false},
+  {"query": "brainstorm how to architect the notification system", "should_trigger": false},
+  {"query": "check the terraform modules for security misconfigurations", "should_trigger": false},
+  {"query": "document the GraphQL schema with examples for each query and mutation", "should_trigger": false},
+  {"query": "simplify the overengineered abstraction layers in the service module", "should_trigger": false},
+  {"query": "scan dependencies for known vulnerabilities", "should_trigger": false}
+]

@@ -1,0 +1,148 @@
+Evaluating: Use when you have a spec, requirements, or design for a multi-step task — before touching code. Also triggers on "plan this", "break this down", "create tasks", "decompose this feature", or when a task clearly needs more than 2-3 steps to implement. If you're about to start building without a plan, this skill applies.
+Results: 8/15 passed
+  [FAIL] rate=0/1 expected=True: plan this feature out — I need executable tasks with file paths and ve
+  [FAIL] rate=0/1 expected=True: I have the requirements for the notification system — let's create a d
+  [FAIL] rate=0/1 expected=True: break this project down into bite-sized tasks that a builder agent can
+  [FAIL] rate=0/1 expected=True: decompose this feature into implementation steps — the auth system nee
+  [FAIL] rate=0/1 expected=True: create tasks for implementing the REST API — I need the full plan with
+  [FAIL] rate=0/1 expected=True: we have the spec for the search feature, now let's turn it into a plan
+  [FAIL] rate=0/1 expected=True: write an implementation plan for the caching layer that a fresh agent 
+  [PASS] rate=0/1 expected=False: fix the null pointer exception in the user service
+  [PASS] rate=0/1 expected=False: run the existing plan — execute the tasks in PLAN-1.1.md
+  [PASS] rate=0/1 expected=False: write documentation for the API endpoints
+  [PASS] rate=0/1 expected=False: create a branch for the feature work
+  [PASS] rate=0/1 expected=False: what approach should we take for the notification system? let's brains
+  [PASS] rate=0/1 expected=False: scan for security vulnerabilities in the codebase
+  [PASS] rate=0/1 expected=False: debug why tests are failing in CI
+  [PASS] rate=0/1 expected=False: simplify the overly complex factory pattern
+{
+  "skill_name": "shipyard-writing-plans",
+  "description": "Use when you have a spec, requirements, or design for a multi-step task \u2014 before touching code. Also triggers on \"plan this\", \"break this down\", \"create tasks\", \"decompose this feature\", or when a task clearly needs more than 2-3 steps to implement. If you're about to start building without a plan, this skill applies.",
+  "results": [
+    {
+      "query": "plan this feature out \u2014 I need executable tasks with file paths and verification steps",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "I have the requirements for the notification system \u2014 let's create a detailed implementation plan with tasks",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "break this project down into bite-sized tasks that a builder agent can execute",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "decompose this feature into implementation steps \u2014 the auth system needs login, signup, password reset, and session management",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "create tasks for implementing the REST API \u2014 I need the full plan with test steps and commit points",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "we have the spec for the search feature, now let's turn it into a plan with TDD steps",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "write an implementation plan for the caching layer that a fresh agent could follow without any context",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "fix the null pointer exception in the user service",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "run the existing plan \u2014 execute the tasks in PLAN-1.1.md",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "write documentation for the API endpoints",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "create a branch for the feature work",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "what approach should we take for the notification system? let's brainstorm",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "scan for security vulnerabilities in the codebase",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "debug why tests are failing in CI",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "simplify the overly complex factory pattern",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    }
+  ],
+  "summary": {
+    "total": 15,
+    "passed": 8,
+    "failed": 7
+  }
+}

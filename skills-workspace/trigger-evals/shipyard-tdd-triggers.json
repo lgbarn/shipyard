@@ -1,0 +1,22 @@
+[
+  {"query": "ok so I need to add a --verbose flag to my deploy script that prints each step as it runs. the script is in scripts/deploy.sh and it currently just runs silently. can you implement that?", "should_trigger": true},
+  {"query": "there's a bug in our user registration flow where emails with plus signs (like user+tag@gmail.com) get rejected even though they're valid. the validation regex in src/validators/email.ts needs fixing", "should_trigger": true},
+  {"query": "I'm working on adding retry logic to our API client. it should retry failed requests up to 3 times with exponential backoff. the client is in lib/api_client.py", "should_trigger": true},
+  {"query": "we need to refactor the payment processing module to support a second payment provider. right now it's hardcoded to Stripe but we want to add PayPal too. the code is in services/payments/", "should_trigger": true},
+  {"query": "can you look at test/auth.test.ts lines 45-60? the mock for the OAuth provider isn't working right — it returns undefined instead of the expected token object. the test keeps passing even when I break the implementation", "should_trigger": true},
+  {"query": "I want to add a health check endpoint to our Express server at /health that returns 200 with {status: 'ok', uptime: process.uptime()}. pretty straightforward", "should_trigger": true},
+  {"query": "our CI pipeline runs terraform plan but doesn't validate the plan output. can you add a step that checks for any destructive changes (resource deletions) and fails the pipeline if any are found?", "should_trigger": true},
+  {"query": "we have some bats tests in test/state-write.bats that are flaky — they pass locally but fail in CI about 30% of the time. the failures are always in the checkpoint-related tests. can you look into it?", "should_trigger": true},
+  {"query": "what's the difference between vitest and jest for testing React components? I'm starting a new project and trying to decide which framework to use", "should_trigger": false},
+  {"query": "can you read through our test suite and tell me what our current code coverage looks like? I want to know which modules have the least coverage", "should_trigger": false},
+  {"query": "I need to set up GitHub Actions for our repo. the workflow should run on push to main and PRs. it needs to install deps, lint, and run tests", "should_trigger": false},
+  {"query": "please review this PR — it adds a new caching layer between our API and database. here's the diff: [large diff]. check for any bugs or performance issues", "should_trigger": false},
+  {"query": "what does this error mean? TypeError: Cannot read properties of undefined (reading 'map') at UserList.tsx:42", "should_trigger": false},
+  {"query": "can you explain how the state management works in this codebase? I'm new to the project and trying to understand the data flow", "should_trigger": false},
+  {"query": "I need to update our README with installation instructions for the new Python 3.12 requirement", "should_trigger": false},
+  {"query": "help me write a SQL migration that adds a 'last_login' timestamp column to the users table with a default of now()", "should_trigger": false},
+  {"query": "I just finished implementing the new search feature with full-text indexing. all the code is written and I manually tested it in the browser — looks good. can you review it before I merge?", "should_trigger": true},
+  {"query": "we're seeing intermittent 504 timeouts on our /api/reports endpoint when generating large reports. the endpoint code is in controllers/reports.go and it queries 3 tables. can you optimize it?", "should_trigger": true},
+  {"query": "I need to delete the old migration files in db/migrations/ that are from before our v2 release. they're cluttering up the directory", "should_trigger": false},
+  {"query": "can you add type annotations to the functions in utils/helpers.py? they're all missing return types and parameter types", "should_trigger": false}
+]

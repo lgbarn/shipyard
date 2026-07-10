@@ -1,0 +1,22 @@
+[
+  {"query": "I'm about to start working on the new notification system. Can you set up a feature branch and worktree so I have an isolated workspace? I don't want to mess up my current working tree since I have uncommitted changes.", "should_trigger": true},
+  {"query": "I've been working on feature/auth-redesign for 3 days and it's ready. Can you help me merge it back into main? I want to squash the 14 commits into something clean first, then create a PR.", "should_trigger": true},
+  {"query": "Set up a worktree for me in ../payment-refactor so I can work on the payment module rewrite in isolation while keeping my current branch untouched. Branch it off the latest main.", "should_trigger": true},
+  {"query": "I'm done with this branch and the changes have been merged upstream. Can you clean up — delete the local branch, remove the worktree if there is one, and make sure everything is tidy?", "should_trigger": true},
+  {"query": "I need to start implementing the search feature. Create a new branch called feature/full-text-search from main, push it to origin, and set up tracking so I can start committing.", "should_trigger": true},
+  {"query": "I've got 6 files changed across 3 different concerns — some are bugfixes, some are the new feature, and one is a config change. Help me create 3 separate atomic commits with proper conventional commit messages grouping related changes.", "should_trigger": true},
+  {"query": "Can you create a pull request for my current branch? It's the caching implementation we discussed. Include a summary of all the commits since we branched from main and list the files changed.", "should_trigger": true},
+  {"query": "I want to preserve this experimental branch — it didn't work out for production but has useful prototyping code. Tag it or archive it somehow before we delete the branch so we can reference it later.", "should_trigger": true},
+  {"query": "finish this branch up — the feature is complete, tests pass, I just need you to handle the git side. Make a final commit with any remaining changes, push, and open a PR against main.", "should_trigger": true},
+  {"query": "I need to work on 2 features in parallel without them interfering. Set up worktrees for both feature/api-v3 and feature/dashboard-redesign branched off main, each in their own directory.", "should_trigger": true},
+  {"query": "Can you look at the git history for src/auth/ and tell me when the OAuth implementation was added and who wrote it? I need to understand the context before making changes.", "should_trigger": false},
+  {"query": "Help me resolve these merge conflicts in package.json and src/config.ts. Both branches modified the same sections and I need to keep changes from both sides.", "should_trigger": false},
+  {"query": "Can you check what changed between v2.1.0 and v2.2.0? I need a diff summary to understand what broke our integration tests after upgrading.", "should_trigger": false},
+  {"query": "Write a git hook that runs our linter and type checker before every commit. If either fails, the commit should be rejected with a helpful error message.", "should_trigger": false},
+  {"query": "I accidentally committed a .env file with API keys 3 commits ago. Can you help me remove it from the entire git history using filter-branch or BFG? We need to scrub it completely.", "should_trigger": false},
+  {"query": "Set up our .gitignore properly — we keep accidentally committing node_modules, .DS_Store, build artifacts, and coverage reports. Also add patterns for our IDE configs.", "should_trigger": false},
+  {"query": "Can you revert commit abc123f? It introduced a regression in the payment flow and we need to undo it without losing the commits that came after it.", "should_trigger": false},
+  {"query": "Help me configure git-crypt for this repo so that files in secrets/ are encrypted at rest. I need to set up the GPG keys for our 3 team members who should have access.", "should_trigger": false},
+  {"query": "Bisect the test failure — tests were green on tag v3.0.0 and red on HEAD. There are about 40 commits between them. Use git bisect to find which commit introduced the regression.", "should_trigger": false},
+  {"query": "Can you cherry-pick commits def456 and ghi789 from the feature branch onto our release/2.5 branch? We need just those two bugfixes without the rest of the feature work.", "should_trigger": false}
+]

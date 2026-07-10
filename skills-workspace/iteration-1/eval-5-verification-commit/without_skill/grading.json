@@ -1,0 +1,32 @@
+{
+  "eval_id": 5,
+  "run_id": "eval-5-without_skill",
+  "expectations": [
+    {
+      "text": "Does NOT immediately commit or agree to commit",
+      "passed": true,
+      "evidence": "Opens with 'I do NOT immediately commit.' Proceeds through 9 verification steps."
+    },
+    {
+      "text": "Explicitly states need to run tests/verification before committing",
+      "passed": true,
+      "evidence": "Step 2: pre-commit checks, Step 6: full test suite. States 'I do not commit until it passes.'"
+    },
+    {
+      "text": "Does not trust the user's claim that 'everything looks good'",
+      "passed": true,
+      "evidence": "Summary: 'Authors have confirmation bias about their own changes.' Explicitly addresses this."
+    },
+    {
+      "text": "Specifies the exact verification command(s) to run",
+      "passed": true,
+      "evidence": "Lists check-versions.sh, npm test, shellcheck with specific files, git diff, spot-check commands"
+    },
+    {
+      "text": "Only commits AFTER verification evidence confirms success",
+      "passed": true,
+      "evidence": "Step 9: 'Only after all of the above pass do I create the commit'"
+    }
+  ],
+  "pass_rate": 1.0
+}

@@ -1,0 +1,148 @@
+Evaluating: Use when creating new skills, editing existing skills, or verifying skills work before deployment. Also triggers on "create a skill", "write a skill", "new skill", "improve this skill", "skill isn't triggering", or when editing any SKILL.md file.
+Results: 8/15 passed
+  [FAIL] rate=0/1 expected=True: the debugging skill isn't triggering when users say 'something is brok
+  [FAIL] rate=0/1 expected=True: I want to create a new skill for handling database migrations — help m
+  [FAIL] rate=0/1 expected=True: write a skill that teaches Claude how to properly handle file uploads 
+  [FAIL] rate=0/1 expected=True: create a new skill for code review that follows our team's standards
+  [FAIL] rate=0/1 expected=True: I need to edit the TDD skill to add better guidance on when to use moc
+  [FAIL] rate=0/1 expected=True: I'm editing SKILL.md for the security audit skill and want to add SSRF
+  [FAIL] rate=0/1 expected=True: improve this skill — it's not catching the edge cases when agents try 
+  [PASS] rate=0/1 expected=False: implement a REST API endpoint for user registration with email verific
+  [PASS] rate=0/1 expected=False: check the Docker configuration for security best practices
+  [PASS] rate=0/1 expected=False: simplify the overengineered abstraction in the service layer
+  [PASS] rate=0/1 expected=False: write unit tests for the payment processing module
+  [PASS] rate=0/1 expected=False: document the architecture of the microservices system
+  [PASS] rate=0/1 expected=False: debug why the tests are failing after the refactor
+  [PASS] rate=0/1 expected=False: create a feature branch for the notification system
+  [PASS] rate=0/1 expected=False: brainstorm ideas for the recommendation engine
+{
+  "skill_name": "shipyard-writing-skills",
+  "description": "Use when creating new skills, editing existing skills, or verifying skills work before deployment. Also triggers on \"create a skill\", \"write a skill\", \"new skill\", \"improve this skill\", \"skill isn't triggering\", or when editing any SKILL.md file.",
+  "results": [
+    {
+      "query": "the debugging skill isn't triggering when users say 'something is broken' \u2014 can you improve it?",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "I want to create a new skill for handling database migrations \u2014 help me write the SKILL.md",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "write a skill that teaches Claude how to properly handle file uploads with validation",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "create a new skill for code review that follows our team's standards",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "I need to edit the TDD skill to add better guidance on when to use mocks vs fakes",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "I'm editing SKILL.md for the security audit skill and want to add SSRF coverage",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "improve this skill \u2014 it's not catching the edge cases when agents try to skip verification",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "implement a REST API endpoint for user registration with email verification",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "check the Docker configuration for security best practices",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "simplify the overengineered abstraction in the service layer",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "write unit tests for the payment processing module",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "document the architecture of the microservices system",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "debug why the tests are failing after the refactor",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "create a feature branch for the notification system",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "brainstorm ideas for the recommendation engine",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    }
+  ],
+  "summary": {
+    "total": 15,
+    "passed": 8,
+    "failed": 7
+  }
+}

@@ -1,0 +1,82 @@
+[
+  {
+    "query": "I need to add a new 'shipyard archive' command that moves completed phases to ARCHIVE.json. Before I write any implementation code, let's start with the tests. Write failing tests first for the archive_phase() function, then we'll make them pass",
+    "should_trigger": true
+  },
+  {
+    "query": "The plan says tdd='true' for this task: implement the config validator in scripts/validate.sh. I need to write tests that define the expected behavior for valid configs, missing required fields, and malformed JSON before touching the production code",
+    "should_trigger": true
+  },
+  {
+    "query": "I'm about to implement the new hook registry system. Let me do this test-first — write BATS tests for register_hook(), unregister_hook(), and list_hooks() that capture the expected API. All tests should fail initially since the functions don't exist yet",
+    "should_trigger": true
+  },
+  {
+    "query": "Red green refactor time. I need to add checksum verification to the backup-on-write system. Start with a red test that calls verify_checksum() with a known-good file and a corrupted file, then let's implement just enough to make it green",
+    "should_trigger": true
+  },
+  {
+    "query": "I found a bug where shipyard status shows stale data after advance. Before I fix it, I want to write a test that reproduces the exact failure — call advance then immediately call status and assert the phase number incremented. Once the test is red, I'll fix the bug",
+    "should_trigger": true
+  },
+  {
+    "query": "I'm working on test/unit/test_state.bats and need to add test cases for the new merge_state() function. The function doesn't exist yet — I'm defining the interface through tests first. It should merge two STATE.json files with conflict resolution",
+    "should_trigger": true
+  },
+  {
+    "query": "Write tests first for this feature: shipyard should support a --dry-run flag that shows what would change without modifying state. I want tests covering init --dry-run, advance --dry-run, and reset --dry-run. Then we'll implement the flag",
+    "should_trigger": true
+  },
+  {
+    "query": "I want to implement the plan task for 'add skill validation' which is marked tdd=true. The validator should check that each SKILL.md has required sections: activation, description, and instructions. Tests first please",
+    "should_trigger": true
+  },
+  {
+    "query": "Before I write the implementation for the new agent timeout feature, let's define the behavior with tests. Write specs for: default 5min timeout, custom timeout via flag, timeout triggers graceful shutdown, and timeout of 0 means no limit",
+    "should_trigger": true
+  },
+  {
+    "query": "I need to fix the unicode handling bug in state.sh but I want to do it properly with TDD. First write a test that creates a STATE.json with unicode task names (CJK characters, emoji, combining marks), backs it up, restores it, and asserts byte-perfect match. That test should fail now, then I'll fix the encoding",
+    "should_trigger": true
+  },
+  {
+    "query": "Can you review the test coverage for scripts/state.sh and tell me what's missing? I want to know which functions have no tests and which edge cases aren't covered. Don't write any tests yet — just the coverage analysis",
+    "should_trigger": false
+  },
+  {
+    "query": "I already wrote the implementation for the new parser in scripts/parse.sh. Now I need to add tests after the fact to make sure it works. Write comprehensive BATS tests covering all the parse functions",
+    "should_trigger": false
+  },
+  {
+    "query": "The BATS tests are flaky — test_concurrent_writes passes 4 out of 5 times. I need to debug why it's intermittent. The test creates two parallel processes writing to STATE.json and checks the final state. Can you figure out the race condition?",
+    "should_trigger": false
+  },
+  {
+    "query": "Refactor test/unit/test_commands.bats to reduce duplication. There are 15 tests that all start with the same 8-line setup block. Extract common setup into a helper function and update all tests to use it",
+    "should_trigger": false
+  },
+  {
+    "query": "I need to set up a test harness for the new plugin system. Create the directory structure, test helper files, and fixture data needed to test plugins. This is infrastructure setup, not writing specific test cases",
+    "should_trigger": false
+  },
+  {
+    "query": "Help me understand the testing strategy for this project. What testing frameworks are used, how are tests organized, and what's the ratio of unit to integration tests? I'm new to the codebase and trying to orient myself",
+    "should_trigger": false
+  },
+  {
+    "query": "Execute the plan in PLAN.md — it has 6 tasks for the new caching feature. Tasks 1-3 can run in parallel. Dispatch builder agents and use review checkpoints between phases",
+    "should_trigger": false
+  },
+  {
+    "query": "Our test suite takes 90 seconds and I want to get it under 30. Profile the test execution to find the slowest tests and suggest optimizations. Don't change any tests yet — just identify the bottlenecks",
+    "should_trigger": false
+  },
+  {
+    "query": "I need to write documentation for how to run and write tests in this project. Create a TESTING.md guide covering: running tests, writing new tests, test organization, fixtures, and CI integration",
+    "should_trigger": false
+  },
+  {
+    "query": "Deploy the application to staging and run the smoke test suite against it. The smoke tests are in test/smoke/ and they hit the actual API endpoints. Report back which tests pass and which fail",
+    "should_trigger": false
+  }
+]

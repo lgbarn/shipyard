@@ -1,0 +1,17 @@
+[
+  {"query": "I have the requirements for the notification system — let's create a detailed implementation plan with tasks", "should_trigger": true},
+  {"query": "plan this feature out — I need executable tasks with file paths and verification steps", "should_trigger": true},
+  {"query": "break this project down into bite-sized tasks that a builder agent can execute", "should_trigger": true},
+  {"query": "create tasks for implementing the REST API — I need the full plan with test steps and commit points", "should_trigger": true},
+  {"query": "decompose this feature into implementation steps — the auth system needs login, signup, password reset, and session management", "should_trigger": true},
+  {"query": "we have the spec for the search feature, now let's turn it into a plan with TDD steps", "should_trigger": true},
+  {"query": "write an implementation plan for the caching layer that a fresh agent could follow without any context", "should_trigger": true},
+  {"query": "fix the null pointer exception in the user service", "should_trigger": false},
+  {"query": "run the existing plan — execute the tasks in PLAN-1.1.md", "should_trigger": false},
+  {"query": "what approach should we take for the notification system? let's brainstorm", "should_trigger": false},
+  {"query": "write documentation for the API endpoints", "should_trigger": false},
+  {"query": "create a branch for the feature work", "should_trigger": false},
+  {"query": "scan for security vulnerabilities in the codebase", "should_trigger": false},
+  {"query": "simplify the overly complex factory pattern", "should_trigger": false},
+  {"query": "debug why tests are failing in CI", "should_trigger": false}
+]

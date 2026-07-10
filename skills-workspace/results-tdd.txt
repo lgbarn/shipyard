@@ -1,0 +1,157 @@
+Evaluating: Use when implementing any feature, bugfix, or behavior change — before writing implementation code. Also triggers on "add a feature", "implement X", "build this", "fix this bug", or any task that will produce new production code. If you're about to write code that isn't a test, this skill applies.
+Results: 8/16 passed
+  [FAIL] rate=0/1 expected=True: add a retry mechanism to the HTTP client that retries failed requests 
+  [FAIL] rate=0/1 expected=True: implement email validation for the signup form — reject empty, missing
+  [FAIL] rate=0/1 expected=True: build a rate limiter middleware that caps requests at 100 per minute p
+  [FAIL] rate=0/1 expected=True: implement the password reset flow — generate token, send email, valida
+  [FAIL] rate=0/1 expected=True: I need to add a new command to the CLI that exports project data as CS
+  [FAIL] rate=0/1 expected=True: create a function that merges two sorted arrays without using extra sp
+  [FAIL] rate=0/1 expected=True: fix the bug where users can submit the form twice by double-clicking t
+  [FAIL] rate=0/1 expected=True: add support for webhook signature verification using HMAC-SHA256
+  [PASS] rate=0/1 expected=False: what's the difference between unit tests and integration tests? when s
+  [PASS] rate=0/1 expected=False: explain how the authentication middleware works in this codebase
+  [PASS] rate=0/1 expected=False: review the existing test suite and tell me if there are any gaps in co
+  [PASS] rate=0/1 expected=False: document the API endpoints in the payments module
+  [PASS] rate=0/1 expected=False: I want to brainstorm ideas for a notification system — what options do
+  [PASS] rate=0/1 expected=False: set up the Docker Compose file for local development with PostgreSQL a
+  [PASS] rate=0/1 expected=False: can you read through src/auth/middleware.ts and explain what each func
+  [PASS] rate=0/1 expected=False: update the README with installation instructions for the new CLI tool
+{
+  "skill_name": "shipyard-tdd",
+  "description": "Use when implementing any feature, bugfix, or behavior change \u2014 before writing implementation code. Also triggers on \"add a feature\", \"implement X\", \"build this\", \"fix this bug\", or any task that will produce new production code. If you're about to write code that isn't a test, this skill applies.",
+  "results": [
+    {
+      "query": "add a retry mechanism to the HTTP client that retries failed requests up to 3 times with exponential backoff",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "implement email validation for the signup form \u2014 reject empty, missing @, and disposable email domains",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "build a rate limiter middleware that caps requests at 100 per minute per API key",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "implement the password reset flow \u2014 generate token, send email, validate token, update password",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "I need to add a new command to the CLI that exports project data as CSV",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "create a function that merges two sorted arrays without using extra space",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "fix the bug where users can submit the form twice by double-clicking the submit button",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "add support for webhook signature verification using HMAC-SHA256",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "what's the difference between unit tests and integration tests? when should I use each?",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "explain how the authentication middleware works in this codebase",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "review the existing test suite and tell me if there are any gaps in coverage",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "document the API endpoints in the payments module",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "I want to brainstorm ideas for a notification system \u2014 what options do we have?",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "set up the Docker Compose file for local development with PostgreSQL and Redis",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "can you read through src/auth/middleware.ts and explain what each function does?",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "update the README with installation instructions for the new CLI tool",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    }
+  ],
+  "summary": {
+    "total": 16,
+    "passed": 8,
+    "failed": 8
+  }
+}

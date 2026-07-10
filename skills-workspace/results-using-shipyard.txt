@@ -1,0 +1,148 @@
+Evaluating: Use when starting any conversation, when unsure how to proceed, or when the user asks "what should I do", "help me", "how do I use shipyard", "where do I start", or "what commands are available". This is the index of all Shipyard skills and commands — consult it before any response to check if a more specific skill applies.
+Results: 8/15 passed
+  [FAIL] rate=0/1 expected=True: what should I do first? I just installed shipyard and don't know where
+  [FAIL] rate=0/1 expected=True: help me — what commands does shipyard have?
+  [FAIL] rate=0/1 expected=True: how do I use shipyard to plan and build a new feature?
+  [FAIL] rate=0/1 expected=True: what skills are available in shipyard? how do I trigger them?
+  [FAIL] rate=0/1 expected=True: I'm confused about the shipyard workflow — what's the difference betwe
+  [FAIL] rate=0/1 expected=True: where do I start with this project? I want to use shipyard for structu
+  [FAIL] rate=0/1 expected=True: what commands are available for managing my project with shipyard?
+  [PASS] rate=0/1 expected=False: implement the email verification feature with token-based confirmation
+  [PASS] rate=0/1 expected=False: simplify the complex factory pattern in the notification service
+  [PASS] rate=0/1 expected=False: create a detailed implementation plan for the search feature
+  [PASS] rate=0/1 expected=False: check the terraform config for security issues
+  [PASS] rate=0/1 expected=False: fix the bug in the payment processing module
+  [PASS] rate=0/1 expected=False: write tests for the user authentication flow
+  [PASS] rate=0/1 expected=False: document the REST API endpoints with examples
+  [PASS] rate=0/1 expected=False: set up a worktree for isolated feature development
+{
+  "skill_name": "using-shipyard",
+  "description": "Use when starting any conversation, when unsure how to proceed, or when the user asks \"what should I do\", \"help me\", \"how do I use shipyard\", \"where do I start\", or \"what commands are available\". This is the index of all Shipyard skills and commands \u2014 consult it before any response to check if a more specific skill applies.",
+  "results": [
+    {
+      "query": "what should I do first? I just installed shipyard and don't know where to start",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "help me \u2014 what commands does shipyard have?",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "how do I use shipyard to plan and build a new feature?",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "what skills are available in shipyard? how do I trigger them?",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "I'm confused about the shipyard workflow \u2014 what's the difference between plan, build, and ship?",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "where do I start with this project? I want to use shipyard for structured development",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "what commands are available for managing my project with shipyard?",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "implement the email verification feature with token-based confirmation",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "simplify the complex factory pattern in the notification service",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "create a detailed implementation plan for the search feature",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "check the terraform config for security issues",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "fix the bug in the payment processing module",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "write tests for the user authentication flow",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "document the REST API endpoints with examples",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "set up a worktree for isolated feature development",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    }
+  ],
+  "summary": {
+    "total": 15,
+    "passed": 8,
+    "failed": 7
+  }
+}

@@ -1,0 +1,193 @@
+Evaluating: Use when facing 2+ independent tasks that can be worked on without shared state or sequential dependencies. Also use when multiple test files fail with different root causes, multiple subsystems are broken independently, or you want agents to work concurrently on separate problem domains. If tasks touch different files and don't share state, this skill applies.
+Results: 12/20 passed
+  [FAIL] rate=0/3 expected=True: we have a plan with 8 tasks and tasks 1-3 are independent (different f
+  [FAIL] rate=0/3 expected=True: I need to build 4 independent microservices: user-service, order-servi
+  [FAIL] rate=0/3 expected=True: we have 6 test files failing after the big refactor. test/auth.bats ha
+  [FAIL] rate=0/3 expected=True: our codebase mapping needs to cover 4 focus areas: architecture, testi
+  [FAIL] rate=0/3 expected=True: we need to update the API docs, the architecture docs, and the user gu
+  [FAIL] rate=0/3 expected=True: I've got 3 bugs to fix: one in the auth module, one in the billing mod
+  [FAIL] rate=0/3 expected=True: can you run the security audit and the documentation generation at the
+  [FAIL] rate=0/3 expected=True: the build phase has 5 plan files and the first 3 are in wave 1 (indepe
+  [PASS] rate=0/3 expected=False: I need to fix the login flow — the OAuth redirect isn't working and th
+  [PASS] rate=0/3 expected=False: can you optimize our database queries? the user search is slow and the
+  [PASS] rate=0/3 expected=False: I need to refactor src/config.ts — it's gotten too complex. can you br
+  [PASS] rate=0/3 expected=False: what's the best approach for adding caching to our API? should we use 
+  [PASS] rate=0/3 expected=False: please review my PR for the new payment integration. check for bugs an
+  [PASS] rate=0/3 expected=False: can you explain how the event system works? I'm trying to understand t
+  [PASS] rate=0/3 expected=False: I need to add error handling to the file upload endpoint. it currently
+  [PASS] rate=0/3 expected=False: help me debug this test failure — test/integration.bats line 45 fails 
+  [PASS] rate=0/3 expected=False: our build is failing because task 3 depends on task 2's output (the ge
+  [PASS] rate=0/3 expected=False: two of our test files are failing but they both import from the same b
+  [PASS] rate=0/3 expected=False: I need to update the package.json version and the changelog at the sam
+  [PASS] rate=0/3 expected=False: can you set up our monitoring dashboards? we need CPU, memory, and req
+{
+  "skill_name": "parallel-dispatch",
+  "description": "Use when facing 2+ independent tasks that can be worked on without shared state or sequential dependencies. Also use when multiple test files fail with different root causes, multiple subsystems are broken independently, or you want agents to work concurrently on separate problem domains. If tasks touch different files and don't share state, this skill applies.",
+  "results": [
+    {
+      "query": "we have a plan with 8 tasks and tasks 1-3 are independent (different files, different modules). can we run those in parallel to speed things up?",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "I need to build 4 independent microservices: user-service, order-service, notification-service, and payment-service. they don't share any code. can we work on them simultaneously?",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "we have 6 test files failing after the big refactor. test/auth.bats has 3 failures, test/config.bats has 2, and test/deploy.bats has 1. the auth and config failures look completely unrelated \u2014 different subsystems, different error messages",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "our codebase mapping needs to cover 4 focus areas: architecture, testing, conventions, and integrations. each area is independent \u2014 different files, different analysis",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "we need to update the API docs, the architecture docs, and the user guide. they're all separate documents covering different things",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "I've got 3 bugs to fix: one in the auth module, one in the billing module, and one in the notification system. completely separate issues with separate root causes",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "can you run the security audit and the documentation generation at the same time? they don't depend on each other",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "the build phase has 5 plan files and the first 3 are in wave 1 (independent). should we run builders concurrently?",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "I need to fix the login flow \u2014 the OAuth redirect isn't working and the session token expires too quickly. these might be related since they're both in the auth module",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "can you optimize our database queries? the user search is slow and the order listing is slow \u2014 both hit the same users table with joins",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "I need to refactor src/config.ts \u2014 it's gotten too complex. can you break it into smaller modules?",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "what's the best approach for adding caching to our API? should we use Redis or in-memory?",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "please review my PR for the new payment integration. check for bugs and security issues",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "can you explain how the event system works? I'm trying to understand the pub/sub pattern in our codebase",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "I need to add error handling to the file upload endpoint. it currently crashes on large files",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "help me debug this test failure \u2014 test/integration.bats line 45 fails with 'expected 200, got 500'. it started failing after yesterday's deploy",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "our build is failing because task 3 depends on task 2's output (the generated types file). can we still parallelize somehow?",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "two of our test files are failing but they both import from the same broken utility module. fixing the utility should fix both",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "I need to update the package.json version and the changelog at the same time so they stay in sync",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "can you set up our monitoring dashboards? we need CPU, memory, and request latency graphs",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    }
+  ],
+  "summary": {
+    "total": 20,
+    "passed": 12,
+    "failed": 8
+  }
+}

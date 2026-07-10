@@ -1,0 +1,27 @@
+{
+  "eval_id": 3,
+  "eval_name": "debugging-jq-null-error",
+  "prompt": "The /shipyard:build command fails with 'jq: error: null is not iterable' when run on a fresh project. I've tried clearing the cache and reinstalling but it still happens.",
+  "assertions": [
+    {
+      "text": "Does NOT immediately propose a fix or solution",
+      "type": "behavioral"
+    },
+    {
+      "text": "First step involves reading/reproducing the error message",
+      "type": "ordering"
+    },
+    {
+      "text": "Traces data flow to identify which jq expression receives null",
+      "type": "behavioral"
+    },
+    {
+      "text": "Mentions checking recent changes or git diff as part of investigation",
+      "type": "behavioral"
+    },
+    {
+      "text": "Forms explicit hypothesis before proposing any fix",
+      "type": "behavioral"
+    }
+  ]
+}

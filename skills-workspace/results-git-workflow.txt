@@ -1,0 +1,157 @@
+Evaluating: Use when starting feature work that needs a branch, creating worktrees for isolation, making atomic commits during development, or completing a branch via merge, PR, preserve, or discard. Also triggers on "create a branch", "set up worktree", "commit this", "merge branch", "start feature work", "create a PR", or any git branching/delivery workflow.
+Results: 8/16 passed
+  [FAIL] rate=0/1 expected=True: ok the feature is done, let's merge this branch back into main
+  [FAIL] rate=0/1 expected=True: create a PR for the changes on the feat-notifications branch with a su
+  [FAIL] rate=0/1 expected=True: I want to discard this branch — the approach didn't work out and I wan
+  [FAIL] rate=0/1 expected=True: set up an isolated workspace so I can work on the migration without af
+  [FAIL] rate=0/1 expected=True: I'm about to start working on the new auth feature — can you create a 
+  [FAIL] rate=0/1 expected=True: commit these changes with the message 'feat: add rate limiting to API 
+  [FAIL] rate=0/1 expected=True: push the current branch and create a pull request for review
+  [FAIL] rate=0/1 expected=True: start feature work on the user roles system — I need a clean branch fr
+  [PASS] rate=0/1 expected=False: brainstorm how to architect the notification system
+  [PASS] rate=0/1 expected=False: implement the email verification flow with token generation and valida
+  [PASS] rate=0/1 expected=False: check the terraform modules for security misconfigurations
+  [PASS] rate=0/1 expected=False: simplify the overengineered abstraction layers in the service module
+  [PASS] rate=0/1 expected=False: document the GraphQL schema with examples for each query and mutation
+  [PASS] rate=0/1 expected=False: scan dependencies for known vulnerabilities
+  [PASS] rate=0/1 expected=False: debug why the API is returning 500 errors on the /users endpoint
+  [PASS] rate=0/1 expected=False: write tests for the new payment processing module
+{
+  "skill_name": "git-workflow",
+  "description": "Use when starting feature work that needs a branch, creating worktrees for isolation, making atomic commits during development, or completing a branch via merge, PR, preserve, or discard. Also triggers on \"create a branch\", \"set up worktree\", \"commit this\", \"merge branch\", \"start feature work\", \"create a PR\", or any git branching/delivery workflow.",
+  "results": [
+    {
+      "query": "ok the feature is done, let's merge this branch back into main",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "create a PR for the changes on the feat-notifications branch with a summary of what changed",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "I want to discard this branch \u2014 the approach didn't work out and I want to start fresh",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "set up an isolated workspace so I can work on the migration without affecting the main branch",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "I'm about to start working on the new auth feature \u2014 can you create a branch and set up a worktree?",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "commit these changes with the message 'feat: add rate limiting to API endpoints'",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "push the current branch and create a pull request for review",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "start feature work on the user roles system \u2014 I need a clean branch from main",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "brainstorm how to architect the notification system",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "implement the email verification flow with token generation and validation",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "check the terraform modules for security misconfigurations",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "simplify the overengineered abstraction layers in the service module",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "document the GraphQL schema with examples for each query and mutation",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "scan dependencies for known vulnerabilities",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "debug why the API is returning 500 errors on the /users endpoint",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "write tests for the new payment processing module",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    }
+  ],
+  "summary": {
+    "total": 16,
+    "passed": 8,
+    "failed": 8
+  }
+}

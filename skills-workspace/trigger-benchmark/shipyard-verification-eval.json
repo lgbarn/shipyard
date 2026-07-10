@@ -1,0 +1,22 @@
+[
+  {"query": "OK I think that refactor looks good, let me commit this and open a PR. The tests should still pass since I only changed the formatting. Go ahead and push to the feature branch.", "should_trigger": true},
+  {"query": "Alright, the migration is done and everything seems to be working. Let's move on to the next task — implementing the webhook handler for Stripe events.", "should_trigger": true},
+  {"query": "Great! That fixes the race condition in the worker pool. The mutex lock will probably prevent the double-write we were seeing. Create a commit with message 'fix: resolve race condition in worker pool'.", "should_trigger": true},
+  {"query": "I updated the nginx config to proxy /api requests to port 3001. It should work now. Let's commit this and deploy to staging so the frontend team can unblock.", "should_trigger": true},
+  {"query": "Done! I rewrote the authentication middleware to use JWT instead of sessions. The login flow seems to work based on my reading of the code. Can you create a PR against main with a summary of changes?", "should_trigger": true},
+  {"query": "That error in src/lib/cache.ts is fixed — I changed the TTL from seconds to milliseconds which was probably the issue. Let me tag this as v2.4.1 and draft release notes.", "should_trigger": true},
+  {"query": "I've finished implementing all 5 API endpoints for the billing module. Everything looks correct to me. Let's move to the frontend integration — start with the subscription page at app/billing/page.tsx.", "should_trigger": true},
+  {"query": "The CI pipeline is green now, I added the missing env var. This should resolve the flaky test issue we've been seeing. Mark this Jira ticket as done and let's move to PROJ-892.", "should_trigger": true},
+  {"query": "Perfect, the database schema migration is complete. I'm fairly confident the foreign key constraints are correct. Go ahead and commit with 'feat: add invoice tables with FK constraints' and open the PR.", "should_trigger": true},
+  {"query": "Alright that was the last file. The entire codebase has been migrated from CommonJS to ESM — require() calls replaced with import, package.json updated, tsconfig adjusted. Ship it!", "should_trigger": true},
+  {"query": "Can you explain how the verification skill works? I want to understand when it triggers and what checks it performs on the codebase before allowing commits.", "should_trigger": false},
+  {"query": "I need to set up a pre-commit hook that runs eslint and prettier on staged files. Here's my .husky/pre-commit file — can you review it and suggest improvements?", "should_trigger": false},
+  {"query": "Read through the test suite in test/integration/ and give me a summary of what's covered and what gaps exist. Don't run anything yet, just analyze the test files.", "should_trigger": false},
+  {"query": "Write a bash script that verifies all Docker containers are healthy before running the deployment script. It should check container status, port availability, and log output.", "should_trigger": false},
+  {"query": "I'm getting a type error in src/utils/validator.ts on line 47. The generic constraint isn't matching. Can you look at the file and figure out what's wrong?", "should_trigger": false},
+  {"query": "Help me design a verification system for our data pipeline — we need checksums at each stage so we can detect data corruption between transforms.", "should_trigger": false},
+  {"query": "Can you add input validation to the /api/users POST endpoint? It needs to check email format, password strength, and that the username is between 3-30 characters.", "should_trigger": false},
+  {"query": "Let me understand the current test coverage. Run the coverage report and show me which files in src/services/ are below 80% line coverage.", "should_trigger": false},
+  {"query": "I want to refactor the error handling in our Express app. Currently errors are caught inconsistently — some routes use try/catch, others use .catch(), and some don't handle errors at all. What's the best approach?", "should_trigger": false},
+  {"query": "Before we start coding, walk me through the architecture of the payments module. I need to understand how src/payments/processor.ts interacts with the Stripe SDK and our internal ledger.", "should_trigger": false}
+]

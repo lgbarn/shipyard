@@ -1,0 +1,152 @@
+{
+  "skill_name": "shipyard-skills-suite",
+  "evals": [
+    {
+      "id": 1,
+      "skill": "shipyard-tdd",
+      "prompt": "I need to add a --dry-run flag to the state-write.sh script. It should print what it would write to STATE.json but not actually write it. Can you add that?",
+      "expected_output": "Agent should write a failing test first (e.g., in test/state-write.bats), watch it fail, then implement the flag, then verify tests pass",
+      "files": ["scripts/state-write.sh"]
+    },
+    {
+      "id": 2,
+      "skill": "shipyard-tdd",
+      "prompt": "There's a validation function in scripts/config-read.sh that should reject config files with missing 'name' fields. Right now it silently accepts them. Fix it.",
+      "expected_output": "Agent should write a failing test reproducing the missing-name acceptance, watch it fail, then add the validation, then verify",
+      "files": ["scripts/config-read.sh"]
+    },
+    {
+      "id": 3,
+      "skill": "shipyard-debugging",
+      "prompt": "The /shipyard:build command fails with 'jq: error: null is not iterable' when run on a fresh project. I've tried clearing the cache and reinstalling but it still happens.",
+      "expected_output": "Agent should NOT jump to fixes. Should reproduce the error, read the full error message, trace the data flow through jq, identify which field is null, and find root cause before proposing any fix",
+      "files": []
+    },
+    {
+      "id": 4,
+      "skill": "shipyard-debugging",
+      "prompt": "Tests pass locally but fail in CI with exit code 141. Specifically test/state-write.bats. I've already tried increasing timeouts and it didn't help.",
+      "expected_output": "Agent should investigate root cause (exit 141 = SIGPIPE), trace data flow, check for pipe issues in the test, not just add more timeouts",
+      "files": []
+    },
+    {
+      "id": 5,
+      "skill": "shipyard-verification",
+      "prompt": "I've refactored the config system to use jq instead of sed. Everything looks good, can you commit this?",
+      "expected_output": "Agent should NOT commit without running tests first. Should run the full test suite, read the output, confirm 0 failures, then make the claim",
+      "files": []
+    },
+    {
+      "id": 6,
+      "skill": "shipyard-verification",
+      "prompt": "The builder agent said all tasks completed successfully. Phase 2 is done. Let's ship it.",
+      "expected_output": "Agent should NOT trust the builder's self-report. Should independently verify by running tests, checking VCS diff, and confirming evidence before claiming phase is complete",
+      "files": []
+    },
+    {
+      "id": 7,
+      "skill": "security-audit",
+      "prompt": "I'm adding a database connection to our API server. Here's the connection string: postgresql://admin:supersecret123@db.internal:5432/myapp. Can you set up the connection pool?",
+      "expected_output": "Agent should flag the hardcoded credentials in the connection string, recommend environment variables or secret manager, and not proceed with hardcoded secrets",
+      "files": []
+    },
+    {
+      "id": 8,
+      "skill": "security-audit",
+      "prompt": "Can you add a user search endpoint? The query parameter goes directly into the SQL WHERE clause for speed.",
+      "expected_output": "Agent should flag SQL injection risk, require parameterized queries, and refuse to implement direct string interpolation in SQL",
+      "files": []
+    },
+    {
+      "id": 9,
+      "skill": "code-simplification",
+      "prompt": "We just finished building phase 2 with 4 builder agents. Can you review the changes before we ship? There are about 12 files changed across scripts/ and commands/.",
+      "expected_output": "Agent should scan for duplication across the 12 files, check for functions >40 lines, look for dead code, AI bloat patterns, and over-engineering. Should prioritize findings by severity.",
+      "files": []
+    },
+    {
+      "id": 10,
+      "skill": "parallel-dispatch",
+      "prompt": "We have 4 test files failing: test/state-write.bats (3 failures), test/config-read.bats (2 failures), test/init.bats (1 failure), and test/build.bats (2 failures). The state-write and config-read failures look unrelated.",
+      "expected_output": "Agent should analyze which failures are independent, group by subsystem, and dispatch parallel agents for independent groups. Should NOT parallelize if failures might be related.",
+      "files": []
+    },
+    {
+      "id": 11,
+      "skill": "git-workflow",
+      "prompt": "I want to start working on adding webhook notifications. Can you set up an isolated workspace?",
+      "expected_output": "Agent should check for existing worktree directories, verify gitignore, create worktree with new branch, run project setup, verify baseline tests, report location",
+      "files": []
+    },
+    {
+      "id": 12,
+      "skill": "git-workflow",
+      "prompt": "I'm done implementing the feature. Tests pass. What are my options for wrapping up?",
+      "expected_output": "Agent should verify tests first (run them, not trust the claim), then present exactly 4 options: merge locally, push and create PR, keep as-is, discard",
+      "files": []
+    },
+    {
+      "id": 13,
+      "skill": "documentation",
+      "prompt": "I just added 5 new public functions to the config module. Can you help document them?",
+      "expected_output": "Agent should write docstrings with parameters, returns, exceptions, and examples. Should verify examples work. Should not skip any public function.",
+      "files": []
+    },
+    {
+      "id": 14,
+      "skill": "infrastructure-validation",
+      "prompt": "I updated our Terraform module to add a new S3 bucket and IAM role. Can you check it before I apply?",
+      "expected_output": "Agent should run terraform fmt, validate, plan, lint, and security scan in order. Should flag any overly permissive IAM policies or missing encryption.",
+      "files": []
+    },
+    {
+      "id": 15,
+      "skill": "shipyard-brainstorming",
+      "prompt": "I want to add real-time notifications to our app.",
+      "expected_output": "Agent should ask ONE question at a time to refine requirements. Should propose 2-3 approaches with trade-offs. Should NOT dump multiple questions at once.",
+      "files": []
+    },
+    {
+      "id": 16,
+      "skill": "shipyard-writing-plans",
+      "prompt": "We've agreed on adding JWT auth to our API. Here are the requirements: login endpoint, token validation middleware, refresh tokens. Create an implementation plan.",
+      "expected_output": "Agent should create tasks with exact file paths, complete code samples, TDD steps, verification commands. Each task should be one TDD cycle. Should detect coupling between tasks.",
+      "files": []
+    },
+    {
+      "id": 17,
+      "skill": "shipyard-executing-plans",
+      "prompt": "Here's our plan with 5 tasks. Let's start building.",
+      "expected_output": "Agent should dispatch fresh builder agent per task, run two-stage review (spec compliance THEN code quality), not skip any review stage, and handle failures properly",
+      "files": []
+    },
+    {
+      "id": 18,
+      "skill": "shipyard-testing",
+      "prompt": "I need to add tests for our user authentication module. The module has login, logout, and token refresh functions. How should I structure the tests?",
+      "expected_output": "Agent should recommend behavior-based tests via public APIs, AAA structure, naming conventions, test pyramid guidance, and appropriate use of doubles",
+      "files": []
+    },
+    {
+      "id": 19,
+      "skill": "lessons-learned",
+      "prompt": "Phase 3 is complete. We shipped the team mode feature. Time to wrap up.",
+      "expected_output": "Agent should present 4 structured prompts, pre-populate from build summaries, prioritize pitfalls over what-went-well, and write to LESSONS.md",
+      "files": []
+    },
+    {
+      "id": 20,
+      "skill": "shipyard-writing-skills",
+      "prompt": "I want to create a new skill for database migration validation. It should check migrations before they run.",
+      "expected_output": "Agent should follow TDD for skills: run baseline scenario WITHOUT skill first, document agent rationalizations, then write the skill addressing those specific violations",
+      "files": []
+    },
+    {
+      "id": 21,
+      "skill": "using-shipyard",
+      "prompt": "I'm new to this project. What tools do I have available and how do I get started?",
+      "expected_output": "Agent should invoke the using-shipyard skill, list available commands and skills, recommend starting with /shipyard:init, and explain the lifecycle",
+      "files": []
+    }
+  ]
+}

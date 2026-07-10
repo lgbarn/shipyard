@@ -1,0 +1,18 @@
+[
+  {"query": "my API endpoint is returning a 500 error when I try to create a new user, but only when the email has a plus sign in it like test+foo@gmail.com", "should_trigger": true},
+  {"query": "something is broken in the auth module — login worked yesterday but now it just hangs and eventually times out after about 30 seconds", "should_trigger": true},
+  {"query": "the tests were passing on my machine but CI is failing with 'connection refused' on the database integration tests, not sure what changed", "should_trigger": true},
+  {"query": "I'm getting a weird TypeError: Cannot read properties of undefined in my React component but only when I navigate to the page via the back button", "should_trigger": true},
+  {"query": "it's not working — I deployed the new version and now the webhook handler just silently drops events, no errors in the logs", "should_trigger": true},
+  {"query": "why is this failing? the build was green 2 hours ago and nobody pushed anything since then but now we're getting heap out of memory", "should_trigger": true},
+  {"query": "my cron job ran but the database wasn't updated — the script exits with code 0 but the rows are stale", "should_trigger": true},
+  {"query": "I have three failing tests after the refactor and I don't understand why — they're testing totally different things", "should_trigger": true},
+  {"query": "add a new REST endpoint for listing user notifications with pagination support", "should_trigger": false},
+  {"query": "write documentation for the payment processing module", "should_trigger": false},
+  {"query": "refactor the config loader to use environment variables instead of a JSON file", "should_trigger": false},
+  {"query": "I want to add dark mode support to the settings page, what's the best approach?", "should_trigger": false},
+  {"query": "can you review this PR for code quality? it's the new caching layer for the API", "should_trigger": false},
+  {"query": "set up terraform for our new staging environment with an RDS instance and ECS cluster", "should_trigger": false},
+  {"query": "create a GitHub Actions workflow that runs lint, test, and deploy on push to main", "should_trigger": false},
+  {"query": "what are the best practices for structuring a monorepo with shared packages?", "should_trigger": false}
+]
