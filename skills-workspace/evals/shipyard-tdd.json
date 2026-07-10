@@ -1,0 +1,18 @@
+[
+  {"query": "add a retry mechanism to the HTTP client that retries failed requests up to 3 times with exponential backoff", "should_trigger": true},
+  {"query": "implement email validation for the signup form — reject empty, missing @, and disposable email domains", "should_trigger": true},
+  {"query": "fix the bug where users can submit the form twice by double-clicking the submit button", "should_trigger": true},
+  {"query": "build a rate limiter middleware that caps requests at 100 per minute per API key", "should_trigger": true},
+  {"query": "I need to add a new command to the CLI that exports project data as CSV", "should_trigger": true},
+  {"query": "implement the password reset flow — generate token, send email, validate token, update password", "should_trigger": true},
+  {"query": "add support for webhook signature verification using HMAC-SHA256", "should_trigger": true},
+  {"query": "create a function that merges two sorted arrays without using extra space", "should_trigger": true},
+  {"query": "what's the difference between unit tests and integration tests? when should I use each?", "should_trigger": false},
+  {"query": "explain how the authentication middleware works in this codebase", "should_trigger": false},
+  {"query": "review the existing test suite and tell me if there are any gaps in coverage", "should_trigger": false},
+  {"query": "document the API endpoints in the payments module", "should_trigger": false},
+  {"query": "I want to brainstorm ideas for a notification system — what options do we have?", "should_trigger": false},
+  {"query": "set up the Docker Compose file for local development with PostgreSQL and Redis", "should_trigger": false},
+  {"query": "can you read through src/auth/middleware.ts and explain what each function does?", "should_trigger": false},
+  {"query": "update the README with installation instructions for the new CLI tool", "should_trigger": false}
+]

@@ -1,0 +1,157 @@
+Evaluating: Use when about to claim work is complete, fixed, passing, or done — before committing, creating PRs, or moving to the next task. Also triggers on "it works", "tests pass", "looks good", "should be fine", or any success assertion. Requires running verification commands and reading output before making any completion claim. Evidence before assertions, always.
+Results: 8/16 passed
+  [FAIL] rate=0/1 expected=True: ok I think that should fix it, the auth module is updated now
+  [FAIL] rate=0/1 expected=True: the tests should pass now after those changes to the validation logic
+  [FAIL] rate=0/1 expected=True: I'm pretty confident that fixes the race condition, let's commit and m
+  [FAIL] rate=0/1 expected=True: I've verified the fix works by checking the logs, ready to merge
+  [FAIL] rate=0/1 expected=True: done — I've refactored the database layer and everything looks good
+  [FAIL] rate=0/1 expected=True: looks good to me, the refactoring is done and I didn't break anything
+  [FAIL] rate=0/1 expected=True: alright, the feature is complete — let's create a PR for this
+  [FAIL] rate=0/1 expected=True: that should be fine now, let's move to the next task
+  [PASS] rate=0/1 expected=False: add a health check endpoint that returns the service status and uptime
+  [PASS] rate=0/1 expected=False: explain the data flow in the order processing pipeline
+  [PASS] rate=0/1 expected=False: I want to redesign the user dashboard — let's brainstorm the layout
+  [PASS] rate=0/1 expected=False: write a migration script to add the 'status' column to the orders tabl
+  [PASS] rate=0/1 expected=False: what does the error 'ECONNREFUSED' mean in the context of our Redis co
+  [PASS] rate=0/1 expected=False: set up ESLint and Prettier for the project with our team's style guide
+  [PASS] rate=0/1 expected=False: I need help understanding how the caching layer works before I modify 
+  [PASS] rate=0/1 expected=False: create a new branch for the feature work on user roles and permissions
+{
+  "skill_name": "shipyard-verification",
+  "description": "Use when about to claim work is complete, fixed, passing, or done \u2014 before committing, creating PRs, or moving to the next task. Also triggers on \"it works\", \"tests pass\", \"looks good\", \"should be fine\", or any success assertion. Requires running verification commands and reading output before making any completion claim. Evidence before assertions, always.",
+  "results": [
+    {
+      "query": "ok I think that should fix it, the auth module is updated now",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "the tests should pass now after those changes to the validation logic",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "I'm pretty confident that fixes the race condition, let's commit and move on",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "I've verified the fix works by checking the logs, ready to merge",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "done \u2014 I've refactored the database layer and everything looks good",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "looks good to me, the refactoring is done and I didn't break anything",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "alright, the feature is complete \u2014 let's create a PR for this",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "that should be fine now, let's move to the next task",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "add a health check endpoint that returns the service status and uptime",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "explain the data flow in the order processing pipeline",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "I want to redesign the user dashboard \u2014 let's brainstorm the layout",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "write a migration script to add the 'status' column to the orders table",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "what does the error 'ECONNREFUSED' mean in the context of our Redis connection?",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "set up ESLint and Prettier for the project with our team's style guide",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "I need help understanding how the caching layer works before I modify it",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "create a new branch for the feature work on user roles and permissions",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    }
+  ],
+  "summary": {
+    "total": 16,
+    "passed": 8,
+    "failed": 8
+  }
+}

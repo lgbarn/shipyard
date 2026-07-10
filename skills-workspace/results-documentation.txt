@@ -1,0 +1,157 @@
+Evaluating: Use when generating documentation, updating README files, writing API docs, creating architecture documentation, or when documentation is incomplete or outdated. Also triggers on "document this", "write docs", "update README", "API docs", "how does this work", "explain this code", "needs documentation", or when shipping features with public interfaces that lack docs.
+Results: 8/16 passed
+  [FAIL] rate=0/1 expected=True: document the REST API endpoints for the user management module — we ne
+  [FAIL] rate=0/1 expected=True: write API docs for the new search endpoints we just shipped
+  [FAIL] rate=0/1 expected=True: create a how-to guide for setting up the development environment from 
+  [FAIL] rate=0/1 expected=True: update the README with the new installation instructions and getting s
+  [FAIL] rate=0/1 expected=True: explain this code — what does the reconciliation function actually do 
+  [FAIL] rate=0/1 expected=True: the architecture documentation is outdated — we need to update it afte
+  [FAIL] rate=0/1 expected=True: we just added 5 new CLI commands and none of them have documentation y
+  [FAIL] rate=0/1 expected=True: how does the event bus work in this codebase? I need to understand it 
+  [PASS] rate=0/1 expected=False: implement a new caching layer using Redis for the product catalog API
+  [PASS] rate=0/1 expected=False: write unit tests for the email validation module
+  [PASS] rate=0/1 expected=False: fix the race condition in the connection pool manager
+  [PASS] rate=0/1 expected=False: check the terraform config for security misconfigurations
+  [PASS] rate=0/1 expected=False: brainstorm how to structure the multi-tenant permissions system
+  [PASS] rate=0/1 expected=False: create a new feature branch and set up a worktree for the auth refacto
+  [PASS] rate=0/1 expected=False: simplify the overengineered factory pattern in the notification servic
+  [PASS] rate=0/1 expected=False: deploy the latest release to production
+{
+  "skill_name": "documentation",
+  "description": "Use when generating documentation, updating README files, writing API docs, creating architecture documentation, or when documentation is incomplete or outdated. Also triggers on \"document this\", \"write docs\", \"update README\", \"API docs\", \"how does this work\", \"explain this code\", \"needs documentation\", or when shipping features with public interfaces that lack docs.",
+  "results": [
+    {
+      "query": "document the REST API endpoints for the user management module \u2014 we need params, return types, and examples",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "write API docs for the new search endpoints we just shipped",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "create a how-to guide for setting up the development environment from scratch",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "update the README with the new installation instructions and getting started guide",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "explain this code \u2014 what does the reconciliation function actually do and why is it structured this way?",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "the architecture documentation is outdated \u2014 we need to update it after the microservices migration",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "we just added 5 new CLI commands and none of them have documentation yet",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "how does the event bus work in this codebase? I need to understand it before making changes",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "implement a new caching layer using Redis for the product catalog API",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "write unit tests for the email validation module",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "fix the race condition in the connection pool manager",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "check the terraform config for security misconfigurations",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "brainstorm how to structure the multi-tenant permissions system",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "create a new feature branch and set up a worktree for the auth refactoring",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "simplify the overengineered factory pattern in the notification service",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "deploy the latest release to production",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    }
+  ],
+  "summary": {
+    "total": 16,
+    "passed": 8,
+    "failed": 8
+  }
+}

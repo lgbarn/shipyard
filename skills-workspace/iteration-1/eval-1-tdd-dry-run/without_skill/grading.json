@@ -1,0 +1,32 @@
+{
+  "eval_id": 1,
+  "run_id": "eval-1-without_skill",
+  "expectations": [
+    {
+      "text": "First step is writing a failing test, not implementation code",
+      "passed": false,
+      "evidence": "First step is 'Read the Existing Test File' — reading code before writing tests. While tests ARE written before implementation, the very first action is reading existing code, not writing a test."
+    },
+    {
+      "text": "Specifies running the test to verify it fails before implementing",
+      "passed": true,
+      "evidence": "'How I Verify the Tests Fail' section with exact commands and expected failure message 'Unknown argument: $1'"
+    },
+    {
+      "text": "Implementation step comes AFTER test verification step",
+      "passed": true,
+      "evidence": "'Then What? — The Implementation' section explicitly comes after 'After confirming red'"
+    },
+    {
+      "text": "Includes a step to verify tests pass after implementation",
+      "passed": true,
+      "evidence": "'Verify the Fix' section: 'All four new tests should now pass (green). Then run the full suite to confirm no regressions'"
+    },
+    {
+      "text": "Does not add features beyond what was requested (no over-engineering)",
+      "passed": false,
+      "evidence": "Writes 4 tests upfront before any implementation, covering --raw mode and side-effect files. While thorough, writing all tests before any GREEN cycle violates strict RED-GREEN-REFACTOR (should be one test at a time). Also adds '[dry-run]' prefix to output which wasn't requested."
+    }
+  ],
+  "pass_rate": 0.6
+}

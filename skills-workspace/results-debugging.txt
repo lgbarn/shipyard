@@ -1,0 +1,157 @@
+Evaluating: Use when encountering any bug, test failure, unexpected behavior, or error — even if the fix seems obvious. Also use when something is "not working", "broken", "failing", or producing wrong results. Must investigate root cause before proposing any fix. Triggers on error messages, stack traces, tracebacks, exceptions, and unexpected output.
+Results: 8/16 passed
+  [FAIL] rate=0/1 expected=True: something is broken in the auth module — login worked yesterday but no
+  [FAIL] rate=0/1 expected=True: the tests were passing on my machine but CI is failing with 'connectio
+  [FAIL] rate=0/1 expected=True: why is this failing? the build was green 2 hours ago and nobody pushed
+  [FAIL] rate=0/1 expected=True: I'm getting a weird TypeError: Cannot read properties of undefined in 
+  [FAIL] rate=0/1 expected=True: my cron job ran but the database wasn't updated — the script exits wit
+  [FAIL] rate=0/1 expected=True: my API endpoint is returning a 500 error when I try to create a new us
+  [FAIL] rate=0/1 expected=True: it's not working — I deployed the new version and now the webhook hand
+  [FAIL] rate=0/1 expected=True: I have three failing tests after the refactor and I don't understand w
+  [PASS] rate=0/1 expected=False: write documentation for the payment processing module
+  [PASS] rate=0/1 expected=False: add a new REST endpoint for listing user notifications with pagination
+  [PASS] rate=0/1 expected=False: refactor the config loader to use environment variables instead of a J
+  [PASS] rate=0/1 expected=False: can you review this PR for code quality? it's the new caching layer fo
+  [PASS] rate=0/1 expected=False: I want to add dark mode support to the settings page, what's the best 
+  [PASS] rate=0/1 expected=False: set up terraform for our new staging environment with an RDS instance 
+  [PASS] rate=0/1 expected=False: create a GitHub Actions workflow that runs lint, test, and deploy on p
+  [PASS] rate=0/1 expected=False: what are the best practices for structuring a monorepo with shared pac
+{
+  "skill_name": "shipyard-debugging",
+  "description": "Use when encountering any bug, test failure, unexpected behavior, or error \u2014 even if the fix seems obvious. Also use when something is \"not working\", \"broken\", \"failing\", or producing wrong results. Must investigate root cause before proposing any fix. Triggers on error messages, stack traces, tracebacks, exceptions, and unexpected output.",
+  "results": [
+    {
+      "query": "something is broken in the auth module \u2014 login worked yesterday but now it just hangs and eventually times out after about 30 seconds",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "the tests were passing on my machine but CI is failing with 'connection refused' on the database integration tests, not sure what changed",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "why is this failing? the build was green 2 hours ago and nobody pushed anything since then but now we're getting heap out of memory",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "I'm getting a weird TypeError: Cannot read properties of undefined in my React component but only when I navigate to the page via the back button",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "my cron job ran but the database wasn't updated \u2014 the script exits with code 0 but the rows are stale",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "my API endpoint is returning a 500 error when I try to create a new user, but only when the email has a plus sign in it like test+foo@gmail.com",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "it's not working \u2014 I deployed the new version and now the webhook handler just silently drops events, no errors in the logs",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "I have three failing tests after the refactor and I don't understand why \u2014 they're testing totally different things",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "write documentation for the payment processing module",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "add a new REST endpoint for listing user notifications with pagination support",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "refactor the config loader to use environment variables instead of a JSON file",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "can you review this PR for code quality? it's the new caching layer for the API",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "I want to add dark mode support to the settings page, what's the best approach?",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "set up terraform for our new staging environment with an RDS instance and ECS cluster",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "create a GitHub Actions workflow that runs lint, test, and deploy on push to main",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "what are the best practices for structuring a monorepo with shared packages?",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    }
+  ],
+  "summary": {
+    "total": 16,
+    "passed": 8,
+    "failed": 8
+  }
+}

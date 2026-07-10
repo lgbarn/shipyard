@@ -1,0 +1,17 @@
+[
+  {"query": "I want to create a new skill for handling database migrations — help me write the SKILL.md", "should_trigger": true},
+  {"query": "the debugging skill isn't triggering when users say 'something is broken' — can you improve it?", "should_trigger": true},
+  {"query": "write a skill that teaches Claude how to properly handle file uploads with validation", "should_trigger": true},
+  {"query": "I need to edit the TDD skill to add better guidance on when to use mocks vs fakes", "should_trigger": true},
+  {"query": "create a new skill for code review that follows our team's standards", "should_trigger": true},
+  {"query": "improve this skill — it's not catching the edge cases when agents try to skip verification", "should_trigger": true},
+  {"query": "I'm editing SKILL.md for the security audit skill and want to add SSRF coverage", "should_trigger": true},
+  {"query": "implement a REST API endpoint for user registration with email verification", "should_trigger": false},
+  {"query": "debug why the tests are failing after the refactor", "should_trigger": false},
+  {"query": "write unit tests for the payment processing module", "should_trigger": false},
+  {"query": "create a feature branch for the notification system", "should_trigger": false},
+  {"query": "document the architecture of the microservices system", "should_trigger": false},
+  {"query": "brainstorm ideas for the recommendation engine", "should_trigger": false},
+  {"query": "check the Docker configuration for security best practices", "should_trigger": false},
+  {"query": "simplify the overengineered abstraction in the service layer", "should_trigger": false}
+]

@@ -1,0 +1,18 @@
+[
+  {"query": "ok I think that should fix it, the auth module is updated now", "should_trigger": true},
+  {"query": "done — I've refactored the database layer and everything looks good", "should_trigger": true},
+  {"query": "the tests should pass now after those changes to the validation logic", "should_trigger": true},
+  {"query": "I'm pretty confident that fixes the race condition, let's commit and move on", "should_trigger": true},
+  {"query": "alright, the feature is complete — let's create a PR for this", "should_trigger": true},
+  {"query": "I've verified the fix works by checking the logs, ready to merge", "should_trigger": true},
+  {"query": "looks good to me, the refactoring is done and I didn't break anything", "should_trigger": true},
+  {"query": "that should be fine now, let's move to the next task", "should_trigger": true},
+  {"query": "add a health check endpoint that returns the service status and uptime", "should_trigger": false},
+  {"query": "explain the data flow in the order processing pipeline", "should_trigger": false},
+  {"query": "I want to redesign the user dashboard — let's brainstorm the layout", "should_trigger": false},
+  {"query": "write a migration script to add the 'status' column to the orders table", "should_trigger": false},
+  {"query": "what does the error 'ECONNREFUSED' mean in the context of our Redis connection?", "should_trigger": false},
+  {"query": "set up ESLint and Prettier for the project with our team's style guide", "should_trigger": false},
+  {"query": "I need help understanding how the caching layer works before I modify it", "should_trigger": false},
+  {"query": "create a new branch for the feature work on user roles and permissions", "should_trigger": false}
+]

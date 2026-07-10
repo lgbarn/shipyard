@@ -1,0 +1,82 @@
+[
+  {
+    "query": "I've got the implementation plan loaded in PLAN.md with 8 independent tasks across 3 phases. Phase 1 has 4 tasks that can run in parallel — can you spin up builder agents and start executing? The plan was reviewed and approved yesterday",
+    "should_trigger": true
+  },
+  {
+    "query": "OK the plan looks good to me. Go ahead and build this — start with the state.sh refactor task, then move to the commands.sh changes. Use the reviewer agent to check each task before moving on. The plan is in .shipyard/plans/v4-migration.md",
+    "should_trigger": true
+  },
+  {
+    "query": "Execute the plan we just wrote. There are 5 tasks: create the new hook file, update plugin.json, add the BATS tests, update the README section, and bump the version. Tasks 1-3 are independent, 4-5 depend on the others finishing",
+    "should_trigger": true
+  },
+  {
+    "query": "I want to implement this feature across multiple sessions. Here's the plan file at plans/caching-layer.md — it has review checkpoints after each phase. Start phase 1 now and we'll pick up phase 2 tomorrow. Run the plan with checkpoints enabled",
+    "should_trigger": true
+  },
+  {
+    "query": "We have the approved plan from the brainstorm session. It's 12 tasks organized into 4 phases. Please dispatch the phase 1 tasks to builder agents — they're all independent: new config parser, schema validator, migration script, and rollback handler",
+    "should_trigger": true
+  },
+  {
+    "query": "Build this out according to the spec. The implementation plan has been loaded and each task has clear acceptance criteria. Start with the database schema changes, then the API endpoints, then the frontend components. Use review checkpoints between phases",
+    "should_trigger": true
+  },
+  {
+    "query": "Run the plan. I've broken the work into 6 tasks in PLAN.md. Tasks are tagged with dependencies so you know what can parallelize. After each task completes, verify it passes the acceptance criteria before moving to the next",
+    "should_trigger": true
+  },
+  {
+    "query": "I just finished writing the plan for the new agent dispatch system. It's ready to execute — 3 phases, 9 tasks total. Phase 1 is the core dispatch loop, phase 2 is error handling, phase 3 is the CLI interface. Implement this following the plan exactly",
+    "should_trigger": true
+  },
+  {
+    "query": "The plan at .shipyard/plans/hooks-v2.md is ready. It has 4 builder tasks that can run concurrently: PreToolUse refactor, PostToolUse new hook, SessionStart hook, and the hook registry. Dispatch these to agents and collect results",
+    "should_trigger": true
+  },
+  {
+    "query": "Implement the changes from our planning session. The plan specifies: 1) extract helper functions from commands.sh into utils.sh, 2) update all callers, 3) add unit tests for each helper, 4) update the skill docs. Execute with review after each step",
+    "should_trigger": true
+  },
+  {
+    "query": "I need to create a plan for migrating our bash scripts to use stricter error handling. Can you analyze the codebase and draft an implementation plan with phases, tasks, and dependencies? Don't implement anything yet — just the plan",
+    "should_trigger": false
+  },
+  {
+    "query": "Help me brainstorm how to restructure the test suite. I'm thinking about splitting integration and unit tests into separate directories, but I'm not sure about the tradeoffs. What would you recommend?",
+    "should_trigger": false
+  },
+  {
+    "query": "Can you review the plan in PLAN.md and tell me if the task dependencies are correct? I think task 5 might be able to run in parallel with task 3 but I'm not sure. Don't execute anything — just review the plan structure",
+    "should_trigger": false
+  },
+  {
+    "query": "I have a bug where the plan parser is skipping tasks that have special characters in their descriptions. The PLAN.md file has tasks with apostrophes and ampersands that get mangled. Can you investigate why the parser fails on these?",
+    "should_trigger": false
+  },
+  {
+    "query": "Write a design document for the new caching layer. I need architecture diagrams, API surface, data flow, and migration path. This is the planning phase — we'll implement later once the design is approved",
+    "should_trigger": false
+  },
+  {
+    "query": "I want to understand how the builder agent dispatch works under the hood. Can you trace through the code and explain the flow from when a plan is loaded to when tasks are assigned to agents? Just want to understand the architecture",
+    "should_trigger": false
+  },
+  {
+    "query": "Can you estimate how long each task in PLAN.md would take? I need to create a timeline for the sprint. Also flag any tasks that seem too large and should be broken down further",
+    "should_trigger": false
+  },
+  {
+    "query": "The tests are failing after the last deploy. I need to debug why test_phase_advance is timing out. It was working yesterday before we merged the state format changes. Can you look at the test output and find the root cause?",
+    "should_trigger": false
+  },
+  {
+    "query": "Refactor the plan executor to support cancellation. Right now if you ctrl-C during plan execution, builder agents keep running. I need to add graceful shutdown with cleanup. This is a single focused change, not a multi-task plan",
+    "should_trigger": false
+  },
+  {
+    "query": "Set up the CI pipeline to automatically validate plan files on PR. Add a GitHub Actions job that parses PLAN.md files and checks for valid structure, dependencies, and required fields. This is a single implementation task",
+    "should_trigger": false
+  }
+]

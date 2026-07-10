@@ -1,0 +1,17 @@
+[
+  {"query": "I have 4 failing test files that are all testing different subsystems — can we fix them all at the same time?", "should_trigger": true},
+  {"query": "run these three tasks in parallel — update the API docs, fix the linting errors, and add the migration script", "should_trigger": true},
+  {"query": "the auth module, the notification service, and the billing system all need updates and they're completely independent", "should_trigger": true},
+  {"query": "I need to map the codebase, run security audit, and generate docs — do these at the same time since they don't depend on each other", "should_trigger": true},
+  {"query": "we have 6 builder tasks that don't share any files — let's dispatch concurrent agents to handle them", "should_trigger": true},
+  {"query": "multiple agents should work on these simultaneously since there's no shared state between the tasks", "should_trigger": true},
+  {"query": "these are independent failures in different test suites that could be investigated at the same time", "should_trigger": true},
+  {"query": "implement the user authentication flow with login, signup, password reset, and session management", "should_trigger": false},
+  {"query": "debug the memory leak in the WebSocket connection handler", "should_trigger": false},
+  {"query": "write unit tests for the order processing pipeline", "should_trigger": false},
+  {"query": "create a branch for the new feature work", "should_trigger": false},
+  {"query": "review the PR for code quality and security issues", "should_trigger": false},
+  {"query": "brainstorm ideas for the recommendation engine", "should_trigger": false},
+  {"query": "update the architecture documentation after the microservices migration", "should_trigger": false},
+  {"query": "fix the failing integration test in the payments module", "should_trigger": false}
+]

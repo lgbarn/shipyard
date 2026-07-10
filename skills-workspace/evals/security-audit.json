@@ -1,0 +1,18 @@
+[
+  {"query": "I just added user input handling to the search endpoint, can you check if it's vulnerable to SQL injection?", "should_trigger": true},
+  {"query": "we're adding a new npm dependency called 'fast-csv' — is it safe to use? any known vulnerabilities?", "should_trigger": true},
+  {"query": "review the Dockerfile I wrote for security issues — I want to make sure we're following best practices", "should_trigger": true},
+  {"query": "I think there might be hardcoded API keys in our test fixtures, can you scan for secrets?", "should_trigger": true},
+  {"query": "is the way I'm handling the OAuth redirect URL safe? I'm worried about open redirect attacks", "should_trigger": true},
+  {"query": "check if our terraform config has any security misconfigurations — especially the IAM policies and security groups", "should_trigger": true},
+  {"query": "we're accepting file uploads from users — what SSRF risks do I need to worry about?", "should_trigger": true},
+  {"query": "is this code secure? I'm deserializing JSON from an external webhook and passing it to eval()", "should_trigger": true},
+  {"query": "add pagination to the list users endpoint using cursor-based pagination", "should_trigger": false},
+  {"query": "refactor the logger to use structured logging with JSON output", "should_trigger": false},
+  {"query": "write unit tests for the email validation function", "should_trigger": false},
+  {"query": "I want to brainstorm ideas for improving the onboarding flow", "should_trigger": false},
+  {"query": "set up a GitHub Actions workflow for automated testing on pull requests", "should_trigger": false},
+  {"query": "explain how the event bus works in our microservices architecture", "should_trigger": false},
+  {"query": "create a migration to add soft delete support to the users table", "should_trigger": false},
+  {"query": "optimize the SQL query in the analytics dashboard — it's taking 3 seconds", "should_trigger": false}
+]

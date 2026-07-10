@@ -1,0 +1,18 @@
+[
+  {"query": "document the REST API endpoints for the user management module — we need params, return types, and examples", "should_trigger": true},
+  {"query": "update the README with the new installation instructions and getting started guide", "should_trigger": true},
+  {"query": "write API docs for the new search endpoints we just shipped", "should_trigger": true},
+  {"query": "the architecture documentation is outdated — we need to update it after the microservices migration", "should_trigger": true},
+  {"query": "create a how-to guide for setting up the development environment from scratch", "should_trigger": true},
+  {"query": "how does the event bus work in this codebase? I need to understand it before making changes", "should_trigger": true},
+  {"query": "we just added 5 new CLI commands and none of them have documentation yet", "should_trigger": true},
+  {"query": "explain this code — what does the reconciliation function actually do and why is it structured this way?", "should_trigger": true},
+  {"query": "implement a new caching layer using Redis for the product catalog API", "should_trigger": false},
+  {"query": "fix the race condition in the connection pool manager", "should_trigger": false},
+  {"query": "write unit tests for the email validation module", "should_trigger": false},
+  {"query": "check the terraform config for security misconfigurations", "should_trigger": false},
+  {"query": "create a new feature branch and set up a worktree for the auth refactoring", "should_trigger": false},
+  {"query": "simplify the overengineered factory pattern in the notification service", "should_trigger": false},
+  {"query": "brainstorm how to structure the multi-tenant permissions system", "should_trigger": false},
+  {"query": "deploy the latest release to production", "should_trigger": false}
+]

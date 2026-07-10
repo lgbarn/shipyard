@@ -1,0 +1,148 @@
+Evaluating: Use when facing 2+ independent tasks that can be worked on without shared state or sequential dependencies. Also triggers on "run in parallel", "do these at the same time", "multiple agents", "concurrent tasks", or when you notice independent failures across different subsystems that could be investigated simultaneously.
+Results: 8/15 passed
+  [FAIL] rate=0/1 expected=True: I have 4 failing test files that are all testing different subsystems 
+  [FAIL] rate=0/1 expected=True: run these three tasks in parallel — update the API docs, fix the linti
+  [FAIL] rate=0/1 expected=True: we have 6 builder tasks that don't share any files — let's dispatch co
+  [FAIL] rate=0/1 expected=True: I need to map the codebase, run security audit, and generate docs — do
+  [FAIL] rate=0/1 expected=True: the auth module, the notification service, and the billing system all 
+  [FAIL] rate=0/1 expected=True: multiple agents should work on these simultaneously since there's no s
+  [FAIL] rate=0/1 expected=True: these are independent failures in different test suites that could be 
+  [PASS] rate=0/1 expected=False: implement the user authentication flow with login, signup, password re
+  [PASS] rate=0/1 expected=False: debug the memory leak in the WebSocket connection handler
+  [PASS] rate=0/1 expected=False: write unit tests for the order processing pipeline
+  [PASS] rate=0/1 expected=False: brainstorm ideas for the recommendation engine
+  [PASS] rate=0/1 expected=False: update the architecture documentation after the microservices migratio
+  [PASS] rate=0/1 expected=False: review the PR for code quality and security issues
+  [PASS] rate=0/1 expected=False: fix the failing integration test in the payments module
+  [PASS] rate=0/1 expected=False: create a branch for the new feature work
+{
+  "skill_name": "parallel-dispatch",
+  "description": "Use when facing 2+ independent tasks that can be worked on without shared state or sequential dependencies. Also triggers on \"run in parallel\", \"do these at the same time\", \"multiple agents\", \"concurrent tasks\", or when you notice independent failures across different subsystems that could be investigated simultaneously.",
+  "results": [
+    {
+      "query": "I have 4 failing test files that are all testing different subsystems \u2014 can we fix them all at the same time?",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "run these three tasks in parallel \u2014 update the API docs, fix the linting errors, and add the migration script",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "we have 6 builder tasks that don't share any files \u2014 let's dispatch concurrent agents to handle them",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "I need to map the codebase, run security audit, and generate docs \u2014 do these at the same time since they don't depend on each other",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "the auth module, the notification service, and the billing system all need updates and they're completely independent",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "multiple agents should work on these simultaneously since there's no shared state between the tasks",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "these are independent failures in different test suites that could be investigated at the same time",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "implement the user authentication flow with login, signup, password reset, and session management",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "debug the memory leak in the WebSocket connection handler",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "write unit tests for the order processing pipeline",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "brainstorm ideas for the recommendation engine",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "update the architecture documentation after the microservices migration",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "review the PR for code quality and security issues",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "fix the failing integration test in the payments module",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "create a branch for the new feature work",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    }
+  ],
+  "summary": {
+    "total": 15,
+    "passed": 8,
+    "failed": 7
+  }
+}

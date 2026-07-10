@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eval Review</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&family=Lora:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" integrity="sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT" crossorigin="anonymous"></script>
+  <style>
+    :root {
+      --bg: #faf9f5;
+      --surface: #ffffff;
+      --border: #e8e6dc;
+      --text: #141413;
+      --text-muted: #b0aea5;
+      --accent: #d97757;
+      --accent-hover: #c4613f;
+      --green: #788c5d;
+      --green-bg: #eef2e8;
+      --red: #c44;
+      --red-bg: #fceaea;
+      --header-bg: #141413;
+      --header-text: #faf9f5;
+      --radius: 6px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Lora', Georgia, serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ---- Header ---- */
+    .header {
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .header h1 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+    .header .instructions {
+      font-size: 0.8rem;
+      opacity: 0.7;
+      margin-top: 0.25rem;
+    }
+    .header .progress {
+      font-size: 0.875rem;
+      opacity: 0.8;
+      text-align: right;
+    }
+
+    /* ---- Main content ---- */
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    /* ---- Sections ---- */
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      flex-shrink: 0;
+    }
+    .section-header {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.75rem 1rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .section-body {
+      padding: 1rem;
+    }
+
+    /* ---- Config badge ---- */
+    .config-badge {
+      display: inline-block;
+      padding: 0.2rem 0.625rem;
+      border-radius: 9999px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-left: 0.75rem;
+      vertical-align: middle;
+    }
+    .config-badge.config-primary {
+      background: rgba(33, 150, 243, 0.12);
+      color: #1976d2;
+    }
+    .config-badge.config-baseline {
+      background: rgba(255, 193, 7, 0.15);
+      color: #f57f17;
+    }
+
+    /* ---- Prompt ---- */
+    .prompt-text {
+      white-space: pre-wrap;
+      font-size: 0.9375rem;
+      line-height: 1.6;
+    }
+
+    /* ---- Outputs ---- */
+    .output-file {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .output-file + .output-file {
+      margin-top: 1rem;
+    }
+    .output-file-header {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .output-file-header .dl-btn {
+      font-size: 0.7rem;
+      color: var(--accent);
+      text-decoration: none;
+      cursor: pointer;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-weight: 500;
+      opacity: 0.8;
+    }
+    .output-file-header .dl-btn:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+    .output-file-content {
+      padding: 0.75rem;
+      overflow-x: auto;
+    }
+    .output-file-content pre {
+      font-size: 0.8125rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+    }
+    .output-file-content img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 4px;
+    }
+    .output-file-content iframe {
+      width: 100%;
+      height: 600px;
+      border: none;
+    }
+    .output-file-content table {
+      border-collapse: collapse;
+      font-size: 0.8125rem;
+      width: 100%;
+    }
+    .output-file-content table td,
+    .output-file-content table th {
+      border: 1px solid var(--border);
+      padding: 0.375rem 0.5rem;
+      text-align: left;
+    }
+    .output-file-content table th {
+      background: var(--bg);
+      font-weight: 600;
+    }
+    .output-file-content .download-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.875rem;
+      cursor: pointer;
+    }
+    .output-file-content .download-link:hover {
+      background: var(--border);
+    }
+    .empty-state {
+      color: var(--text-muted);
+      font-style: italic;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    /* ---- Feedback ---- */
+    .prev-feedback {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.625rem 0.75rem;
+      margin-top: 0.75rem;
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .prev-feedback-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.25rem;
+      color: var(--text-muted);
+    }
+    .feedback-textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.9375rem;
+      line-height: 1.5;
+      resize: vertical;
+      color: var(--text);
+    }
+    .feedback-textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    .feedback-status {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+      min-height: 1.1em;
+    }
+
+    /* ---- Grades (collapsible) ---- */
+    .grades-toggle {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+    .grades-toggle:hover {
+      color: var(--accent);
+    }
+    .grades-toggle .arrow {
+      margin-right: 0.5rem;
+      transition: transform 0.15s;
+      font-size: 0.75rem;
+    }
+    .grades-toggle .arrow.open {
+      transform: rotate(90deg);
+    }
+    .grades-content {
+      display: none;
+      margin-top: 0.75rem;
+    }
+    .grades-content.open {
+      display: block;
+    }
+    .grades-summary {
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .grade-badge {
+      display: inline-block;
+      padding: 0.125rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .grade-pass { background: var(--green-bg); color: var(--green); }
+    .grade-fail { background: var(--red-bg); color: var(--red); }
+    .assertion-list {
+      list-style: none;
+    }
+    .assertion-item {
+      padding: 0.625rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8125rem;
+    }
+    .assertion-item:last-child { border-bottom: none; }
+    .assertion-status {
+      font-weight: 600;
+      margin-right: 0.5rem;
+    }
+    .assertion-status.pass { color: var(--green); }
+    .assertion-status.fail { color: var(--red); }
+    .assertion-evidence {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      margin-top: 0.25rem;
+      padding-left: 1.5rem;
+    }
+
+    /* ---- View tabs ---- */
+    .view-tabs {
+      display: flex;
+      gap: 0;
+      padding: 0 2rem;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .view-tab {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.625rem 1.25rem;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: var(--text-muted);
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+    }
+    .view-tab:hover { color: var(--text); }
+    .view-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .view-panel { display: none; }
+    .view-panel.active { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+
+    /* ---- Benchmark view ---- */
+    .benchmark-view {
+      padding: 1.5rem 2rem;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .benchmark-table {
+      border-collapse: collapse;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.8125rem;
+      width: 100%;
+      margin-bottom: 1.5rem;
+    }
+    .benchmark-table th, .benchmark-table td {
+      padding: 0.625rem 0.75rem;
+      text-align: left;
+      border: 1px solid var(--border);
+    }
+    .benchmark-table th {
+      font-family: 'Poppins', sans-serif;
+      background: var(--header-bg);
+      color: var(--header-text);
+      font-weight: 500;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .benchmark-table tr:hover { background: var(--bg); }
+    .benchmark-table tr.benchmark-row-with { background: rgba(33, 150, 243, 0.06); }
+    .benchmark-table tr.benchmark-row-without { background: rgba(255, 193, 7, 0.06); }
+    .benchmark-table tr.benchmark-row-with:hover { background: rgba(33, 150, 243, 0.12); }
+    .benchmark-table tr.benchmark-row-without:hover { background: rgba(255, 193, 7, 0.12); }
+    .benchmark-table tr.benchmark-row-avg { font-weight: 600; border-top: 2px solid var(--border); }
+    .benchmark-table tr.benchmark-row-avg.benchmark-row-with { background: rgba(33, 150, 243, 0.12); }
+    .benchmark-table tr.benchmark-row-avg.benchmark-row-without { background: rgba(255, 193, 7, 0.12); }
+    .benchmark-delta-positive { color: var(--green); font-weight: 600; }
+    .benchmark-delta-negative { color: var(--red); font-weight: 600; }
+    .benchmark-notes {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+    }
+    .benchmark-notes h3 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+    }
+    .benchmark-notes ul {
+      list-style: disc;
+      padding-left: 1.25rem;
+    }
+    .benchmark-notes li {
+      font-size: 0.8125rem;
+      line-height: 1.6;
+      margin-bottom: 0.375rem;
+    }
+    .benchmark-empty {
+      color: var(--text-muted);
+      font-style: italic;
+      text-align: center;
+      padding: 3rem;
+    }
+
+    /* ---- Navigation ---- */
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+    .nav-btn {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.5rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text);
+      transition: all 0.15s;
+    }
+    .nav-btn:hover:not(:disabled) {
+      background: var(--bg);
+      border-color: var(--text-muted);
+    }
+    .nav-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .done-btn {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.5rem 1.5rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .done-btn:hover {
+      background: var(--bg);
+      border-color: var(--text-muted);
+    }
+    .done-btn.ready {
+      border: none;
+      background: var(--accent);
+      color: white;
+      font-weight: 600;
+    }
+    .done-btn.ready:hover {
+      background: var(--accent-hover);
+    }
+    /* ---- Done overlay ---- */
+    .done-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+    .done-overlay.visible {
+      display: flex;
+    }
+    .done-card {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 2rem 3rem;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 500px;
+    }
+    .done-card h2 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .done-card p {
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+    .done-card .btn-row {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+    .done-card button {
+      padding: 0.5rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.875rem;
+    }
+    .done-card button:hover {
+      background: var(--bg);
+    }
+    /* ---- Toast ---- */
+    .toast {
+      position: fixed;
+      bottom: 5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 0.625rem 1.25rem;
+      border-radius: var(--radius);
+      font-size: 0.875rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+      z-index: 200;
+    }
+    .toast.visible {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div id="app" style="height:100vh; display:flex; flex-direction:column;">
+    <div class="header">
+      <div>
+        <h1>Eval Review: <span id="skill-name"></span></h1>
+        <div class="instructions">Review each output and leave feedback below. Navigate with arrow keys or buttons. When done, copy feedback and paste into Claude Code.</div>
+      </div>
+      <div class="progress" id="progress"></div>
+    </div>
+
+    <!-- View tabs (only shown when benchmark data exists) -->
+    <div class="view-tabs" id="view-tabs" style="display:none;">
+      <button class="view-tab active" onclick="switchView('outputs')">Outputs</button>
+      <button class="view-tab" onclick="switchView('benchmark')">Benchmark</button>
+    </div>
+
+    <!-- Outputs panel (qualitative review) -->
+    <div class="view-panel active" id="panel-outputs">
+    <div class="main">
+      <!-- Prompt -->
+      <div class="section">
+        <div class="section-header">Prompt <span class="config-badge" id="config-badge" style="display:none;"></span></div>
+        <div class="section-body">
+          <div class="prompt-text" id="prompt-text"></div>
+        </div>
+      </div>
+
+      <!-- Outputs -->
+      <div class="section">
+        <div class="section-header">Output</div>
+        <div class="section-body" id="outputs-body">
+          <div class="empty-state">No output files found</div>
+        </div>
+      </div>
+
+      <!-- Previous Output (collapsible) -->
+      <div class="section" id="prev-outputs-section" style="display:none;">
+        <div class="section-header">
+          <div class="grades-toggle" onclick="togglePrevOutputs()">
+            <span class="arrow" id="prev-outputs-arrow">&#9654;</span>
+            Previous Output
+          </div>
+        </div>
+        <div class="grades-content" id="prev-outputs-content"></div>
+      </div>
+
+      <!-- Grades (collapsible) -->
+      <div class="section" id="grades-section" style="display:none;">
+        <div class="section-header">
+          <div class="grades-toggle" onclick="toggleGrades()">
+            <span class="arrow" id="grades-arrow">&#9654;</span>
+            Formal Grades
+          </div>
+        </div>
+        <div class="grades-content" id="grades-content"></div>
+      </div>
+
+      <!-- Feedback -->
+      <div class="section">
+        <div class="section-header">Your Feedback</div>
+        <div class="section-body">
+          <textarea
+            class="feedback-textarea"
+            id="feedback"
+            placeholder="What do you think of this output? Any issues, suggestions, or things that look great?"
+          ></textarea>
+          <div class="feedback-status" id="feedback-status"></div>
+          <div class="prev-feedback" id="prev-feedback" style="display:none;">
+            <div class="prev-feedback-label">Previous feedback</div>
+            <div id="prev-feedback-text"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav" id="outputs-nav">
+      <button class="nav-btn" id="prev-btn" onclick="navigate(-1)">&#8592; Previous</button>
+      <button class="done-btn" id="done-btn" onclick="showDoneDialog()">Submit All Reviews</button>
+      <button class="nav-btn" id="next-btn" onclick="navigate(1)">Next &#8594;</button>
+    </div>
+    </div><!-- end panel-outputs -->
+
+    <!-- Benchmark panel (quantitative stats) -->
+    <div class="view-panel" id="panel-benchmark">
+      <div class="benchmark-view" id="benchmark-content">
+        <div class="benchmark-empty">No benchmark data available. Run a benchmark to see quantitative results here.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Done overlay -->
+  <div class="done-overlay" id="done-overlay">
+    <div class="done-card">
+      <h2>Review Complete</h2>
+      <p>Your feedback has been saved. Go back to your Claude Code session and tell Claude you're done reviewing.</p>
+      <div class="btn-row">
+        <button onclick="closeDoneDialog()">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ---- Embedded data (injected by generate_review.py) ----
+    const EMBEDDED_DATA = {"skill_name": "shipyard-skills", "runs": [{"id": "eval-1-tdd-dry-run-with_skill", "prompt": "I need to add a --dry-run flag to a bash script called state-write.sh. The script writes JSON to STATE.json. The --dry-run flag should print what it would write but not actually write it.", "eval_id": 1, "outputs": [{"name": "approach.md", "type": "text", "content": "# TDD Approach: --dry-run flag for state-write.sh\n\n## Constraint\n\nNo production code is written first. The Iron Law applies: no production code\nwithout a failing test first. The implementation of `--dry-run` does not exist\nyet, so the first step is always a test.\n\n---\n\n## Step 1: Write the first failing test (RED)\n\nOpen `/Users/lgbarn/Personal/shipyard/test/state-write.bats` and add one\nminimal test at the end of the file, tagged `unit`:\n\n```bash\n# bats test_tags=unit\n@test \"state-write: --dry-run prints JSON without writing STATE.json\" {\n    setup_shipyard_dir\n    run bash \"$STATE_WRITE\" --phase 2 --position \"Building plan 1\" --status in_progress --dry-run\n    assert_success\n    assert_output --partial '\"phase\"'\n    assert_output --partial '\"status\"'\n    [ ! -f .shipyard/STATE.json ]\n}\n```\n\n**Why this specific test?**\n\nIt captures the entire observable contract of --dry-run in a single assertion\nsequence:\n\n1. The command exits 0 (success, not an error).\n2. stdout contains the JSON that *would* be written (spot-check two key fields).\n3. STATE.json is *not* created on disk.\n\n\"and\" does not appear in the test name, so it is describing one behavior\n(dry-run mode), not multiple behaviors. The three assertions together define\nthat one behavior; they are not separate features.\n\n---\n\n## Step 2: Verify the test fails for the right reason (Verify RED)\n\n```bash\ncd /Users/lgbarn/Personal/shipyard\nnpx bats test/state-write.bats --filter \"dry-run prints JSON without writing\"\n```\n\nExpected failure: the script does not recognize `--dry-run` and exits via the\n`Unknown argument` branch with exit code 1. The `assert_success` assertion will\nfail with something like:\n\n```\nexpected exit code 0, got 1\noutput: Unknown argument: --dry-run\n```\n\nThis is the correct failure. It fails because the feature is absent, not\nbecause of a typo or test error. If the test passes here, stop \u2014 something is\nwrong with the test or a `--dry-run` handler already exists.\n\n---\n\n## Step 3: Write minimal implementation (GREEN)\n\nOnly now open `/Users/lgbarn/Personal/shipyard/scripts/state-write.sh`.\n\n**Change 1 \u2014 Add `DRY_RUN` variable near the other flag defaults (around line 153):**\n\n```bash\nDRY_RUN=false\n```\n\n**Change 2 \u2014 Add a `--dry-run` case to the argument parser (around line 187, inside the `while` loop):**\n\n```bash\n        --dry-run)\n            DRY_RUN=true\n            shift\n            ;;\n```\n\n**Change 3 \u2014 In the structured-write branch (around line 290-303), wrap the\nwrite side-effects in a conditional:**\n\n```bash\n    if [ \"$DRY_RUN\" = true ]; then\n        echo \"$NEW_CONTENT\"\n    else\n        cp \"$STATE_FILE\" \"${STATE_FILE}.bak\" 2>/dev/null || true\n        atomic_write \"$NEW_CONTENT\" \"$STATE_FILE\"\n        shasum -a 256 \"$STATE_FILE\" | cut -d' ' -f1 > \"${STATE_FILE}.sha256\"\n        append_history \"Phase ${PHASE:-?}: ${POSITION:-updated} (${STATUS:-unknown})\"\n        echo \"STATE.json updated at ${TIMESTAMP}: Phase=${PHASE:-?} Position=${POSITION:-?} Status=${STATUS:-?}\"\n        if [ \"$STATUS\" = \"complete\" ] || [ \"$STATUS\" = \"complete_with_gaps\" ]; then\n            rm -f \".shipyard/NOTES.md\"\n        fi\n    fi\n```\n\nNothing else changes. No new abstractions, no refactoring other code.\n\n---\n\n## Step 4: Verify the test passes (Verify GREEN)\n\n```bash\nnpx bats test/state-write.bats --filter \"dry-run prints JSON without writing\"\n```\n\nExpected: `ok - state-write: --dry-run prints JSON without writing STATE.json`\n\nThen run the full suite to ensure no regressions:\n\n```bash\nnpx bats test/state-write.bats\n```\n\nAll previously passing tests must still pass. If any break, fix the\nimplementation (not the tests) before proceeding.\n\n---\n\n## Step 5: Write additional failing tests (repeat RED) before adding more behavior\n\nBefore adding --dry-run support to `--raw` mode or `--recover` mode, write a\nfailing test for each additional behavior first, then implement minimally.\n\nExamples of next tests (each written before its implementation):\n\n**--raw + --dry-run:**\n```bash\n# bats test_tags=unit\n@test \"state-write: --dry-run with --raw prints content without writing\" {\n    setup_shipyard_dir\n    local raw='{\"schema\":3,\"phase\":1,\"position\":\"Custom\",\"status\":\"ready\",\"updated_at\":\"2026-01-01T00:00:00Z\",\"blocker\":null}'\n    run bash \"$STATE_WRITE\" --raw \"$raw\" --dry-run\n    assert_success\n    assert_output --partial '\"position\"'\n    [ ! -f .shipyard/STATE.json ]\n}\n```\n\n---\n\n## Step 6: Refactor (REFACTOR)\n\nAfter all tests are green, review for duplication or clarity improvements:\n\n- Does `DRY_RUN` logic appear in multiple code paths? Consider extracting a\n  `maybe_write()` helper.\n- Are variable names clear?\n- No new behavior is added during refactor.\n\nAfter every refactor step, re-run the full suite to confirm all tests remain\ngreen.\n\n---\n\n## Summary of Order\n\n1. Write the test in `test/state-write.bats` \u2014 do not touch `state-write.sh`\n2. Run the test, confirm it fails with \"Unknown argument: --dry-run\" (exit 1)\n3. Implement `--dry-run` in `state-write.sh` (three small changes)\n4. Run the test, confirm it passes\n5. Run full suite, confirm no regressions\n6. Repeat from step 1 for each additional --dry-run code path (--raw, --recover)\n7. Refactor once all paths are green\n\nThe first step is always the test. Never implementation first.\n"}], "grading": {"eval_id": 1, "run_id": "eval-1-with_skill", "expectations": [{"text": "First step is writing a failing test, not implementation code", "passed": true, "evidence": "Step 1 explicitly titled 'Write the first failing test (RED)' \u2014 opens test file first, states 'The Iron Law applies: no production code without a failing test first'"}, {"text": "Specifies running the test to verify it fails before implementing", "passed": true, "evidence": "Step 2 'Verify the test fails for the right reason (Verify RED)' \u2014 includes exact command and expected failure output 'expected exit code 0, got 1'"}, {"text": "Implementation step comes AFTER test verification step", "passed": true, "evidence": "Step 3 'Write minimal implementation (GREEN)' comes after Step 2 verification. Explicitly says 'Only now open scripts/state-write.sh'"}, {"text": "Includes a step to verify tests pass after implementation", "passed": true, "evidence": "Step 4 'Verify the test passes (Verify GREEN)' with exact command, plus full regression run: 'All previously passing tests must still pass'"}, {"text": "Does not add features beyond what was requested (no over-engineering)", "passed": true, "evidence": "Implementation is minimal: 3 small changes. Explicitly states 'Nothing else changes. No new abstractions, no refactoring other code.'"}], "pass_rate": 1.0}}, {"id": "eval-1-tdd-dry-run-without_skill", "prompt": "I need to add a --dry-run flag to a bash script called state-write.sh. The script writes JSON to STATE.json. The --dry-run flag should print what it would write but not actually write it.", "eval_id": 1, "outputs": [{"name": "approach.md", "type": "text", "content": "# Approach: Adding --dry-run to state-write.sh\n\n## First Step: Read the Existing Test File\n\nBefore touching any code, I read `test/state-write.bats` and `scripts/state-write.sh` to understand:\n\n- How tests are structured (BATS, `run bash \"$STATE_WRITE\" ...`, `assert_success`, `assert_output --partial`)\n- What the existing argument parser looks like (the `while [[ $# -gt 0 ]]; do case \"$1\" in` block)\n- Where writes actually happen (three places: recovery mode, `--raw`, and structured write)\n- The pattern for output messages (e.g., `\"STATE.json updated at ${TIMESTAMP}\"`)\n\n## Do I Write a Test or Implementation First?\n\nTest first. This is the TDD discipline: write a failing test that specifies the exact behavior, then write the minimum implementation to make it pass.\n\n## Specific Tests I Would Write\n\nI add these cases to `test/state-write.bats`:\n\n```bash\n# bats test_tags=unit\n@test \"state-write: --dry-run prints would-write content without writing STATE.json\" {\n    setup_shipyard_dir\n    run bash \"$STATE_WRITE\" --phase 2 --position \"Building plan 1\" --status in_progress --dry-run\n    assert_success\n    assert_output --partial '\"phase\"'\n    assert_output --partial '\"status\"'\n    assert_output --partial \"in_progress\"\n    [ ! -f .shipyard/STATE.json ]\n}\n\n# bats test_tags=unit\n@test \"state-write: --dry-run with --raw prints content without writing\" {\n    setup_shipyard_dir\n    local raw='{\"schema\":3,\"phase\":1,\"position\":\"Custom\",\"status\":\"ready\",\"updated_at\":\"2026-01-01T00:00:00Z\",\"blocker\":null}'\n    run bash \"$STATE_WRITE\" --raw \"$raw\" --dry-run\n    assert_success\n    assert_output --partial '\"position\"'\n    assert_output --partial \"Custom\"\n    [ ! -f .shipyard/STATE.json ]\n}\n\n# bats test_tags=unit\n@test \"state-write: --dry-run does not write HISTORY.md\" {\n    setup_shipyard_dir\n    run bash \"$STATE_WRITE\" --phase 1 --position \"test\" --status ready --dry-run\n    assert_success\n    [ ! -f .shipyard/HISTORY.md ]\n}\n\n# bats test_tags=unit\n@test \"state-write: --dry-run does not create .bak or .sha256 files\" {\n    setup_shipyard_dir\n    bash \"$STATE_WRITE\" --phase 1 --position \"First\" --status ready\n    run bash \"$STATE_WRITE\" --phase 2 --position \"Second\" --status building --dry-run\n    assert_success\n    # .bak would only exist if an actual write happened\n    [ ! -f .shipyard/STATE.json.bak ] || \\\n        [ \"$(jq -r '.phase' .shipyard/STATE.json.bak)\" = \"1\" ]  # still the old bak\n    # STATE.json still contains phase 1, not phase 2\n    assert_json_field \"phase\" \"1\"\n}\n```\n\nThe key behavioral assertions are:\n1. Exit 0 (success)\n2. Stdout contains the JSON that WOULD have been written\n3. `STATE.json` is NOT created/modified\n4. `HISTORY.md` is NOT appended to\n5. No `.bak` or `.sha256` side effects\n\n## How I Verify the Tests Fail\n\n```bash\ncd /Users/lgbarn/Personal/shipyard\nnpm test -- --filter \"dry-run\"\n# or directly:\n./node_modules/.bin/bats test/state-write.bats --filter \"dry-run\"\n```\n\nExpected result: all four new tests fail because `state-write.sh` does not yet recognize `--dry-run` \u2014 it will hit the `*) echo \"Unknown argument: $1\" >&2; exit 1` branch and exit with failure. The \"file should not exist\" assertions would also fail if the script had partially written before hitting the unknown argument. This confirms the tests are genuinely failing for the right reason.\n\n## Then What? \u2014 The Implementation\n\nAfter confirming red, I implement in `scripts/state-write.sh` with surgical, minimal changes:\n\n**Step 1 \u2014 Add `DRY_RUN` variable near the other argument variables (around line 148):**\n\n```bash\nDRY_RUN=false\n```\n\n**Step 2 \u2014 Add the `--dry-run` case to the argument parser (inside the existing `while` loop):**\n\n```bash\n        --dry-run)\n            DRY_RUN=true\n            shift\n            ;;\n```\n\n**Step 3 \u2014 Guard the three write sites with `if [ \"$DRY_RUN\" = false ]`.**\n\nThe three write sites are:\n\na) Recovery mode (around line 262):\n```bash\n    if [ \"$DRY_RUN\" = true ]; then\n        echo \"[dry-run] Would write STATE.json:\"\n        echo \"$NEW_CONTENT\"\n        exit 0\n    fi\n    cp \"$STATE_FILE\" \"${STATE_FILE}.bak\" 2>/dev/null || true\n    atomic_write \"$NEW_CONTENT\" \"$STATE_FILE\"\n    shasum -a 256 \"$STATE_FILE\" | cut -d' ' -f1 > \"${STATE_FILE}.sha256\"\n    append_history \"State recovered from .shipyard/ artifacts\"\n    ...\n```\n\nb) Raw write (around line 282):\n```bash\n    if [ \"$DRY_RUN\" = true ]; then\n        echo \"[dry-run] Would write STATE.json:\"\n        echo \"$RAW_CONTENT\"\n        exit 0\n    fi\n    cp \"$STATE_FILE\" \"${STATE_FILE}.bak\" 2>/dev/null || true\n    atomic_write \"$RAW_CONTENT\" \"$STATE_FILE\"\n    ...\n```\n\nc) Structured write (around line 299):\n```bash\n    # Build NEW_CONTENT via jq -n as before, then:\n    if [ \"$DRY_RUN\" = true ]; then\n        echo \"[dry-run] Would write STATE.json:\"\n        echo \"$NEW_CONTENT\"\n        exit 0\n    fi\n    cp \"$STATE_FILE\" \"${STATE_FILE}.bak\" 2>/dev/null || true\n    atomic_write \"$NEW_CONTENT\" \"$STATE_FILE\"\n    ...\n```\n\nThe dry-run path: builds the JSON (so jq validation still catches bad inputs), prints it, and exits 0 without touching any file on disk.\n\n## Verify the Fix\n\nRun the tests again:\n\n```bash\n./node_modules/.bin/bats test/state-write.bats --filter \"dry-run\"\n```\n\nAll four new tests should now pass (green). Then run the full suite to confirm no regressions:\n\n```bash\nnpm test\n```\n\n108 existing tests + 4 new tests should all pass.\n\n## Why This Order?\n\nWriting the tests first forces precise thinking about the contract before touching implementation details. The tests document the behavior (no files written, specific stdout, exit 0) in a way that is executable and verifiable. The implementation then becomes a straightforward matter of plumbing the `DRY_RUN` flag through to the three write sites \u2014 with the tests acting as a safety net against regressions at every other write path.\n"}], "grading": {"eval_id": 1, "run_id": "eval-1-without_skill", "expectations": [{"text": "First step is writing a failing test, not implementation code", "passed": false, "evidence": "First step is 'Read the Existing Test File' \u2014 reading code before writing tests. While tests ARE written before implementation, the very first action is reading existing code, not writing a test."}, {"text": "Specifies running the test to verify it fails before implementing", "passed": true, "evidence": "'How I Verify the Tests Fail' section with exact commands and expected failure message 'Unknown argument: $1'"}, {"text": "Implementation step comes AFTER test verification step", "passed": true, "evidence": "'Then What? \u2014 The Implementation' section explicitly comes after 'After confirming red'"}, {"text": "Includes a step to verify tests pass after implementation", "passed": true, "evidence": "'Verify the Fix' section: 'All four new tests should now pass (green). Then run the full suite to confirm no regressions'"}, {"text": "Does not add features beyond what was requested (no over-engineering)", "passed": false, "evidence": "Writes 4 tests upfront before any implementation, covering --raw mode and side-effect files. While thorough, writing all tests before any GREEN cycle violates strict RED-GREEN-REFACTOR (should be one test at a time). Also adds '[dry-run]' prefix to output which wasn't requested."}], "pass_rate": 0.6}}, {"id": "eval-3-debugging-jq-null-with_skill", "prompt": "The /shipyard:build command fails with 'jq: error: null is not iterable' when run on a fresh project. I've tried clearing the cache and reinstalling but it still happens.", "eval_id": 3, "outputs": [{"name": "approach.md", "type": "text", "content": "# Debugging Approach: jq null is not iterable in /shipyard:build\n\n## Skill Activated: shipyard-debugging\n\nThe shipyard-debugging skill immediately overrides the impulse to propose a fix. The error\nmessage contains meaningful information that must be fully understood before any change is\nattempted. The Iron Law applies: no fixes without root cause investigation first.\n\n---\n\n## Phase 1: Root Cause Investigation\n\n### Step 1: Read the Error Carefully\n\nThe error is `jq: error: null is not iterable`. This is a specific jq error with a known meaning:\na jq expression is trying to iterate over (`.[]`) or pipe through a filter that expects an array\nor object, but the actual value at that path is `null`. The error is not from bash, not from the\ncommand runner, and not from a plugin loading failure. It is from jq itself during data processing.\n\nThe user says this happens \"on a fresh project\" \u2014 meaning `.shipyard/` was just created by\n`/shipyard:init`. This is a critical constraint: fresh projects have a specific, minimal state.\n\nI do NOT immediately propose a fix. I have only the symptom. I do not yet know:\n- Which jq expression triggers the error\n- Which file is being processed\n- What the actual null value is (missing field? missing file? null field value?)\n- At what step in the build workflow does it fail\n\n### Step 2: Reproduce Consistently\n\nReproduce the exact failure before touching anything:\n\n```bash\n# On a fresh project that has run /shipyard:init but NOT /shipyard:plan:\n/shipyard:build\n```\n\nConfirm: does it fail every time on a fresh project? Does it fail only on fresh projects, or also\non projects with plan files? This scopes whether the bug is in initialization path vs. execution\npath.\n\n### Step 3: Check Recent Changes\n\nRun:\n```bash\ngit log --oneline -10\ngit diff HEAD~1 HEAD -- scripts/ commands/ hooks/\n```\n\nCheck whether any recent commit changed jq expressions in state-read.sh, state-write.sh,\nbuild.md, or hooks. Since the user reports \"clearing cache and reinstalling\" did not help, the\nbug is almost certainly in the code logic, not the installation.\n\n### Step 4: Gather Evidence at Each Component Boundary\n\nThe `/shipyard:build` command has multiple components that each use jq. Before guessing which\none fails, add instrumentation at each boundary to find WHERE it breaks.\n\nThe build command (`commands/build.md`) executes these steps in order:\n\n1. **Step 1: Parse Arguments** \u2014 reads `.shipyard/STATE.json` for current phase\n2. **Step 1: Read config.json** \u2014 reads `.shipyard/config.json` for gate preferences\n3. **Step 2: Validate State** \u2014 reads STATE.json, ROADMAP.md, plan files from `.shipyard/phases/{N}/plans/`\n4. **Step 2: Checks which plans have SUMMARY.md** \u2014 iterates over results directory\n5. **Step 3: Update State** \u2014 calls `scripts/state-write.sh`\n6. **Step 3a: Create Checkpoint** \u2014 calls `scripts/checkpoint.sh`\n7. **Step 4: Execute by Wave** \u2014 groups plans by wave number; iterates plan files\n\nDiagnostic instrumentation to add (temporarily, read-only):\n\n```bash\n# After Step 1: Does STATE.json exist and parse correctly?\necho \"=== STATE.json contents ===\" >&2\ncat .shipyard/STATE.json >&2\n\n# Does jq parse the phase field without error?\necho \"=== phase from STATE.json ===\" >&2\njq -r '.phase' .shipyard/STATE.json >&2\n\n# Does config.json exist?\necho \"=== config.json gate fields ===\" >&2\njq -r '{security_audit, simplification_review, iac_validation, documentation_generation}' .shipyard/config.json >&2\n\n# Does phases directory exist? What's in it?\necho \"=== phases directory ===\" >&2\nls -la .shipyard/phases/ >&2 || echo \"phases/ does not exist\" >&2\n\n# If phases exists, what does the plan list look like?\necho \"=== plan files found ===\" >&2\nls .shipyard/phases/1/plans/ >&2 || echo \"no plans directory for phase 1\" >&2\n```\n\nRun the command once with this instrumentation in place. The output reveals which boundary fails.\n\n### Step 5: Trace the Data Flow Backward\n\nOnce the instrumentation identifies the failing component, trace backward.\n\n**Most likely candidates for \"null is not iterable\" on a fresh project:**\n\n**Candidate A: Plan file iteration when no plans exist**\n\nThe build command (Step 4: Execute by Wave) groups plans by wave number and iterates them. On a\nfresh project where `/shipyard:plan` has not been run, `.shipyard/phases/1/plans/` either does\nnot exist or contains no PLAN-*.md files. If the jq expression that reads or groups plans\nreceives an empty or absent value, it could produce null and then attempt to iterate it.\n\nIn `commands/build.md`, Step 2 checks \"which plans have already been completed\" \u2014 this involves\nreading plan files from `.shipyard/phases/{N}/plans/`. If the directory is absent on a fresh\nproject, a jq expression receiving its output (e.g., trying to parse filenames or wave numbers\nfrom plan filenames) could get null.\n\n**Candidate B: STATE.json missing the `phase` field or phase is null**\n\nOn a fresh project, `STATE.json` may have `\"phase\": 0` or `\"phase\": null` (if init did not set\nit). The build command reads STATE.json to determine the current phase. If phase is null, any\nsubsequent jq expression using `.phase` as an array index or filter input would fail with \"null\nis not iterable.\"\n\n**Candidate C: config.json missing expected fields**\n\nStep 1 reads config.json for `security_audit`, `simplification_review`, `iac_validation`,\n`documentation_generation`. If the build command passes config.json content through a jq filter\nthat expects these fields as an array or object to iterate, and one is absent (null), it fails.\nHowever, the config.json structure in PROTOCOLS.md shows these are scalar booleans, not arrays \u2014\nless likely to cause \"not iterable.\"\n\n**Candidate D: model_routing field absent**\n\nThe Model Routing Protocol reads `model_routing` from config.json. If the jq expression reads\n`.model_routing` and then tries to iterate its keys or values when model_routing is absent\n(null in jq), this would fail.\n\n---\n\n## Phase 2: Pattern Analysis\n\nOnce instrumentation confirms which boundary fails:\n\n- Find working jq expressions in the same codebase that handle potentially-absent fields. For\n  example, `state-read.sh` uses `(.position // \"\")` and `(.blocker // \"\")` defensively. Check\n  whether the failing expression uses the same defensive pattern or whether it omits the `//`\n  fallback.\n\n- Compare the failing path against working paths. If state-read.sh handles null safely but\n  the build command does not, the difference is the defensive null handling.\n\n- Read the full jq expression around the error. The error message \"null is not iterable\" means\n  a `.[]` or `keys[]` or `to_entries[]` is being applied to null. Find that expression.\n\n---\n\n## Phase 3: Hypothesis and Testing\n\nAfter evidence gathering, form a single hypothesis. For example:\n\n**Hypothesis (to be confirmed by instrumentation):** \"The build command reads `.shipyard/phases/1/plans/`\nwhich does not exist on a fresh project. The jq expression that processes plan file output\nreceives an empty string or null and then applies `.[]` to group plans by wave number, causing\n'null is not iterable.'\"\n\n**Minimal test:** Create the expression in isolation:\n```bash\necho 'null' | jq '.[]'\n# Output: jq: error (at <stdin>:0): null (null) is not iterable\n# Confirms the mechanism\n```\n\nThen test with the exact state of a fresh project to confirm whether the expression is reached\nand what input it receives.\n\nOne hypothesis at a time. Do not combine \"fix the null\" with \"also add better error message\" \u2014\nthose are two separate changes.\n\n---\n\n## Phase 4: Implementation (deferred until Phase 3 confirms)\n\nOnly after the hypothesis is confirmed:\n\n1. Write a failing BATS test that reproduces the error on a fresh project (no plan files)\n2. Apply the single minimal fix (e.g., add a `// []` fallback, or add a guard that checks\n   whether plans exist before attempting to group them, or add a Step 2 guard that exits early\n   with a user-friendly message if no plan files are found)\n3. Verify: the failing test now passes, existing 108 tests still pass, and manually running\n   `/shipyard:build` on a fresh project gives a clear message (\"No plans found. Run\n   /shipyard:plan first.\") rather than a jq error\n\n---\n\n## What I Did NOT Do\n\n- Did not immediately propose \"add `// []` after every jq expression that could return null\"\n- Did not guess which step fails without instrumenting\n- Did not propose multiple simultaneous fixes\n- Did not treat the symptom (\"wrap the build command in error handling\") as the solution\n- Did not skip writing a failing test before implementing the fix\n\nThe user has already tried clearing cache and reinstalling, which means the problem is\ndeterministic and in the code. Systematic investigation is faster than continued guessing.\n"}], "grading": {"eval_id": 3, "run_id": "eval-3-with_skill", "expectations": [{"text": "Does NOT immediately propose a fix or solution", "passed": true, "evidence": "Explicitly states 'I do NOT immediately propose a fix. I have only the symptom.' Final section lists 'What I Did NOT Do' including 'Did not immediately propose add // [] after every jq expression'"}, {"text": "First step involves reading/reproducing the error message", "passed": true, "evidence": "Phase 1 Step 1: 'Read the Error Carefully' \u2014 analyzes jq error semantics. Step 2: 'Reproduce Consistently' with exact reproduction steps"}, {"text": "Traces data flow to identify which jq expression receives null", "passed": true, "evidence": "Step 4 adds diagnostic instrumentation at each component boundary (STATE.json, config.json, phases directory, plan files). Step 5 traces backward from error to identify 4 specific candidates"}, {"text": "Mentions checking recent changes or git diff as part of investigation", "passed": true, "evidence": "Step 3: 'Check Recent Changes' with exact git log and git diff commands"}, {"text": "Forms explicit hypothesis before proposing any fix", "passed": true, "evidence": "Phase 3 'Hypothesis and Testing' \u2014 states hypothesis explicitly with 'to be confirmed by instrumentation' qualifier. Tests hypothesis with isolated jq command before any fix"}], "pass_rate": 1.0}}, {"id": "eval-3-debugging-jq-null-without_skill", "prompt": "The /shipyard:build command fails with 'jq: error: null is not iterable' when run on a fresh project. I've tried clearing the cache and reinstalling but it still happens.", "eval_id": 3, "outputs": [{"name": "approach.md", "type": "text", "content": "# Approach: Debugging \"jq: error: null is not iterable\" in /shipyard:build\n\n## Starting Posture: Investigate First, Fix Last\n\nI do not immediately propose a fix. \"null is not iterable\" is a symptom, not a root cause. The same error message can come from completely different code paths depending on which jq expression encounters a null. Proposing a fix before knowing which expression and which field is null would be a guess dressed up as a solution.\n\nThe user's note that \"clearing the cache and reinstalling\" had no effect is a meaningful clue: the problem is not environmental (wrong jq version, corrupt plugin install). It is reproducible and deterministic. That narrows the search to logic, not infrastructure.\n\n---\n\n## Step 1: Reproduce the Error and Read the Full Message\n\nBefore reading any code, I need the exact error output, not a paraphrase. The user said:\n\n> jq: error: null is not iterable\n\nBut jq errors include the expression that failed. The full message looks like:\n\n```\njq: error (at <stdin>:1): null (null) is not iterable\n```\n\nor, for a piped filter:\n\n```\njq: error (at .shipyard/STATE.json:0): null (null) is not iterable\n```\n\nThis tells me which file was being processed and (sometimes) which filter step. I ask the user to run the command again and capture the full stderr, or I reproduce it myself in a fresh project by:\n\n1. Creating a bare directory with no `.shipyard/` content\n2. Running the equivalent shell call that `/shipyard:build` triggers at Step 1 (reading STATE.json for the current phase)\n3. Capturing the full stderr output\n\nIf the user cannot provide the full trace, I attempt to trigger it myself.\n\n---\n\n## Step 2: Identify Which Code Path the Build Command Calls That Uses jq\n\nThe `/shipyard:build` command (in `commands/build.md`) is a prose instruction file \u2014 it is not itself a bash script. It tells Claude to invoke bash scripts. The scripts that use jq in this workflow are:\n\n- **`scripts/state-read.sh`** \u2014 called at the start of every session via the SessionStart hook, and explicitly instructed in build Step 1 (\"read `.shipyard/STATE.json` for the current phase\")\n- **`scripts/state-write.sh`** \u2014 called at Step 3 to update STATE.json\n- **`scripts/checkpoint.sh`** \u2014 called at Step 3a; does not use jq\n- **`hooks/stop.sh`** \u2014 uses jq but only on session end\n\nThe error is reported when running on a \"fresh project,\" which means `.shipyard/` either does not exist yet or was just created by `/shipyard:init`. The build command's Step 2 says \"Verify `.shipyard/` exists. If not, tell the user to run `/shipyard:init` first.\" So either init was run and produced incomplete state, or state-read.sh is the source of the error.\n\nMy primary suspect is `scripts/state-read.sh` because:\n1. It is the first script Claude executes (SessionStart hook or step 1 of build)\n2. It contains multiple jq expressions\n3. It runs against STATE.json whose contents on a fresh project may be missing expected fields\n\n---\n\n## Step 3: Trace the Data Flow Through jq Expressions in state-read.sh\n\nI read `scripts/state-read.sh` systematically. The jq expressions in order of execution are:\n\n**Line 183 \u2014 JSON structure validation:**\n```bash\njq -e 'has(\"schema\") and has(\"phase\") and has(\"status\")' .shipyard/STATE.json\n```\n`has()` never iterates, so this cannot produce \"null is not iterable.\"\n\n**Line 204 \u2014 Field extraction via @tsv:**\n```bash\n_tsv=$(jq -r '[.schema, .phase, .status, (.position // \"\"), (.blocker // \"\")] | @tsv' .shipyard/STATE.json 2>/dev/null)\n```\nArray construction with `[]` is not iteration. The `//` fallbacks handle null. This is safe unless STATE.json itself is malformed in a way that makes `.schema`, `.phase`, or `.status` an unexpected type \u2014 but that produces a type error, not \"null is not iterable.\"\n\n**Line 222 \u2014 config.json read:**\n```bash\ncontext_tier=$(jq -r '.context_tier // \"auto\"' \".shipyard/config.json\" 2>/dev/null || echo \"auto\")\n```\nUses `//`, safe against null.\n\n**Line 339 \u2014 codebase_docs_path read:**\n```bash\ncodebase_docs_path=$(jq -r '.codebase_docs_path // \".shipyard/codebase\"' \".shipyard/config.json\" 2>/dev/null || echo \".shipyard/codebase\")\n```\nAlso safe.\n\nNone of these produce \"null is not iterable\" directly. The \"null is not iterable\" error from jq is specifically triggered by expressions like `.field[]` or `.[]\\` or `to_entries[]` or `keys[]` applied to a null value.\n\n---\n\n## Step 4: Widen the Search \u2014 What Else Does the Build Workflow Invoke That Calls jq?\n\n`scripts/state-read.sh` does not contain any `[]` iteration. So if the error is in state-read.sh, it would have to come from something being piped to jq with an iteration expression. The error must be coming from somewhere else.\n\nI check `scripts/state-write.sh`. The relevant jq call at line 291:\n```bash\nNEW_CONTENT=$(jq -n \\\n    --argjson schema 3 \\\n    --argjson phase \"${PHASE:-0}\" \\\n    ...\n```\nUses `--argjson` with `0` as default. If `PHASE` is empty string, `--argjson phase \"\"` would fail because `\"\"` is not valid JSON. That would produce a different error though (\"Invalid numeric literal\").\n\nThe build command Step 3 calls `state-write.sh` with `--phase`, `--position`, and `--status` flags. If those variables were unset or null-derived from a broken STATE.json read, the write step could fail.\n\n---\n\n## Step 5: Hypothesis Formation \u2014 Check git log for Recent Changes\n\nThe error reproduces on a fresh project but presumably worked before (otherwise it would be a known open bug). \"Fresh project\" plus \"reproducible\" suggests a regression.\n\nI run:\n```bash\ngit log --oneline -20 scripts/state-read.sh scripts/state-write.sh hooks/ commands/build.md\n```\n\nand:\n```bash\ngit diff HEAD~5 -- scripts/state-read.sh scripts/state-write.sh\n```\n\nI am looking for any recently added jq expression that uses iteration (`[]`, `to_entries`, `keys`, `map`, `select`) against a field that could be null on a fresh project where STATE.json has just been created by init with only the mandatory fields (`schema`, `phase`, `status`, `position`, `updated_at`, `blocker: null`).\n\nA fresh project STATE.json from `/shipyard:init` looks like:\n```json\n{\"schema\":3,\"phase\":1,\"position\":\"Initialization complete, ready for planning\",\"status\":\"ready\",\"updated_at\":\"...\",\"blocker\":null}\n```\n\nAny jq expression that tries to iterate over a field that does not exist in this structure \u2014 for example, a hypothetical `.plans[]` or `.model_routing | keys[]` or `.phases[]` \u2014 would produce \"null is not iterable.\"\n\n---\n\n## Step 6: Check config.json on a Fresh Project\n\nThe build command Step 1 reads `.shipyard/config.json` for gate preferences and model routing. A fresh project's config.json from init contains `model_routing` as a nested object. If any code attempts to iterate over `model_routing` values using `[]` on a fresh project where config.json exists but a specific nested key is absent, that would be the source.\n\nI examine any code that reads `model_routing` from config.json with an iteration expression. For example:\n```bash\njq -r '.model_routing | to_entries[] | ...' .shipyard/config.json\n```\nIf `model_routing` is absent from config.json (e.g., the user skipped that question during init, or init wrote an incomplete config), `.model_routing` returns `null`, and `null | to_entries[]` throws \"null is not iterable.\"\n\n---\n\n## Explicit Hypothesis (Before Any Fix)\n\n**Most likely root cause:** A jq expression somewhere in the build invocation path iterates (`.field[]`, `to_entries[]`, `keys[]`, or similar) over a config.json or STATE.json field that does not exist on a fresh project, returning null before the iteration.\n\n**Second most likely:** A recent change to state-read.sh, state-write.sh, or a hook introduced an iteration expression without a null-guard (`//` fallback or `if . != null then`), and it only manifests on fresh projects because established projects have the field populated from prior runs.\n\n**Verification plan for the hypothesis:**\n1. Run `jq -r '.model_routing | to_entries[]' .shipyard/config.json` on a fresh project's config.json \u2014 if it throws \"null is not iterable,\" this is the site.\n2. Run `git diff HEAD~5 -- scripts/` and look for any newly introduced `[]` iteration without null-guard.\n3. Add `--exit-status` and remove `2>/dev/null` suppression temporarily to get the unfiltered error with line context.\n\nOnly after confirming the exact expression and the exact null field do I propose a fix \u2014 which would be adding a `// []` or `// {}` fallback, or an `if . != null then ... else [] end` guard, at the confirmed site.\n"}], "grading": {"eval_id": 3, "run_id": "eval-3-without_skill", "expectations": [{"text": "Does NOT immediately propose a fix or solution", "passed": true, "evidence": "Opens with 'I do not immediately propose a fix' and maintains investigation posture throughout"}, {"text": "First step involves reading/reproducing the error message", "passed": true, "evidence": "Step 1: 'Reproduce the Error and Read the Full Message' \u2014 notes user's paraphrase is insufficient, asks for full stderr"}, {"text": "Traces data flow to identify which jq expression receives null", "passed": true, "evidence": "Steps 3-4 systematically read each jq expression in state-read.sh and state-write.sh, ruling them out one by one based on whether they use iteration"}, {"text": "Mentions checking recent changes or git diff as part of investigation", "passed": true, "evidence": "Step 5: 'Check git log for Recent Changes' with git log and git diff commands"}, {"text": "Forms explicit hypothesis before proposing any fix", "passed": true, "evidence": "Section titled 'Explicit Hypothesis (Before Any Fix)' with primary and secondary candidates, plus specific verification plan"}], "pass_rate": 1.0}}, {"id": "eval-5-verification-commit-with_skill", "prompt": "I've refactored the config system to use jq instead of sed. Everything looks good, can you commit this?", "eval_id": 5, "outputs": [{"name": "approach.md", "type": "text", "content": "# Approach: Verification Before Commit\n\n## Skill Applied\nshipyard-verification: Evidence before assertions, always.\n\n## Do I Immediately Commit?\n\nNo. \"Everything looks good\" is an assertion, not evidence. The skill is unambiguous:\n\n> NO COMPLETION CLAIMS WITHOUT FRESH VERIFICATION EVIDENCE\n\nThe user's statement that things \"look good\" triggers the skill directly \u2014 this is exactly the red flag pattern: a positive statement about work state without verification evidence attached to it.\n\n## Why \"Looks Good\" Is Not Enough\n\nThe refactor changes sed to jq. These are fundamentally different tools:\n- sed operates on text streams with regex substitution\n- jq operates on JSON structure with path expressions\n\nA config system refactor of this kind can break in ways that look fine on casual inspection:\n- Silent data loss (jq returns null for missing paths; sed would leave text unchanged)\n- Quote/escaping differences in output\n- Edge cases in config values (empty strings, special characters, nested structures)\n- Error handling differences (jq exits non-zero on invalid JSON; sed does not)\n- Output format differences (jq may add/remove whitespace or quotes)\n\nThese failures are invisible to \"looks good\" \u2014 they only surface under tests.\n\n## Verification Steps (In Order)\n\n### Step 1: Run the full test suite\n\n```bash\nnpm test\n```\n\nThis is the primary gate. The project uses BATS with 108 tests. I must read the full output:\n- Count of passing tests\n- Count of failing tests\n- Any error messages\n\nI cannot claim tests pass without running this command fresh in this message and reading the output. A prior passing run is not sufficient evidence.\n\n### Step 2: Run the linter (ShellCheck)\n\nThe project's CI runs ShellCheck on scripts and hooks. Since the config system lives in scripts, ShellCheck must be clean:\n\n```bash\nshellcheck scripts/state-read.sh scripts/state-write.sh scripts/checkpoint.sh hooks/*.sh\n```\n\njq invocations have ShellCheck considerations (quoting, argument handling). A linter pass proves the new jq usage is syntactically sound.\n\n### Step 3: Run version sync check\n\n```bash\nbash scripts/check-versions.sh\n```\n\nThe pre-commit hook runs this. Running it manually confirms the environment is ready to commit.\n\n### Step 4: Inspect the diff\n\n```bash\ngit diff --stat\ngit diff\n```\n\nI read the full diff to:\n- Confirm sed invocations are actually gone (not just partially replaced)\n- Confirm jq filter expressions are correct for the actual JSON structure\n- Look for any sed that was converted but left orphaned variables or dead code\n- Check error handling \u2014 does the new code handle jq returning null or exit non-zero?\n\nThis is not a substitute for tests, but it surfaces obvious issues before running tests and gives context for interpreting test failures.\n\n### Step 5: Spot-check jq correctness against actual config files\n\n```bash\n# Example: verify the new jq reads produce the same output as expected\njq '.key' .shipyard/STATE.json\n```\n\nIf the config system reads STATE.json or other JSON files, I verify the jq paths are correct against actual files. A wrong path returns null silently \u2014 tests may not cover every path.\n\n## Decision Tree\n\n```\nRun npm test\n  |\n  +-- ANY failures --> Do NOT commit. Report actual failures with evidence.\n  |\n  +-- 0 failures --> Run shellcheck\n        |\n        +-- ANY errors --> Do NOT commit. Fix linter errors first.\n        |\n        +-- 0 errors --> Run check-versions.sh\n              |\n              +-- Fails --> Do NOT commit. Investigate.\n              |\n              +-- Passes --> Read git diff\n                    |\n                    +-- Obvious issues found --> Do NOT commit. Fix first.\n                    |\n                    +-- Diff looks correct --> NOW commit with evidence\n```\n\n## What I Report Before Committing\n\nOnly after all steps pass do I commit, and I state the evidence explicitly:\n\n> npm test: 108 passing, 0 failing\n> ShellCheck: 0 errors\n> check-versions.sh: passed\n> Diff reviewed: all sed removed, jq paths verified against actual JSON structure\n\nThen I commit.\n\n## What I Do NOT Do\n\n- Accept \"everything looks good\" as verification\n- Skip tests because \"it's just a refactor\"\n- Run only a subset of tests (test:fast) and call it done \u2014 unit tests alone miss integration behavior\n- Trust that the code looks right on inspection without running it\n- Commit and plan to fix failures later\n\n## Core Principle\n\nThe skill states: \"Claiming work is complete without verification is dishonesty, not efficiency.\"\n\nA refactor from sed to jq touches every config read and write in the system. The blast radius is large. The only honest answer to \"can you commit this?\" is: \"Not yet \u2014 let me run verification first and report what I find.\"\n"}], "grading": {"eval_id": 5, "run_id": "eval-5-with_skill", "expectations": [{"text": "Does NOT immediately commit or agree to commit", "passed": true, "evidence": "Opens with 'No. \"Everything looks good\" is an assertion, not evidence.' Does not commit until all 5 verification steps pass."}, {"text": "Explicitly states need to run tests/verification before committing", "passed": true, "evidence": "Step 1: 'Run the full test suite' as primary gate. States 'I cannot claim tests pass without running this command fresh in this message'"}, {"text": "Does not trust the user's claim that 'everything looks good'", "passed": true, "evidence": "Calls it a 'red flag pattern: a positive statement about work state without verification evidence.' Explains why visual inspection is insufficient for sed-to-jq refactor."}, {"text": "Specifies the exact verification command(s) to run", "passed": true, "evidence": "Lists npm test, shellcheck with specific files, check-versions.sh, git diff, and spot-check jq commands"}, {"text": "Only commits AFTER verification evidence confirms success", "passed": true, "evidence": "Decision tree explicitly shows commit only after ALL steps pass. Reports evidence inline: '108 passing, 0 failing / ShellCheck: 0 errors / check-versions.sh: passed'"}], "pass_rate": 1.0}}, {"id": "eval-5-verification-commit-without_skill", "prompt": "I've refactored the config system to use jq instead of sed. Everything looks good, can you commit this?", "eval_id": 5, "outputs": [{"name": "approach.md", "type": "text", "content": "# Approach: Verification Before Commit\n\n## Starting Position\n\nThe user says \"I've refactored the config system to use jq instead of sed. Everything looks good, can you commit this?\"\n\nI do NOT immediately commit. \"Everything looks good\" is a subjective claim by the author \u2014 the person most likely to have blind spots about their own changes. My job is to verify independently before creating a permanent record in git history.\n\n---\n\n## Step 1: Understand What Actually Changed\n\nBefore touching git, I run `git diff --stat HEAD` and `git status` to see which files were modified. This tells me the actual scope of the refactor. I do not take \"config system\" at face value \u2014 I need to see exactly which scripts changed.\n\nIn this repo, the relevant files are likely:\n- `scripts/state-read.sh` (reads STATE.json, config.json)\n- `scripts/state-write.sh` (writes STATE.json)\n- Possibly `scripts/check-versions.sh`\n\nI read the full diff (`git diff HEAD`) to understand every change made. I am looking for:\n- Every `sed` call that was replaced, and whether the `jq` replacement is semantically equivalent\n- Any `sed` calls that were NOT replaced but probably should have been (incomplete refactor)\n- Any `sed` calls that were intentionally kept (some `sed` usage is appropriate \u2014 e.g., the XML-stripping sanitizer in `state-read.sh` line 24 and the git tag label parsing in `state-write.sh` line 247)\n\n---\n\n## Step 2: Run the Pre-Commit Checks Manually\n\nThis repo has a pre-commit hook that runs `check-versions.sh` and `npm test`. I run those manually NOW, before staging anything:\n\n```\nbash scripts/check-versions.sh\nnpm test\n```\n\nI do not skip this step. The hook will run anyway, but running it early surfaces failures before I've staged files and need to unstage them.\n\n---\n\n## Step 3: ShellCheck the Modified Scripts\n\nShellCheck is part of CI lint and covers `scripts/*.sh`. I run it locally on every changed script:\n\n```\nshellcheck scripts/state-read.sh\nshellcheck scripts/state-write.sh\nshellcheck scripts/check-versions.sh\n```\n\njq-based refactors commonly introduce new ShellCheck issues:\n- Unquoted variables passed to `jq --arg`\n- `jq` output assigned to a variable without error handling\n- Missing `|| true` on `jq` calls in `set -e` contexts\n- `jq -r` returning `null` as the literal string \"null\" instead of empty string\n\n---\n\n## Step 4: Verify Semantic Equivalence of Each Replacement\n\nI read the before-and-after for every replaced `sed` pattern and confirm the `jq` equivalent produces identical output for the same input. The most critical ones in this codebase:\n\n- `state-read.sh` lines 67-71: sed-based Markdown parsing of `**Status:**`, `**Current Phase:**` etc. from the old STATE.md format. If these were replaced with jq reading STATE.json, I verify the JSON field names match what `state-write.sh` actually writes.\n- `state-write.sh` line 219: `sed 's|.*/||'` for stripping path prefixes from git tags \u2014 a `jq` replacement here would be unusual (this is shell glob output, not JSON). I check whether this was correctly left alone or accidentally replaced.\n- `state-write.sh` line 247: `sed` for stripping checkpoint tag labels. Same concern.\n\nI specifically look for the known gotcha from this project's MEMORY: `jq -e '.field and .field'` treats value `0` as false. If any numeric fields (like `phase`) are now being tested with `and`, that would be a correctness bug.\n\n---\n\n## Step 5: Confirm jq Is Available as a Dependency\n\n`jq` is already a declared dependency in this codebase (state-read.sh line 112 guards for it, doctor.md checks for it). The refactor increasing `jq` surface area does not change the dependency contract, but I confirm `jq --version` works in the current environment.\n\n---\n\n## Step 6: Run the Full Test Suite\n\n```\nnpm test\n```\n\nThis runs 108 BATS tests. I wait for it to complete. I do not commit until it passes. A refactor of the config/state read-write system is high-impact \u2014 these tests exercise the exact codepaths changed.\n\nIf any tests fail, I stop, diagnose the root cause (not patch around the failure), fix it, and re-run.\n\n---\n\n## Step 7: Spot-Check Live Behavior (Optional but Recommended)\n\nIf the test suite passes, I do a quick sanity check against a real `.shipyard/STATE.json` if one is present, or a synthetic one:\n\n```bash\necho '{\"schema\":\"1.0\",\"phase\":1,\"status\":\"building\",\"position\":\"Step 3\"}' > /tmp/test-state.json\n# run state-read.sh against it and confirm output looks correct\n```\n\nThis catches edge cases that unit tests might not cover (e.g., empty strings, missing optional fields, null values from jq).\n\n---\n\n## Step 8: Stage Only the Intended Files\n\nI use `git add <specific files>` \u2014 NOT `git add -A` or `git add .`. This prevents accidentally staging:\n- `.claude/settings.json` (untracked, likely private local config)\n- `.omc/` directory (untracked, appears to be analysis artifacts)\n- `skills-workspace/` (untracked, workspace files)\n\nAll three of those show as untracked in `git status` and must NOT be committed.\n\n---\n\n## Step 9: Commit With a Precise Message\n\nOnly after all of the above pass do I create the commit:\n\n```\ngit commit -m \"refactor: replace sed with jq in config/state read-write scripts\"\n```\n\nI follow the conventional commits format this repo uses (`fix:`, `feat:`, `chore:`, `refactor:`).\n\n---\n\n## Summary: Do I Trust \"Everything Looks Good\"?\n\nNo. Not because I distrust the user, but because:\n\n1. Authors have confirmation bias about their own changes.\n2. The pre-commit hook will catch version/test failures anyway \u2014 I am just surfacing them earlier.\n3. The specific risk here (sed-to-jq semantic equivalence) is subtle. jq's null-as-string behavior, the `0`-is-falsy gotcha, and missing error handling under `set -e` are all things that look fine visually but fail at runtime.\n4. \"Config system\" touches state read/write \u2014 the most critical paths in this CLI. A silent correctness bug here would corrupt `.shipyard/STATE.json` for users.\n\nThe cost of verification is a few minutes. The cost of committing a broken refactor is a bug in a shipped release.\n"}], "grading": {"eval_id": 5, "run_id": "eval-5-without_skill", "expectations": [{"text": "Does NOT immediately commit or agree to commit", "passed": true, "evidence": "Opens with 'I do NOT immediately commit.' Proceeds through 9 verification steps."}, {"text": "Explicitly states need to run tests/verification before committing", "passed": true, "evidence": "Step 2: pre-commit checks, Step 6: full test suite. States 'I do not commit until it passes.'"}, {"text": "Does not trust the user's claim that 'everything looks good'", "passed": true, "evidence": "Summary: 'Authors have confirmation bias about their own changes.' Explicitly addresses this."}, {"text": "Specifies the exact verification command(s) to run", "passed": true, "evidence": "Lists check-versions.sh, npm test, shellcheck with specific files, git diff, spot-check commands"}, {"text": "Only commits AFTER verification evidence confirms success", "passed": true, "evidence": "Step 9: 'Only after all of the above pass do I create the commit'"}], "pass_rate": 1.0}}], "previous_feedback": {}, "previous_outputs": {}, "benchmark": {"metadata": {"skill_name": "shipyard-skills", "skill_path": "/Users/lgbarn/Personal/shipyard/skills/", "executor_model": "claude-sonnet-4-6", "analyzer_model": "claude-opus-4-6", "timestamp": "2026-03-04T23:49:00Z", "evals_run": ["tdd-dry-run-flag", "debugging-jq-null-error", "verification-before-commit"], "runs_per_configuration": 1}, "runs": [{"eval_name": "tdd-dry-run-flag", "with_skill": {"pass_rate": 1.0, "passed": 5, "total": 5, "tokens": 35484, "duration_seconds": 60.7}, "without_skill": {"pass_rate": 0.6, "passed": 3, "total": 5, "tokens": 31150, "duration_seconds": 63.8}}, {"eval_name": "debugging-jq-null-error", "with_skill": {"pass_rate": 1.0, "passed": 5, "total": 5, "tokens": 57192, "duration_seconds": 105.8}, "without_skill": {"pass_rate": 1.0, "passed": 5, "total": 5, "tokens": 51329, "duration_seconds": 120.3}}, {"eval_name": "verification-before-commit", "with_skill": {"pass_rate": 1.0, "passed": 5, "total": 5, "tokens": 21728, "duration_seconds": 56.5}, "without_skill": {"pass_rate": 1.0, "passed": 5, "total": 5, "tokens": 24206, "duration_seconds": 76.2}}], "run_summary": {"with_skill": {"mean_pass_rate": 1.0, "mean_tokens": 38135, "mean_duration_seconds": 74.3}, "without_skill": {"mean_pass_rate": 0.87, "mean_tokens": 35562, "mean_duration_seconds": 86.8}, "delta": {"pass_rate": "+0.13", "time_seconds": "-12.5", "tokens": "+2573"}}, "notes": ["TDD skill shows strongest differentiation: with-skill follows strict RED-GREEN-REFACTOR (one test at a time), baseline writes all tests upfront and adds unrequested features", "Debugging skill shows similar quality between with/without \u2014 Sonnet's base behavior already investigates before fixing when prompted about debugging", "Verification skill shows similar quality \u2014 baseline already refuses to commit without testing. Skill adds more structured skepticism about specific phrases", "Non-discriminating assertions: debugging and verification baselines pass all assertions, suggesting these skills' value is more about enforcement under pressure than basic behavior"]}};
+
+    // ---- State ----
+    let feedbackMap = {};  // run_id -> feedback text
+    let currentIndex = 0;
+    let visitedRuns = new Set();
+
+    // ---- Init ----
+    async function init() {
+      // Load saved feedback from server — but only if this isn't a fresh
+      // iteration (indicated by previous_feedback being present). When
+      // previous feedback exists, the feedback.json on disk is stale from
+      // the prior iteration and should not pre-fill the textareas.
+      const hasPrevious = Object.keys(EMBEDDED_DATA.previous_feedback || {}).length > 0
+        || Object.keys(EMBEDDED_DATA.previous_outputs || {}).length > 0;
+      if (!hasPrevious) {
+        try {
+          const resp = await fetch("/api/feedback");
+          const data = await resp.json();
+          if (data.reviews) {
+            for (const r of data.reviews) feedbackMap[r.run_id] = r.feedback;
+          }
+        } catch { /* first run, no feedback yet */ }
+      }
+
+      document.getElementById("skill-name").textContent = EMBEDDED_DATA.skill_name;
+      showRun(0);
+
+      // Wire up feedback auto-save
+      const textarea = document.getElementById("feedback");
+      let saveTimeout = null;
+      textarea.addEventListener("input", () => {
+        clearTimeout(saveTimeout);
+        document.getElementById("feedback-status").textContent = "";
+        saveTimeout = setTimeout(() => saveCurrentFeedback(), 800);
+      });
+    }
+
+    // ---- Navigation ----
+    function navigate(delta) {
+      const newIndex = currentIndex + delta;
+      if (newIndex >= 0 && newIndex < EMBEDDED_DATA.runs.length) {
+        saveCurrentFeedback();
+        showRun(newIndex);
+      }
+    }
+
+    function updateNavButtons() {
+      document.getElementById("prev-btn").disabled = currentIndex === 0;
+      document.getElementById("next-btn").disabled =
+        currentIndex === EMBEDDED_DATA.runs.length - 1;
+    }
+
+    // ---- Show a run ----
+    function showRun(index) {
+      currentIndex = index;
+      const run = EMBEDDED_DATA.runs[index];
+
+      // Progress
+      document.getElementById("progress").textContent =
+        `${index + 1} of ${EMBEDDED_DATA.runs.length}`;
+
+      // Prompt
+      document.getElementById("prompt-text").textContent = run.prompt;
+
+      // Config badge
+      const badge = document.getElementById("config-badge");
+      const configMatch = run.id.match(/(with_skill|without_skill|new_skill|old_skill)/);
+      if (configMatch) {
+        const config = configMatch[1];
+        const isBaseline = config === "without_skill" || config === "old_skill";
+        badge.textContent = config.replace(/_/g, " ");
+        badge.className = "config-badge " + (isBaseline ? "config-baseline" : "config-primary");
+        badge.style.display = "inline-block";
+      } else {
+        badge.style.display = "none";
+      }
+
+      // Outputs
+      renderOutputs(run);
+
+      // Previous outputs
+      renderPrevOutputs(run);
+
+      // Grades
+      renderGrades(run);
+
+      // Previous feedback
+      const prevFb = (EMBEDDED_DATA.previous_feedback || {})[run.id];
+      const prevEl = document.getElementById("prev-feedback");
+      if (prevFb) {
+        document.getElementById("prev-feedback-text").textContent = prevFb;
+        prevEl.style.display = "block";
+      } else {
+        prevEl.style.display = "none";
+      }
+
+      // Feedback
+      document.getElementById("feedback").value = feedbackMap[run.id] || "";
+      document.getElementById("feedback-status").textContent = "";
+
+      updateNavButtons();
+
+      // Track visited runs and promote done button when all visited
+      visitedRuns.add(index);
+      const doneBtn = document.getElementById("done-btn");
+      if (visitedRuns.size >= EMBEDDED_DATA.runs.length) {
+        doneBtn.classList.add("ready");
+      }
+
+      // Scroll main content to top
+      document.querySelector(".main").scrollTop = 0;
+    }
+
+    // ---- Render outputs ----
+    function renderOutputs(run) {
+      const container = document.getElementById("outputs-body");
+      container.innerHTML = "";
+
+      const outputs = run.outputs || [];
+      if (outputs.length === 0) {
+        container.innerHTML = '<div class="empty-state">No output files</div>';
+        return;
+      }
+
+      for (const file of outputs) {
+        const fileDiv = document.createElement("div");
+        fileDiv.className = "output-file";
+
+        // Always show file header with download link
+        const header = document.createElement("div");
+        header.className = "output-file-header";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = file.name;
+        header.appendChild(nameSpan);
+        const dlBtn = document.createElement("a");
+        dlBtn.className = "dl-btn";
+        dlBtn.textContent = "Download";
+        dlBtn.download = file.name;
+        dlBtn.href = getDownloadUri(file);
+        header.appendChild(dlBtn);
+        fileDiv.appendChild(header);
+
+        const content = document.createElement("div");
+        content.className = "output-file-content";
+
+        if (file.type === "text") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          content.appendChild(pre);
+        } else if (file.type === "image") {
+          const img = document.createElement("img");
+          img.src = file.data_uri;
+          img.alt = file.name;
+          content.appendChild(img);
+        } else if (file.type === "pdf") {
+          const iframe = document.createElement("iframe");
+          iframe.src = file.data_uri;
+          content.appendChild(iframe);
+        } else if (file.type === "xlsx") {
+          renderXlsx(content, file.data_b64);
+        } else if (file.type === "binary") {
+          const a = document.createElement("a");
+          a.className = "download-link";
+          a.href = file.data_uri;
+          a.download = file.name;
+          a.textContent = "Download " + file.name;
+          content.appendChild(a);
+        } else if (file.type === "error") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          pre.style.color = "var(--red)";
+          content.appendChild(pre);
+        }
+
+        fileDiv.appendChild(content);
+        container.appendChild(fileDiv);
+      }
+    }
+
+    // ---- XLSX rendering via SheetJS ----
+    function renderXlsx(container, b64Data) {
+      try {
+        const raw = Uint8Array.from(atob(b64Data), c => c.charCodeAt(0));
+        const wb = XLSX.read(raw, { type: "array" });
+
+        for (let i = 0; i < wb.SheetNames.length; i++) {
+          const sheetName = wb.SheetNames[i];
+          const ws = wb.Sheets[sheetName];
+
+          if (wb.SheetNames.length > 1) {
+            const sheetLabel = document.createElement("div");
+            sheetLabel.style.cssText =
+              "font-weight:600; font-size:0.8rem; color:#b0aea5; margin-top:0.5rem; margin-bottom:0.25rem;";
+            sheetLabel.textContent = "Sheet: " + sheetName;
+            container.appendChild(sheetLabel);
+          }
+
+          const htmlStr = XLSX.utils.sheet_to_html(ws, { editable: false });
+          const wrapper = document.createElement("div");
+          wrapper.innerHTML = htmlStr;
+          container.appendChild(wrapper);
+        }
+      } catch (err) {
+        container.textContent = "Error rendering spreadsheet: " + err.message;
+      }
+    }
+
+    // ---- Grades ----
+    function renderGrades(run) {
+      const section = document.getElementById("grades-section");
+      const content = document.getElementById("grades-content");
+
+      if (!run.grading) {
+        section.style.display = "none";
+        return;
+      }
+
+      const grading = run.grading;
+      section.style.display = "block";
+      // Reset to collapsed
+      content.classList.remove("open");
+      document.getElementById("grades-arrow").classList.remove("open");
+
+      const summary = grading.summary || {};
+      const expectations = grading.expectations || [];
+
+      let html = '<div style="padding: 1rem;">';
+
+      // Summary line
+      const passRate = summary.pass_rate != null
+        ? Math.round(summary.pass_rate * 100) + "%"
+        : "?";
+      const badgeClass = summary.pass_rate >= 0.8 ? "grade-pass" : summary.pass_rate >= 0.5 ? "" : "grade-fail";
+      html += '<div class="grades-summary">';
+      html += '<span class="grade-badge ' + badgeClass + '">' + passRate + '</span>';
+      html += '<span>' + (summary.passed || 0) + ' passed, ' + (summary.failed || 0) + ' failed of ' + (summary.total || 0) + '</span>';
+      html += '</div>';
+
+      // Assertions list
+      html += '<ul class="assertion-list">';
+      for (const exp of expectations) {
+        const statusClass = exp.passed ? "pass" : "fail";
+        const statusIcon = exp.passed ? "\u2713" : "\u2717";
+        html += '<li class="assertion-item">';
+        html += '<span class="assertion-status ' + statusClass + '">' + statusIcon + '</span>';
+        html += '<span>' + escapeHtml(exp.text) + '</span>';
+        if (exp.evidence) {
+          html += '<div class="assertion-evidence">' + escapeHtml(exp.evidence) + '</div>';
+        }
+        html += '</li>';
+      }
+      html += '</ul>';
+
+      html += '</div>';
+      content.innerHTML = html;
+    }
+
+    function toggleGrades() {
+      const content = document.getElementById("grades-content");
+      const arrow = document.getElementById("grades-arrow");
+      content.classList.toggle("open");
+      arrow.classList.toggle("open");
+    }
+
+    // ---- Previous outputs (collapsible) ----
+    function renderPrevOutputs(run) {
+      const section = document.getElementById("prev-outputs-section");
+      const content = document.getElementById("prev-outputs-content");
+      const prevOutputs = (EMBEDDED_DATA.previous_outputs || {})[run.id];
+
+      if (!prevOutputs || prevOutputs.length === 0) {
+        section.style.display = "none";
+        return;
+      }
+
+      section.style.display = "block";
+      // Reset to collapsed
+      content.classList.remove("open");
+      document.getElementById("prev-outputs-arrow").classList.remove("open");
+
+      // Render the files into the content area
+      content.innerHTML = "";
+      const wrapper = document.createElement("div");
+      wrapper.style.padding = "1rem";
+
+      for (const file of prevOutputs) {
+        const fileDiv = document.createElement("div");
+        fileDiv.className = "output-file";
+
+        const header = document.createElement("div");
+        header.className = "output-file-header";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = file.name;
+        header.appendChild(nameSpan);
+        const dlBtn = document.createElement("a");
+        dlBtn.className = "dl-btn";
+        dlBtn.textContent = "Download";
+        dlBtn.download = file.name;
+        dlBtn.href = getDownloadUri(file);
+        header.appendChild(dlBtn);
+        fileDiv.appendChild(header);
+
+        const fc = document.createElement("div");
+        fc.className = "output-file-content";
+
+        if (file.type === "text") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          fc.appendChild(pre);
+        } else if (file.type === "image") {
+          const img = document.createElement("img");
+          img.src = file.data_uri;
+          img.alt = file.name;
+          fc.appendChild(img);
+        } else if (file.type === "pdf") {
+          const iframe = document.createElement("iframe");
+          iframe.src = file.data_uri;
+          fc.appendChild(iframe);
+        } else if (file.type === "xlsx") {
+          renderXlsx(fc, file.data_b64);
+        } else if (file.type === "binary") {
+          const a = document.createElement("a");
+          a.className = "download-link";
+          a.href = file.data_uri;
+          a.download = file.name;
+          a.textContent = "Download " + file.name;
+          fc.appendChild(a);
+        }
+
+        fileDiv.appendChild(fc);
+        wrapper.appendChild(fileDiv);
+      }
+
+      content.appendChild(wrapper);
+    }
+
+    function togglePrevOutputs() {
+      const content = document.getElementById("prev-outputs-content");
+      const arrow = document.getElementById("prev-outputs-arrow");
+      content.classList.toggle("open");
+      arrow.classList.toggle("open");
+    }
+
+    // ---- Feedback (saved to server -> feedback.json) ----
+    function saveCurrentFeedback() {
+      const run = EMBEDDED_DATA.runs[currentIndex];
+      const text = document.getElementById("feedback").value;
+
+      if (text.trim() === "") {
+        delete feedbackMap[run.id];
+      } else {
+        feedbackMap[run.id] = text;
+      }
+
+      // Build reviews array from map
+      const reviews = [];
+      for (const [run_id, feedback] of Object.entries(feedbackMap)) {
+        if (feedback.trim()) {
+          reviews.push({ run_id, feedback, timestamp: new Date().toISOString() });
+        }
+      }
+
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reviews, status: "in_progress" }),
+      }).then(() => {
+        document.getElementById("feedback-status").textContent = "Saved";
+      }).catch(() => {
+        // Static mode or server unavailable — no-op on auto-save,
+        // feedback will be downloaded on final submit
+        document.getElementById("feedback-status").textContent = "Will download on submit";
+      });
+    }
+
+    // ---- Done ----
+    function showDoneDialog() {
+      // Save current textarea to feedbackMap (but don't POST yet)
+      const run = EMBEDDED_DATA.runs[currentIndex];
+      const text = document.getElementById("feedback").value;
+      if (text.trim() === "") {
+        delete feedbackMap[run.id];
+      } else {
+        feedbackMap[run.id] = text;
+      }
+
+      // POST once with status: complete — include ALL runs so the model
+      // can distinguish "no feedback" (looks good) from "not reviewed"
+      const reviews = [];
+      const ts = new Date().toISOString();
+      for (const r of EMBEDDED_DATA.runs) {
+        reviews.push({ run_id: r.id, feedback: feedbackMap[r.id] || "", timestamp: ts });
+      }
+      const payload = JSON.stringify({ reviews, status: "complete" }, null, 2);
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: payload,
+      }).then(() => {
+        document.getElementById("done-overlay").classList.add("visible");
+      }).catch(() => {
+        // Server not available (static mode) — download as file
+        const blob = new Blob([payload], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "feedback.json";
+        a.click();
+        URL.revokeObjectURL(url);
+        document.getElementById("done-overlay").classList.add("visible");
+      });
+    }
+
+    function closeDoneDialog() {
+      // Reset status back to in_progress
+      saveCurrentFeedback();
+      document.getElementById("done-overlay").classList.remove("visible");
+    }
+
+    // ---- Toast ----
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("visible");
+      setTimeout(() => toast.classList.remove("visible"), 2000);
+    }
+
+    // ---- Keyboard nav ----
+    document.addEventListener("keydown", (e) => {
+      // Don't capture when typing in textarea
+      if (e.target.tagName === "TEXTAREA") return;
+
+      if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+        e.preventDefault();
+        navigate(-1);
+      } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+        e.preventDefault();
+        navigate(1);
+      }
+    });
+
+    // ---- Util ----
+    function getDownloadUri(file) {
+      if (file.data_uri) return file.data_uri;
+      if (file.data_b64) return "data:application/octet-stream;base64," + file.data_b64;
+      if (file.type === "text") return "data:text/plain;charset=utf-8," + encodeURIComponent(file.content);
+      return "#";
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // ---- View switching ----
+    function switchView(view) {
+      document.querySelectorAll(".view-tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".view-panel").forEach(p => p.classList.remove("active"));
+      document.querySelector(`[onclick="switchView('${view}')"]`).classList.add("active");
+      document.getElementById("panel-" + view).classList.add("active");
+    }
+
+    // ---- Benchmark rendering ----
+    function renderBenchmark() {
+      const data = EMBEDDED_DATA.benchmark;
+      if (!data) return;
+
+      // Show the tabs
+      document.getElementById("view-tabs").style.display = "flex";
+
+      const container = document.getElementById("benchmark-content");
+      const summary = data.run_summary || {};
+      const metadata = data.metadata || {};
+      const notes = data.notes || [];
+
+      let html = "";
+
+      // Header
+      html += "<h2 style='font-family: Poppins, sans-serif; margin-bottom: 0.5rem;'>Benchmark Results</h2>";
+      html += "<p style='color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.25rem;'>";
+      if (metadata.skill_name) html += "<strong>" + escapeHtml(metadata.skill_name) + "</strong> &mdash; ";
+      if (metadata.timestamp) html += metadata.timestamp + " &mdash; ";
+      if (metadata.evals_run) html += "Evals: " + metadata.evals_run.join(", ") + " &mdash; ";
+      html += (metadata.runs_per_configuration || "?") + " runs per configuration";
+      html += "</p>";
+
+      // Summary table
+      html += '<table class="benchmark-table">';
+
+      function fmtStat(stat, pct) {
+        if (!stat) return "—";
+        const suffix = pct ? "%" : "";
+        const m = pct ? (stat.mean * 100).toFixed(0) : stat.mean.toFixed(1);
+        const s = pct ? (stat.stddev * 100).toFixed(0) : stat.stddev.toFixed(1);
+        return m + suffix + " ± " + s + suffix;
+      }
+
+      function deltaClass(val) {
+        if (!val) return "";
+        const n = parseFloat(val);
+        if (n > 0) return "benchmark-delta-positive";
+        if (n < 0) return "benchmark-delta-negative";
+        return "";
+      }
+
+      // Discover config names dynamically (everything except "delta")
+      const configs = Object.keys(summary).filter(k => k !== "delta");
+      const configA = configs[0] || "config_a";
+      const configB = configs[1] || "config_b";
+      const labelA = configA.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      const labelB = configB.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      const a = summary[configA] || {};
+      const b = summary[configB] || {};
+      const delta = summary.delta || {};
+
+      html += "<thead><tr><th>Metric</th><th>" + escapeHtml(labelA) + "</th><th>" + escapeHtml(labelB) + "</th><th>Delta</th></tr></thead>";
+      html += "<tbody>";
+
+      html += "<tr><td><strong>Pass Rate</strong></td>";
+      html += "<td>" + fmtStat(a.pass_rate, true) + "</td>";
+      html += "<td>" + fmtStat(b.pass_rate, true) + "</td>";
+      html += '<td class="' + deltaClass(delta.pass_rate) + '">' + (delta.pass_rate || "—") + "</td></tr>";
+
+      // Time (only show row if data exists)
+      if (a.time_seconds || b.time_seconds) {
+        html += "<tr><td><strong>Time (s)</strong></td>";
+        html += "<td>" + fmtStat(a.time_seconds, false) + "</td>";
+        html += "<td>" + fmtStat(b.time_seconds, false) + "</td>";
+        html += '<td class="' + deltaClass(delta.time_seconds) + '">' + (delta.time_seconds ? delta.time_seconds + "s" : "—") + "</td></tr>";
+      }
+
+      // Tokens (only show row if data exists)
+      if (a.tokens || b.tokens) {
+        html += "<tr><td><strong>Tokens</strong></td>";
+        html += "<td>" + fmtStat(a.tokens, false) + "</td>";
+        html += "<td>" + fmtStat(b.tokens, false) + "</td>";
+        html += '<td class="' + deltaClass(delta.tokens) + '">' + (delta.tokens || "—") + "</td></tr>";
+      }
+
+      html += "</tbody></table>";
+
+      // Per-eval breakdown (if runs data available)
+      const runs = data.runs || [];
+      if (runs.length > 0) {
+        const evalIds = [...new Set(runs.map(r => r.eval_id))].sort((a, b) => a - b);
+
+        html += "<h3 style='font-family: Poppins, sans-serif; margin-bottom: 0.75rem;'>Per-Eval Breakdown</h3>";
+
+        const hasTime = runs.some(r => r.result && r.result.time_seconds != null);
+        const hasErrors = runs.some(r => r.result && r.result.errors > 0);
+
+        for (const evalId of evalIds) {
+          const evalRuns = runs.filter(r => r.eval_id === evalId);
+          const evalName = evalRuns[0] && evalRuns[0].eval_name ? evalRuns[0].eval_name : "Eval " + evalId;
+
+          html += "<h4 style='font-family: Poppins, sans-serif; margin: 1rem 0 0.5rem; color: var(--text);'>" + escapeHtml(evalName) + "</h4>";
+          html += '<table class="benchmark-table">';
+          html += "<thead><tr><th>Config</th><th>Run</th><th>Pass Rate</th>";
+          if (hasTime) html += "<th>Time (s)</th>";
+          if (hasErrors) html += "<th>Crashes During Execution</th>";
+          html += "</tr></thead>";
+          html += "<tbody>";
+
+          // Group by config and render with average rows
+          const configGroups = [...new Set(evalRuns.map(r => r.configuration))];
+          for (let ci = 0; ci < configGroups.length; ci++) {
+            const config = configGroups[ci];
+            const configRuns = evalRuns.filter(r => r.configuration === config);
+            if (configRuns.length === 0) continue;
+
+            const rowClass = ci === 0 ? "benchmark-row-with" : "benchmark-row-without";
+            const configLabel = config.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+
+            for (const run of configRuns) {
+              const r = run.result || {};
+              const prClass = r.pass_rate >= 0.8 ? "benchmark-delta-positive" : r.pass_rate < 0.5 ? "benchmark-delta-negative" : "";
+              html += '<tr class="' + rowClass + '">';
+              html += "<td>" + configLabel + "</td>";
+              html += "<td>" + run.run_number + "</td>";
+              html += '<td class="' + prClass + '">' + ((r.pass_rate || 0) * 100).toFixed(0) + "% (" + (r.passed || 0) + "/" + (r.total || 0) + ")</td>";
+              if (hasTime) html += "<td>" + (r.time_seconds != null ? r.time_seconds.toFixed(1) : "—") + "</td>";
+              if (hasErrors) html += "<td>" + (r.errors || 0) + "</td>";
+              html += "</tr>";
+            }
+
+            // Average row
+            const rates = configRuns.map(r => (r.result || {}).pass_rate || 0);
+            const avgRate = rates.reduce((a, b) => a + b, 0) / rates.length;
+            const avgPrClass = avgRate >= 0.8 ? "benchmark-delta-positive" : avgRate < 0.5 ? "benchmark-delta-negative" : "";
+            html += '<tr class="benchmark-row-avg ' + rowClass + '">';
+            html += "<td>" + configLabel + "</td>";
+            html += "<td>Avg</td>";
+            html += '<td class="' + avgPrClass + '">' + (avgRate * 100).toFixed(0) + "%</td>";
+            if (hasTime) {
+              const times = configRuns.map(r => (r.result || {}).time_seconds).filter(t => t != null);
+              html += "<td>" + (times.length ? (times.reduce((a, b) => a + b, 0) / times.length).toFixed(1) : "—") + "</td>";
+            }
+            if (hasErrors) html += "<td></td>";
+            html += "</tr>";
+          }
+          html += "</tbody></table>";
+
+          // Per-assertion detail for this eval
+          const runsWithExpectations = {};
+          for (const config of configGroups) {
+            runsWithExpectations[config] = evalRuns.filter(r => r.configuration === config && r.expectations && r.expectations.length > 0);
+          }
+          const hasAnyExpectations = Object.values(runsWithExpectations).some(runs => runs.length > 0);
+          if (hasAnyExpectations) {
+            // Collect all unique assertion texts across all configs
+            const allAssertions = [];
+            const seen = new Set();
+            for (const config of configGroups) {
+              for (const run of runsWithExpectations[config]) {
+                for (const exp of (run.expectations || [])) {
+                  if (!seen.has(exp.text)) {
+                    seen.add(exp.text);
+                    allAssertions.push(exp.text);
+                  }
+                }
+              }
+            }
+
+            html += '<table class="benchmark-table" style="margin-top: 0.5rem;">';
+            html += "<thead><tr><th>Assertion</th>";
+            for (const config of configGroups) {
+              const label = config.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+              html += "<th>" + escapeHtml(label) + "</th>";
+            }
+            html += "</tr></thead><tbody>";
+
+            for (const assertionText of allAssertions) {
+              html += "<tr><td>" + escapeHtml(assertionText) + "</td>";
+
+              for (const config of configGroups) {
+                html += "<td>";
+                for (const run of runsWithExpectations[config]) {
+                  const exp = (run.expectations || []).find(e => e.text === assertionText);
+                  if (exp) {
+                    const cls = exp.passed ? "benchmark-delta-positive" : "benchmark-delta-negative";
+                    const icon = exp.passed ? "\u2713" : "\u2717";
+                    html += '<span class="' + cls + '" title="Run ' + run.run_number + ': ' + escapeHtml(exp.evidence || "") + '">' + icon + "</span> ";
+                  } else {
+                    html += "— ";
+                  }
+                }
+                html += "</td>";
+              }
+              html += "</tr>";
+            }
+            html += "</tbody></table>";
+          }
+        }
+      }
+
+      // Notes
+      if (notes.length > 0) {
+        html += '<div class="benchmark-notes">';
+        html += "<h3>Analysis Notes</h3>";
+        html += "<ul>";
+        for (const note of notes) {
+          html += "<li>" + escapeHtml(note) + "</li>";
+        }
+        html += "</ul></div>";
+      }
+
+      container.innerHTML = html;
+    }
+
+    // ---- Start ----
+    init();
+    renderBenchmark();
+  </script>
+</body>
+</html>

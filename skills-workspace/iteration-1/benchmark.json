@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "skill_name": "shipyard-skills",
+    "skill_path": "/Users/lgbarn/Personal/shipyard/skills/",
+    "executor_model": "claude-sonnet-4-6",
+    "analyzer_model": "claude-opus-4-6",
+    "timestamp": "2026-03-04T23:49:00Z",
+    "evals_run": ["tdd-dry-run-flag", "debugging-jq-null-error", "verification-before-commit"],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_name": "tdd-dry-run-flag",
+      "with_skill": {"pass_rate": 1.0, "passed": 5, "total": 5, "tokens": 35484, "duration_seconds": 60.7},
+      "without_skill": {"pass_rate": 0.6, "passed": 3, "total": 5, "tokens": 31150, "duration_seconds": 63.8}
+    },
+    {
+      "eval_name": "debugging-jq-null-error",
+      "with_skill": {"pass_rate": 1.0, "passed": 5, "total": 5, "tokens": 57192, "duration_seconds": 105.8},
+      "without_skill": {"pass_rate": 1.0, "passed": 5, "total": 5, "tokens": 51329, "duration_seconds": 120.3}
+    },
+    {
+      "eval_name": "verification-before-commit",
+      "with_skill": {"pass_rate": 1.0, "passed": 5, "total": 5, "tokens": 21728, "duration_seconds": 56.5},
+      "without_skill": {"pass_rate": 1.0, "passed": 5, "total": 5, "tokens": 24206, "duration_seconds": 76.2}
+    }
+  ],
+  "run_summary": {
+    "with_skill": {"mean_pass_rate": 1.0, "mean_tokens": 38135, "mean_duration_seconds": 74.3},
+    "without_skill": {"mean_pass_rate": 0.87, "mean_tokens": 35562, "mean_duration_seconds": 86.8},
+    "delta": {
+      "pass_rate": "+0.13",
+      "time_seconds": "-12.5",
+      "tokens": "+2573"
+    }
+  },
+  "notes": [
+    "TDD skill shows strongest differentiation: with-skill follows strict RED-GREEN-REFACTOR (one test at a time), baseline writes all tests upfront and adds unrequested features",
+    "Debugging skill shows similar quality between with/without — Sonnet's base behavior already investigates before fixing when prompted about debugging",
+    "Verification skill shows similar quality — baseline already refuses to commit without testing. Skill adds more structured skepticism about specific phrases",
+    "Non-discriminating assertions: debugging and verification baselines pass all assertions, suggesting these skills' value is more about enforcement under pressure than basic behavior"
+  ]
+}

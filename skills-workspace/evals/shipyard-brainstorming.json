@@ -1,0 +1,18 @@
+[
+  {"query": "I want to add a notification system to my app but I'm not sure what approach to take", "should_trigger": true},
+  {"query": "let's think about how to handle file uploads — should we use S3 directly or go through our API?", "should_trigger": true},
+  {"query": "I have an idea for a dashboard that shows real-time metrics, what do you think?", "should_trigger": true},
+  {"query": "what if we added a plugin system so users could extend the app with their own integrations?", "should_trigger": true},
+  {"query": "I need to build a search feature for our product catalog, let's figure out the requirements first", "should_trigger": true},
+  {"query": "let's design a caching strategy for the API — I'm thinking Redis but open to alternatives", "should_trigger": true},
+  {"query": "brainstorm with me on how to structure the permissions system for our multi-tenant app", "should_trigger": true},
+  {"query": "I want to add SSO support but I don't know whether to use SAML or OIDC", "should_trigger": true},
+  {"query": "fix the bug in src/auth/login.ts where the session cookie isn't being set correctly", "should_trigger": false},
+  {"query": "run the test suite and tell me which tests are failing", "should_trigger": false},
+  {"query": "read through the codebase and explain how the payment processing works", "should_trigger": false},
+  {"query": "deploy the application to the staging environment using our existing terraform config", "should_trigger": false},
+  {"query": "the API is returning 503 errors intermittently — help me investigate", "should_trigger": false},
+  {"query": "commit the changes I just made with the message 'fix: resolve token expiration bug'", "should_trigger": false},
+  {"query": "update the API documentation to include the new search endpoints", "should_trigger": false},
+  {"query": "review the PR at https://github.com/our-org/our-repo/pull/142 for security issues", "should_trigger": false}
+]

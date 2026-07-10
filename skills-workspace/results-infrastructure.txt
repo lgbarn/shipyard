@@ -1,0 +1,148 @@
+Evaluating: Use when working with Terraform (.tf, .tfvars), Ansible (playbooks, roles, inventory), Docker (Dockerfile, docker-compose.yml), CloudFormation, Kubernetes manifests, or any infrastructure-as-code files — provides validation workflows, tool chains, and common mistake prevention. Also triggers on "validate terraform", "check docker", "lint ansible", "terraform plan", "docker build", or any IaC file being created or modified.
+Results: 8/15 passed
+  [FAIL] rate=0/1 expected=True: I just wrote a new terraform module for our ECS cluster — can you vali
+  [FAIL] rate=0/1 expected=True: check the Dockerfile for best practices — I want to make sure we're no
+  [FAIL] rate=0/1 expected=True: lint the ansible playbook in deploy/playbook.yml — I want to catch iss
+  [FAIL] rate=0/1 expected=True: validate the docker-compose.yml — I added a new service for Redis and 
+  [FAIL] rate=0/1 expected=True: run terraform plan and review the changes before we apply to productio
+  [FAIL] rate=0/1 expected=True: I modified the terraform security groups in modules/network/main.tf — 
+  [FAIL] rate=0/1 expected=True: docker build keeps failing with a hadolint warning about pinning the b
+  [PASS] rate=0/1 expected=False: implement a new REST endpoint for user profile updates
+  [PASS] rate=0/1 expected=False: write unit tests for the email sending service
+  [PASS] rate=0/1 expected=False: brainstorm ideas for improving the search experience
+  [PASS] rate=0/1 expected=False: simplify the service layer abstractions
+  [PASS] rate=0/1 expected=False: debug the memory leak in the Node.js application
+  [PASS] rate=0/1 expected=False: document the deployment process for the team
+  [PASS] rate=0/1 expected=False: check npm dependencies for known vulnerabilities
+  [PASS] rate=0/1 expected=False: create a feature branch and worktree for the auth refactoring
+{
+  "skill_name": "infrastructure-validation",
+  "description": "Use when working with Terraform (.tf, .tfvars), Ansible (playbooks, roles, inventory), Docker (Dockerfile, docker-compose.yml), CloudFormation, Kubernetes manifests, or any infrastructure-as-code files \u2014 provides validation workflows, tool chains, and common mistake prevention. Also triggers on \"validate terraform\", \"check docker\", \"lint ansible\", \"terraform plan\", \"docker build\", or any IaC file being created or modified.",
+  "results": [
+    {
+      "query": "I just wrote a new terraform module for our ECS cluster \u2014 can you validate it before I apply?",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "check the Dockerfile for best practices \u2014 I want to make sure we're not running as root and the image is secure",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "lint the ansible playbook in deploy/playbook.yml \u2014 I want to catch issues before running it",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "validate the docker-compose.yml \u2014 I added a new service for Redis and want to make sure the config is correct",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "run terraform plan and review the changes before we apply to production",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "I modified the terraform security groups in modules/network/main.tf \u2014 validate the changes",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "docker build keeps failing with a hadolint warning about pinning the base image \u2014 help me fix it",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "implement a new REST endpoint for user profile updates",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "write unit tests for the email sending service",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "brainstorm ideas for improving the search experience",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "simplify the service layer abstractions",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "debug the memory leak in the Node.js application",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "document the deployment process for the team",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "check npm dependencies for known vulnerabilities",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "create a feature branch and worktree for the auth refactoring",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    }
+  ],
+  "summary": {
+    "total": 15,
+    "passed": 8,
+    "failed": 7
+  }
+}

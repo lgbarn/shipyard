@@ -1,0 +1,82 @@
+[
+  {
+    "query": "The CI pipeline on GitHub Actions is green locally but fails on ubuntu-latest with exit code 137 — I've checked the logs and it seems to die during the test phase. The runner has 7GB RAM. Can you figure out what's going on and why it only fails in CI?",
+    "should_trigger": true
+  },
+  {
+    "query": "I'm getting a weird intermittent failure in our integration tests — about 1 in 5 runs, test_concurrent_writes times out after 30 seconds. I added some debug logging but can't reproduce it consistently on my M2 Mac. The test passes fine when run in isolation with bats test/integration/concurrent.bats",
+    "should_trigger": true
+  },
+  {
+    "query": "After upgrading jq from 1.6 to 1.7, the state parsing in scripts/state.sh is silently returning empty strings for nested fields. The command `jq -r '.phases[0].tasks[0].status' STATE.json` works fine in terminal but inside the script it outputs null. Something about how we're piping data changed",
+    "should_trigger": true
+  },
+  {
+    "query": "Users are reporting that `shipyard init` hangs for about 45 seconds on repos with more than 500 files. I suspect it's the glob pattern in discover_skills() but I'm not sure — it could also be the git log call we added in v3.2. Can you investigate the bottleneck before I start optimizing random things?",
+    "should_trigger": true
+  },
+  {
+    "query": "I just merged PR #47 and now `shipyard map` throws 'unexpected token' on line 234 of scripts/commands.sh. The PR only touched the help command, so I don't understand how map broke. Here's the traceback from bash -x",
+    "should_trigger": true
+  },
+  {
+    "query": "Something broke between commits 55614c4 and d2c37c6 — the PreToolUse hook is no longer firing when it should. I've confirmed SHIPYARD_DISABLE_HOOKS is not set. The hook file exists at hooks/pre-tool-use.sh and has execute permissions. Not sure where to start looking",
+    "should_trigger": true
+  },
+  {
+    "query": "Our BATS test suite used to take 12 seconds with --jobs 4 but now it takes over 90 seconds after I added 15 new integration tests. The new tests themselves only take 2 seconds each when run individually. I think there might be resource contention but I want to understand the root cause before restructuring anything",
+    "should_trigger": true
+  },
+  {
+    "query": "I keep getting 'permission denied' when running shipyard doctor on a fresh clone. It works fine if I run chmod +x on all the scripts first, but shouldn't the install step handle that? Other team members aren't hitting this — just me on macOS Sequoia 26.3",
+    "should_trigger": true
+  },
+  {
+    "query": "The backup-on-write feature is creating .bak files but the SHA-256 checksums don't match after restore. I verified with shasum -a 256 and the restored file has 3 extra bytes at the end. This only happens when STATE.json contains unicode characters in task descriptions",
+    "should_trigger": true
+  },
+  {
+    "query": "When I run `shipyard status` right after `shipyard advance`, the status still shows the previous phase. But if I wait a second and run status again, it's correct. Feels like a race condition or maybe the state file isn't being flushed before status reads it",
+    "should_trigger": true
+  },
+  {
+    "query": "I need to write a new shipyard command called 'shipyard archive' that moves completed phases to a separate ARCHIVE.json file. Here's my rough plan: 1) add archive subcommand to commands.sh, 2) create archive_phase() in state.sh, 3) add tests. Can you help me implement this?",
+    "should_trigger": false
+  },
+  {
+    "query": "Can you refactor the state.sh file to use associative arrays instead of repeated jq calls? The current approach works fine but it's hard to read and I think arrays would be cleaner. No bugs — just want better code structure",
+    "should_trigger": false
+  },
+  {
+    "query": "I want to add a --verbose flag to every shipyard command. The flag should set SHIPYARD_VERBOSE=true and enable bash -x tracing. Can you implement this across all command handlers?",
+    "should_trigger": false
+  },
+  {
+    "query": "Write unit tests for the checksum verification function in scripts/state.sh. I want to cover: valid checksum, corrupted file, missing .bak file, and empty state. Use BATS with the AAA pattern",
+    "should_trigger": false
+  },
+  {
+    "query": "I'm planning a v4.0 release and need to document all breaking changes between v3.0 and now. Can you audit the git history and compile a migration guide for users upgrading from v3.x?",
+    "should_trigger": false
+  },
+  {
+    "query": "Help me set up ShellCheck as a pre-commit hook that runs automatically. I know it already runs in CI but I want it local too. The config should match what's in .github/workflows/ci.yml",
+    "should_trigger": false
+  },
+  {
+    "query": "I need to understand how the skill auto-discovery system works. Can you trace through the code path from when shipyard loads to when skills are available? I'm not debugging anything — just trying to understand the architecture before I extend it",
+    "should_trigger": false
+  },
+  {
+    "query": "Create a new BATS test file for the shipyard-map command covering edge cases: empty project, single phase, completed project, and unicode in task names. Follow the existing test patterns in test/",
+    "should_trigger": false
+  },
+  {
+    "query": "Can you review this PR diff and tell me if the changes to hooks/session-end.sh look correct? I want a code review focused on error handling and edge cases, not debugging a specific issue",
+    "should_trigger": false
+  },
+  {
+    "query": "I want to benchmark shipyard init across different repo sizes (100, 1000, 10000 files) and create a performance comparison table. Can you set up the benchmark script and run the measurements?",
+    "should_trigger": false
+  }
+]

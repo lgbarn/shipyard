@@ -1,0 +1,32 @@
+{
+  "eval_id": 5,
+  "run_id": "eval-5-with_skill",
+  "expectations": [
+    {
+      "text": "Does NOT immediately commit or agree to commit",
+      "passed": true,
+      "evidence": "Opens with 'No. \"Everything looks good\" is an assertion, not evidence.' Does not commit until all 5 verification steps pass."
+    },
+    {
+      "text": "Explicitly states need to run tests/verification before committing",
+      "passed": true,
+      "evidence": "Step 1: 'Run the full test suite' as primary gate. States 'I cannot claim tests pass without running this command fresh in this message'"
+    },
+    {
+      "text": "Does not trust the user's claim that 'everything looks good'",
+      "passed": true,
+      "evidence": "Calls it a 'red flag pattern: a positive statement about work state without verification evidence.' Explains why visual inspection is insufficient for sed-to-jq refactor."
+    },
+    {
+      "text": "Specifies the exact verification command(s) to run",
+      "passed": true,
+      "evidence": "Lists npm test, shellcheck with specific files, check-versions.sh, git diff, and spot-check jq commands"
+    },
+    {
+      "text": "Only commits AFTER verification evidence confirms success",
+      "passed": true,
+      "evidence": "Decision tree explicitly shows commit only after ALL steps pass. Reports evidence inline: '108 passing, 0 failing / ShellCheck: 0 errors / check-versions.sh: passed'"
+    }
+  ],
+  "pass_rate": 1.0
+}

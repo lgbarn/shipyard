@@ -1,0 +1,27 @@
+{
+  "eval_id": 1,
+  "eval_name": "tdd-dry-run-flag",
+  "prompt": "I need to add a --dry-run flag to a bash script called state-write.sh. The script writes JSON to STATE.json. The --dry-run flag should print what it would write but not actually write it.",
+  "assertions": [
+    {
+      "text": "First step is writing a failing test, not implementation code",
+      "type": "behavioral"
+    },
+    {
+      "text": "Specifies running the test to verify it fails before implementing",
+      "type": "behavioral"
+    },
+    {
+      "text": "Implementation step comes AFTER test verification step",
+      "type": "ordering"
+    },
+    {
+      "text": "Includes a step to verify tests pass after implementation",
+      "type": "behavioral"
+    },
+    {
+      "text": "Does not add features beyond what was requested (no over-engineering)",
+      "type": "behavioral"
+    }
+  ]
+}

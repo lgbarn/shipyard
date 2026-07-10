@@ -1,0 +1,22 @@
+[
+  {"query": "Hey, I just installed shipyard and I'm staring at my project. What do I do first? I see a .shipyard directory was created but I don't know what any of the files are for or what commands are available.", "should_trigger": true},
+  {"query": "Help me figure out what to work on. I have a bunch of tasks in my backlog but I'm not sure which shipyard command or skill I should use to pick the next one and start executing.", "should_trigger": true},
+  {"query": "How do I use shipyard to manage my project? I've read the README but I'm still confused about the workflow — when do I use commands vs skills vs agents? What's the difference?", "should_trigger": true},
+  {"query": "I'm new to this project and someone told me to use shipyard. Where do I start? I don't even know what skills are available or how to see the current project state.", "should_trigger": true},
+  {"query": "What should I do next? I just finished the auth module and committed it. Not sure if I should run a shipyard command to update state, move to the next phase, or something else.", "should_trigger": true},
+  {"query": "I'm trying to do something but I can't figure out which skill handles it. I need to update the project map after restructuring several directories. Is there a command for that?", "should_trigger": true},
+  {"query": "Can you help me? I'm lost. I've been using shipyard for a week but I keep forgetting which commands do what. Is there a cheat sheet or quick reference?", "should_trigger": true},
+  {"query": "I opened Claude Code and I have this shipyard plugin. What's the right way to kick off a new coding session? Do I need to run init, or status, or something else to get context?", "should_trigger": true},
+  {"query": "What commands does shipyard have? I know there's init and status but I feel like I'm only using 10% of the tool. Show me what's available and when I'd use each one.", "should_trigger": true},
+  {"query": "I want to contribute to this codebase but I don't know the workflow. The CONTRIBUTING.md mentions shipyard but doesn't explain how to actually use it day-to-day. Walk me through it.", "should_trigger": true},
+  {"query": "Refactor the database connection pool in src/db/pool.ts to use a singleton pattern instead of creating new connections on every request. The current approach is causing connection exhaustion under load.", "should_trigger": false},
+  {"query": "Write integration tests for the payment webhook handler. It needs to cover successful payment, failed payment, refund, and dispute events. Mock the Stripe SDK but test the actual database writes.", "should_trigger": false},
+  {"query": "I need to fix a bug in the CSV export feature. When a field contains commas or quotes, the output file is malformed. The export logic is in src/export/csv.ts around line 89.", "should_trigger": false},
+  {"query": "Add rate limiting to our API gateway. We need 100 requests per minute per API key, with a sliding window algorithm. Store the counters in Redis and return proper 429 responses with Retry-After headers.", "should_trigger": false},
+  {"query": "Can you review the Dockerfile and docker-compose.yml? I want to optimize the build — it's taking 8 minutes because it reinstalls dependencies on every code change. I think we need better layer caching.", "should_trigger": false},
+  {"query": "Migrate the user table from PostgreSQL to the new schema. Add columns for mfa_enabled (boolean), last_login_at (timestamp), and login_count (integer). Write the up and down migrations.", "should_trigger": false},
+  {"query": "The search results page is showing stale data. When I update a product and search for it, the old data appears for about 30 seconds. I think it's a caching issue in the Elasticsearch indexer.", "should_trigger": false},
+  {"query": "Set up GitHub Actions CI for this repo. We need lint, test, and build jobs. Tests should run on ubuntu and macos. Build artifacts should be uploaded. Deploy to staging on merge to main.", "should_trigger": false},
+  {"query": "I need to implement SSO with SAML for our enterprise customers. The identity providers will be Okta and Azure AD. Where should I put the SAML configuration and callback handling?", "should_trigger": false},
+  {"query": "Analyze the performance of our React app using the Chrome DevTools profiler output I saved. The initial render takes 3 seconds and I suspect it's the deeply nested context providers causing unnecessary re-renders.", "should_trigger": false}
+]

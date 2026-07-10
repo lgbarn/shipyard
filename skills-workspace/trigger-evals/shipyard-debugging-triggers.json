@@ -1,0 +1,22 @@
+[
+  {"query": "the build is failing with 'jq: error: null is not iterable' on fresh projects. I already tried clearing cache and reinstalling but it keeps happening", "should_trigger": true},
+  {"query": "tests pass locally but fail in CI with exit code 141. I've tried increasing timeouts but it didn't help. the failure is in test/state-write.bats", "should_trigger": true},
+  {"query": "our API returns 500 errors intermittently on the /users endpoint. about 10% of requests fail. no pattern I can see in the logs", "should_trigger": true},
+  {"query": "TypeError: Cannot read properties of undefined (reading 'map') at UserList.tsx:42. this started happening after the last deploy but I'm not sure what changed", "should_trigger": true},
+  {"query": "the deploy script hangs at the 'waiting for health check' step. it used to work fine. I already tried restarting the server and redeploying", "should_trigger": true},
+  {"query": "something's wrong with our notification system — emails are being sent but they arrive empty (no body content). the template rendering seems fine when I test locally", "should_trigger": true},
+  {"query": "our docker container starts but crashes after about 30 seconds with OOM killed. we increased memory to 2GB but it still happens", "should_trigger": true},
+  {"query": "the checkout flow breaks when a user has more than 50 items in their cart. works fine with fewer items. not sure where the limit is coming from", "should_trigger": true},
+  {"query": "I already tried 3 different fixes for this race condition and none of them worked. the lock keeps getting released before the operation completes", "should_trigger": true},
+  {"query": "our background job worker processes about 100 jobs then stops picking up new ones. restart fixes it temporarily. been happening for a week", "should_trigger": true},
+  {"query": "can you add a new feature to track user login history? store the last 10 logins with timestamp and IP", "should_trigger": false},
+  {"query": "I want to refactor our authentication module to use JWT instead of session tokens", "should_trigger": false},
+  {"query": "please write unit tests for the payment processing module in services/payments.py", "should_trigger": false},
+  {"query": "can you review this PR and check for code quality issues? here's the diff", "should_trigger": false},
+  {"query": "help me set up a new Next.js project with TypeScript, Tailwind, and Prisma", "should_trigger": false},
+  {"query": "I need to update our API documentation to include the new v3 endpoints", "should_trigger": false},
+  {"query": "can you explain how async/await works in Python? I'm confused about the event loop", "should_trigger": false},
+  {"query": "we need to add rate limiting to our public API endpoints. what's the best approach?", "should_trigger": false},
+  {"query": "help me write a terraform module for deploying our app to AWS ECS with auto-scaling", "should_trigger": false},
+  {"query": "can you optimize this SQL query? it's doing a full table scan on a 10M row table: SELECT * FROM orders WHERE status = 'pending' ORDER BY created_at", "should_trigger": false}
+]

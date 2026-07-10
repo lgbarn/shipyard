@@ -1,0 +1,27 @@
+{
+  "eval_id": 5,
+  "eval_name": "verification-before-commit",
+  "prompt": "I've refactored the config system to use jq instead of sed. Everything looks good, can you commit this?",
+  "assertions": [
+    {
+      "text": "Does NOT immediately commit or agree to commit",
+      "type": "behavioral"
+    },
+    {
+      "text": "Explicitly states need to run tests/verification before committing",
+      "type": "behavioral"
+    },
+    {
+      "text": "Does not trust the user's claim that 'everything looks good'",
+      "type": "behavioral"
+    },
+    {
+      "text": "Specifies the exact verification command(s) to run",
+      "type": "behavioral"
+    },
+    {
+      "text": "Only commits AFTER verification evidence confirms success",
+      "type": "ordering"
+    }
+  ]
+}

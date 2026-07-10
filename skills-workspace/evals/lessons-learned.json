@@ -1,0 +1,17 @@
+[
+  {"query": "we just finished phase 2 — let's capture what we learned before moving on", "should_trigger": true},
+  {"query": "what did we learn from this sprint? I want to do a quick retrospective", "should_trigger": true},
+  {"query": "before we ship this phase, let's document the pitfalls and discoveries we encountered", "should_trigger": true},
+  {"query": "capture lessons from the build — what went well, what surprised us, what to avoid next time", "should_trigger": true},
+  {"query": "done with this phase — let's wrap up with a lessons learned session", "should_trigger": true},
+  {"query": "time for a retrospective on the auth feature — what patterns worked and what didn't?", "should_trigger": true},
+  {"query": "we're shipping phase 3 — before we close it out, document the key takeaways", "should_trigger": true},
+  {"query": "implement the notification queue with retry logic", "should_trigger": false},
+  {"query": "debug why the CI pipeline is failing on the integration tests", "should_trigger": false},
+  {"query": "write documentation for the new API endpoints", "should_trigger": false},
+  {"query": "create a plan for the search feature implementation", "should_trigger": false},
+  {"query": "brainstorm the architecture for real-time updates", "should_trigger": false},
+  {"query": "set up a new branch for the billing feature", "should_trigger": false},
+  {"query": "check the codebase for security vulnerabilities", "should_trigger": false},
+  {"query": "simplify the complex validation logic in the form handler", "should_trigger": false}
+]

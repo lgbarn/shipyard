@@ -1,0 +1,157 @@
+Evaluating: Use when working with any code, infrastructure-as-code, configuration files, dependencies, or before claiming security posture is adequate — covers OWASP Top 10, secrets detection, dependency vulnerabilities, IaC security, Docker hardening, and supply chain risks. Also triggers on "is this secure", "security check", "vulnerability", "CVE", "secrets", "hardening", "SSRF", "injection", or when adding/updating any dependency.
+Results: 8/16 passed
+  [FAIL] rate=0/1 expected=True: I just added user input handling to the search endpoint, can you check
+  [FAIL] rate=0/1 expected=True: review the Dockerfile I wrote for security issues — I want to make sur
+  [FAIL] rate=0/1 expected=True: I think there might be hardcoded API keys in our test fixtures, can yo
+  [FAIL] rate=0/1 expected=True: is the way I'm handling the OAuth redirect URL safe? I'm worried about
+  [FAIL] rate=0/1 expected=True: we're adding a new npm dependency called 'fast-csv' — is it safe to us
+  [FAIL] rate=0/1 expected=True: check if our terraform config has any security misconfigurations — esp
+  [FAIL] rate=0/1 expected=True: we're accepting file uploads from users — what SSRF risks do I need to
+  [FAIL] rate=0/1 expected=True: is this code secure? I'm deserializing JSON from an external webhook a
+  [PASS] rate=0/1 expected=False: add pagination to the list users endpoint using cursor-based paginatio
+  [PASS] rate=0/1 expected=False: write unit tests for the email validation function
+  [PASS] rate=0/1 expected=False: refactor the logger to use structured logging with JSON output
+  [PASS] rate=0/1 expected=False: set up a GitHub Actions workflow for automated testing on pull request
+  [PASS] rate=0/1 expected=False: I want to brainstorm ideas for improving the onboarding flow
+  [PASS] rate=0/1 expected=False: create a migration to add soft delete support to the users table
+  [PASS] rate=0/1 expected=False: explain how the event bus works in our microservices architecture
+  [PASS] rate=0/1 expected=False: optimize the SQL query in the analytics dashboard — it's taking 3 seco
+{
+  "skill_name": "security-audit",
+  "description": "Use when working with any code, infrastructure-as-code, configuration files, dependencies, or before claiming security posture is adequate \u2014 covers OWASP Top 10, secrets detection, dependency vulnerabilities, IaC security, Docker hardening, and supply chain risks. Also triggers on \"is this secure\", \"security check\", \"vulnerability\", \"CVE\", \"secrets\", \"hardening\", \"SSRF\", \"injection\", or when adding/updating any dependency.",
+  "results": [
+    {
+      "query": "I just added user input handling to the search endpoint, can you check if it's vulnerable to SQL injection?",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "review the Dockerfile I wrote for security issues \u2014 I want to make sure we're following best practices",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "I think there might be hardcoded API keys in our test fixtures, can you scan for secrets?",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "is the way I'm handling the OAuth redirect URL safe? I'm worried about open redirect attacks",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "we're adding a new npm dependency called 'fast-csv' \u2014 is it safe to use? any known vulnerabilities?",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "check if our terraform config has any security misconfigurations \u2014 especially the IAM policies and security groups",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "we're accepting file uploads from users \u2014 what SSRF risks do I need to worry about?",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "is this code secure? I'm deserializing JSON from an external webhook and passing it to eval()",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": false
+    },
+    {
+      "query": "add pagination to the list users endpoint using cursor-based pagination",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "write unit tests for the email validation function",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "refactor the logger to use structured logging with JSON output",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "set up a GitHub Actions workflow for automated testing on pull requests",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "I want to brainstorm ideas for improving the onboarding flow",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "create a migration to add soft delete support to the users table",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "explain how the event bus works in our microservices architecture",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    },
+    {
+      "query": "optimize the SQL query in the analytics dashboard \u2014 it's taking 3 seconds",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 1,
+      "pass": true
+    }
+  ],
+  "summary": {
+    "total": 16,
+    "passed": 8,
+    "failed": 8
+  }
+}

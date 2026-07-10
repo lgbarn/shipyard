@@ -1,0 +1,17 @@
+[
+  {"query": "I just wrote a new terraform module for our ECS cluster — can you validate it before I apply?", "should_trigger": true},
+  {"query": "check the Dockerfile for best practices — I want to make sure we're not running as root and the image is secure", "should_trigger": true},
+  {"query": "lint the ansible playbook in deploy/playbook.yml — I want to catch issues before running it", "should_trigger": true},
+  {"query": "run terraform plan and review the changes before we apply to production", "should_trigger": true},
+  {"query": "validate the docker-compose.yml — I added a new service for Redis and want to make sure the config is correct", "should_trigger": true},
+  {"query": "I modified the terraform security groups in modules/network/main.tf — validate the changes", "should_trigger": true},
+  {"query": "docker build keeps failing with a hadolint warning about pinning the base image — help me fix it", "should_trigger": true},
+  {"query": "implement a new REST endpoint for user profile updates", "should_trigger": false},
+  {"query": "write unit tests for the email sending service", "should_trigger": false},
+  {"query": "debug the memory leak in the Node.js application", "should_trigger": false},
+  {"query": "brainstorm ideas for improving the search experience", "should_trigger": false},
+  {"query": "create a feature branch and worktree for the auth refactoring", "should_trigger": false},
+  {"query": "document the deployment process for the team", "should_trigger": false},
+  {"query": "simplify the service layer abstractions", "should_trigger": false},
+  {"query": "check npm dependencies for known vulnerabilities", "should_trigger": false}
+]
