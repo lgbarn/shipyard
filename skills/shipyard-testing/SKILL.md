@@ -1,6 +1,6 @@
 ---
 name: shipyard-testing
-description: Use when writing tests, structuring test suites, choosing test boundaries, or debugging test quality issues like flakiness, over-mocking, or brittle tests. Also use when deciding between unit/integration/E2E tests, when tests break during refactoring (sign of testing implementation details), or when test setup exceeds 20 lines. Covers AAA structure, DAMP naming, mock boundaries, and the testing pyramid.
+description: Guides test design with AAA structure, DAMP naming, mock boundaries, and the testing pyramid. Use when writing tests, structuring test suites, choosing test boundaries, or fixing test quality issues such as flakiness, over-mocking, or brittle tests. Also use when choosing between unit, integration, and E2E tests, when tests break during refactoring (a sign of testing implementation details), or when test setup exceeds 20 lines.
 ---
 
 <!-- TOKEN BUDGET: 400 lines / ~1200 tokens -->

@@ -1,6 +1,6 @@
 ---
 name: code-simplification
-description: Use after implementing features, before claiming a phase is complete, when reviewing AI-generated code, or when code feels overly complex. Also use when you notice repeated patterns across files, a function exceeds 40 lines, nesting exceeds 3 levels, or an abstraction has only one implementation. Covers duplication, dead code, over-engineering, and AI-specific bloat patterns like verbose error handling and redundant type checks.
+description: Finds and removes duplication, dead code, over-engineering, and AI-generated bloat such as verbose error handling and redundant type checks. Use after implementing features, before claiming a phase is complete, when reviewing AI-generated code, or when code feels overly complex. Also use when a pattern repeats across files, a function exceeds 40 lines, nesting exceeds 3 levels, or an abstraction has only one implementation.
 ---
 
 <!-- TOKEN BUDGET: 400 lines / ~1200 tokens -->

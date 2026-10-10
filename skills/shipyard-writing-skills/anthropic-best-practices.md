@@ -33,21 +33,37 @@ Match specificity to task fragility:
 
 ### Frontmatter (YAML)
 
-Two fields only: `name` and `description`.
+Open Agent Skills spec fields (portable to claude.ai and the Skills API): `name`, `description`, `license`, `compatibility` (max 500 chars), `metadata`, `allowed-tools`. Other fields cause a hard error when you package the skill for claude.ai or the Skills API.
 
-- `name`: Max 64 chars, lowercase/numbers/hyphens only, no XML tags, no reserved words ("anthropic", "claude")
-- `description`: Max 1024 chars, non-empty, no XML tags, third person, includes triggering conditions (when to use)
+- `name`: Max 64 chars, lowercase/numbers/hyphens only, no XML tags, no reserved words ("anthropic", "claude"). Claude Code defaults it to the directory name.
+- `description`: Max 1024 chars, non-empty, no XML tags, third person, states what the skill does and when to use it
+
+Claude Code accepts more optional fields:
+
+| Field | Purpose |
+|-------|---------|
+| `when_to_use` | Appended to `description`; the two together are capped at 1,536 chars in the skill listing |
+| `argument-hint`, `arguments` | Argument hint shown in the slash menu; named arguments |
+| `disable-model-invocation` | `true` = only the user can invoke the skill (default `false`) |
+| `user-invocable` | `false` = hide from the slash menu (default `true`) |
+| `allowed-tools`, `disallowed-tools` | Tool permissions while the skill is active |
+| `model`, `effort` | Model and reasoning effort for the skill |
+| `context: fork`, `agent` | Run the skill in a forked subagent context |
+| `hooks`, `paths`, `shell` | Skill-scoped hooks, path patterns, shell selection |
+
+Malformed YAML does not fail loudly: the body loads with empty metadata, so the skill does not trigger.
 
 ### Naming
 
-Gerund form preferred: `processing-pdfs`, `analyzing-spreadsheets`, `testing-code`.
+Consider gerund form: `processing-pdfs`, `analyzing-spreadsheets`, `testing-code`. Noun phrases and action-oriented names are also acceptable.
 
 Avoid: vague (`helper`, `utils`), generic (`documents`, `data`), reserved words.
 
 ### Description Writing
 
 - Third person (injected into system prompt)
-- Focus on triggering conditions (when to use). Describe the problem domain, not the skill's workflow (see CSO section in SKILL.md for why)
+- State what the skill does and when to use it. Put the key use case first.
+- Shipyard rule (not from the Anthropic docs): do not list the workflow steps (see CSO section in SKILL.md for why)
 - Be specific with key terms for discovery
 
 **Good:** `Extract text and tables from PDF files, fill forms, merge documents. Use when working with PDF files or when the user mentions PDFs, forms, or document extraction.`
@@ -58,6 +74,17 @@ Avoid: vague (`helper`, `utils`), generic (`documents`, `data`), reserved words.
 
 - Keep under 500 lines
 - Use progressive disclosure: SKILL.md as overview, separate files for details
+- Put critical rules first (see "Claude Code Runtime Behavior")
+
+## Claude Code Runtime Behavior
+
+Source: [code.claude.com/docs/en/skills](https://code.claude.com/docs/en/skills)
+
+- **Listing budget:** skill names and descriptions share about 1% of the context window. When the listing overflows, Claude Code drops the descriptions of the least-invoked skills first. Names always stay. Run `/doctor` to estimate the cost.
+- **Plugin skills** are invoked as `/plugin-name:skill-name` (for example `/shipyard:shipyard-tdd`).
+- **Precedence:** enterprise, then personal, then project skills.
+- **Loaded once:** skill content is not re-read on later turns. After compaction, only the start of an invoked skill is kept. Put must-follow rules at the top, or enforce them with frontmatter `hooks`.
+- **Validation:** `claude plugin validate` checks that SKILL.md files parse.
 - Keep references one level deep from SKILL.md
 - Add table of contents to reference files over 100 lines
 
@@ -139,11 +166,15 @@ Provide input/output pairs. Examples help Claude understand desired style better
 - Too many options (provide a default with escape hatch)
 - Over-explaining things Claude already knows
 - Windows-style paths (always use forward slashes)
+- Unexplained constants in scripts ("voodoo constants"): justify every value
+- Scripts that defer errors to Claude: handle the error in the script ("solve, don't defer")
+- MCP tools without a server prefix: use `ServerName:tool_name`
 
 ## Quality Checklist
 
 ### Core Quality
-- [ ] Description: specific, includes key terms, what + when
+- [ ] Description: specific, includes key terms, what + when, key use case first
+- [ ] Critical rules near the top of SKILL.md
 - [ ] SKILL.md body under 500 lines
 - [ ] Additional details in separate files if needed
 - [ ] No time-sensitive information
@@ -160,4 +191,8 @@ Provide input/output pairs. Examples help Claude understand desired style better
 
 ## Source
 
-Official documentation: [Skill authoring best practices](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices)
+Official documentation (checked 2026-10-10):
+
+- [Skill authoring best practices](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices)
+- [Agent Skills overview](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview)
+- [Claude Code skills](https://code.claude.com/docs/en/skills)

@@ -40,7 +40,7 @@ Skills are auto-activating capabilities that trigger based on context.
    ```markdown
    ---
    name: skill-name
-   description: Use when [trigger context description]
+   description: Does [one-clause outcome]. Use when [trigger context description].
    ---
 
    <!-- TOKEN BUDGET: N lines / ~M tokens -->
@@ -49,7 +49,7 @@ Skills are auto-activating capabilities that trigger based on context.
 
    ## Overview
 
-   [What this skill does and when it activates.]
+   [Core principle and must-follow rules first. After compaction, only the start of an invoked skill is kept.]
 
    ## Triggers
 

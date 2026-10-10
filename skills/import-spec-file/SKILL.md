@@ -1,6 +1,6 @@
 ---
 name: import-spec-file
-description: Import a handwritten spec document into Shipyard, replacing brainstorming. Use when a freeform spec, requirements, or design document exists.
+description: Imports a handwritten spec document into Shipyard in place of brainstorming. Use when a freeform spec, requirements, or design document already exists.
 argument-hint: "[file-path] — path to a spec document (e.g. docs/my-spec.md or /abs/path/spec.md)"
 ---
 
