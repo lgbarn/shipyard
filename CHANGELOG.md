@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [4.12.5] - 2026-10-10
+
+### Changed
+- **CI**: bump `actions/setup-node` from 6 to 7 (#26, dependabot).
+
 ## [4.12.4] - 2026-07-09
 
 ### Changed
