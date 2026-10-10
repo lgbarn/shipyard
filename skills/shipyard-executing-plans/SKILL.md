@@ -1,6 +1,6 @@
 ---
 name: shipyard-executing-plans
-description: Use when you have a written implementation plan to execute, either in the current session with builder/reviewer agents or in a separate session with review checkpoints. Also use when the user says "build this", "implement this", "execute the plan", "run the plan", or when a plan file has been loaded with independent tasks suitable for agent dispatch.
+description: Executes a written implementation plan with agents. Use when a written plan is ready to execute, in the current session or a separate one. Also use when the user says "build this", "implement this", "execute the plan", or "run the plan", or when a loaded plan file has independent tasks suitable for agent dispatch.
 ---
 
 <!-- TOKEN BUDGET: 300 lines / ~900 tokens -->

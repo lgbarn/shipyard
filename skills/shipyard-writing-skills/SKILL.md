@@ -1,6 +1,6 @@
 ---
 name: shipyard-writing-skills
-description: Use when creating, editing, or improving skills, or when a skill isn't triggering correctly. Also use when editing any SKILL.md file, writing skill descriptions, or debugging why a skill doesn't activate. Triggers on "create a skill", "write a skill", "new skill", "improve this skill", "skill isn't triggering", or when reviewing skill quality and effectiveness.
+description: Applies test-driven development to creating and editing skills. Use when creating, editing, or improving a skill, editing any SKILL.md file, writing skill descriptions, or debugging why a skill does not activate. Also use when the user says "create a skill", "write a skill", "new skill", "improve this skill", or "skill isn't triggering", or when reviewing skill quality.
 ---
 
 <!-- TOKEN BUDGET: 380 lines / ~1140 tokens -->
@@ -108,25 +108,25 @@ skills/
 ## SKILL.md Structure
 
 **Frontmatter (YAML):**
-- Only two fields supported: `name` and `description`
-- Max 1024 characters total
-- `name`: Use letters, numbers, and hyphens only (no parentheses, special chars)
-- `description`: Third-person, describes ONLY when to use (NOT what it does)
-  - Start with "Use when..." to focus on triggering conditions
+- `name`: max 64 chars, lowercase letters, numbers, and hyphens only; no "anthropic" or "claude"
+- `description`: max 1024 chars, no XML tags, third person
+  - One short clause on what the skill does, then "Use when..." with the triggering conditions
+  - Put the key use case first; Claude Code shortens descriptions in the skill listing when the budget runs out
   - Include specific symptoms, situations, and contexts
-  - **NEVER summarize the skill's process or workflow** (see CSO section for why)
+  - **NEVER summarize the skill's process or workflow steps** (see CSO section for why)
   - Keep under 500 characters if possible
+- Claude Code supports more optional fields (`argument-hint`, `allowed-tools`, `disable-model-invocation`, and others). See `anthropic-best-practices.md`. Shipyard skills use only `name`, `description`, and `argument-hint`.
 
 ```markdown
 ---
-name: Skill-Name-With-Hyphens
-description: Use when [specific triggering conditions and symptoms]
+name: skill-name-with-hyphens
+description: Does [one-clause outcome]. Use when [specific triggering conditions and symptoms].
 ---
 
 # Skill Name
 
 ## Overview
-What is this? Core principle in 1-2 sentences.
+What is this? Core principle in 1-2 sentences. Put critical rules here, at the top: after context compaction, only the start of an invoked skill is kept.
 
 ## When to Use
 Bullet list with SYMPTOMS and use cases
@@ -146,7 +146,7 @@ Inline code for simple patterns
 
 | Element | Rule | Example |
 |---------|------|---------|
-| Description | Triggering conditions only, no workflow | `"Use when tests hang waiting for async ops"` |
+| Description | One-clause outcome + triggering conditions, no workflow steps | `"Fixes flaky async tests. Use when tests hang waiting for async ops"` |
 | Keywords | Error messages, symptoms, tool names | `"ENOTEMPTY", "flaky", "bats-core"` |
 | Name | Verb-first, hyphenated | `condition-based-waiting` not `async-helpers` |
 | Token budget | `<150 words` getting-started, `<500 words` others | Compress, cross-reference |
@@ -154,8 +154,8 @@ Inline code for simple patterns
 
 **Why no `@` links:** `@` syntax force-loads files immediately, consuming context tokens you may not need yet.
 
-**Critical CSO rule — Description = When to Use, NOT What the Skill Does:**
-When a description summarizes the skill's workflow, Claude follows the description instead of reading the full skill. A description saying "code review between tasks" caused Claude to do ONE review even though the skill showed TWO stages. Keep descriptions as triggering conditions only.
+**Critical CSO rule — Description = Outcome + When to Use, NOT the Workflow:**
+When a description summarizes the skill's workflow, Claude follows the description instead of reading the full skill. A description saying "code review between tasks" caused Claude to do ONE review even though the skill showed TWO stages. State the outcome in one short clause, then the triggering conditions. Never list the workflow steps.
 
 ## Flowchart Usage
 
@@ -190,11 +190,11 @@ Don't: implement in 5+ languages, create fill-in-the-blank templates, write cont
 
 ## CSO Description Examples
 
-<example type="good" title="Triggering conditions only, no workflow summary">
+<example type="good" title="Outcome and triggering conditions, no workflow summary">
 ```yaml
-description: Use when executing implementation plans with independent tasks in the current session
+description: Executes implementation plans with agents. Use when executing implementation plans with independent tasks in the current session
 ```
-Just triggering conditions -- Claude reads the full skill to learn the workflow.
+Outcome plus triggering conditions -- Claude reads the full skill to learn the workflow.
 </example>
 
 <example type="bad" title="Workflow summary in description">
@@ -339,8 +339,9 @@ Agent found new rationalization? Add explicit counter. Re-test until bulletproof
 **RED:** Create pressure scenarios (3+ for discipline skills) -- run WITHOUT skill -- document baseline rationalizations
 
 **GREEN:**
-- [ ] Name: letters/numbers/hyphens only; YAML frontmatter (name + description, max 1024 chars)
-- [ ] Description: "Use when..." + triggers/symptoms, third person, no workflow summary
+- [ ] Name: lowercase letters/numbers/hyphens only, max 64 chars; description max 1024 chars
+- [ ] Description: one-clause outcome + "Use when..." triggers/symptoms, third person, no workflow summary
+- [ ] Critical rules at the top of the body (compaction keeps only the start of an invoked skill)
 - [ ] Keywords for search, clear overview, address baseline failures from RED
 - [ ] Code inline or linked; one excellent example (not multi-language)
 - [ ] Run WITH skill -- verify compliance

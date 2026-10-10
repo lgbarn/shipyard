@@ -682,3 +682,12 @@ JSONEOF
     [ ! -s "$stderr_file" ]
     rm -f "$stderr_file"
 }
+
+# bats test_tags=unit
+@test "state-read: skill summary uses frontmatter description, not the --- delimiter" {
+    cd "$BATS_TEST_TMPDIR"
+    run bash "$STATE_READ"
+    assert_success
+    assert_output --partial '`shipyard:shipyard-tdd` - '
+    refute_output --partial '` - ---'
+}

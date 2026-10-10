@@ -1,6 +1,6 @@
 ---
 name: using-shipyard
-description: Use when starting any conversation, when the user asks "what should I do", "help me", "how do I use shipyard", or "where do I start". Establishes how to find and use skills, requiring Skill tool invocation before ANY response including clarifying questions. Also use when unsure which skill or command applies to the current situation.
+description: Explains how to find and use Shipyard skills and commands, and requires a Skill tool call before any response, including clarifying questions. Use at the start of any conversation, or when the user asks "what should I do", "help me", "how do I use shipyard", or "where do I start". Also use when it is unclear which skill or command applies.
 ---
 
 <!-- TOKEN BUDGET: 220 lines / ~660 tokens -->

@@ -1,11 +1,17 @@
 ---
 name: parallel-dispatch
-description: Use when facing 2+ independent tasks that can be worked on without shared state or sequential dependencies. Also use when multiple test files fail with different root causes, multiple subsystems are broken independently, or you want agents to work concurrently on separate problem domains. If tasks touch different files and don't share state, this skill applies.
+description: Dispatches concurrent agents for independent tasks. Use when 2 or more tasks can proceed without shared state or sequential dependencies, such as multiple test files that fail with different root causes or multiple subsystems that are broken independently. Applies when tasks touch different files and do not share state.
 ---
 
 <!-- TOKEN BUDGET: 220 lines / ~660 tokens -->
 
 # Dispatching Parallel Agents
+
+## Overview
+
+When you have multiple unrelated failures (different test files, different subsystems, different bugs), investigating them sequentially wastes time. Each investigation is independent and can happen in parallel.
+
+**Core principle:** Dispatch one agent per independent problem domain. Let them work concurrently.
 
 <activation>
 
@@ -63,12 +69,6 @@ Shipyard multi-agent commands (`build`, `plan`, `map`, `ship`) use a standardize
 - "run in parallel", "do these at the same time", "parallel tasks", "concurrent agents"
 
 </activation>
-
-## Overview
-
-When you have multiple unrelated failures (different test files, different subsystems, different bugs), investigating them sequentially wastes time. Each investigation is independent and can happen in parallel.
-
-**Core principle:** Dispatch one agent per independent problem domain. Let them work concurrently.
 
 ## Decision Flow
 

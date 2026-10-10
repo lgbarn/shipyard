@@ -1,11 +1,23 @@
 ---
 name: lessons-learned
-description: Use when a phase or milestone is complete and you need to extract reusable knowledge, before shipping, or when reflecting on completed work. Also use when the user says "what did we learn", "capture lessons", "retrospective", "wrap up", "ship this phase", or "done with this phase". If a phase is about to ship without lesson capture, this skill must activate.
+description: Extracts reusable lessons from completed work. Use when a phase or milestone is complete, before shipping, or when reflecting on finished work. Also use when the user says "what did we learn", "capture lessons", "retrospective", "wrap up", "ship this phase", or "done with this phase". A phase must not ship without lesson capture.
 ---
 
 <!-- TOKEN BUDGET: 215 lines / ~645 tokens -->
 
 # Lessons Learned
+
+## Iron Law
+
+```
+NO PHASE SHIPS WITHOUT LESSON CAPTURE
+```
+
+No exceptions:
+- Not for "small phases" or "just a bugfix"
+- Not for "we're in a hurry"
+- Not for "nothing notable happened"
+- Even smooth phases confirm what's working — capture it
 
 <activation>
 
@@ -122,18 +134,6 @@ After the user approves lessons, optionally append to `CLAUDE.md`:
 </instructions>
 
 <rules>
-
-## Iron Law
-
-```
-NO PHASE SHIPS WITHOUT LESSON CAPTURE
-```
-
-No exceptions:
-- Not for "small phases" or "just a bugfix"
-- Not for "we're in a hurry"
-- Not for "nothing notable happened"
-- Even smooth phases confirm what's working — capture it
 
 ## Quality Standards
 

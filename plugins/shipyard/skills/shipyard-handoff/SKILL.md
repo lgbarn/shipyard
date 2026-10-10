@@ -1,6 +1,6 @@
 ---
 name: shipyard-handoff
-description: Captures session context into .shipyard/HANDOFF.md so the next session can resume without losing progress.
+description: Captures session context into .shipyard/HANDOFF.md so the next session can resume without losing progress. Use when the user says "handoff", "save context", or "I'm done for now", or when a long session ends and its state should be recorded.
 ---
 
 <!-- TOKEN BUDGET: 80 lines / ~240 tokens -->

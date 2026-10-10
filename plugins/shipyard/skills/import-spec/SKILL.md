@@ -1,6 +1,6 @@
 ---
 name: import-spec
-description: Import a spec-kit feature spec into Shipyard, replacing brainstorming. Use when a spec-kit feature directory exists with spec.md.
+description: Imports a spec-kit feature spec into Shipyard in place of brainstorming. Use when a spec-kit feature directory with spec.md exists.
 argument-hint: "[feature-path] — path to spec-kit feature directory (e.g. specs/003-chat-system)"
 ---
 

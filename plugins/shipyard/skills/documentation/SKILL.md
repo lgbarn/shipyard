@@ -1,11 +1,23 @@
 ---
 name: documentation
-description: Use when shipping features with public interfaces that lack docs, generating documentation, updating README files, writing API docs, creating architecture documentation, or when documentation is incomplete or outdated. Also use when adding breaking changes, implementing complex algorithms, or before shipping any phase — if a public function lacks a docstring, this skill applies.
+description: Generates and updates code docs, README files, API docs, and architecture documentation. Use when a feature with public interfaces lacks docs, when documentation is incomplete or outdated, or before shipping any phase. Also use when adding breaking changes or complex algorithms, or when a public function lacks a docstring.
 ---
 
 <!-- TOKEN BUDGET: 290 lines / ~870 tokens -->
 
 # Documentation Generation
+
+## Iron Law
+
+```
+NEVER SHIP A PUBLIC API WITHOUT DOCSTRINGS
+```
+
+No exceptions:
+- Not for "simple" functions
+- Not for "internal-but-public" interfaces
+- Not for "obvious" parameter names
+- Not for "we'll add docs later"
 
 <activation>
 
@@ -170,18 +182,6 @@ are retried 3 times then marked failed.
 </instructions>
 
 <rules>
-
-## Iron Law
-
-```
-NEVER SHIP A PUBLIC API WITHOUT DOCSTRINGS
-```
-
-No exceptions:
-- Not for "simple" functions
-- Not for "internal-but-public" interfaces
-- Not for "obvious" parameter names
-- Not for "we'll add docs later"
 
 ## Quality Standards
 

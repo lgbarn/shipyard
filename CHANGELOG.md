@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [4.12.6] - 2026-10-10
+
+### Changed
+- **Skills**: all 19 skill descriptions rewritten to current Anthropic guidance: third person, a one-clause outcome first, then "Use when..." triggers. `shipyard-handoff` now states when to use it.
+- **Skills**: `documentation`, `lessons-learned`, and `parallel-dispatch` now state their core rule at the top of the body, because compaction keeps only the start of an invoked skill.
+- **shipyard-writing-skills**: `anthropic-best-practices.md` and the SKILL.md frontmatter guidance updated to the current docs (Claude Code frontmatter fields, 1,536-char listing cap, listing budget, plugin skill naming, compaction behavior). The example skill name is now valid lowercase.
+
+### Fixed
+- **Session-start skill summary**: `state-read.sh` showed `---` as the description of every skill because it read the first non-heading line (the frontmatter delimiter). It now reads the frontmatter `description` field.
+
 ## [4.12.5] - 2026-10-10
 
 ### Changed

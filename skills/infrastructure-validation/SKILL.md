@@ -1,6 +1,6 @@
 ---
 name: infrastructure-validation
-description: Use when working with Terraform (.tf, .tfvars), Ansible (playbooks, roles, inventory), Docker (Dockerfile, docker-compose.yml), Kubernetes (manifests, Helm charts), CloudFormation, or any infrastructure-as-code files. Also use when running terraform plan/apply, building Docker images, writing Helm templates, or when IaC changes touch security groups, IAM policies, or secrets. Provides validation workflows, tool chains, and common mistake prevention.
+description: Validates infrastructure-as-code with tool chains and checks for common mistakes. Use when working with Terraform (.tf, .tfvars), Ansible (playbooks, roles, inventory), Docker (Dockerfile, docker-compose.yml), Kubernetes (manifests, Helm charts), or CloudFormation. Also use when running terraform plan/apply, building Docker images, writing Helm templates, or when IaC changes touch security groups, IAM policies, or secrets.
 ---
 
 <!-- TOKEN BUDGET: 140 lines / ~420 tokens -->

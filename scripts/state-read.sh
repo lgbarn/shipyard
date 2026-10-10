@@ -51,8 +51,8 @@ skill_list=""
 for skill_dir in "${PLUGIN_ROOT}"/skills/*/; do
     [ -f "${skill_dir}SKILL.md" ] || continue
     skill_name=$(basename "$skill_dir")
-    # Extract first line description from SKILL.md (after the # header)
-    desc=$(sed -n '/^[^#]/{ s/^[[:space:]]*//; p; q; }' "${skill_dir}SKILL.md" 2>/dev/null || echo "")
+    # Extract the description field from the SKILL.md YAML frontmatter
+    desc=$(sed -n '1,/^---$/{ s/^description:[[:space:]]*//p; }' "${skill_dir}SKILL.md" 2>/dev/null | head -n 1 || echo "")
     [ -z "$desc" ] && desc="(no description)"
     # Truncate long descriptions
     [ "${#desc}" -gt 120 ] && desc="${desc:0:117}..."
