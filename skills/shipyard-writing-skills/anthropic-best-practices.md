@@ -2,6 +2,17 @@
 
 Reference companion to the TDD-focused SKILL.md. Summarized from Anthropic's official documentation at `platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices`.
 
+## Contents
+- Core principles (conciseness, degrees of freedom, testing with all target models)
+- SKILL.md structure (frontmatter, naming, descriptions, body)
+- Claude Code runtime behavior
+- Progressive disclosure patterns
+- XML tags for prompt clarity
+- Common patterns (workflows, feedback loops, templates, examples)
+- Anti-patterns
+- Quality checklist
+- Source
+
 ## Core Principles
 
 ### Conciseness
