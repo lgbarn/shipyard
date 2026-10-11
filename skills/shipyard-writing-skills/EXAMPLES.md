@@ -2,6 +2,12 @@
 
 These examples supplement the main SKILL.md. They are organized by section for easy reference.
 
+## Contents
+- CSO description examples (good vs bad descriptions, keyword and trigger patterns)
+- Token efficiency techniques (tool help, cross-references, compressed examples, redundancy, naming)
+- Bulletproofing skills against rationalization (loopholes, spirit vs letter, rationalization table, red flags, CSO for violations)
+- Anti-pattern examples (narrative example, code in flowcharts, generic labels)
+
 ---
 
 ## CSO Description Examples

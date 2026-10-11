@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [4.12.7] - 2026-10-10
+
+### Changed
+- **shipyard-writing-skills**: `EXAMPLES.md` and `anthropic-best-practices.md` now start with a `## Contents` section, as Anthropic's guidance requires for reference files longer than 100 lines.
+
 ## [4.12.6] - 2026-10-10
 
 ### Changed
