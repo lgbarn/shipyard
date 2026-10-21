@@ -20,7 +20,7 @@ jobs:
 
       - name: Setup WSL
         if: runner.os == 'Windows'
-        uses: Vampire/setup-wsl@d1da7f2c0322a5ee4f24975344f67fc0f5baf364
+        uses: Vampire/setup-wsl@4c48163d9f981914dd8caa0fc335fe19cca5bff4
         with:
           distribution: Ubuntu-24.04
           additional-packages: bash jq git
